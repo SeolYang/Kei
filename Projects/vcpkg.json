@@ -1,0 +1,23 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+    "name": "holo-engine",
+    "version": "0.0.1",
+    "dependencies": [
+      "vulkan-headers",
+      "vulkan",
+      "vulkan-memory-allocator",
+      {
+        "name" : "sdl2",
+        "features": ["vulkan"]
+      },
+      "vk-bootstrap",
+      "glm",
+      "imgui",
+      "tinyobjloader",
+      "stb",
+      "assimp",
+      "meshoptimizer",
+      "spdlog",
+      "robin-hood-hashing"
+    ]
+  }
