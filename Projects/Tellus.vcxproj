@@ -15,17 +15,21 @@
     <ClCompile Include="..\Source\GameInstance.cpp" />
     <ClCompile Include="..\Source\Instance.cpp" />
     <ClCompile Include="..\Source\main.cpp" />
+    <ClCompile Include="..\Source\VulkanInstance.cpp" />
     <ClCompile Include="..\Source\Window.cpp" />
+    <ClCompile Include="..\ThirdParty\volk\volk.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\ECS.h" />
     <ClInclude Include="..\Source\TellusAssert.h" />
     <ClInclude Include="..\Source\Extent.h" />
     <ClInclude Include="..\Source\Timer.h" />
+    <ClInclude Include="..\Source\VulkanInstance.h" />
     <ClInclude Include="..\Source\Window.h" />
     <ClInclude Include="..\Source\Core.h" />
     <ClInclude Include="..\Source\GameInstance.h" />
     <ClInclude Include="..\Source\Instance.h" />
+    <ClInclude Include="..\ThirdParty\volk\volk.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -87,7 +91,7 @@
       <PrecompiledHeaderFile>Core.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source;$(SolutionDir)..\Thirdparty\volk</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -109,7 +113,7 @@
       <PrecompiledHeaderFile>Core.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source;$(SolutionDir)..\Thirdparty\volk</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>

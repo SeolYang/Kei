@@ -1,1 +1,2 @@
-#include "Core.h"
+#define VMA_IMPLEMENTATION
+#include <Core.h>

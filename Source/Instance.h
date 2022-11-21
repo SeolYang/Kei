@@ -4,6 +4,7 @@
 namespace sy
 {
 	class Window;
+	class VulkanInstance;
 	class GameInstance;
 	class Instance
 	{
@@ -17,12 +18,16 @@ namespace sy
 		Instance& operator=(const Instance&) = delete;
 		Instance& operator=(Instance&&) = default;
 
-		void Startup();
 		void Run();
+
+	private:
+		void Startup();
+		void Cleanup();
 
 	private:
 		std::unique_ptr<Timer> timer;
 		std::unique_ptr<Window> window;
+		std::unique_ptr<VulkanInstance> vulkanInstance;
 		std::unique_ptr<GameInstance> gameInstance;
 
 	};

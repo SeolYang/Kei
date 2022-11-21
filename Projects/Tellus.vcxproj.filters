@@ -4,6 +4,15 @@
     <Filter Include="Source">
       <UniqueIdentifier>{16bb4be9-8000-4436-9470-79fe25b3422f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Vulkan">
+      <UniqueIdentifier>{d6da8484-c46b-444b-9a13-8c5471166e83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty">
+      <UniqueIdentifier>{d0eb0fe7-efea-4404-9cb1-35e7005bfeed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty\volk">
+      <UniqueIdentifier>{b2a0daa1-ab1e-4a6f-b5da-b5ee007806ac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Core.cpp">
@@ -20,6 +29,12 @@
     </ClCompile>
     <ClCompile Include="..\Source\main.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VulkanInstance.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\volk\volk.c">
+      <Filter>Thirdparty\volk</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -46,6 +61,12 @@
     </ClInclude>
     <ClInclude Include="..\Source\ECS.h">
       <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VulkanInstance.h">
+      <Filter>Source\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\volk\volk.h">
+      <Filter>Thirdparty\volk</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

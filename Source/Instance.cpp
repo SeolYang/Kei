@@ -2,24 +2,31 @@
 #include <Instance.h>
 #include <Window.h>
 #include <GameInstance.h>
+#include <VulkanInstance.h>
 
 namespace sy
 {
 	Instance::Instance()
 	{
-		timer = std::make_unique<Timer>();
-		window = std::make_unique<Window>("Test", Extent2D<uint32_t>{ 1280, 720 });
+		Startup();
 	}
 
 	Instance::~Instance()
 	{
-		window->Cleanup();
+		Cleanup();
 	}
 
 	void Instance::Startup()
 	{
-		timer->Startup();
-		window->Startup();
+		timer = std::make_unique<Timer>();
+		window = std::make_unique<Window>("Test", Extent2D<uint32_t>{ 1280, 720 });
+		vulkanInstance = std::make_unique<VulkanInstance>(*window);
+	}
+
+	void Instance::Cleanup()
+	{
+		vulkanInstance.reset();
+		window.reset();
 	}
 
 	void Instance::Run()

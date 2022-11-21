@@ -7,6 +7,12 @@ namespace sy
 		title(title),
 		extent(extent)
 	{
+		Startup();
+	}
+
+	Window::~Window()
+	{
+		Cleanup();
 	}
 
 	void Window::Startup()
