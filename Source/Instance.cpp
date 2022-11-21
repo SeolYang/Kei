@@ -18,6 +18,11 @@ namespace sy
 
 	void Instance::Startup()
 	{
+#if defined(_DEBUG) || defined(DEBUG)
+		spdlog::set_level(spdlog::level::trace);
+#elif
+		spdlog::set_level(spdlog::level::warn);
+#endif
 		timer = std::make_unique<Timer>();
 		window = std::make_unique<Window>("Test", Extent2D<uint32_t>{ 1280, 720 });
 		vulkanInstance = std::make_unique<VulkanInstance>(*window);

@@ -24,5 +24,17 @@ namespace sy
 
 		VmaAllocator allocator;
 
+		VkQueue graphicsQueue;
+		VkQueue computeQueue;
+		VkQueue transferQueue;
+		VkQueue presentQueue;
+
+		uint32_t graphicsQueueFamilyIdx;
+		uint32_t computeQueueFamilyIdx;
+		uint32_t transferQueueFamilyIdx;
+		uint32_t presentQueueFamilyIdx;
+
+		std::string gpuName;
+
 	};
 }

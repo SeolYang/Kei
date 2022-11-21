@@ -52,7 +52,8 @@ namespace sy
 			.value();
 
 		physicalDevice = vkbPhysicalDevice.physical_device;
-		auto features = vkbPhysicalDevice.features;
+		gpuName = vkbPhysicalDevice.properties.deviceName;
+
 		vkb::DeviceBuilder deviceBuilder{ vkbPhysicalDevice };
 		VkPhysicalDeviceShaderDrawParametersFeatures shaderDrawParameters
 		{
@@ -68,10 +69,13 @@ namespace sy
 			.dynamicRendering = VK_TRUE
 		};
 
-		vkb::Device vkbDevice = deviceBuilder.add_pNext(&shaderDrawParameters)
-		.add_pNext(&dynamicRenderingFeatures)
-		.build().value();
+		auto vkbDeviceRes = deviceBuilder.add_pNext(&shaderDrawParameters)
+			.add_pNext(&dynamicRenderingFeatures)
+			.build();
+		SY_ASSERT(vkbDeviceRes.has_value(), "Failed to create device using GPU {}.", gpuName);
+		auto vkbDevice = vkbDeviceRes.value();
 		device = vkbDevice.device;
+		spdlog::trace("Succeed to create logical device using GPU {}.", gpuName);
 
 		const VmaVulkanFunctions vulkanFunctions
 		{
@@ -84,9 +88,34 @@ namespace sy
 			.physicalDevice = physicalDevice,
 			.device = device,
 			.pVulkanFunctions = &vulkanFunctions,
-			.instance = instance
+			.instance = instance,
 		};
-		vmaCreateAllocator(&allocatorInfo, &allocator);
+		VK_ASSERT(vmaCreateAllocator(&allocatorInfo, &allocator), "Failed to create vulkan memory allocator instance.");
+		spdlog::trace("Vulkan memory allocator instance successfully created.");
+
+		const auto graphicsQueueRes = vkbDevice.get_queue(vkb::QueueType::graphics);
+		SY_ASSERT(graphicsQueueRes.has_value(), "Failed to get graphics queue from logical device of vulkan.");
+		graphicsQueue = graphicsQueueRes.value();
+		graphicsQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
+		spdlog::trace("Graphics Queue successfully acquired. Family Index: {}.", graphicsQueueFamilyIdx);
+
+		const auto computeQueueRes = vkbDevice.get_queue(vkb::QueueType::compute);
+		SY_ASSERT(computeQueueRes.has_value(), "Failed to get compute queue from logical device of vulkan.");
+		computeQueue = computeQueueRes.value();
+		computeQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::compute).value();
+		spdlog::trace("Compute Queue successfully acquired. Family Index: {}.", computeQueueFamilyIdx);
+
+		const auto transferQueueRes = vkbDevice.get_queue(vkb::QueueType::transfer);
+		SY_ASSERT(transferQueueRes.has_value(), "Failed to get transfer queue from logical device of vulkan.");
+		transferQueue = computeQueueRes.value();
+		transferQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::transfer).value();
+		spdlog::trace("Transfer Queue successfully acquired. Family Index: {}.", transferQueueFamilyIdx);
+
+		const auto presentQueueRes = vkbDevice.get_queue(vkb::QueueType::present);
+		SY_ASSERT(presentQueueRes.has_value(), "Failed to get present queue from logical device of vulkan.");
+		presentQueue = presentQueueRes.value();
+		presentQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::present).value();
+		spdlog::trace("Present Queue successfully acquired. Family Index: {}.", presentQueueFamilyIdx);
 	}
 
 	void VulkanInstance::Cleanup()
