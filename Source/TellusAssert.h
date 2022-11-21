@@ -1,19 +1,19 @@
 #pragma once
 #include <Core.h>
 
-namespace sy
-{
-    static void Assert(bool bCondition, std::string_view file, size_t line, std::string_view message)
-    {
 #if defined(_DEBUG) || defined(DEBUG)
-        if (!bCondition)
-        {
-            // @TODO: Logging here
-            //std::format("Assert failed at File : {}, Line : {}, Message : {}", file, line, message)
-            __debugbreak();
+#define SY_ASSERT(CONDITION, FORMAT_STR, ...) \
+    if (!(CONDITION)) { \
+		spdlog::critical("Assert failed at File: {}, Line: {}", __FILE__, __LINE__); \
+        spdlog::critical(FORMAT_STR, __VA_ARGS__); \
+        __debugbreak(); \
         }
+#elif
+#define SY_ASSERT(...)
 #endif
-    }
-}
 
-#define SY_ASSERT(Condition, LogMessage) sy::Assert(Condition, __FILE__, __LINE__, LogMessage);
+#if defined(_DEBUG) || defined(DEUG)
+#define VK_ASSERT(RESULT, FORMAT_STR, ...) \
+    SY_ASSERT((RESULT == VK_SUCCESS), FORMAT_STR, __VA_ARGS__)
+#elif
+#endif
