@@ -1,7 +1,7 @@
 #include <Core.h>
-#include <CommandBuffer.h>
-#include <VulkanInstance.h>
-#include <CommandPool.h>
+#include <VK/CommandBuffer.h>
+#include <VK/VulkanInstance.h>
+#include <VK/CommandPool.h>
 
 #include "Fence.h"
 

@@ -1,9 +1,9 @@
 #include <Core.h>
-#include <VulkanInstance.h>
-#include <Swapchain.h>
-#include <CommandBuffer.h>
-#include <CommandPool.h>
 #include <Window.h>
+#include <VK/VulkanInstance.h>
+#include <VK/Swapchain.h>
+#include <VK/CommandBuffer.h>
+#include <VK/CommandPool.h>
 
 namespace sy
 {

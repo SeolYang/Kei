@@ -1,7 +1,7 @@
 #include <Core.h>
-#include <CommandPool.h>
-#include <CommandBuffer.h>
-#include <VulkanInstance.h>
+#include <VK/CommandPool.h>
+#include <VK/CommandBuffer.h>
+#include <VK/VulkanInstance.h>
 
 namespace sy
 {

@@ -2,7 +2,7 @@
 #include <Instance.h>
 #include <Window.h>
 #include <GameInstance.h>
-#include <VulkanInstance.h>
+#include <VK/VulkanInstance.h>
 
 namespace sy
 {

@@ -1,7 +1,7 @@
 #include <Core.h>
-#include <Swapchain.h>
-#include <VulkanInstance.h>
 #include <Window.h>
+#include <VK/Swapchain.h>
+#include <VK/VulkanInstance.h>
 
 namespace sy
 {

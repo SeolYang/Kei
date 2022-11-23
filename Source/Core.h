@@ -57,7 +57,7 @@ namespace sy
 #include <NamedType.h>
 #include <Extent.h>
 #include <TellusAssert.h>
-#include <VulkanTypes.h>
+#include <VK/VulkanTypes.h>
 
 #include <ECS.h>
 #include <Timer.h>

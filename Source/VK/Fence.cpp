@@ -1,7 +1,6 @@
 #include <Core.h>
-#include <Fence.h>
-
-#include "VulkanInstance.h"
+#include <VK/Fence.h>
+#include <VK/VulkanInstance.h>
 
 namespace sy
 {
