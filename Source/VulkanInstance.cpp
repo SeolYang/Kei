@@ -1,5 +1,6 @@
 #include <Core.h>
 #include <VulkanInstance.h>
+#include <CommandPool.h>;
 #include <Window.h>
 
 namespace sy
@@ -18,6 +19,23 @@ namespace sy
 	VulkanInstance::~VulkanInstance()
 	{
 		Cleanup();
+	}
+
+	uint32_t VulkanInstance::GetQueueFamilyIndex(const EQueueType queue) const
+	{
+		switch (queue)
+		{
+		case EQueueType::Graphics:
+			return graphicsQueueFamilyIdx;
+		case EQueueType::Compute:
+			return computeQueueFamilyIdx;
+		case EQueueType::Transfer:
+			return transferQueueFamilyIdx;
+		case EQueueType::Present:
+			return presentQueueFamilyIdx;
+		}
+
+		return graphicsQueueFamilyIdx;
 	}
 
 	void VulkanInstance::Startup()
@@ -73,7 +91,7 @@ namespace sy
 			.add_pNext(&dynamicRenderingFeatures)
 			.build();
 		SY_ASSERT(vkbDeviceRes.has_value(), "Failed to create device using GPU {}.", gpuName);
-		auto vkbDevice = vkbDeviceRes.value();
+		auto& vkbDevice = vkbDeviceRes.value();
 		device = vkbDevice.device;
 		spdlog::trace("Succeed to create logical device using GPU {}.", gpuName);
 
@@ -93,6 +111,45 @@ namespace sy
 		VK_ASSERT(vmaCreateAllocator(&allocatorInfo, &allocator), "Failed to create vulkan memory allocator instance.");
 		spdlog::trace("Vulkan memory allocator instance successfully created.");
 
+		InitCommandPools(vkbDevice);
+	}
+
+	void VulkanInstance::Cleanup()
+	{
+		{
+			std::lock_guard lock(graphicsCmdPoolListMutex);
+			graphicsCmdPools.clear();
+		}
+
+		{
+			std::lock_guard lock(computeCmdPoolListMutex);
+			computeCmdPools.clear();
+		}
+
+		{
+			std::lock_guard lock(transferCmdPoolListMutex);
+			transferCmdPools.clear();
+		}
+
+		{
+			std::lock_guard lock(presentCmdPoolListMutex);
+			presentCmdPools.clear();
+		}
+
+		vmaDestroyAllocator(allocator);
+		allocator = VK_NULL_HANDLE;
+		vkDestroyDevice(device, nullptr);
+		device = VK_NULL_HANDLE;
+		vkDestroySurfaceKHR(instance, surface, nullptr);
+		surface = VK_NULL_HANDLE;
+		vkb::destroy_debug_utils_messenger(instance, debugMessenger, nullptr);
+		debugMessenger = VK_NULL_HANDLE;
+		vkDestroyInstance(instance, nullptr);
+		instance = VK_NULL_HANDLE;
+	}
+
+	void VulkanInstance::InitCommandPools(vkb::Device& vkbDevice)
+	{
 		const auto graphicsQueueRes = vkbDevice.get_queue(vkb::QueueType::graphics);
 		SY_ASSERT(graphicsQueueRes.has_value(), "Failed to get graphics queue from logical device of vulkan.");
 		graphicsQueue = graphicsQueueRes.value();
@@ -116,19 +173,22 @@ namespace sy
 		presentQueue = presentQueueRes.value();
 		presentQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::present).value();
 		spdlog::trace("Present Queue successfully acquired. Family Index: {}.", presentQueueFamilyIdx);
+
+		auto& test = RequestGraphicsCommandPool();
+		test.RequestCommandBuffer("test cmd buffer 0");
+		test.RequestCommandBuffer("test cmd buffer 1");
 	}
 
-	void VulkanInstance::Cleanup()
+	CommandPool& VulkanInstance::RequestCommandPool(const EQueueType queueType, std::vector<std::unique_ptr<CommandPool>>& poolList, std::mutex& listMutex)
 	{
-		vmaDestroyAllocator(allocator);
-		allocator = VK_NULL_HANDLE;
-		vkDestroyDevice(device, nullptr);
-		device = VK_NULL_HANDLE;
-		vkDestroySurfaceKHR(instance, surface, nullptr);
-		surface = VK_NULL_HANDLE;
-		vkb::destroy_debug_utils_messenger(instance, debugMessenger, nullptr);
-		debugMessenger = VK_NULL_HANDLE;
-		vkDestroyInstance(instance, nullptr);
-		instance = VK_NULL_HANDLE;
+		thread_local CommandPool* threadPool = nullptr;
+		if (threadPool == nullptr)
+		{
+			threadPool = new CommandPool(*this, queueType);
+			std::lock_guard<std::mutex> lock(listMutex);
+			poolList.push_back(std::unique_ptr<CommandPool>(threadPool));
+		}
+
+		return *threadPool;
 	}
 }
