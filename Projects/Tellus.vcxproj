@@ -11,7 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\CommandBuffer.cpp" />
+    <ClCompile Include="..\Source\CommandPool.cpp" />
     <ClCompile Include="..\Source\Core.cpp" />
+    <ClCompile Include="..\Source\Fence.cpp" />
     <ClCompile Include="..\Source\GameInstance.cpp" />
     <ClCompile Include="..\Source\Instance.cpp" />
     <ClCompile Include="..\Source\main.cpp" />
@@ -20,11 +23,16 @@
     <ClCompile Include="..\ThirdParty\volk\volk.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Source\CommandBuffer.h" />
+    <ClInclude Include="..\Source\CommandPool.h" />
     <ClInclude Include="..\Source\ECS.h" />
+    <ClInclude Include="..\Source\Fence.h" />
     <ClInclude Include="..\Source\TellusAssert.h" />
     <ClInclude Include="..\Source\Extent.h" />
     <ClInclude Include="..\Source\Timer.h" />
     <ClInclude Include="..\Source\VulkanInstance.h" />
+    <ClInclude Include="..\Source\NamedType.h" />
+    <ClInclude Include="..\Source\VulkanTypes.h" />
     <ClInclude Include="..\Source\Window.h" />
     <ClInclude Include="..\Source\Core.h" />
     <ClInclude Include="..\Source\GameInstance.h" />

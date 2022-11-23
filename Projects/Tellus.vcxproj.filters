@@ -36,6 +36,15 @@
     <ClCompile Include="..\ThirdParty\volk\volk.c">
       <Filter>Thirdparty\volk</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\CommandPool.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\CommandBuffer.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Fence.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Core.h">
@@ -67,6 +76,21 @@
     </ClInclude>
     <ClInclude Include="..\ThirdParty\volk\volk.h">
       <Filter>Thirdparty\volk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\CommandPool.h">
+      <Filter>Source\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\CommandBuffer.h">
+      <Filter>Source\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VulkanTypes.h">
+      <Filter>Source\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\NamedType.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Fence.h">
+      <Filter>Source\Vulkan</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
