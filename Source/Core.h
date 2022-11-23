@@ -54,8 +54,10 @@ namespace sy
 /** spdlog */
 #include <spdlog/spdlog.h>
 
+#include <NamedType.h>
 #include <Extent.h>
 #include <TellusAssert.h>
+#include <VulkanTypes.h>
 
 #include <ECS.h>
 #include <Timer.h>
