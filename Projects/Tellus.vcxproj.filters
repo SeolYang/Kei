@@ -45,6 +45,9 @@
     <ClCompile Include="..\Source\Fence.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Swapchain.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Core.h">
@@ -90,6 +93,9 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Fence.h">
+      <Filter>Source\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Swapchain.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
   </ItemGroup>

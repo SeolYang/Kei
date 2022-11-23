@@ -1,6 +1,6 @@
 #include <Core.h>
 #include <VulkanInstance.h>
-#include <CommandPool.h>;
+#include <CommandPool.h>
 #include <Window.h>
 
 namespace sy

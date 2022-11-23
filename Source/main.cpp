@@ -1,3 +1,4 @@
+#include <Core.h>
 #include <Instance.h>
 #include <ECS.h>
 

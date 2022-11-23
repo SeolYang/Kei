@@ -16,8 +16,10 @@ namespace sy
 		[[nodiscard]] CommandPool& RequestTransferCommandPool() { return RequestCommandPool(EQueueType::Transfer, transferCmdPools, transferCmdPoolListMutex); }
 		[[nodiscard]] CommandPool& RequestPresentCommandPool() { return RequestCommandPool(EQueueType::Present, presentCmdPools, presentCmdPoolListMutex); }
 
+		[[nodiscard]] VkPhysicalDevice GetPhysicalDevice() const { return physicalDevice; }
 		[[nodiscard]] VkDevice GetLogicalDevice() const { return device; }
 		[[nodiscard]] uint32_t GetQueueFamilyIndex(EQueueType queue) const;
+		[[nodiscard]] VkSurfaceKHR GetSurface() const { return surface; }
 
 	private:
 		void Startup();
