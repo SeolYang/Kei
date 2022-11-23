@@ -1,11 +1,13 @@
 #include <Core.h>
 #include <VulkanInstance.h>
+#include <Swapchain.h>
+#include <CommandBuffer.h>
 #include <CommandPool.h>
 #include <Window.h>
 
 namespace sy
 {
-	VulkanInstance::VulkanInstance(Window& window) :
+	VulkanInstance::VulkanInstance(const Window& window) :
 		window(window),
 		instance(VK_NULL_HANDLE),
 		surface(VK_NULL_HANDLE),
@@ -43,7 +45,7 @@ namespace sy
 		volkInitialize();
 
 		vkb::InstanceBuilder instanceBuilder;
-		auto instanceBuilderRes = instanceBuilder.set_app_name(window.GetWindowTitle().data())
+		auto instanceBuilderRes = instanceBuilder.set_app_name(window.GetTitle().data())
 #ifdef _DEBUG
 			.request_validation_layers()
 			.use_default_debug_messenger()
@@ -95,7 +97,9 @@ namespace sy
 		device = vkbDevice.device;
 		spdlog::trace("Succeed to create logical device using GPU {}.", gpuName);
 
-		const VmaVulkanFunctions vulkanFunctions
+		swapchain = std::make_unique<Swapchain>(*this, window);
+
+		const VmaVulkanFunctions vkFunctions
 		{
 			.vkGetInstanceProcAddr = vkGetInstanceProcAddr,
 			.vkGetDeviceProcAddr = vkGetDeviceProcAddr
@@ -105,11 +109,11 @@ namespace sy
 		{
 			.physicalDevice = physicalDevice,
 			.device = device,
-			.pVulkanFunctions = &vulkanFunctions,
+			.pVulkanFunctions = &vkFunctions,
 			.instance = instance,
 		};
 		VK_ASSERT(vmaCreateAllocator(&allocatorInfo, &allocator), "Failed to create vulkan memory allocator instance.");
-		spdlog::trace("Vulkan memory allocator instance successfully created.");
+		spdlog::trace("VMA instance successfully created.");
 
 		InitCommandPools(vkbDevice);
 	}
@@ -138,6 +142,9 @@ namespace sy
 
 		vmaDestroyAllocator(allocator);
 		allocator = VK_NULL_HANDLE;
+
+		swapchain.reset();
+
 		vkDestroyDevice(device, nullptr);
 		device = VK_NULL_HANDLE;
 		vkDestroySurfaceKHR(instance, surface, nullptr);
@@ -148,7 +155,7 @@ namespace sy
 		instance = VK_NULL_HANDLE;
 	}
 
-	void VulkanInstance::InitCommandPools(vkb::Device& vkbDevice)
+	void VulkanInstance::InitCommandPools(const vkb::Device& vkbDevice)
 	{
 		const auto graphicsQueueRes = vkbDevice.get_queue(vkb::QueueType::graphics);
 		SY_ASSERT(graphicsQueueRes.has_value(), "Failed to get graphics queue from logical device of vulkan.");

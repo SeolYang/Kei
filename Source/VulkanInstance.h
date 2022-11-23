@@ -4,11 +4,13 @@
 namespace sy
 {
 	class Window;
+	class Swapchain;
+	class CommandBuffer;
 	class CommandPool;
 	class VulkanInstance
 	{
 	public:
-		VulkanInstance(Window& window);
+		VulkanInstance(const Window& window);
 		~VulkanInstance();
 
 		[[nodiscard]] CommandPool& RequestGraphicsCommandPool() { return RequestCommandPool(EQueueType::Graphics, graphicsCmdPools, graphicsCmdPoolListMutex); }
@@ -25,18 +27,20 @@ namespace sy
 		void Startup();
 		void Cleanup();
 
-		void InitCommandPools(vkb::Device& vkbDevice);
+		void InitCommandPools(const vkb::Device& vkbDevice);
 
 		[[nodiscard]] CommandPool& RequestCommandPool(EQueueType queueType, std::vector<std::unique_ptr<CommandPool>>& poolList, std::mutex& listMutex);
 
 	private:
-		Window& window;
+		const Window& window;
 		VkInstance instance;
 		VkDebugUtilsMessengerEXT debugMessenger;
 		VkSurfaceKHR surface;
 		VkPhysicalDevice physicalDevice;
 		VkDevice device;
 		std::string gpuName;
+
+		std::unique_ptr<Swapchain> swapchain;
 
 		VmaAllocator allocator;
 

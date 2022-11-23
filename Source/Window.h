@@ -15,9 +15,9 @@ namespace sy
 		Window& operator=(const Window&) = delete;
 		Window& operator=(Window&&) = default;
 
-		[[nodiscard]] std::string_view GetWindowTitle() const { return title; }
+		[[nodiscard]] std::string_view GetTitle() const { return title; }
 		[[nodiscard]] SDL_Window& GetSDLWindow() const { return *window; }
-
+		[[nodiscard]] auto GetExtent() const { return extent; }
 	private:
 		void Startup();
 		void Cleanup();

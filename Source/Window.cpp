@@ -39,6 +39,7 @@ namespace sy
 		if (window != nullptr)
 		{
 			SDL_DestroyWindow(window);
+			window = nullptr;
 		}
 	}
 }
