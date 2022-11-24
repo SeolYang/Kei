@@ -199,10 +199,6 @@ namespace sy
 		presentQueue = presentQueueRes.value();
 		presentQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::present).value();
 		spdlog::trace("Present Queue successfully acquired. Family Index: {}.", presentQueueFamilyIdx);
-
-		auto& test = RequestGraphicsCommandPool();
-		test.RequestCommandBuffer("test cmd buffer 0");
-		test.RequestCommandBuffer("test cmd buffer 1");
 	}
 
 	CommandPool& VulkanInstance::RequestCommandPool(const EQueueType queueType, std::vector<std::unique_ptr<CommandPool>>& poolList, std::mutex& listMutex)
