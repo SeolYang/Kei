@@ -4,6 +4,8 @@
 #include <VK/Swapchain.h>
 #include <VK/CommandBuffer.h>
 #include <VK/CommandPool.h>
+#include <VK/Semaphore.h>
+#include <VK/Fence.h>
 
 namespace sy
 {
@@ -40,6 +42,31 @@ namespace sy
 		return graphicsQueueFamilyIdx;
 	}
 
+	VkQueue VulkanInstance::GetQueue(EQueueType queue) const
+	{
+		switch (queue)
+		{
+		case EQueueType::Graphics:
+			return graphicsQueue;
+		case EQueueType::Compute:
+			return computeQueue;
+		case EQueueType::Transfer:
+			return transferQueue;
+		case EQueueType::Present:
+			return presentQueue;
+		}
+
+		return graphicsQueue;
+	}
+
+	void VulkanInstance::SubmitTo(const EQueueType type, const VkSubmitInfo submitInfo, Fence& fence) const
+	{
+		const auto queue = GetQueue(type);
+		SY_ASSERT(queue != VK_NULL_HANDLE, "Invalid queue submission request.");
+
+		vkQueueSubmit(queue, 1, &submitInfo, fence.GetNativeHandle());
+	}
+
 	void VulkanInstance::Startup()
 	{
 		volkInitialize();
@@ -65,9 +92,8 @@ namespace sy
 		auto vkbPhysicalDevice = physicalDeviceSelector.set_minimum_version(1, 3)
 			.set_surface(surface)
 			.add_required_extension("VK_EXT_descriptor_indexing")
-			//.add_required_extension("VK_KHR_depth_stencil_resolve")
-			//.add_required_extension("VK_KHR_get_physical_device_properties2")
-			//.add_required_extension("VK_KHR_dynamic_rendering")
+			.add_required_extension("VK_KHR_swapchain")
+			.add_required_extension("VK_KHR_dynamic_rendering")
 			.select()
 			.value();
 
@@ -75,13 +101,6 @@ namespace sy
 		gpuName = vkbPhysicalDevice.properties.deviceName;
 
 		vkb::DeviceBuilder deviceBuilder{ vkbPhysicalDevice };
-		VkPhysicalDeviceShaderDrawParametersFeatures shaderDrawParameters
-		{
-			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES,
-			.pNext = nullptr,
-			.shaderDrawParameters = VK_TRUE
-		};
-
 		VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures
 		{
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
@@ -89,15 +108,15 @@ namespace sy
 			.dynamicRendering = VK_TRUE
 		};
 
-		auto vkbDeviceRes = deviceBuilder.add_pNext(&shaderDrawParameters)
-			.add_pNext(&dynamicRenderingFeatures)
+		auto vkbDeviceRes = 
+			deviceBuilder.add_pNext(&dynamicRenderingFeatures)
 			.build();
 		SY_ASSERT(vkbDeviceRes.has_value(), "Failed to create device using GPU {}.", gpuName);
 		auto& vkbDevice = vkbDeviceRes.value();
 		device = vkbDevice.device;
 		spdlog::trace("Succeed to create logical device using GPU {}.", gpuName);
 
-		swapchain = std::make_unique<Swapchain>(*this, window);
+		swapchain = std::make_unique<Swapchain>(window , *this);
 
 		const VmaVulkanFunctions vkFunctions
 		{

@@ -5,8 +5,10 @@
 namespace sy
 {
 	Fence::Fence(std::string_view name, const VulkanInstance& vulkanInstance, const bool bIsSignaled) :
-		NamedType(name),
-		vulkanInstance(vulkanInstance)
+		VulkanWrapper<VkFence>(name, vulkanInstance, VK_DESTROY_LAMBDA_SIGNATURE(VkFence)
+		{
+			vkDestroyFence(vulkanInstance.GetLogicalDevice(), handle, nullptr);
+		})
 	{
 		const VkFenceCreateInfo createInfo
 		{
@@ -15,29 +17,22 @@ namespace sy
 			.flags = bIsSignaled ? VK_FENCE_CREATE_SIGNALED_BIT : static_cast<VkFlags>(0)
 		};
 
-		VK_ASSERT(vkCreateFence(vulkanInstance.GetLogicalDevice(), &createInfo, nullptr, &fence), "Failed to create fence.");
+		VK_ASSERT(vkCreateFence(vulkanInstance.GetLogicalDevice(), &createInfo, nullptr, &handle), "Failed to create fence.");
 	}
 
-	Fence::~Fence()
+	void Fence::Wait() const
 	{
-		vkDestroyFence(vulkanInstance.GetLogicalDevice(), fence, nullptr);
+		vkWaitForFences(vulkanInstance.GetLogicalDevice(), 1, &handle, VK_TRUE, std::numeric_limits<uint64_t>::max());
 	}
 
-	const Fence& Fence::Wait() const
+	void Fence::Reset() const
 	{
-		vkWaitForFences(vulkanInstance.GetLogicalDevice(), 1, &fence, VK_TRUE, std::numeric_limits<uint64_t>::max());
-		return *this;
-	}
-
-	const Fence& Fence::Reset() const
-	{
-		vkResetFences(vulkanInstance.GetLogicalDevice(), 1, &fence);
-		return *this;
+		vkResetFences(vulkanInstance.GetLogicalDevice(), 1, &handle);
 	}
 
 	bool Fence::IsSignaled() const
 	{
-		return vkGetFenceStatus(vulkanInstance.GetLogicalDevice(), fence) == VK_SUCCESS;
+		return vkGetFenceStatus(vulkanInstance.GetLogicalDevice(), handle) == VK_SUCCESS;
 	}
 
 }

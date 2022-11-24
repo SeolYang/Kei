@@ -5,21 +5,17 @@ namespace sy
 {
 	class VulkanInstance;
 	class CommandBuffer;
-	class CommandPool : public NamedType
+	class CommandPool : public VulkanWrapper<VkCommandPool>
 	{
 	public:
 		CommandPool(const VulkanInstance& vulkanInstance, EQueueType queueType);
-		virtual ~CommandPool() override;
+		virtual ~CommandPool() override = default;
 
-		const CommandBuffer& RequestCommandBuffer(std::string_view name);
+		CommandBuffer& RequestCommandBuffer(std::string_view name);
 		[[nodiscard]] EQueueType GetQueueType() const { return queueType; }
-		[[nodiscard]] VkCommandPool GetCommandPool() const { return pool; }
 
 	private:
-		const VulkanInstance& vulkanInstance;
 		const EQueueType queueType;
-		VkCommandPool pool;
-
 		std::vector<std::unique_ptr<CommandBuffer>> cmdBuffers;
 
 	};

@@ -4,21 +4,15 @@
 namespace sy
 {
 	class VulkanInstance;
-	class Fence : public NamedType
+	class Fence : public VulkanWrapper<VkFence>
 	{
 	public:
 		Fence(std::string_view name, const VulkanInstance& vulkanInstance, bool bIsSignaled = true);
-		virtual ~Fence() override;
+		virtual ~Fence() override = default;
 
-		[[nodiscard]] VkFence GetFence() const { return fence; }
-
-		const Fence& Wait() const;
-		const Fence& Reset() const;
+		void Wait() const;
+		void Reset() const;
 		[[nodiscard]] bool IsSignaled() const;
-
-	private:
-		const VulkanInstance& vulkanInstance;
-		VkFence fence;
 
 	};
 }

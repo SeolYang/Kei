@@ -30,9 +30,6 @@
     <ClCompile Include="..\Source\main.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\ThirdParty\volk\volk.c">
-      <Filter>Thirdparty\volk</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\VK\CommandBuffer.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
@@ -47,6 +44,15 @@
     </ClCompile>
     <ClCompile Include="..\Source\VK\VulkanInstance.cpp">
       <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Renderer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\Semaphore.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\volk\volk.c">
+      <Filter>Thirdparty\volk</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -96,6 +102,15 @@
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\VK\VulkanTypes.h">
+      <Filter>Source\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Renderer.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\Semaphore.h">
+      <Filter>Source\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\VulkanWrapper.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
   </ItemGroup>

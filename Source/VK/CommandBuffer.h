@@ -6,26 +6,23 @@ namespace sy
 	class VulkanInstance;
 	class CommandPool;
 	class Fence;
-	class CommandBuffer : public NamedType
+	class CommandBuffer : public VulkanWrapper<VkCommandBuffer>
 	{
 	public:
 		CommandBuffer(std::string_view name, const VulkanInstance& vulkanInstance, const CommandPool& cmdPool);
 		virtual ~CommandBuffer() override = default;
 
-		[[nodiscard]] VkCommandBuffer GetCommandBuffer() const { return cmdBuffer; }
 		[[nodiscard]] EQueueType GetQueueType() const { return queueType; }
 
 		[[nodiscard]] bool IsReadyToUse() const;
 
-		const CommandBuffer& ResetFence() const;
-		const CommandBuffer& Begin() const;
-		const CommandBuffer& End() const;
+		void ResetFence() const;
+		void Begin() const;
+		void End() const;
 
 	private:
 		const EQueueType queueType;
-		const VulkanInstance& vulkanInstance;
 		const CommandPool& cmdPool;
-		VkCommandBuffer cmdBuffer;
 		std::unique_ptr<Fence> fence;
 
 	};

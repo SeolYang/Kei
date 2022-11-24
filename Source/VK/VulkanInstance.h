@@ -7,6 +7,7 @@ namespace sy
 	class Swapchain;
 	class CommandBuffer;
 	class CommandPool;
+	class Fence;
 	class VulkanInstance
 	{
 	public:
@@ -21,7 +22,11 @@ namespace sy
 		[[nodiscard]] VkPhysicalDevice GetPhysicalDevice() const { return physicalDevice; }
 		[[nodiscard]] VkDevice GetLogicalDevice() const { return device; }
 		[[nodiscard]] uint32_t GetQueueFamilyIndex(EQueueType queue) const;
+		[[nodiscard]] VkQueue GetQueue(EQueueType queue) const;
 		[[nodiscard]] VkSurfaceKHR GetSurface() const { return surface; }
+		[[nodiscard]] Swapchain& GetSwapchain() const { return *swapchain; }
+
+		void SubmitTo(EQueueType type, const VkSubmitInfo submitInfo, Fence& fence) const;
 
 	private:
 		void Startup();

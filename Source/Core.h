@@ -38,10 +38,9 @@ namespace sy
 }
 
 /** Vulkan Headers */
-#define VK_NO_PROTOTYPES
 #define VK_USE_PLATFORM_WIN32_KHR
-#include <vulkan/vulkan.hpp>
-
+#define VK_NO_PROTOTYPES
+#include <vulkan/vulkan.h>
 #include <volk.h>
 #include <VkBootstrap.h>
 
@@ -58,6 +57,7 @@ namespace sy
 #include <Extent.h>
 #include <TellusAssert.h>
 #include <VK/VulkanTypes.h>
+#include <VK/VulkanWrapper.h>
 
 #include <ECS.h>
 #include <Timer.h>

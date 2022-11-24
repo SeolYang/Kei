@@ -6,10 +6,11 @@
 namespace sy
 {
 	CommandPool::CommandPool(const VulkanInstance& vulkanInstance, const EQueueType queueType) :
-		NamedType("Unknown Queue"),
-		vulkanInstance(vulkanInstance),
-		queueType(queueType),
-		pool(VK_NULL_HANDLE)
+		VulkanWrapper<VkCommandPool>("Unknown Queue", vulkanInstance, VK_DESTROY_LAMBDA_SIGNATURE(VkCommandPool)
+		{
+			vkDestroyCommandPool(vulkanInstance.GetLogicalDevice(), handle, nullptr);
+		}),
+		queueType(queueType)
 	{
 		switch (queueType)
 		{
@@ -37,15 +38,10 @@ namespace sy
 
 		const size_t threadId = std::hash<std::thread::id>{}(std::this_thread::get_id());
 		spdlog::trace("Creating cmd pool for thread {}.", threadId);
-		VK_ASSERT(vkCreateCommandPool(vulkanInstance.GetLogicalDevice(), &cmdPoolCreateInfo, nullptr, &pool), "Failed to create vulkan command queue from create info.");
+		VK_ASSERT(vkCreateCommandPool(vulkanInstance.GetLogicalDevice(), &cmdPoolCreateInfo, nullptr, &handle), "Failed to create vulkan command queue from create info.");
 	}
 
-	CommandPool::~CommandPool()
-	{
-		vkDestroyCommandPool(vulkanInstance.GetLogicalDevice(), pool, nullptr);
-	}
-
-	const CommandBuffer& CommandPool::RequestCommandBuffer(const std::string_view name)
+	CommandBuffer& CommandPool::RequestCommandBuffer(const std::string_view name)
 	{
 		spdlog::trace("Request Command Buffer {} from Command Pool {}.", name, this->GetName());
 		for (const auto& cmdBufferPtr : cmdBuffers)

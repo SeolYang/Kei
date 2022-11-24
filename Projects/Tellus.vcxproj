@@ -18,9 +18,11 @@
     <ClCompile Include="..\Source\GameInstance.cpp" />
     <ClCompile Include="..\Source\Instance.cpp" />
     <ClCompile Include="..\Source\main.cpp" />
+    <ClCompile Include="..\Source\Renderer.cpp" />
     <ClCompile Include="..\Source\VK\CommandBuffer.cpp" />
     <ClCompile Include="..\Source\VK\CommandPool.cpp" />
     <ClCompile Include="..\Source\VK\Fence.cpp" />
+    <ClCompile Include="..\Source\VK\Semaphore.cpp" />
     <ClCompile Include="..\Source\VK\Swapchain.cpp" />
     <ClCompile Include="..\Source\VK\VulkanInstance.cpp" />
     <ClCompile Include="..\Source\Window.cpp" />
@@ -31,6 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\ECS.h" />
+    <ClInclude Include="..\Source\Renderer.h" />
     <ClInclude Include="..\Source\TellusAssert.h" />
     <ClInclude Include="..\Source\Extent.h" />
     <ClInclude Include="..\Source\Timer.h" />
@@ -38,9 +41,11 @@
     <ClInclude Include="..\Source\VK\CommandBuffer.h" />
     <ClInclude Include="..\Source\VK\CommandPool.h" />
     <ClInclude Include="..\Source\VK\Fence.h" />
+    <ClInclude Include="..\Source\VK\Semaphore.h" />
     <ClInclude Include="..\Source\VK\Swapchain.h" />
     <ClInclude Include="..\Source\VK\VulkanInstance.h" />
     <ClInclude Include="..\Source\VK\VulkanTypes.h" />
+    <ClInclude Include="..\Source\VK\VulkanWrapper.h" />
     <ClInclude Include="..\Source\Window.h" />
     <ClInclude Include="..\Source\Core.h" />
     <ClInclude Include="..\Source\GameInstance.h" />
