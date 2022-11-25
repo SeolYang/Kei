@@ -13,8 +13,9 @@ namespace sy
 	Renderer::Renderer(const Window& window, VulkanInstance& vulkanInstance) :
 		window(window),
 		vulkanInstance(vulkanInstance),
+		renderFence(std::make_unique<Fence>("Render Fence", vulkanInstance)),
 		renderSemaphore(std::make_unique<Semaphore>("Render Semaphore", vulkanInstance)),
-		renderFence(std::make_unique<Fence>("Render Fence", vulkanInstance))
+		presentSemaphore(std::make_unique<Semaphore>("Present Semaphore", vulkanInstance))
 	{
 	}
 
@@ -22,7 +23,6 @@ namespace sy
 	{
 		renderFence->Wait();
 		vulkanInstance.WaitAllQueuesForIdle();
-		renderSemaphore.reset();
 	}
 
 	void Renderer::Render()
@@ -33,8 +33,7 @@ namespace sy
 		auto& graphicsCmdPool = vulkanInstance.RequestGraphicsCommandPool();
 
 		auto& swapchain = vulkanInstance.GetSwapchain();
-		const auto& presentSemaphore = swapchain.GetSemaphore();
-		swapchain.AcquireNext();
+		swapchain.AcquireNext(*presentSemaphore);
 		const auto swapchainImage = swapchain.GetCurrentImage();
 		const auto swapchainImageView = swapchain.GetCurrentImageView();
 
@@ -131,20 +130,20 @@ namespace sy
 		}
 		graphicsCmdBuffer.End();
 
-		const auto presentVkSemaphore = presentSemaphore.GetNativeHandle();
-		const auto renderVkSemaphore = renderSemaphore->GetNativeHandle();
+		const auto presentSemaphoreNative = presentSemaphore->GetNativeHandle();
+		const auto renderSemaphoreNative = renderSemaphore->GetNativeHandle();
 		constexpr VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		const VkSubmitInfo submitInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
 			.pNext = nullptr,
 			.waitSemaphoreCount = 1,
-			.pWaitSemaphores = &presentVkSemaphore,
+			.pWaitSemaphores = &presentSemaphoreNative,
 			.pWaitDstStageMask = &waitStage,
 			.commandBufferCount = 1,
 			.pCommandBuffers = &graphicsCmdBufferNative,
 			.signalSemaphoreCount = 1,
-			.pSignalSemaphores = &renderVkSemaphore,
+			.pSignalSemaphores = &renderSemaphoreNative,
 		};
 
 		vulkanInstance.SubmitTo(EQueueType::Graphics, submitInfo, *renderFence);
@@ -157,7 +156,7 @@ namespace sy
 		presentInfo.pSwapchains = &swapchainNative;
 		presentInfo.swapchainCount = 1;
 
-		presentInfo.pWaitSemaphores = &renderVkSemaphore;
+		presentInfo.pWaitSemaphores = &renderSemaphoreNative;
 		presentInfo.waitSemaphoreCount = 1;
 
 		const auto swapchainImageIndex = swapchain.GetCurrentImageIndex();

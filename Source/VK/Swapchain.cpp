@@ -12,8 +12,7 @@ namespace sy
 			vkDestroySwapchainKHR(vulkanInstance.GetLogicalDevice(), handle, nullptr);
 		}),
 		window(window),
-		currentImageIdx(0),
-		presentSemaphore(std::make_unique<Semaphore>("Present Semaphore", vulkanInstance))
+		currentImageIdx(0)
 	{
 		vkb::SwapchainBuilder swapchainBuilder
 		{
@@ -47,8 +46,8 @@ namespace sy
 		}
 	}
 
-	void Swapchain::AcquireNext()
+	void Swapchain::AcquireNext(const Semaphore& presentSemaphore)
 	{
-		VK_ASSERT(vkAcquireNextImageKHR(vulkanInstance.GetLogicalDevice(), handle, std::numeric_limits<uint64_t>::max(), presentSemaphore->GetNativeHandle(), VK_NULL_HANDLE, &currentImageIdx), "Failed to acquire next image view.");
+		VK_ASSERT(vkAcquireNextImageKHR(vulkanInstance.GetLogicalDevice(), handle, std::numeric_limits<uint64_t>::max(), presentSemaphore.GetNativeHandle(), VK_NULL_HANDLE, &currentImageIdx), "Failed to acquire next image view.");
 	}
 }

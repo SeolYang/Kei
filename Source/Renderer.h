@@ -20,6 +20,7 @@ namespace sy
 		VulkanInstance& vulkanInstance;
 		std::unique_ptr<Fence> renderFence;
 		std::unique_ptr<Semaphore> renderSemaphore;
+		std::unique_ptr<Semaphore> presentSemaphore;
 
 		size_t currentFrames = 0;
 
