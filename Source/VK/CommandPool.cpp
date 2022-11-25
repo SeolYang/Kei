@@ -41,20 +41,23 @@ namespace sy
 		VK_ASSERT(vkCreateCommandPool(vulkanInstance.GetLogicalDevice(), &cmdPoolCreateInfo, nullptr, &handle), "Failed to create vulkan command queue from create info.");
 	}
 
-	CommandBuffer& CommandPool::RequestCommandBuffer(const std::string_view name)
+	CommandBuffer& CommandPool::RequestCommandBuffer(const std::string_view name, const Fence& renderFence)
 	{
-		spdlog::trace("Request Command Buffer {} from Command Pool {}.", name, this->GetName());
 		for (const auto& cmdBufferPtr : cmdBuffers)
 		{
 			if (cmdBufferPtr->IsReadyToUse())
 			{
-				cmdBufferPtr->ResetFence();
 				cmdBufferPtr->SetName(name);
+				cmdBufferPtr->Begin(renderFence);
 				return *cmdBufferPtr;
 			}
 		}
 
+		const size_t threadId = std::hash<std::thread::id>{}(std::this_thread::get_id());
+		spdlog::trace("Creating cmd buffer for thread {}.", threadId);
 		cmdBuffers.emplace_back(std::make_unique<CommandBuffer>(name, vulkanInstance, *this));
-		return *cmdBuffers.back();
+		const auto& newCmdBuffer = cmdBuffers.back();
+		newCmdBuffer->Begin(renderFence);
+		return *newCmdBuffer;
 	}
 }

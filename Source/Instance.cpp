@@ -1,8 +1,9 @@
 #include <Core.h>
 #include <Instance.h>
 #include <Window.h>
-#include <GameInstance.h>
 #include <VK/VulkanInstance.h>
+#include <Renderer.h>
+#include <GameInstance.h>
 
 namespace sy
 {
@@ -26,10 +27,12 @@ namespace sy
 		timer = std::make_unique<Timer>();
 		window = std::make_unique<Window>("Test", Extent2D<uint32_t>{ 1280, 720 });
 		vulkanInstance = std::make_unique<VulkanInstance>(*window);
+		renderer = std::make_unique<Renderer>(*window, *vulkanInstance);
 	}
 
 	void Instance::Cleanup()
 	{
+		renderer.reset();
 		vulkanInstance.reset();
 		window.reset();
 	}
@@ -50,6 +53,8 @@ namespace sy
                     bExit = true;
                 }
             }
+
+			renderer->Render();
 
 			timer->End();
         }

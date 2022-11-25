@@ -7,10 +7,13 @@
 namespace sy
 {
 	Swapchain::Swapchain(const Window& window, const VulkanInstance& vulkanInstance) :
+		VulkanWrapper("Swapchain", vulkanInstance, VK_DESTROY_LAMBDA_SIGNATURE(VkSwapchainKHR)
+		{
+			vkDestroySwapchainKHR(vulkanInstance.GetLogicalDevice(), handle, nullptr);
+		}),
 		window(window),
-		vulkanInstance(vulkanInstance),
-		swapchain(VK_NULL_HANDLE),
-		currentImageIdx(0)
+		currentImageIdx(0),
+		presentSemaphore(std::make_unique<Semaphore>("Present Semaphore", vulkanInstance))
 	{
 		vkb::SwapchainBuilder swapchainBuilder
 		{
@@ -28,8 +31,8 @@ namespace sy
 			.build()
 			.value();
 
-		swapchain = vkbSwapchain.swapchain;
-		SY_ASSERT(swapchain != VK_NULL_HANDLE, "Invalid swapchain.");
+		handle = vkbSwapchain.swapchain;
+		SY_ASSERT(handle != VK_NULL_HANDLE, "Invalid swapchain.");
 		images = vkbSwapchain.get_images().value();
 		imageViews = vkbSwapchain.get_image_views().value();
 		format = vkbSwapchain.image_format;
@@ -42,12 +45,10 @@ namespace sy
 		{
 			vkDestroyImageView(device, imageView, nullptr);
 		}
-
-		vkDestroySwapchainKHR(device, swapchain, nullptr);
 	}
 
 	void Swapchain::AcquireNext()
 	{
-		VK_ASSERT(vkAcquireNextImageKHR(vulkanInstance.GetLogicalDevice(), swapchain, std::numeric_limits<uint64_t>::max(), presentSemaphore->GetNativeHandle(), VK_NULL_HANDLE, &currentImageIdx), "Failed to acquire next image view.");
+		VK_ASSERT(vkAcquireNextImageKHR(vulkanInstance.GetLogicalDevice(), handle, std::numeric_limits<uint64_t>::max(), presentSemaphore->GetNativeHandle(), VK_NULL_HANDLE, &currentImageIdx), "Failed to acquire next image view.");
 	}
 }

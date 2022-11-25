@@ -110,8 +110,11 @@
     <ClInclude Include="..\Source\VK\Semaphore.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\VK\VulkanWrapper.h">
+    <ClInclude Include="..\Source\VK\VulkanWrapper.hpp">
       <Filter>Source\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Pool.hpp">
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

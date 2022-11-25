@@ -25,9 +25,9 @@ namespace sy
 		Cleanup();
 	}
 
-	uint32_t VulkanInstance::GetQueueFamilyIndex(const EQueueType queue) const
+	uint32_t VulkanInstance::GetQueueFamilyIndex(const EQueueType queueType) const
 	{
-		switch (queue)
+		switch (queueType)
 		{
 		case EQueueType::Graphics:
 			return graphicsQueueFamilyIdx;
@@ -42,9 +42,9 @@ namespace sy
 		return graphicsQueueFamilyIdx;
 	}
 
-	VkQueue VulkanInstance::GetQueue(EQueueType queue) const
+	VkQueue VulkanInstance::GetQueue(EQueueType queueType) const
 	{
-		switch (queue)
+		switch (queueType)
 		{
 		case EQueueType::Graphics:
 			return graphicsQueue;
@@ -59,12 +59,32 @@ namespace sy
 		return graphicsQueue;
 	}
 
-	void VulkanInstance::SubmitTo(const EQueueType type, const VkSubmitInfo submitInfo, Fence& fence) const
+	void VulkanInstance::SubmitTo(const EQueueType type, const VkSubmitInfo& submitInfo, const Fence& fence) const
 	{
 		const auto queue = GetQueue(type);
 		SY_ASSERT(queue != VK_NULL_HANDLE, "Invalid queue submission request.");
 
-		vkQueueSubmit(queue, 1, &submitInfo, fence.GetNativeHandle());
+		VK_ASSERT(vkQueueSubmit(queue, 1, &submitInfo, fence.GetNativeHandle()), "Failed to submit to queue.");
+	}
+
+	void VulkanInstance::Present(const VkPresentInfoKHR& presentInfo) const
+	{
+		const auto queue = GetQueue(EQueueType::Present);
+		vkQueuePresentKHR(queue, &presentInfo);
+	}
+
+	void VulkanInstance::WaitQueueForIdle(const EQueueType queueType) const
+	{
+		const VkQueue queue = GetQueue(queueType);
+		vkQueueWaitIdle(queue);
+	}
+
+	void VulkanInstance::WaitAllQueuesForIdle() const
+	{
+		vkQueueWaitIdle(graphicsQueue);
+		vkQueueWaitIdle(computeQueue);
+		vkQueueWaitIdle(transferQueue);
+		vkQueueWaitIdle(presentQueue);
 	}
 
 	void VulkanInstance::Startup()
@@ -139,39 +159,42 @@ namespace sy
 
 	void VulkanInstance::Cleanup()
 	{
+		WaitAllQueuesForIdle();
 		{
-			std::lock_guard lock(graphicsCmdPoolListMutex);
-			graphicsCmdPools.clear();
+			{
+				std::lock_guard lock(graphicsCmdPoolListMutex);
+				graphicsCmdPools.clear();
+			}
+
+			{
+				std::lock_guard lock(computeCmdPoolListMutex);
+				computeCmdPools.clear();
+			}
+
+			{
+				std::lock_guard lock(transferCmdPoolListMutex);
+				transferCmdPools.clear();
+			}
+
+			{
+				std::lock_guard lock(presentCmdPoolListMutex);
+				presentCmdPools.clear();
+			}
+
+			vmaDestroyAllocator(allocator);
+			allocator = VK_NULL_HANDLE;
+
+			swapchain.reset();
+
+			vkDestroyDevice(device, nullptr);
+			device = VK_NULL_HANDLE;
+			vkDestroySurfaceKHR(instance, surface, nullptr);
+			surface = VK_NULL_HANDLE;
+			vkb::destroy_debug_utils_messenger(instance, debugMessenger, nullptr);
+			debugMessenger = VK_NULL_HANDLE;
+			vkDestroyInstance(instance, nullptr);
+			instance = VK_NULL_HANDLE;
 		}
-
-		{
-			std::lock_guard lock(computeCmdPoolListMutex);
-			computeCmdPools.clear();
-		}
-
-		{
-			std::lock_guard lock(transferCmdPoolListMutex);
-			transferCmdPools.clear();
-		}
-
-		{
-			std::lock_guard lock(presentCmdPoolListMutex);
-			presentCmdPools.clear();
-		}
-
-		vmaDestroyAllocator(allocator);
-		allocator = VK_NULL_HANDLE;
-
-		swapchain.reset();
-
-		vkDestroyDevice(device, nullptr);
-		device = VK_NULL_HANDLE;
-		vkDestroySurfaceKHR(instance, surface, nullptr);
-		surface = VK_NULL_HANDLE;
-		vkb::destroy_debug_utils_messenger(instance, debugMessenger, nullptr);
-		debugMessenger = VK_NULL_HANDLE;
-		vkDestroyInstance(instance, nullptr);
-		instance = VK_NULL_HANDLE;
 	}
 
 	void VulkanInstance::InitCommandPools(const vkb::Device& vkbDevice)

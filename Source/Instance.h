@@ -5,6 +5,7 @@ namespace sy
 {
 	class Window;
 	class VulkanInstance;
+	class Renderer;
 	class GameInstance;
 	class Instance
 	{
@@ -28,6 +29,7 @@ namespace sy
 		std::unique_ptr<Timer> timer;
 		std::unique_ptr<Window> window;
 		std::unique_ptr<VulkanInstance> vulkanInstance;
+		std::unique_ptr<Renderer> renderer;
 		std::unique_ptr<GameInstance> gameInstance;
 
 	};

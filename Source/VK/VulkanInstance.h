@@ -8,6 +8,7 @@ namespace sy
 	class CommandBuffer;
 	class CommandPool;
 	class Fence;
+	class Semaphore;
 	class VulkanInstance
 	{
 	public:
@@ -21,12 +22,16 @@ namespace sy
 
 		[[nodiscard]] VkPhysicalDevice GetPhysicalDevice() const { return physicalDevice; }
 		[[nodiscard]] VkDevice GetLogicalDevice() const { return device; }
-		[[nodiscard]] uint32_t GetQueueFamilyIndex(EQueueType queue) const;
-		[[nodiscard]] VkQueue GetQueue(EQueueType queue) const;
+		[[nodiscard]] uint32_t GetQueueFamilyIndex(EQueueType queueType) const;
+		[[nodiscard]] VkQueue GetQueue(EQueueType queueType) const;
 		[[nodiscard]] VkSurfaceKHR GetSurface() const { return surface; }
 		[[nodiscard]] Swapchain& GetSwapchain() const { return *swapchain; }
 
-		void SubmitTo(EQueueType type, const VkSubmitInfo submitInfo, Fence& fence) const;
+		void SubmitTo(EQueueType type, const VkSubmitInfo& submitInfo, const Fence& fence) const;
+		void Present(const VkPresentInfoKHR& presentInfo) const;
+
+		void WaitQueueForIdle(EQueueType queueType) const;
+		void WaitAllQueuesForIdle() const;
 
 	private:
 		void Startup();

@@ -33,6 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\ECS.h" />
+    <ClInclude Include="..\Source\Pool.hpp" />
     <ClInclude Include="..\Source\Renderer.h" />
     <ClInclude Include="..\Source\TellusAssert.h" />
     <ClInclude Include="..\Source\Extent.h" />
@@ -45,7 +46,7 @@
     <ClInclude Include="..\Source\VK\Swapchain.h" />
     <ClInclude Include="..\Source\VK\VulkanInstance.h" />
     <ClInclude Include="..\Source\VK\VulkanTypes.h" />
-    <ClInclude Include="..\Source\VK\VulkanWrapper.h" />
+    <ClInclude Include="..\Source\VK\VulkanWrapper.hpp" />
     <ClInclude Include="..\Source\Window.h" />
     <ClInclude Include="..\Source\Core.h" />
     <ClInclude Include="..\Source\GameInstance.h" />

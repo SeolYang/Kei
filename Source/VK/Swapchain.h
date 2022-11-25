@@ -6,21 +6,21 @@ namespace sy
 	class VulkanInstance;
 	class Window;
 	class Semaphore;
-	class Swapchain
+	class Swapchain : public VulkanWrapper<VkSwapchainKHR>
 	{
 	public:
 		Swapchain(const Window& window, const VulkanInstance& vulkanInstance);
-		~Swapchain();
+		virtual ~Swapchain() override;
 
 		void AcquireNext();
-		[[nodiscard]] VkImage GetCurrentImage() const { return images[currentImageIdx]; }
-		[[nodiscard]] VkImageView GetCurrentImageView() const { return imageViews[currentImageIdx]; }
+		[[nodiscard]] auto GetCurrentImage() const { return images[currentImageIdx]; }
+		[[nodiscard]] auto GetCurrentImageView() const { return imageViews[currentImageIdx]; }
+		[[nodiscard]] auto GetCurrentImageIndex() const { return currentImageIdx; }
 
 		Semaphore& GetSemaphore() const { return *presentSemaphore; }
+
 	private:
 		const Window& window;
-		const VulkanInstance& vulkanInstance;
-		VkSwapchainKHR swapchain;
 		std::vector<VkImage> images;
 		std::vector<VkImageView> imageViews;
 		VkFormat format;

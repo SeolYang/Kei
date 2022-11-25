@@ -16,14 +16,13 @@ namespace sy
 
 		[[nodiscard]] bool IsReadyToUse() const;
 
-		void ResetFence() const;
-		void Begin() const;
+		void Begin(const Fence& newDependencyFence);
 		void End() const;
 
 	private:
 		const EQueueType queueType;
 		const CommandPool& cmdPool;
-		std::unique_ptr<Fence> fence;
+		const Fence* dependencyFence;
 
 	};
 

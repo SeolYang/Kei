@@ -1,7 +1,7 @@
 #include <Core.h>
 #include <VK/CommandBuffer.h>
-#include <VK/VulkanInstance.h>
 #include <VK/CommandPool.h>
+#include <VK/VulkanInstance.h>
 
 #include "Fence.h"
 
@@ -14,7 +14,7 @@ namespace sy
 		}),
 		queueType(cmdPool.GetQueueType()),
 		cmdPool(cmdPool),
-		fence(std::make_unique<Fence>(name, vulkanInstance))
+		dependencyFence(nullptr)
 	{
 		const VkCommandBufferAllocateInfo allocInfo
 		{
@@ -25,23 +25,17 @@ namespace sy
 			.commandBufferCount = 1
 		};
 
-		const size_t threadId = std::hash<std::thread::id>{}(std::this_thread::get_id());
-		spdlog::trace("Creating cmd buffer for thread {}.", threadId);
 		VK_ASSERT(vkAllocateCommandBuffers(vulkanInstance.GetLogicalDevice(), &allocInfo, &handle), "Failed to creating command buffer.");
 	}
 
 	bool CommandBuffer::IsReadyToUse() const
 	{
-		return fence->IsSignaled();
+		return dependencyFence == nullptr || dependencyFence->IsSignaled();
 	}
 
-	void CommandBuffer::ResetFence() const
+	void CommandBuffer::Begin(const Fence& newDependencyFence)
 	{
-		fence->Reset();
-	}
-
-	void CommandBuffer::Begin() const
-	{
+		dependencyFence = &newDependencyFence;
 		const VkCommandBufferBeginInfo beginInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -50,6 +44,7 @@ namespace sy
 			.pInheritanceInfo =  nullptr
 		};
 
+		vkResetCommandBuffer(handle, 0);
 		VK_ASSERT(vkBeginCommandBuffer(handle, &beginInfo), "Faeild to begin command buffer {}.", GetName());
 	}
 
