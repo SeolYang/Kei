@@ -56,8 +56,10 @@ namespace sy
 #include <NamedType.h>
 #include <Extent.h>
 #include <TellusAssert.h>
+#include <Pool.hpp>
+
 #include <VK/VulkanTypes.h>
-#include <VK/VulkanWrapper.h>
+#include <VK/VulkanWrapper.hpp>
 
 #include <ECS.h>
 #include <Timer.h>
