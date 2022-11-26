@@ -59,18 +59,58 @@ namespace sy
 		return graphicsQueue;
 	}
 
-	void VulkanInstance::SubmitTo(const EQueueType type, const VkSubmitInfo& submitInfo, const Fence& fence) const
+	void VulkanInstance::SubmitTo(const EQueueType queueType, const VkSubmitInfo& submitInfo, const Fence& fence) const
 	{
-		const auto queue = GetQueue(type);
+		const auto queue = GetQueue(queueType);
 		SY_ASSERT(queue != VK_NULL_HANDLE, "Invalid queue submission request.");
 
 		VK_ASSERT(vkQueueSubmit(queue, 1, &submitInfo, fence.GetNativeHandle()), "Failed to submit to queue.");
+	}
+
+	void VulkanInstance::SubmitTo(EQueueType queueType, const std::span<std::reference_wrapper<const Semaphore>> waitSemaphores, const std::span<std::reference_wrapper<const CommandBuffer>> cmdBuffers, std::span<std::reference_wrapper<const Semaphore>> signalSemaphores, const VkPipelineStageFlags waitStage, const Fence& fence)
+	{
+		const auto waitSemaphoreNatives = TransformVulkanWrappersToNatives(waitSemaphores);
+		const auto cmdBufferNatives = TransformVulkanWrappersToNatives(cmdBuffers);
+		const auto signalSemaphoreNatives = TransformVulkanWrappersToNatives(signalSemaphores);
+		const VkSubmitInfo submitInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+			.pNext = nullptr,
+			.waitSemaphoreCount = static_cast<uint32_t>(waitSemaphoreNatives.size()),
+			.pWaitSemaphores = waitSemaphoreNatives.data(),
+			.pWaitDstStageMask = &waitStage,
+			.commandBufferCount = static_cast<uint32_t>(cmdBufferNatives.size()),
+			.pCommandBuffers = cmdBufferNatives.data(),
+			.signalSemaphoreCount = static_cast<uint32_t>(signalSemaphoreNatives.size()),
+			.pSignalSemaphores = signalSemaphoreNatives.data()
+		};
+
+		SubmitTo(queueType, submitInfo, fence);
 	}
 
 	void VulkanInstance::Present(const VkPresentInfoKHR& presentInfo) const
 	{
 		const auto queue = GetQueue(EQueueType::Present);
 		vkQueuePresentKHR(queue, &presentInfo);
+	}
+
+	void VulkanInstance::Present(const Swapchain& swapchain, const Semaphore& waitSemaphore) const
+	{
+		const auto swapchainImageIdx = swapchain.GetCurrentImageIndex();
+		const auto waitSemaphoreNative = waitSemaphore.GetNativeHandle();
+		const auto swapchainNative = swapchain.GetNativeHandle();
+		const VkPresentInfoKHR presentInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+			.pNext = nullptr,
+			.waitSemaphoreCount = 1,
+			.pWaitSemaphores = &waitSemaphoreNative,
+			.swapchainCount = 1,
+			.pSwapchains = &swapchainNative,
+			.pImageIndices = &swapchainImageIdx
+		};
+
+		Present(presentInfo);
 	}
 
 	void VulkanInstance::WaitQueueForIdle(const EQueueType queueType) const

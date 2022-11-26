@@ -27,8 +27,16 @@ namespace sy
 		[[nodiscard]] VkSurfaceKHR GetSurface() const { return surface; }
 		[[nodiscard]] Swapchain& GetSwapchain() const { return *swapchain; }
 
-		void SubmitTo(EQueueType type, const VkSubmitInfo& submitInfo, const Fence& fence) const;
+		void SubmitTo(EQueueType queueType, const VkSubmitInfo& submitInfo, const Fence& fence) const;
+		void SubmitTo(
+			EQueueType queueType, 
+			std::span<std::reference_wrapper<const Semaphore>> waitSemaphores,
+			std::span<std::reference_wrapper<const CommandBuffer>> cmdBuffers,
+			std::span<std::reference_wrapper<const Semaphore>> signalSemaphores,
+			VkPipelineStageFlags waitStage, const Fence& fence);
+
 		void Present(const VkPresentInfoKHR& presentInfo) const;
+		void Present(const Swapchain& swapchain, const Semaphore& waitSemaphore) const;
 
 		void WaitQueueForIdle(EQueueType queueType) const;
 		void WaitAllQueuesForIdle() const;

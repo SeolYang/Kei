@@ -12,37 +12,36 @@ namespace sy
 {
 	Renderer::Renderer(const Window& window, VulkanInstance& vulkanInstance) :
 		window(window),
-		vulkanInstance(vulkanInstance),
-		renderFence(std::make_unique<Fence>("Render Fence", vulkanInstance)),
-		renderSemaphore(std::make_unique<Semaphore>("Render Semaphore", vulkanInstance)),
-		presentSemaphore(std::make_unique<Semaphore>("Present Semaphore", vulkanInstance))
+		vulkanInstance(vulkanInstance)
 	{
+		for (size_t frameIdx = 0; frameIdx < NumMaxInFlightFrames; ++frameIdx)
+		{
+			auto& frame = frames[frameIdx];
+			frame.renderFence = std::make_unique<Fence>(std::format("Render Fence {}", frameIdx), vulkanInstance);
+			frame.renderSemaphore = std::make_unique<Semaphore>(std::format("Render Semaphore {}", frameIdx), vulkanInstance);
+			frame.presentSemaphore = std::make_unique<Semaphore>(std::format("Present Semaphore {}", frameIdx), vulkanInstance);
+		}
 	}
 
 	Renderer::~Renderer()
 	{
-		renderFence->Wait();
 		vulkanInstance.WaitAllQueuesForIdle();
 	}
 
 	void Renderer::Render()
 	{
-		++currentFrames;
-
+		const Frame& frame = FrameBegin();
 		const auto windowExtent = window.GetExtent();
-		auto& graphicsCmdPool = vulkanInstance.RequestGraphicsCommandPool();
-
 		auto& swapchain = vulkanInstance.GetSwapchain();
-		swapchain.AcquireNext(*presentSemaphore);
 		const auto swapchainImage = swapchain.GetCurrentImage();
 		const auto swapchainImageView = swapchain.GetCurrentImageView();
 
-		const auto& graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Render Cmd Buffer", *renderFence);
-		const auto graphicsCmdBufferNative = graphicsCmdBuffer.GetNativeHandle();
-
-		renderFence->Wait();
-		renderFence->Reset();
+		auto& graphicsCmdPool = vulkanInstance.RequestGraphicsCommandPool();
+		CRefVec<CommandBuffer> graphicsCmdBufferBatch;
+		const auto& graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Render Cmd Buffer", *frame.renderFence);
+		graphicsCmdBufferBatch.emplace_back(graphicsCmdBuffer);
 		{
+			const auto graphicsCmdBufferNative = graphicsCmdBuffer.GetNativeHandle();
 			const VkImageMemoryBarrier colorAttachmentImgMemoryBarrier
 			{
 				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
@@ -67,9 +66,9 @@ namespace sy
 				0, 0, nullptr, 0, nullptr, 1, &colorAttachmentImgMemoryBarrier);
 
 			VkClearColorValue clearColorValue;
-			clearColorValue.float32[0] = std::cos((float)currentFrames / 180.0f);
-			clearColorValue.float32[1] = std::sin((float)currentFrames / 180.0f);
-			clearColorValue.float32[2] = std::cos((float)currentFrames / 180.0f);
+			clearColorValue.float32[0] = std::cos(currentFrames / 180.f) * 0.5f + 1.f;
+			clearColorValue.float32[1] = std::sin(currentFrames / 270.f) * 0.5f + 1.f;
+			clearColorValue.float32[2] = std::cos(currentFrames / 90.f) * 0.5f + 1.f;
 			clearColorValue.float32[3] = 1.f;
 			const VkRenderingAttachmentInfoKHR colorAttachmentInfo
 			{
@@ -130,38 +129,34 @@ namespace sy
 		}
 		graphicsCmdBuffer.End();
 
-		const auto presentSemaphoreNative = presentSemaphore->GetNativeHandle();
-		const auto renderSemaphoreNative = renderSemaphore->GetNativeHandle();
-		constexpr VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		const VkSubmitInfo submitInfo
-		{
-			.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-			.pNext = nullptr,
-			.waitSemaphoreCount = 1,
-			.pWaitSemaphores = &presentSemaphoreNative,
-			.pWaitDstStageMask = &waitStage,
-			.commandBufferCount = 1,
-			.pCommandBuffers = &graphicsCmdBufferNative,
-			.signalSemaphoreCount = 1,
-			.pSignalSemaphores = &renderSemaphoreNative,
-		};
+		CRefVec<Semaphore> waitSemaphores;
+		waitSemaphores.emplace_back(*frame.presentSemaphore);
+		CRefVec<Semaphore> signalSemaphores;
+		signalSemaphores.emplace_back(*frame.renderSemaphore);
 
-		vulkanInstance.SubmitTo(EQueueType::Graphics, submitInfo, *renderFence);
+		vulkanInstance.SubmitTo(EQueueType::Graphics,
+			waitSemaphores,
+			graphicsCmdBufferBatch,
+			signalSemaphores,
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, *frame.renderFence);
 
-		VkPresentInfoKHR presentInfo = {};
-		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-		presentInfo.pNext = nullptr;
+		vulkanInstance.Present(swapchain, *frame.renderSemaphore);
+		FrameEnd(frame);
+	}
 
-		const auto swapchainNative = swapchain.GetNativeHandle();
-		presentInfo.pSwapchains = &swapchainNative;
-		presentInfo.swapchainCount = 1;
+	const Frame& Renderer::FrameBegin()
+	{
+		const auto& currentFrame = GetCurrentFrame();
+		auto& swapchain = vulkanInstance.GetSwapchain();
+		swapchain.AcquireNext(*currentFrame.presentSemaphore);
+		currentFrame.renderFence->Wait();
+		currentFrame.renderFence->Reset();
 
-		presentInfo.pWaitSemaphores = &renderSemaphoreNative;
-		presentInfo.waitSemaphoreCount = 1;
+		return currentFrame;
+	}
 
-		const auto swapchainImageIndex = swapchain.GetCurrentImageIndex();
-		presentInfo.pImageIndices = &swapchainImageIndex;
-
-		vulkanInstance.Present(presentInfo);
+	void Renderer::FrameEnd(const Frame& currentFrame)
+	{
+		++currentFrames;
 	}
 }
