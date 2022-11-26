@@ -13,7 +13,6 @@ namespace sy
 			// DO NOTHING
 		}),
 		queueType(cmdPool.GetQueueType()),
-		cmdPool(cmdPool),
 		dependencyFence(nullptr)
 	{
 		const VkCommandBufferAllocateInfo allocInfo
@@ -51,5 +50,15 @@ namespace sy
 	void CommandBuffer::End() const
 	{
 		VK_ASSERT(vkEndCommandBuffer(handle), "Failed to end command buffer {}.", GetName());
+	}
+
+	void CommandBuffer::BeginRendering(const VkRenderingInfo& renderingInfo) const
+	{
+		vkCmdBeginRendering(handle, &renderingInfo);
+	}
+
+	void CommandBuffer::EndRendering() const
+	{
+		vkCmdEndRendering(handle);
 	}
 }

@@ -6,7 +6,7 @@
 namespace sy
 {
 	CommandPool::CommandPool(const VulkanInstance& vulkanInstance, const EQueueType queueType) :
-		VulkanWrapper<VkCommandPool>("Unknown Queue", vulkanInstance, VK_DESTROY_LAMBDA_SIGNATURE(VkCommandPool)
+		VulkanWrapper<VkCommandPool>("Unknown Pool", vulkanInstance, VK_DESTROY_LAMBDA_SIGNATURE(VkCommandPool)
 		{
 			vkDestroyCommandPool(vulkanInstance.GetLogicalDevice(), handle, nullptr);
 		}),

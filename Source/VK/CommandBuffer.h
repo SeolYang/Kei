@@ -19,9 +19,11 @@ namespace sy
 		void Begin(const Fence& newDependencyFence);
 		void End() const;
 
+		void BeginRendering(const VkRenderingInfo& renderingInfo) const;
+		void EndRendering() const;
+
 	private:
 		const EQueueType queueType;
-		const CommandPool& cmdPool;
 		const Fence* dependencyFence;
 
 	};

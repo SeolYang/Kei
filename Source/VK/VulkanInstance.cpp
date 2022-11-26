@@ -67,10 +67,15 @@ namespace sy
 		VK_ASSERT(vkQueueSubmit(queue, 1, &submitInfo, fence.GetNativeHandle()), "Failed to submit to queue.");
 	}
 
-	void VulkanInstance::SubmitTo(EQueueType queueType, const std::span<std::reference_wrapper<const Semaphore>> waitSemaphores, const std::span<std::reference_wrapper<const CommandBuffer>> cmdBuffers, std::span<std::reference_wrapper<const Semaphore>> signalSemaphores, const VkPipelineStageFlags waitStage, const Fence& fence)
+	void VulkanInstance::SubmitTo(EQueueType queueType, const std::span<std::reference_wrapper<const Semaphore>> waitSemaphores, const std::span<std::reference_wrapper<const CommandBuffer>> cmdBuffers, std::span<std::reference_wrapper<const Semaphore>> signalSemaphores, const VkPipelineStageFlags waitStage, const Fence& fence) const
 	{
 		const auto waitSemaphoreNatives = TransformVulkanWrappersToNatives(waitSemaphores);
-		const auto cmdBufferNatives = TransformVulkanWrappersToNatives(cmdBuffers);
+		const auto cmdBufferNatives = TransformVulkanWrappersToNativesWithValidation<CommandBuffer>(cmdBuffers
+			, [queueType](const CRef<CommandBuffer> cmdBufferRef)
+			{
+				const auto& cmdBuffer = cmdBufferRef.get();
+				return cmdBuffer.GetQueueType() == queueType;
+			});
 		const auto signalSemaphoreNatives = TransformVulkanWrappersToNatives(signalSemaphores);
 		const VkSubmitInfo submitInfo
 		{
@@ -266,14 +271,15 @@ namespace sy
 
 	CommandPool& VulkanInstance::RequestCommandPool(const EQueueType queueType, std::vector<std::unique_ptr<CommandPool>>& poolList, std::mutex& listMutex)
 	{
-		thread_local CommandPool* threadPool = nullptr;
-		if (threadPool == nullptr)
+		thread_local robin_hood::unordered_map<EQueueType, CommandPool*> localCmdPools;
+		if (!localCmdPools.contains(queueType))
 		{
-			threadPool = new CommandPool(*this, queueType);
+			auto* newCmdPool = new CommandPool(*this, queueType);
+			localCmdPools[queueType] = newCmdPool;
 			std::lock_guard<std::mutex> lock(listMutex);
-			poolList.push_back(std::unique_ptr<CommandPool>(threadPool));
+			poolList.emplace_back(newCmdPool);
 		}
 
-		return *threadPool;
+		return *localCmdPools[queueType];
 	}
 }

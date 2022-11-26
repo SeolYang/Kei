@@ -40,6 +40,11 @@ namespace sy
 		CRefVec<CommandBuffer> graphicsCmdBufferBatch;
 		const auto& graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Render Cmd Buffer", *frame.renderFence);
 		graphicsCmdBufferBatch.emplace_back(graphicsCmdBuffer);
+
+		auto& computeCmdPool = vulkanInstance.RequestComputeCommandPool();
+		// Invalid batch!
+		graphicsCmdBufferBatch.emplace_back(computeCmdPool.RequestCommandBuffer("Compute Buffer", *frame.renderFence));
+		graphicsCmdBufferBatch.back().get().End();
 		{
 			const auto graphicsCmdBufferNative = graphicsCmdBuffer.GetNativeHandle();
 			const VkImageMemoryBarrier colorAttachmentImgMemoryBarrier
@@ -98,11 +103,11 @@ namespace sy
 				.pColorAttachments = &colorAttachmentInfo
 			};
 
-			vkCmdBeginRendering(graphicsCmdBufferNative, &renderingInfo);
+			graphicsCmdBuffer.BeginRendering(renderingInfo);
 			{
 				// Rendering something here
 			}
-			vkCmdEndRendering(graphicsCmdBufferNative);
+			graphicsCmdBuffer.EndRendering();
 
 			const VkImageMemoryBarrier presentImgMemoryBarrier
 			{

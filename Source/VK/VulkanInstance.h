@@ -33,7 +33,7 @@ namespace sy
 			std::span<std::reference_wrapper<const Semaphore>> waitSemaphores,
 			std::span<std::reference_wrapper<const CommandBuffer>> cmdBuffers,
 			std::span<std::reference_wrapper<const Semaphore>> signalSemaphores,
-			VkPipelineStageFlags waitStage, const Fence& fence);
+			VkPipelineStageFlags waitStage, const Fence& fence) const;
 
 		void Present(const VkPresentInfoKHR& presentInfo) const;
 		void Present(const Swapchain& swapchain, const Semaphore& waitSemaphore) const;
