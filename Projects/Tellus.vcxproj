@@ -23,6 +23,7 @@
     <ClCompile Include="..\Source\VK\CommandPool.cpp" />
     <ClCompile Include="..\Source\VK\Fence.cpp" />
     <ClCompile Include="..\Source\VK\Semaphore.cpp" />
+    <ClCompile Include="..\Source\VK\ShaderModule.cpp" />
     <ClCompile Include="..\Source\VK\Swapchain.cpp" />
     <ClCompile Include="..\Source\VK\VulkanInstance.cpp" />
     <ClCompile Include="..\Source\Window.cpp" />
@@ -43,6 +44,7 @@
     <ClInclude Include="..\Source\VK\CommandPool.h" />
     <ClInclude Include="..\Source\VK\Fence.h" />
     <ClInclude Include="..\Source\VK\Semaphore.h" />
+    <ClInclude Include="..\Source\VK\ShaderModule.h" />
     <ClInclude Include="..\Source\VK\Swapchain.h" />
     <ClInclude Include="..\Source\VK\VulkanInstance.h" />
     <ClInclude Include="..\Source\VK\VulkanTypes.h" />
@@ -52,6 +54,10 @@
     <ClInclude Include="..\Source\GameInstance.h" />
     <ClInclude Include="..\Source\Instance.h" />
     <ClInclude Include="..\ThirdParty\volk\volk.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Assets\Shaders\tri.frag" />
+    <None Include="..\Assets\Shaders\tri.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -122,6 +128,10 @@
       <AdditionalLibraryDirectories>$(VcpkgManifestRoot)\vcpkg_installed\x64-windows\lib\manual-link</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(ProjectDir)..\Assets" "$(TargetDir)Assets" /e /d /r /i /y
+xcopy "$(ProjectDir)..\Assets" "$(ProjectDir)Assets" /e /d /r /i /y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -146,6 +156,10 @@
       <AdditionalLibraryDirectories>$(VcpkgManifestRoot)\vcpkg_installed\x64-windows\lib\manual-link</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(ProjectDir)..\Assets" "$(TargetDir)Assets" /e /d /r /i /y
+xcopy "$(ProjectDir)..\Assets" "$(ProjectDir)Assets" /e /d /r /i /y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

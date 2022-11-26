@@ -363,5 +363,8 @@ FodyWeavers.xsd
 Bin/
 Intermediate/
 
+# Assets
+Projects/Assets
+
 # vcpkg
 Projects/vcpkg_installed

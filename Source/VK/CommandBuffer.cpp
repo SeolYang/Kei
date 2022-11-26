@@ -61,7 +61,7 @@ namespace sy
 
 	void CommandBuffer::ChangeImageLayout(VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask, uint32_t mipLevelCount, uint32_t baseMipLevel, uint32_t arrayLayerCount, uint32_t baseArrayLayer) const
 	{
-		SY_ASSERT(srcStage == dstStage, "Redundant image layout change detected.");
+		SY_ASSERT(srcStage != dstStage, "Redundant image layout change detected.");
 		const auto [srcAccess, dstAccess] = QueryOptimalAccessFlagFromImageLayout(oldLayout, newLayout);
 		const VkImageMemoryBarrier barrier
 		{
@@ -89,11 +89,11 @@ namespace sy
 
 	void CommandBuffer::PipelineBarrier(VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, std::span<VkMemoryBarrier> memoryBarriers, std::span<VkBufferMemoryBarrier> bufferMemoryBarriers, std::span<VkImageMemoryBarrier> imageMemoryBarriers) const
 	{
-		VK_ASSERT(vkCmdPipelineBarrier(handle,
-			srcStage, dstStage, 0, 
+		vkCmdPipelineBarrier(handle,
+			srcStage, dstStage, 0,
 			memoryBarriers.size(), memoryBarriers.data(),
-			bufferMemoryBarriers.size(), bufferMemoryBarriers.data(), 
-			imageMemoryBarriers.size(), imageMemoryBarriers.data()), "Failed to insert pipeline barrier.");
+			bufferMemoryBarriers.size(), bufferMemoryBarriers.data(),
+			imageMemoryBarriers.size(), imageMemoryBarriers.data());
 	}
 
 	std::pair<VkAccessFlags, VkAccessFlags>  CommandBuffer::QueryOptimalAccessFlagFromImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout)

@@ -7,6 +7,7 @@
 #include <VK/Swapchain.h>
 #include <VK/CommandPool.h>
 #include <VK/CommandBuffer.h>
+#include <VK/ShaderModule.h>
 
 namespace sy
 {
@@ -22,6 +23,9 @@ namespace sy
 			frame.renderSemaphore = std::make_unique<Semaphore>(std::format("Render Semaphore {}", inFlightFrameIdx), vulkanInstance);
 			frame.presentSemaphore = std::make_unique<Semaphore>(std::format("Present Semaphore {}", inFlightFrameIdx), vulkanInstance);
 		}
+
+		triVert = std::make_unique<ShaderModule>("Triangle vertex shader", vulkanInstance, "Assets/Shaders/bin/tri.vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+		triFrag = std::make_unique<ShaderModule>("Triangle fragment shader", vulkanInstance, "Assets/Shaders/bin/tri.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 	}
 
 	Renderer::~Renderer()
@@ -49,7 +53,6 @@ namespace sy
 				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 
 				VK_IMAGE_ASPECT_COLOR_BIT);
 
-			const auto graphicsCmdBufferNative = graphicsCmdBuffer->GetNativeHandle();
 			VkClearColorValue clearColorValue;
 			clearColorValue.float32[0] = std::cos(currentFrameIdx / 180.f) * 0.5f + 1.f;
 			clearColorValue.float32[1] = std::sin(currentFrameIdx / 270.f) * 0.5f + 1.f;

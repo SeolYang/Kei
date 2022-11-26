@@ -31,6 +31,7 @@
 #include <ranges>
 #include <numbers>
 #include <tuple>
+#include <fstream>
 
 namespace sy
 {

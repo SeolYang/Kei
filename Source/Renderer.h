@@ -7,6 +7,7 @@ namespace sy
 	class Window;
 	class Semaphore;
 	class Fence;
+	class ShaderModule;
 
 	struct Frame
 	{
@@ -38,5 +39,7 @@ namespace sy
 		std::array<Frame, NumMaxInFlightFrames> frames;
 		size_t currentFrameIdx = 0;
 
+		std::unique_ptr<ShaderModule> triVert;
+		std::unique_ptr<ShaderModule> triFrag;
 	};
 }
