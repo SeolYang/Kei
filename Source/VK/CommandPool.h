@@ -22,9 +22,9 @@ namespace sy
 
 		CommandBufferAllocation RequestCommandBuffer(std::string_view name);
 		[[nodiscard]] EQueueType GetQueueType() const { return queueType; }
+		void BeginFrame();
 
 		void Reset() const;
-		void BeginFrame();
 
 	private:
 		const EQueueType queueType;

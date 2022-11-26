@@ -30,6 +30,7 @@
 #include <condition_variable>
 #include <ranges>
 #include <numbers>
+#include <tuple>
 
 namespace sy
 {
