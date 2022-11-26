@@ -35,6 +35,19 @@ namespace sy
 {
 	namespace chrono = std::chrono;
 	namespace fs = std::filesystem;
+
+	template <typename T>
+	using Ref = std::reference_wrapper<T>;
+	template <typename T>
+	using CRef = Ref<const T>;
+	template <typename T>
+	using RefVec = std::vector<Ref<T>>;
+	template <typename T>
+	using CRefVec = std::vector<CRef<T>>;
+	template <typename T>
+	using RefSpan = std::span<Ref<T>>;
+	template <typename T>
+	using CRefSpan = std::span<CRef<T>>;
 }
 
 /** Vulkan Headers */
