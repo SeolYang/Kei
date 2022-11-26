@@ -41,10 +41,10 @@ namespace sy
 		const auto& graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Render Cmd Buffer", *frame.renderFence);
 		graphicsCmdBufferBatch.emplace_back(graphicsCmdBuffer);
 
-		auto& computeCmdPool = vulkanInstance.RequestComputeCommandPool();
+		//auto& computeCmdPool = vulkanInstance.RequestComputeCommandPool();
 		// Invalid batch!
-		graphicsCmdBufferBatch.emplace_back(computeCmdPool.RequestCommandBuffer("Compute Buffer", *frame.renderFence));
-		graphicsCmdBufferBatch.back().get().End();
+		//graphicsCmdBufferBatch.emplace_back(computeCmdPool.RequestCommandBuffer("Compute Buffer", *frame.renderFence));
+		//graphicsCmdBufferBatch.back().get().End();
 		{
 			const auto graphicsCmdBufferNative = graphicsCmdBuffer.GetNativeHandle();
 			const VkImageMemoryBarrier colorAttachmentImgMemoryBarrier
