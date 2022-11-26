@@ -4,7 +4,7 @@
 
 namespace sy
 {
-	ShaderModule::ShaderModule(const std::string_view name, const VulkanInstance& vulkanInstance, const std::string_view filePath, const VkShaderStageFlags shaderType, const std::string_view entryPoint) :
+	ShaderModule::ShaderModule(const std::string_view name, const VulkanInstance& vulkanInstance, const std::string_view filePath, const VkShaderStageFlagBits shaderType, const std::string_view entryPoint) :
 		VulkanWrapper(name, vulkanInstance, VK_DESTROY_LAMBDA_SIGNATURE(VkShaderModule)
 		{
 			vkDestroyShaderModule(vulkanInstance.GetLogicalDevice(), handle, nullptr);

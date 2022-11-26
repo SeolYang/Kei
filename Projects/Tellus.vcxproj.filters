@@ -60,6 +60,9 @@
     <ClCompile Include="..\Source\VK\ShaderModule.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\VK\Pipeline.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Core.h">
@@ -123,6 +126,9 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\VK\ShaderModule.h">
+      <Filter>Source\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\Pipeline.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
   </ItemGroup>

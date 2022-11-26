@@ -7,7 +7,7 @@ namespace sy
 	class ShaderModule : public VulkanWrapper<VkShaderModule>
 	{
 	public:
-		ShaderModule(std::string_view name, const VulkanInstance& vulkanInstance, std::string_view filePath, VkShaderStageFlags shaderType, std::string_view entryPoint);
+		ShaderModule(std::string_view name, const VulkanInstance& vulkanInstance, std::string_view filePath, VkShaderStageFlagBits shaderType, std::string_view entryPoint);
 		virtual ~ShaderModule() override = default;
 
 		[[nodiscard]] auto GetShaderType() const { return shaderType; }
@@ -16,7 +16,7 @@ namespace sy
 	private:
 		std::string path;
 		std::string entryPoint;
-		const VkShaderStageFlags shaderType;
+		const VkShaderStageFlagBits shaderType;
 
 	};
 }
