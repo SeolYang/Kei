@@ -8,12 +8,15 @@
         spdlog::critical(FORMAT_STR, __VA_ARGS__); \
         __debugbreak(); \
         }
-#elif
-#define SY_ASSERT(...)
+#else
+#define SY_ASSERT(CONDITION, ...) \
+    do { (void)sizeof(CONDITION); } while(0)
 #endif
 
 #if defined(_DEBUG) || defined(DEUG)
 #define VK_ASSERT(RESULT, FORMAT_STR, ...) \
     SY_ASSERT((RESULT == VK_SUCCESS), FORMAT_STR, __VA_ARGS__)
-#elif
+#else
+#define VK_ASSERT(CONDITION, ...) \
+    do { CONDITION; } while(0)
 #endif
