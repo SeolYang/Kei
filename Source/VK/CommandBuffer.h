@@ -14,9 +14,8 @@ namespace sy
 
 		[[nodiscard]] EQueueType GetQueueType() const { return queueType; }
 
-		[[nodiscard]] bool IsReadyToUse() const;
-
-		void Begin(const Fence& newDependencyFence);
+		void Reset() const;
+		void Begin();
 		void End() const;
 
 		void BeginRendering(const VkRenderingInfo& renderingInfo) const;
@@ -24,7 +23,6 @@ namespace sy
 
 	private:
 		const EQueueType queueType;
-		const Fence* dependencyFence;
 
 	};
 

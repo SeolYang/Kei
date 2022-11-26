@@ -21,7 +21,7 @@ namespace sy
 	{
 #if defined(_DEBUG) || defined(DEBUG)
 		spdlog::set_level(spdlog::level::trace);
-#elif
+#else
 		spdlog::set_level(spdlog::level::warn);
 #endif
 		timer = std::make_unique<Timer>();

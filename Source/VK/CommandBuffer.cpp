@@ -9,11 +9,10 @@ namespace sy
 {
 	CommandBuffer::CommandBuffer(std::string_view name, const VulkanInstance& vulkanInstance, const CommandPool& cmdPool) :
 		VulkanWrapper<VkCommandBuffer>(name, vulkanInstance, VK_DESTROY_LAMBDA_SIGNATURE(VkCommandBuffer)
-		{
-			// DO NOTHING
-		}),
-		queueType(cmdPool.GetQueueType()),
-		dependencyFence(nullptr)
+	{
+		// DO NOTHING
+	}),
+		queueType(cmdPool.GetQueueType())
 	{
 		const VkCommandBufferAllocateInfo allocInfo
 		{
@@ -27,23 +26,21 @@ namespace sy
 		VK_ASSERT(vkAllocateCommandBuffers(vulkanInstance.GetLogicalDevice(), &allocInfo, &handle), "Failed to creating command buffer.");
 	}
 
-	bool CommandBuffer::IsReadyToUse() const
+	void CommandBuffer::Reset() const
 	{
-		return dependencyFence == nullptr || dependencyFence->IsSignaled();
+		vkResetCommandBuffer(handle, 0);
 	}
 
-	void CommandBuffer::Begin(const Fence& newDependencyFence)
+	void CommandBuffer::Begin()
 	{
-		dependencyFence = &newDependencyFence;
 		const VkCommandBufferBeginInfo beginInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
 			.pNext = nullptr,
 			.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
-			.pInheritanceInfo =  nullptr
+			.pInheritanceInfo = nullptr
 		};
 
-		vkResetCommandBuffer(handle, 0);
 		VK_ASSERT(vkBeginCommandBuffer(handle, &beginInfo), "Faeild to begin command buffer {}.", GetName());
 	}
 

@@ -132,6 +132,15 @@ namespace sy
 		vkQueueWaitIdle(presentQueue);
 	}
 
+	void VulkanInstance::BeginFrame(const size_t currentInFlightFrameIdx) const
+	{
+		const auto& frameDependCmdPools = cmdPools[currentInFlightFrameIdx];
+		for (const auto& cmdPool : frameDependCmdPools)
+		{
+			cmdPool->BeginFrame();
+		}
+	}
+
 	void VulkanInstance::Startup()
 	{
 		volkInitialize();
@@ -199,51 +208,43 @@ namespace sy
 		VK_ASSERT(vmaCreateAllocator(&allocatorInfo, &allocator), "Failed to create vulkan memory allocator instance.");
 		spdlog::trace("VMA instance successfully created.");
 
-		InitCommandPools(vkbDevice);
+		InitQueues(vkbDevice);
 	}
 
 	void VulkanInstance::Cleanup()
 	{
 		WaitAllQueuesForIdle();
 		{
+			spdlog::trace("Cleanup command pools...");
 			{
-				std::lock_guard lock(graphicsCmdPoolListMutex);
-				graphicsCmdPools.clear();
+				RWLock lock(cmdPoolMutex);
+				for (auto& cmdPoolVec : cmdPools)
+				{
+					cmdPoolVec.clear();
+				}
 			}
-
-			{
-				std::lock_guard lock(computeCmdPoolListMutex);
-				computeCmdPools.clear();
-			}
-
-			{
-				std::lock_guard lock(transferCmdPoolListMutex);
-				transferCmdPools.clear();
-			}
-
-			{
-				std::lock_guard lock(presentCmdPoolListMutex);
-				presentCmdPools.clear();
-			}
-
-			vmaDestroyAllocator(allocator);
 			allocator = VK_NULL_HANDLE;
 
+			spdlog::trace("Cleanup swap chain...");
 			swapchain.reset();
 
+			spdlog::trace("Cleanup vulkan logical device...");
 			vkDestroyDevice(device, nullptr);
 			device = VK_NULL_HANDLE;
+			spdlog::trace("Cleanup vulkan surface...");
 			vkDestroySurfaceKHR(instance, surface, nullptr);
 			surface = VK_NULL_HANDLE;
 			vkb::destroy_debug_utils_messenger(instance, debugMessenger, nullptr);
 			debugMessenger = VK_NULL_HANDLE;
+			spdlog::trace("Cleanup vulkan instance...");
 			vkDestroyInstance(instance, nullptr);
 			instance = VK_NULL_HANDLE;
 		}
 	}
 
-	void VulkanInstance::InitCommandPools(const vkb::Device& vkbDevice)
+	void VulkanInstance::InitQueues(const vkb::Device& vkbDevice)
 	{
+		spdlog::trace("Initializing queues..");
 		const auto graphicsQueueRes = vkbDevice.get_queue(vkb::QueueType::graphics);
 		SY_ASSERT(graphicsQueueRes.has_value(), "Failed to get graphics queue from logical device of vulkan.");
 		graphicsQueue = graphicsQueueRes.value();
@@ -269,17 +270,20 @@ namespace sy
 		spdlog::trace("Present Queue successfully acquired. Family Index: {}.", presentQueueFamilyIdx);
 	}
 
-	CommandPool& VulkanInstance::RequestCommandPool(const EQueueType queueType, std::vector<std::unique_ptr<CommandPool>>& poolList, std::mutex& listMutex)
+	CommandPool& VulkanInstance::RequestCommandPool(const EQueueType queueType, const size_t currentInFlightFrameIdx)
 	{
-		thread_local robin_hood::unordered_map<EQueueType, CommandPool*> localCmdPools;
+		thread_local robin_hood::unordered_map<EQueueType, std::array<CommandPool*, NumMaxInFlightFrames>> localCmdPools;
 		if (!localCmdPools.contains(queueType))
 		{
-			auto* newCmdPool = new CommandPool(*this, queueType);
-			localCmdPools[queueType] = newCmdPool;
-			std::lock_guard<std::mutex> lock(listMutex);
-			poolList.emplace_back(newCmdPool);
+			RWLock lock(cmdPoolMutex);
+			for (size_t inFlightFrameIdx = 0; inFlightFrameIdx < NumMaxInFlightFrames; ++inFlightFrameIdx)
+			{
+				auto* newCmdPool = new CommandPool(*this, queueType);
+				localCmdPools[queueType][inFlightFrameIdx] = newCmdPool;
+				cmdPools[inFlightFrameIdx].emplace_back(newCmdPool);
+			}
 		}
 
-		return *localCmdPools[queueType];
+		return *(localCmdPools[queueType][currentInFlightFrameIdx]);
 	}
 }

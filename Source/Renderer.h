@@ -10,12 +10,11 @@ namespace sy
 
 	struct Frame
 	{
+		size_t inFlightFrameIdx;
 		std::unique_ptr<Fence> renderFence;
 		std::unique_ptr<Semaphore> renderSemaphore;
 		std::unique_ptr<Semaphore> presentSemaphore;
 	};
-
-	constexpr size_t NumMaxInFlightFrames = 2;
 
 	class Renderer
 	{
@@ -25,16 +24,19 @@ namespace sy
 
 		void Render();
 
+		[[nodiscard]] size_t GetCurrentInFlightFrameIndex() const { return currentFrameIdx % NumMaxInFlightFrames; }
+		[[nodiscard]] const Frame& GetCurrentInFlightFrame() const { return frames[GetCurrentInFlightFrameIndex()]; }
+		[[nodiscard]] size_t GetCurrentFrameIndex() const { return currentFrameIdx; }
+
 	private:
-		[[nodiscard]] const Frame& GetCurrentFrame() const { return frames[currentFrames % NumMaxInFlightFrames]; }
-		const Frame& FrameBegin();
-		void FrameEnd(const Frame& currentFrame);
+		const Frame& BeginFrame();
+		void EndFrame(const Frame& currentFrame);
 
 	private:
 		const Window& window;
 		VulkanInstance& vulkanInstance;
 		std::array<Frame, NumMaxInFlightFrames> frames;
-		size_t currentFrames = 0;
+		size_t currentFrameIdx = 0;
 
 	};
 }

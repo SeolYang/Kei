@@ -22,17 +22,18 @@ namespace sy
 
 	void Fence::Wait() const
 	{
-		vkWaitForFences(vulkanInstance.GetLogicalDevice(), 1, &handle, VK_TRUE, std::numeric_limits<uint64_t>::max());
+		VK_ASSERT(vkWaitForFences(vulkanInstance.GetLogicalDevice(), 1, &handle, VK_TRUE, std::numeric_limits<uint64_t>::max()), "Failed to wait fence {}", GetName());
 	}
 
 	void Fence::Reset() const
 	{
-		vkResetFences(vulkanInstance.GetLogicalDevice(), 1, &handle);
+		VK_ASSERT(vkResetFences(vulkanInstance.GetLogicalDevice(), 1, &handle), "Failed to reset fence {}", GetName());
 	}
 
 	bool Fence::IsSignaled() const
 	{
-		return vkGetFenceStatus(vulkanInstance.GetLogicalDevice(), handle) == VK_SUCCESS;
+		const auto status = vkGetFenceStatus(vulkanInstance.GetLogicalDevice(), handle);
+		return status == VK_SUCCESS;
 	}
 
 }

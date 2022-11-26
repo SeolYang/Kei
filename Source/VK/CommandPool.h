@@ -9,17 +9,27 @@ namespace sy
 	class CommandPool : public VulkanWrapper<VkCommandPool>
 	{
 	public:
+		struct Deallocation
+		{
+			const OffsetPool::Slot_t slot;
+		};
+
+		using CommandBufferAllocation = std::unique_ptr<CommandBuffer, std::function<void(CommandBuffer*)>>;
+
+	public:
 		CommandPool(const VulkanInstance& vulkanInstance, EQueueType queueType);
 		virtual ~CommandPool() override = default;
 
-		CommandBuffer& RequestCommandBuffer(std::string_view name, const Fence& renderFence);
+		CommandBufferAllocation RequestCommandBuffer(std::string_view name);
 		[[nodiscard]] EQueueType GetQueueType() const { return queueType; }
+
+		void Reset() const;
+		void BeginFrame();
 
 	private:
 		const EQueueType queueType;
+		OffsetPool offsetPool;
 		std::vector<std::unique_ptr<CommandBuffer>> cmdBuffers;
-
+		std::vector<Deallocation> pendingDeallocations;
 	};
-
-
 }

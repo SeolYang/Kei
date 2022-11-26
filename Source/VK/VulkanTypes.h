@@ -10,4 +10,6 @@ namespace sy
 		Transfer,
 		Present
 	};
+
+	constexpr size_t NumMaxInFlightFrames = 2;
 }

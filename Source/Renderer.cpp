@@ -14,12 +14,13 @@ namespace sy
 		window(window),
 		vulkanInstance(vulkanInstance)
 	{
-		for (size_t frameIdx = 0; frameIdx < NumMaxInFlightFrames; ++frameIdx)
+		for (size_t inFlightFrameIdx = 0; inFlightFrameIdx < NumMaxInFlightFrames; ++inFlightFrameIdx)
 		{
-			auto& frame = frames[frameIdx];
-			frame.renderFence = std::make_unique<Fence>(std::format("Render Fence {}", frameIdx), vulkanInstance);
-			frame.renderSemaphore = std::make_unique<Semaphore>(std::format("Render Semaphore {}", frameIdx), vulkanInstance);
-			frame.presentSemaphore = std::make_unique<Semaphore>(std::format("Present Semaphore {}", frameIdx), vulkanInstance);
+			auto& frame = frames[inFlightFrameIdx];
+			frame.inFlightFrameIdx = inFlightFrameIdx;
+			frame.renderFence = std::make_unique<Fence>(std::format("Render Fence {}", inFlightFrameIdx), vulkanInstance);
+			frame.renderSemaphore = std::make_unique<Semaphore>(std::format("Render Semaphore {}", inFlightFrameIdx), vulkanInstance);
+			frame.presentSemaphore = std::make_unique<Semaphore>(std::format("Present Semaphore {}", inFlightFrameIdx), vulkanInstance);
 		}
 	}
 
@@ -30,23 +31,19 @@ namespace sy
 
 	void Renderer::Render()
 	{
-		const Frame& frame = FrameBegin();
+		const Frame& frame = BeginFrame();
 		const auto windowExtent = window.GetExtent();
 		auto& swapchain = vulkanInstance.GetSwapchain();
 		const auto swapchainImage = swapchain.GetCurrentImage();
 		const auto swapchainImageView = swapchain.GetCurrentImageView();
 
-		auto& graphicsCmdPool = vulkanInstance.RequestGraphicsCommandPool();
+		auto& graphicsCmdPool = vulkanInstance.RequestCommandPool(EQueueType::Graphics, GetCurrentInFlightFrameIndex());
 		CRefVec<CommandBuffer> graphicsCmdBufferBatch;
-		const auto& graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Render Cmd Buffer", *frame.renderFence);
-		graphicsCmdBufferBatch.emplace_back(graphicsCmdBuffer);
-
-		//auto& computeCmdPool = vulkanInstance.RequestComputeCommandPool();
-		// Invalid batch!
-		//graphicsCmdBufferBatch.emplace_back(computeCmdPool.RequestCommandBuffer("Compute Buffer", *frame.renderFence));
-		//graphicsCmdBufferBatch.back().get().End();
+		auto graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Render Cmd Buffer");
+		graphicsCmdBufferBatch.emplace_back(*graphicsCmdBuffer);
+		graphicsCmdBuffer->Begin();
 		{
-			const auto graphicsCmdBufferNative = graphicsCmdBuffer.GetNativeHandle();
+			const auto graphicsCmdBufferNative = graphicsCmdBuffer->GetNativeHandle();
 			const VkImageMemoryBarrier colorAttachmentImgMemoryBarrier
 			{
 				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
@@ -71,9 +68,9 @@ namespace sy
 				0, 0, nullptr, 0, nullptr, 1, &colorAttachmentImgMemoryBarrier);
 
 			VkClearColorValue clearColorValue;
-			clearColorValue.float32[0] = std::cos(currentFrames / 180.f) * 0.5f + 1.f;
-			clearColorValue.float32[1] = std::sin(currentFrames / 270.f) * 0.5f + 1.f;
-			clearColorValue.float32[2] = std::cos(currentFrames / 90.f) * 0.5f + 1.f;
+			clearColorValue.float32[0] = std::cos(currentFrameIdx / 180.f) * 0.5f + 1.f;
+			clearColorValue.float32[1] = std::sin(currentFrameIdx / 270.f) * 0.5f + 1.f;
+			clearColorValue.float32[2] = std::cos(currentFrameIdx / 90.f) * 0.5f + 1.f;
 			clearColorValue.float32[3] = 1.f;
 			const VkRenderingAttachmentInfoKHR colorAttachmentInfo
 			{
@@ -103,11 +100,11 @@ namespace sy
 				.pColorAttachments = &colorAttachmentInfo
 			};
 
-			graphicsCmdBuffer.BeginRendering(renderingInfo);
+			graphicsCmdBuffer->BeginRendering(renderingInfo);
 			{
 				// Rendering something here
 			}
-			graphicsCmdBuffer.EndRendering();
+			graphicsCmdBuffer->EndRendering();
 
 			const VkImageMemoryBarrier presentImgMemoryBarrier
 			{
@@ -132,7 +129,7 @@ namespace sy
 				VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
 				0, 0, nullptr, 0, nullptr, 1, &presentImgMemoryBarrier);
 		}
-		graphicsCmdBuffer.End();
+		graphicsCmdBuffer->End();
 
 		CRefVec<Semaphore> waitSemaphores;
 		waitSemaphores.emplace_back(*frame.presentSemaphore);
@@ -146,22 +143,23 @@ namespace sy
 			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, *frame.renderFence);
 
 		vulkanInstance.Present(swapchain, *frame.renderSemaphore);
-		FrameEnd(frame);
+		EndFrame(frame);
 	}
 
-	const Frame& Renderer::FrameBegin()
+	const Frame& Renderer::BeginFrame()
 	{
-		const auto& currentFrame = GetCurrentFrame();
+		const auto& currentFrame = GetCurrentInFlightFrame();
 		auto& swapchain = vulkanInstance.GetSwapchain();
 		swapchain.AcquireNext(*currentFrame.presentSemaphore);
 		currentFrame.renderFence->Wait();
 		currentFrame.renderFence->Reset();
+		vulkanInstance.BeginFrame(GetCurrentInFlightFrameIndex());
 
 		return currentFrame;
 	}
 
-	void Renderer::FrameEnd(const Frame& currentFrame)
+	void Renderer::EndFrame(const Frame& currentFrame)
 	{
-		++currentFrames;
+		++currentFrameIdx;
 	}
 }

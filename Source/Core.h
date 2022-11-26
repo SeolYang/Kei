@@ -48,6 +48,9 @@ namespace sy
 	using RefSpan = std::span<Ref<T>>;
 	template <typename T>
 	using CRefSpan = std::span<CRef<T>>;
+
+	using RWLock = std::unique_lock<std::shared_mutex>;
+	using ReadLock = std::shared_lock<std::shared_mutex>;
 }
 
 /** Vulkan Headers */

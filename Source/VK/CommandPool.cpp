@@ -7,10 +7,11 @@ namespace sy
 {
 	CommandPool::CommandPool(const VulkanInstance& vulkanInstance, const EQueueType queueType) :
 		VulkanWrapper<VkCommandPool>("Unknown Pool", vulkanInstance, VK_DESTROY_LAMBDA_SIGNATURE(VkCommandPool)
-		{
-			vkDestroyCommandPool(vulkanInstance.GetLogicalDevice(), handle, nullptr);
-		}),
-		queueType(queueType)
+	{
+		vkDestroyCommandPool(vulkanInstance.GetLogicalDevice(), handle, nullptr);
+	}),
+		queueType(queueType),
+		offsetPool(1, 16)
 	{
 		switch (queueType)
 		{
@@ -28,36 +29,55 @@ namespace sy
 			break;
 		}
 
+		const auto queueFamilyIdx = vulkanInstance.GetQueueFamilyIndex(queueType);
 		const VkCommandPoolCreateInfo cmdPoolCreateInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
 			.pNext = nullptr,
 			.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-			.queueFamilyIndex = vulkanInstance.GetQueueFamilyIndex(queueType)
+			.queueFamilyIndex = queueFamilyIdx
 		};
 
 		const size_t threadId = std::hash<std::thread::id>{}(std::this_thread::get_id());
-		spdlog::trace("Creating cmd pool for thread {}.", threadId);
+		//spdlog::trace("Creating command pool for thread {} and queue family {}; Dependent on In-flight frames {}/{}.", threadId, queueFamilyIdx, (inFlightFrameIdx + 1), NumMaxInFlightFrames);
 		VK_ASSERT(vkCreateCommandPool(vulkanInstance.GetLogicalDevice(), &cmdPoolCreateInfo, nullptr, &handle), "Failed to create vulkan command queue from create info.");
 	}
 
-	CommandBuffer& CommandPool::RequestCommandBuffer(const std::string_view name, const Fence& renderFence)
+	CommandPool::CommandBufferAllocation CommandPool::RequestCommandBuffer(std::string_view name)
 	{
-		for (const auto& cmdBufferPtr : cmdBuffers)
+		const auto allocatedSlot = offsetPool.Allocate();
+		const Deallocation deallocation
 		{
-			if (cmdBufferPtr->IsReadyToUse())
-			{
-				cmdBufferPtr->SetName(name);
-				cmdBufferPtr->Begin(renderFence);
-				return *cmdBufferPtr;
-			}
+			.slot = allocatedSlot
+		};
+
+		if (allocatedSlot.Offset >= cmdBuffers.size())
+		{
+			cmdBuffers.emplace_back(std::make_unique<CommandBuffer>(name, vulkanInstance, *this));
 		}
 
-		const size_t threadId = std::hash<std::thread::id>{}(std::this_thread::get_id());
-		spdlog::trace("Creating cmd buffer for thread {}.", threadId);
-		cmdBuffers.emplace_back(std::make_unique<CommandBuffer>(name, vulkanInstance, *this));
-		const auto& newCmdBuffer = cmdBuffers.back();
-		newCmdBuffer->Begin(renderFence);
-		return *newCmdBuffer;
+		cmdBuffers[allocatedSlot.Offset]->Reset();
+		return {
+			cmdBuffers[allocatedSlot.Offset].get(),
+			[this, deallocation](CommandBuffer*)
+			{
+				pendingDeallocations.emplace_back(deallocation);
+			}
+		};
+	}
+
+	void CommandPool::Reset() const
+	{
+		vkResetCommandPool(vulkanInstance.GetLogicalDevice(), handle, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
+	}
+
+	void CommandPool::BeginFrame()
+	{
+		for (auto& deallocation : pendingDeallocations)
+		{
+			offsetPool.Deallocate(deallocation.slot);
+		}
+		pendingDeallocations.clear();
+		Reset();
 	}
 }

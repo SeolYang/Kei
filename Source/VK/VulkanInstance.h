@@ -15,10 +15,7 @@ namespace sy
 		VulkanInstance(const Window& window);
 		~VulkanInstance();
 
-		[[nodiscard]] CommandPool& RequestGraphicsCommandPool() { return RequestCommandPool(EQueueType::Graphics, graphicsCmdPools, graphicsCmdPoolListMutex); }
-		[[nodiscard]] CommandPool& RequestComputeCommandPool() { return RequestCommandPool(EQueueType::Compute, computeCmdPools, computeCmdPoolListMutex); }
-		[[nodiscard]] CommandPool& RequestTransferCommandPool() { return RequestCommandPool(EQueueType::Transfer, transferCmdPools, transferCmdPoolListMutex); }
-		[[nodiscard]] CommandPool& RequestPresentCommandPool() { return RequestCommandPool(EQueueType::Present, presentCmdPools, presentCmdPoolListMutex); }
+		[[nodiscard]] CommandPool& RequestCommandPool(EQueueType queueType, size_t currentFrameIdx);
 
 		[[nodiscard]] VkPhysicalDevice GetPhysicalDevice() const { return physicalDevice; }
 		[[nodiscard]] VkDevice GetLogicalDevice() const { return device; }
@@ -41,13 +38,13 @@ namespace sy
 		void WaitQueueForIdle(EQueueType queueType) const;
 		void WaitAllQueuesForIdle() const;
 
+		void BeginFrame(size_t currentInFlightFrameIdx) const;
+
 	private:
 		void Startup();
 		void Cleanup();
 
-		void InitCommandPools(const vkb::Device& vkbDevice);
-
-		[[nodiscard]] CommandPool& RequestCommandPool(EQueueType queueType, std::vector<std::unique_ptr<CommandPool>>& poolList, std::mutex& listMutex);
+		void InitQueues(const vkb::Device& vkbDevice);
 
 	private:
 		const Window& window;
@@ -72,14 +69,8 @@ namespace sy
 		uint32_t transferQueueFamilyIdx;
 		uint32_t presentQueueFamilyIdx;
 
-		std::vector<std::unique_ptr<CommandPool>> graphicsCmdPools;
-		std::mutex graphicsCmdPoolListMutex;
-		std::vector<std::unique_ptr<CommandPool>> computeCmdPools;
-		std::mutex computeCmdPoolListMutex;
-		std::vector<std::unique_ptr<CommandPool>> transferCmdPools;
-		std::mutex transferCmdPoolListMutex;
-		std::vector<std::unique_ptr<CommandPool>> presentCmdPools;
-		std::mutex presentCmdPoolListMutex;
+		std::shared_mutex cmdPoolMutex;
+		std::array<std::vector<std::unique_ptr<CommandPool>>, NumMaxInFlightFrames> cmdPools;
 
 	};
 }
