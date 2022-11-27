@@ -9,6 +9,7 @@ namespace sy
 	class CommandPool;
 	class Fence;
 	class Semaphore;
+	class DescriptorPool;
 	class VulkanInstance
 	{
 	public:

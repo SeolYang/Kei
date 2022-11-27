@@ -9,13 +9,15 @@ namespace sy
 	class Fence;
 	class ShaderModule;
 	class Pipeline;
-
+	class DescriptorPool;
 	struct Frame
 	{
 		size_t inFlightFrameIdx;
 		std::unique_ptr<Fence> renderFence;
 		std::unique_ptr<Semaphore> renderSemaphore;
 		std::unique_ptr<Semaphore> presentSemaphore;
+		std::unique_ptr<DescriptorPool> globalDescriptorPool;
+
 	};
 
 	class Renderer

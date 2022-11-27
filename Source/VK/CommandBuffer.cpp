@@ -4,6 +4,8 @@
 #include <VK/VulkanInstance.h>
 #include <VK/Pipeline.h>
 
+#include "DescriptorPool.h"
+
 namespace sy
 {
 	CommandBuffer::CommandBuffer(std::string_view name, const VulkanInstance& vulkanInstance, const CommandPool& cmdPool) :
@@ -95,6 +97,12 @@ namespace sy
 	void CommandBuffer::BindPipeline(const Pipeline& pipeline) const
 	{
 		vkCmdBindPipeline(handle, pipeline.GetPipelineBindPoint(), pipeline.GetNativeHandle());
+	}
+
+	void CommandBuffer::BindDescriptorSet(const DescriptorPool& descriptorPool, const Pipeline& pipeline) const
+	{
+		const VkDescriptorSet descriptorSet = descriptorPool.GetDescriptorSet();
+		vkCmdBindDescriptorSets(handle, pipeline.GetPipelineBindPoint(), pipeline.GetPipelineLayout(), 0, 1, &descriptorSet, 0, nullptr);
 	}
 
 	void CommandBuffer::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const

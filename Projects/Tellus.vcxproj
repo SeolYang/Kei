@@ -21,6 +21,7 @@
     <ClCompile Include="..\Source\Renderer.cpp" />
     <ClCompile Include="..\Source\VK\CommandBuffer.cpp" />
     <ClCompile Include="..\Source\VK\CommandPool.cpp" />
+    <ClCompile Include="..\Source\VK\DescriptorPool.cpp" />
     <ClCompile Include="..\Source\VK\Fence.cpp" />
     <ClCompile Include="..\Source\VK\Pipeline.cpp" />
     <ClCompile Include="..\Source\VK\PipelineBuilder.cpp" />
@@ -42,8 +43,10 @@
     <ClInclude Include="..\Source\Extent.h" />
     <ClInclude Include="..\Source\Timer.h" />
     <ClInclude Include="..\Source\NamedType.h" />
+    <ClInclude Include="..\Source\UniqueHandle.h" />
     <ClInclude Include="..\Source\VK\CommandBuffer.h" />
     <ClInclude Include="..\Source\VK\CommandPool.h" />
+    <ClInclude Include="..\Source\VK\DescriptorPool.h" />
     <ClInclude Include="..\Source\VK\Fence.h" />
     <ClInclude Include="..\Source\VK\Pipeline.h" />
     <ClInclude Include="..\Source\VK\PipelineBuilder.h" />

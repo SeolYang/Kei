@@ -15,12 +15,14 @@ namespace sy
 
 		[[nodiscard]] auto GetPipelineType() const { return pipelineType; }
 		[[nodiscard]] auto GetPipelineBindPoint() const { return PipelineTypeToBindPoint(pipelineType); }
+		[[nodiscard]] auto GetPipelineLayout() const { return layout; }
 
 	private:
-		Pipeline(std::string_view name, const VulkanInstance& vulkanInstance, EPipelineType pipelineType);
+		Pipeline(std::string_view name, const VulkanInstance& vulkanInstance, EPipelineType pipelineType, VkPipelineLayout layout);
 
 	private:
 		const EPipelineType pipelineType;
+		VkPipelineLayout layout;
 
 	};
 }

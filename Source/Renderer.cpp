@@ -10,6 +10,7 @@
 #include <VK/ShaderModule.h>
 #include <VK/Pipeline.h>
 #include <VK/PipelineBuilder.h>
+#include <VK/DescriptorPool.h>
 
 namespace sy
 {
@@ -25,23 +26,26 @@ namespace sy
 			frame.renderFence = std::make_unique<Fence>(std::format("Render Fence {}", inFlightFrameIdx), vulkanInstance);
 			frame.renderSemaphore = std::make_unique<Semaphore>(std::format("Render Semaphore {}", inFlightFrameIdx), vulkanInstance);
 			frame.presentSemaphore = std::make_unique<Semaphore>(std::format("Present Semaphore {}", inFlightFrameIdx), vulkanInstance);
+			frame.globalDescriptorPool = std::make_unique<DescriptorPool>(std::format("Global Bindless Descriptor pool {}", inFlightFrameIdx), vulkanInstance);
 		}
 
 		triVert = std::make_unique<ShaderModule>("Triangle vertex shader", vulkanInstance, "Assets/Shaders/bin/tri.vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 		triFrag = std::make_unique<ShaderModule>("Triangle fragment shader", vulkanInstance, "Assets/Shaders/bin/tri.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
+		// @TODO: Set layout 중복 생성 제거
+		const VkDescriptorSetLayout descriptorSetLayout = frames[0].globalDescriptorPool->GetDescriptorSetLayout();
 		const VkPipelineLayoutCreateInfo nullLayoutInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 			.pNext = nullptr,
 			.flags = 0,
-			.setLayoutCount = 0,
-			.pSetLayouts = nullptr,
+			.setLayoutCount = 1,
+			.pSetLayouts = &descriptorSetLayout,
 			.pushConstantRangeCount = 0,
 			.pPushConstantRanges = nullptr
 		};
 
-		vkCreatePipelineLayout(vulkanInstance.GetLogicalDevice(), &nullLayoutInfo, nullptr, &nullLayout);
+		VK_ASSERT(vkCreatePipelineLayout(vulkanInstance.GetLogicalDevice(), &nullLayoutInfo, nullptr, &nullLayout), "Failed to create layout");
 
 		GraphicsPipelineBuilder basicPipelineBuilder;
 		basicPipelineBuilder.SetDefault()
@@ -62,6 +66,7 @@ namespace sy
 	void Renderer::Render()
 	{
 		const Frame& frame = BeginFrame();
+		const auto& globalDescriptorPool = *frame.globalDescriptorPool;
 		const auto windowExtent = window.GetExtent();
 		auto& swapchain = vulkanInstance.GetSwapchain();
 		const auto swapchainImage = swapchain.GetCurrentImage();
@@ -117,6 +122,7 @@ namespace sy
 			{
 				// Rendering something here
 				graphicsCmdBuffer->BindPipeline(*basicPipeline);
+				graphicsCmdBuffer->BindDescriptorSet(globalDescriptorPool, *basicPipeline);
 				graphicsCmdBuffer->Draw(3, 1, 0, 0);
 			}
 			graphicsCmdBuffer->EndRendering();
@@ -151,13 +157,14 @@ namespace sy
 		swapchain.AcquireNext(*currentFrame.presentSemaphore);
 		currentFrame.renderFence->Wait();
 		currentFrame.renderFence->Reset();
-		vulkanInstance.BeginFrame(GetCurrentInFlightFrameIndex());
+		vulkanInstance.BeginFrame(currentFrame.inFlightFrameIdx);
 
 		return currentFrame;
 	}
 
 	void Renderer::EndFrame(const Frame& currentFrame)
 	{
+		currentFrame.globalDescriptorPool->EndFrame();
 		++currentFrameIdx;
 	}
 }

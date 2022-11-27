@@ -7,7 +7,7 @@ namespace sy
 {
 	Pipeline::Pipeline(std::string_view name, const VulkanInstance& vulkanInstance,
 		const GraphicsPipelineBuilder& builder) :
-		Pipeline(name, vulkanInstance, EPipelineType::Graphics)
+		Pipeline(name, vulkanInstance, EPipelineType::Graphics, builder.GetPipelineLayout())
 	{
 		const auto createInfo = builder.Build();
 		VK_ASSERT(vkCreateGraphicsPipelines(vulkanInstance.GetLogicalDevice(), VK_NULL_HANDLE, 1, &createInfo, nullptr, &handle), "Failed to create graphics pipeline {}.", name);
@@ -15,18 +15,19 @@ namespace sy
 
 	Pipeline::Pipeline(std::string_view name, const VulkanInstance& vulkanInstance,
 		const ComputePipelineBuilder& builder) :
-		Pipeline(name, vulkanInstance, EPipelineType::Compute)
+		Pipeline(name, vulkanInstance, EPipelineType::Compute, builder.GetPipelineLayout())
 	{
 		const auto createInfo = builder.Build();
 		VK_ASSERT(vkCreateComputePipelines(vulkanInstance.GetLogicalDevice(), VK_NULL_HANDLE, 1, &createInfo, nullptr, &handle), "Failed to create compute pipeline {}.", name);
 	}
 
-	Pipeline::Pipeline(std::string_view name, const VulkanInstance& vulkanInstance, EPipelineType pipelineType) :
+	Pipeline::Pipeline(std::string_view name, const VulkanInstance& vulkanInstance, EPipelineType pipelineType, VkPipelineLayout layout) :
 		VulkanWrapper<VkPipeline>(name, vulkanInstance, VK_DESTROY_LAMBDA_SIGNATURE(VkPipeline)
 		{
 			vkDestroyPipeline(vulkanInstance.GetLogicalDevice(), handle, nullptr);
 		}),
-		pipelineType(pipelineType)
+		pipelineType(pipelineType),
+		layout(layout)
 	{
 	}
 }

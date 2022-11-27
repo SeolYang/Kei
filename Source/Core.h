@@ -53,6 +53,12 @@ namespace sy
 
 	using RWLock = std::unique_lock<std::shared_mutex>;
 	using ReadLock = std::shared_lock<std::shared_mutex>;
+
+	template <typename T, size_t N>
+	constexpr size_t LengthOfArray(T (&)[N])
+	{
+		return N;
+	}
 }
 
 /** Vulkan Headers */
@@ -71,6 +77,7 @@ namespace sy
 /** spdlog */
 #include <spdlog/spdlog.h>
 
+#include <UniqueHandle.h>
 #include <NamedType.h>
 #include <Extent.h>
 #include <TellusAssert.h>

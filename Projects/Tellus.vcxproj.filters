@@ -66,6 +66,9 @@
     <ClCompile Include="..\Source\VK\PipelineBuilder.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\VK\DescriptorPool.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Core.h">
@@ -136,6 +139,12 @@
     </ClInclude>
     <ClInclude Include="..\Source\VK\PipelineBuilder.h">
       <Filter>Source\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\DescriptorPool.h">
+      <Filter>Source\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\UniqueHandle.h">
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

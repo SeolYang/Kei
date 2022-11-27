@@ -6,6 +6,7 @@
 #include <VK/CommandPool.h>
 #include <VK/Semaphore.h>
 #include <VK/Fence.h>
+#include <VK/DescriptorPool.h>
 
 namespace sy
 {
@@ -182,8 +183,22 @@ namespace sy
 			.dynamicRendering = VK_TRUE
 		};
 
+		VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures
+		{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES,
+			.pNext = nullptr,
+			.descriptorBindingUniformBufferUpdateAfterBind = VK_TRUE,
+			.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE,
+			.descriptorBindingStorageImageUpdateAfterBind = VK_TRUE,
+			.descriptorBindingStorageBufferUpdateAfterBind = VK_TRUE,
+			.descriptorBindingPartiallyBound = VK_TRUE,
+			.descriptorBindingVariableDescriptorCount = VK_TRUE,
+			.runtimeDescriptorArray = VK_TRUE,
+		};
+
 		auto vkbDeviceRes = 
 			deviceBuilder.add_pNext(&dynamicRenderingFeatures)
+			.add_pNext(&descriptorIndexingFeatures)
 			.build();
 		SY_ASSERT(vkbDeviceRes.has_value(), "Failed to create device using GPU {}.", gpuName);
 		auto& vkbDevice = vkbDeviceRes.value();
@@ -209,6 +224,7 @@ namespace sy
 		spdlog::trace("VMA instance successfully created.");
 
 		InitQueues(vkbDevice);
+
 	}
 
 	void VulkanInstance::Cleanup()
