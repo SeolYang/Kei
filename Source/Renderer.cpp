@@ -8,6 +8,8 @@
 #include <VK/CommandPool.h>
 #include <VK/CommandBuffer.h>
 #include <VK/ShaderModule.h>
+#include <VK/Pipeline.h>
+#include <VK/PipelineBuilder.h>
 
 namespace sy
 {
@@ -15,6 +17,7 @@ namespace sy
 		window(window),
 		vulkanInstance(vulkanInstance)
 	{
+		const auto windowExtent = window.GetExtent();
 		for (size_t inFlightFrameIdx = 0; inFlightFrameIdx < NumMaxInFlightFrames; ++inFlightFrameIdx)
 		{
 			auto& frame = frames[inFlightFrameIdx];
@@ -26,11 +29,34 @@ namespace sy
 
 		triVert = std::make_unique<ShaderModule>("Triangle vertex shader", vulkanInstance, "Assets/Shaders/bin/tri.vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 		triFrag = std::make_unique<ShaderModule>("Triangle fragment shader", vulkanInstance, "Assets/Shaders/bin/tri.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+
+		const VkPipelineLayoutCreateInfo nullLayoutInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+			.pNext = nullptr,
+			.flags = 0,
+			.setLayoutCount = 0,
+			.pSetLayouts = nullptr,
+			.pushConstantRangeCount = 0,
+			.pPushConstantRanges = nullptr
+		};
+
+		vkCreatePipelineLayout(vulkanInstance.GetLogicalDevice(), &nullLayoutInfo, nullptr, &nullLayout);
+
+		GraphicsPipelineBuilder basicPipelineBuilder;
+		basicPipelineBuilder.SetDefault()
+			.AddShaderStage(*triVert)
+			.AddShaderStage(*triFrag)
+			.AddViewport(0.f, 0.f, static_cast<float>(windowExtent.width), static_cast<float>(windowExtent.height), 0.0f, 1.0f)
+			.AddScissor(0, 0, windowExtent.width, windowExtent.height)
+			.SetPipelineLayout(nullLayout);
+		basicPipeline = std::make_unique<Pipeline>("Basic Graphics Pipeline", vulkanInstance, basicPipelineBuilder);
 	}
 
 	Renderer::~Renderer()
 	{
 		vulkanInstance.WaitAllQueuesForIdle();
+		vkDestroyPipelineLayout(vulkanInstance.GetLogicalDevice(), nullLayout, nullptr);
 	}
 
 	void Renderer::Render()
@@ -90,6 +116,8 @@ namespace sy
 			graphicsCmdBuffer->BeginRendering(renderingInfo);
 			{
 				// Rendering something here
+				graphicsCmdBuffer->BindPipeline(*basicPipeline);
+				graphicsCmdBuffer->Draw(3, 1, 0, 0);
 			}
 			graphicsCmdBuffer->EndRendering();
 

@@ -8,6 +8,7 @@ namespace sy
 	class Semaphore;
 	class Fence;
 	class ShaderModule;
+	class Pipeline;
 
 	struct Frame
 	{
@@ -41,5 +42,8 @@ namespace sy
 
 		std::unique_ptr<ShaderModule> triVert;
 		std::unique_ptr<ShaderModule> triFrag;
+		std::unique_ptr<Pipeline> basicPipeline;
+		VkPipelineLayout nullLayout;
+
 	};
 }
