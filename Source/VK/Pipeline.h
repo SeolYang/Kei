@@ -10,10 +10,16 @@ namespace sy
 	class Pipeline : public VulkanWrapper<VkPipeline>
 	{
 	public:
-		Pipeline(const GraphicsPipelineBuilder& builder);
+		Pipeline(std::string_view name, const VulkanInstance& vulkanInstance, const GraphicsPipelineBuilder & builder);
+		Pipeline(std::string_view name, const VulkanInstance& vulkanInstance, const ComputePipelineBuilder& builder);
+
+		[[nodiscard]] auto GetPipelineType() const { return pipelineType; }
+		[[nodiscard]] auto GetPipelineBindPoint() const { return PipelineTypeToBindPoint(pipelineType); }
 
 	private:
-		const VulkanInstance& vulkanInstance;
+		Pipeline(std::string_view name, const VulkanInstance& vulkanInstance, EPipelineType pipelineType);
+
+	private:
 		const EPipelineType pipelineType;
 
 	};

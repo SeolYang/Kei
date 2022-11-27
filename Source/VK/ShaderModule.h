@@ -11,7 +11,8 @@ namespace sy
 		virtual ~ShaderModule() override = default;
 
 		[[nodiscard]] auto GetShaderType() const { return shaderType; }
-		[[nodiscard]] auto GetPath() const { return path; }
+		[[nodiscard]] std::string_view GetPath() const { return path; }
+		[[nodiscard]] std::string_view GetEntryPoint() const { return entryPoint; }
 
 	private:
 		std::string path;

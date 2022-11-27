@@ -12,6 +12,15 @@ namespace sy
 
 	GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetDefault()
 	{
+		ZeroMemory(&pipelineCreateFlags, sizeof(pipelineCreateFlags));
+		ZeroMemory(&vertexInputInfo, sizeof(vertexInputInfo));
+		ZeroMemory(&inputAssembly, sizeof(inputAssembly));
+		ZeroMemory(&tessellation, sizeof(tessellation));
+		ZeroMemory(&rasterizer, sizeof(rasterizer));
+		ZeroMemory(&colorBlend, sizeof(colorBlend));
+		ZeroMemory(&multiSampling, sizeof(multiSampling));
+		ZeroMemory(&depthStencil, sizeof(depthStencil));
+
 		SetPipelineCreateFlags(0);
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 		vertexInputInfo.pNext = nullptr;
@@ -25,12 +34,13 @@ namespace sy
 		inputAssembly.pNext = nullptr;
 		tessellation.sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
 		tessellation.pNext = nullptr;
+		viewports.clear();
+		scissors.clear();
 		viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 		viewportState.pNext = nullptr;
-		viewports.clear();
+		viewportState.flags = 0;
 		viewportState.viewportCount = 0;
 		viewportState.pViewports = nullptr;
-		scissors.clear();
 		viewportState.scissorCount = 0;
 		viewportState.pScissors = nullptr;
 		rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -63,6 +73,7 @@ namespace sy
 		SetSampleShadingEnable(false);
 		SetRasterizerSamples(VK_SAMPLE_COUNT_1_BIT);
 		SetMinSampleShading(1.f);
+		SetSampleMask(nullptr);
 		SetAlphaToCoverageEnable(false);
 		SetAlphaToOneEnable(false);
 
@@ -89,7 +100,7 @@ namespace sy
 			VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
 			nullptr, 0,
 			shaderModule.GetShaderType(), shaderModule.GetNativeHandle(),
-			shaderModule.GetName().data(),
+			shaderModule.GetEntryPoint().data(),
 			nullptr);
 
 		return *this;
@@ -127,6 +138,8 @@ namespace sy
 	GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddViewport(VkViewport viewport)
 	{
 		viewports.emplace_back(viewport);
+		++viewportState.viewportCount;
+		viewportState.pViewports = viewports.data();
 		return *this;
 	}
 
@@ -134,7 +147,7 @@ namespace sy
 		float minDepth, float maxDepth)
 	{
 		viewports.emplace_back(x, y, width, height, minDepth, maxDepth);
-		viewportState.viewportCount = viewports.size();
+		++viewportState.viewportCount;
 		viewportState.pViewports = viewports.data();
 		return *this;
 	}
@@ -142,7 +155,7 @@ namespace sy
 	GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddScissor(VkRect2D scissor)
 	{
 		scissors.emplace_back(scissor);
-		viewportState.scissorCount = scissors.size();
+		++viewportState.scissorCount;
 		viewportState.pScissors = scissors.data();
 		return *this;
 	}
@@ -150,6 +163,8 @@ namespace sy
 	GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddScissor(int32_t x, int32_t y, uint32_t width, uint32_t height)
 	{
 		scissors.emplace_back(VkOffset2D{ x, y }, VkExtent2D{ width, height });
+		++viewportState.scissorCount;
+		viewportState.pScissors = scissors.data();
 		return *this;
 	}
 
@@ -228,6 +243,12 @@ namespace sy
 	GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetMinSampleShading(float minSampleShading)
 	{
 		multiSampling.minSampleShading = minSampleShading;
+		return *this;
+	}
+
+	GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetSampleMask(uint32_t* sampleMask)
+	{
+		multiSampling.pSampleMask = sampleMask;
 		return *this;
 	}
 
@@ -417,6 +438,7 @@ namespace sy
 
 	ComputePipelineBuilder& ComputePipelineBuilder::SetShader(const ShaderModule& shaderModule)
 	{
+		SY_ASSERT((shaderModule.GetShaderType() & VK_SHADER_STAGE_COMPUTE_BIT) != 0, "Shader is not a type of compute shader.");
 		shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		shaderStage.pNext = nullptr;
 		shaderStage.module = shaderModule.GetNativeHandle();

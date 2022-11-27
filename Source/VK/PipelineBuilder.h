@@ -3,9 +3,8 @@
 
 namespace sy
 {
-	
 	class ShaderModule;
-	struct GraphicsPipelineBuilder
+	class GraphicsPipelineBuilder
 	{
 	public:
 		GraphicsPipelineBuilder();
@@ -61,7 +60,7 @@ namespace sy
 		GraphicsPipelineBuilder& SetRasterizerSamples(VkSampleCountFlagBits rasterizerSamples);
 		GraphicsPipelineBuilder& SetSampleShadingEnable(bool bSampleShadingEnable);
 		GraphicsPipelineBuilder& SetMinSampleShading(float minSampleShading);
-		//GraphicsPipelineBuilder& SetSampleMask()
+		GraphicsPipelineBuilder& SetSampleMask(uint32_t* sampleMask);
 		GraphicsPipelineBuilder& SetAlphaToCoverageEnable(bool bAlphaToCoverageEnable);
 		GraphicsPipelineBuilder& SetAlphaToOneEnable(bool bAlphaToOne);
 
@@ -96,9 +95,9 @@ namespace sy
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo;
 		VkPipelineInputAssemblyStateCreateInfo inputAssembly;
 		VkPipelineTessellationStateCreateInfo tessellation;
+		VkPipelineViewportStateCreateInfo viewportState;
 		std::vector<VkViewport> viewports;
 		std::vector<VkRect2D> scissors;
-		VkPipelineViewportStateCreateInfo viewportState;
 		VkPipelineRasterizationStateCreateInfo rasterizer;
 		std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments;
 		VkPipelineColorBlendStateCreateInfo colorBlend;
