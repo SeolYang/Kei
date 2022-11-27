@@ -23,6 +23,7 @@
     <ClCompile Include="..\Source\VK\CommandPool.cpp" />
     <ClCompile Include="..\Source\VK\Fence.cpp" />
     <ClCompile Include="..\Source\VK\Pipeline.cpp" />
+    <ClCompile Include="..\Source\VK\PipelineBuilder.cpp" />
     <ClCompile Include="..\Source\VK\Semaphore.cpp" />
     <ClCompile Include="..\Source\VK\ShaderModule.cpp" />
     <ClCompile Include="..\Source\VK\Swapchain.cpp" />
@@ -45,6 +46,7 @@
     <ClInclude Include="..\Source\VK\CommandPool.h" />
     <ClInclude Include="..\Source\VK\Fence.h" />
     <ClInclude Include="..\Source\VK\Pipeline.h" />
+    <ClInclude Include="..\Source\VK\PipelineBuilder.h" />
     <ClInclude Include="..\Source\VK\Semaphore.h" />
     <ClInclude Include="..\Source\VK\ShaderModule.h" />
     <ClInclude Include="..\Source\VK\Swapchain.h" />

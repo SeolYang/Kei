@@ -11,5 +11,12 @@ namespace sy
 		Present
 	};
 
+	enum class EPipelineType
+	{
+		Graphics,
+		Compute,
+		RayTracing
+	};
+
 	constexpr size_t NumMaxInFlightFrames = 2;
 }
