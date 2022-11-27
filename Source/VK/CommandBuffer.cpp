@@ -2,16 +2,12 @@
 #include <VK/CommandBuffer.h>
 #include <VK/CommandPool.h>
 #include <VK/VulkanInstance.h>
-
-#include "Fence.h"
+#include <VK/Pipeline.h>
 
 namespace sy
 {
 	CommandBuffer::CommandBuffer(std::string_view name, const VulkanInstance& vulkanInstance, const CommandPool& cmdPool) :
-		VulkanWrapper<VkCommandBuffer>(name, vulkanInstance, VK_DESTROY_LAMBDA_SIGNATURE(VkCommandBuffer)
-	{
-		// DO NOTHING
-	}),
+		VulkanWrapper<VkCommandBuffer>(name, vulkanInstance, VK_DESTROY_LAMBDA_SIGNATURE(VkCommandBuffer){ }),
 		queueType(cmdPool.GetQueueType())
 	{
 		const VkCommandBufferAllocateInfo allocInfo
@@ -96,6 +92,16 @@ namespace sy
 			imageMemoryBarriers.size(), imageMemoryBarriers.data());
 	}
 
+	void CommandBuffer::BindPipeline(const Pipeline& pipeline) const
+	{
+		vkCmdBindPipeline(handle, pipeline.GetPipelineBindPoint(), pipeline.GetNativeHandle());
+	}
+
+	void CommandBuffer::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const
+	{
+		vkCmdDraw(handle, vertexCount, instanceCount, firstVertex, firstInstance);
+	}
+
 	std::pair<VkAccessFlags, VkAccessFlags>  CommandBuffer::QueryOptimalAccessFlagFromImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout)
 	{
 		VkAccessFlags srcAccess = VK_ACCESS_NONE;
@@ -147,6 +153,6 @@ namespace sy
 			break;
 		}
 
-		return {srcAccess, dstAccess};
+		return { srcAccess, dstAccess };
 	}
 }
