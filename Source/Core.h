@@ -59,6 +59,12 @@ namespace sy
 	{
 		return N;
 	}
+
+	template <typename T>
+	constexpr auto ToUnderlying(const T& val)
+	{
+		return static_cast<std::underlying_type_t<T>>(val);
+	}
 }
 
 /** Vulkan Headers */

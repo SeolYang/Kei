@@ -4,6 +4,71 @@
 namespace sy
 {
     template <typename SlotDataType = void>
+    class FixedPool
+    {
+    public:
+        template <typename DataType>
+        struct SlotType
+        {
+            size_t Offset;
+            DataType Data;
+        };
+
+        template <>
+        struct SlotType<void>
+        {
+            size_t Offset;
+        };
+
+        using Slot_t = SlotType<SlotDataType>;
+
+    public:
+        FixedPool(const size_t sizePerSlot = 1, size_t maxSlotCount = 0) :
+            sizePerSlot(sizePerSlot),
+			maxSlotCount(0),
+			allocatedSize(0)
+        {
+            Grow(maxSlotCount);
+        }
+
+        [[nodiscard]] Slot_t Allocate()
+        {
+            Slot_t slot = std::move(freeSlots.front());
+            freeSlots.pop();
+            return slot;
+        }
+
+        void Deallocate(const Slot_t& slot)
+        {
+            freeSlots.emplace(slot);
+        }
+
+        [[nodiscard]] size_t GetAllocatedSize() const { return allocatedSize; }
+
+        void Grow(const size_t additionalSlotCount)
+        {
+            if (additionalSlotCount > 0)
+            {
+                for (size_t idx = 0; idx < additionalSlotCount; ++idx)
+                {
+                    freeSlots.emplace(allocatedSize);
+                    allocatedSize += sizePerSlot;
+                    ++maxSlotCount;
+                }
+            }
+        }
+
+    private:
+        std::queue<Slot_t> freeSlots;
+        const size_t sizePerSlot;
+    	size_t maxSlotCount;
+    	size_t allocatedSize;
+
+    };
+
+    using FixedOffsetPool = FixedPool<void>;
+
+    template <typename SlotDataType = void>
     class Pool
     {
     public:

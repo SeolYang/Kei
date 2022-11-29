@@ -7,7 +7,6 @@ namespace sy
 	class CommandPool;
 	class Fence;
 	class Pipeline;
-	class DescriptorPool;
 	class CommandBuffer : public VulkanWrapper<VkCommandBuffer>
 	{
 	public:
@@ -27,7 +26,6 @@ namespace sy
 		void PipelineBarrier(VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, std::span<VkMemoryBarrier> memoryBarriers, std::span<VkBufferMemoryBarrier> bufferMemoryBarriers, std::span<VkImageMemoryBarrier> imageMemoryBarriers) const;
 
 		void BindPipeline(const Pipeline& pipeline) const;
-		void BindDescriptorSet(const DescriptorPool& descriptorPool, const Pipeline& pipeline) const;
 		void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const;
 
 	public:

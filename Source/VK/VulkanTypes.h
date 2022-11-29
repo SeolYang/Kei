@@ -22,7 +22,6 @@ namespace sy
 	{
 		switch (type)
 		{
-		default:
 		case EPipelineType::Graphics:
 			return VK_PIPELINE_BIND_POINT_GRAPHICS;
 		case EPipelineType::Compute:
@@ -32,32 +31,47 @@ namespace sy
 		}
 	}
 
-	constexpr uint32_t MaxBindlessResourcesPerDescriptor = 2048;
-	static uint32_t QueryBindlessBindingOfDescriptor(const VkDescriptorType type)
+	enum class EDescriptorType : uint8_t
 	{
-		switch (type)
+		Sampler = 0,
+		SampledImage,
+		CombinedImageSampler,
+		StorageImage,
+		UniformBuffer,
+		StorageBuffer,
+		InputAttachment,
+		UniformBufferDynamic,
+		StorageBufferDynamic,
+		EnumMax
+	};
+
+	constexpr static auto ToNative(const EDescriptorType descriptorType)
+	{
+		switch (descriptorType)
 		{
-		case VK_DESCRIPTOR_TYPE_SAMPLER:
-			return 0;
-		case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
-			return 1;
-		case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
-			return 2;
-		case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
-			return 3;
-		case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-			return 4;
-		case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC:
-			return 5;
-		case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
-			return 6;
-		case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC:
-			return 7;
+		case EDescriptorType::Sampler:
+			return VK_DESCRIPTOR_TYPE_SAMPLER;
+		case EDescriptorType::SampledImage:
+			return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+		case EDescriptorType::CombinedImageSampler:
+			return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		case EDescriptorType::StorageImage:
+			return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		case EDescriptorType::UniformBuffer:
+			return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		case EDescriptorType::UniformBufferDynamic:
+			return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+		case EDescriptorType::StorageBuffer:
+			return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		case EDescriptorType::StorageBufferDynamic:
+			return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+		case EDescriptorType::InputAttachment:
+			return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
 		default:
-			SY_ASSERT(false, "Unsupported Bindless descriptor type.");
-			return std::numeric_limits<uint32_t>::max();
+			SY_ASSERT(false, "Invalid value!");
 		}
 	}
 
+	constexpr uint32_t MaxBindlessResourcesPerDescriptor = 2048;
 	constexpr size_t NumMaxInFlightFrames = 2;
 }

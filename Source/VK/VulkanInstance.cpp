@@ -6,7 +6,6 @@
 #include <VK/CommandPool.h>
 #include <VK/Semaphore.h>
 #include <VK/Fence.h>
-#include <VK/DescriptorPool.h>
 
 namespace sy
 {

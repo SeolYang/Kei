@@ -9,14 +9,13 @@ namespace sy
 	class Fence;
 	class ShaderModule;
 	class Pipeline;
-	class DescriptorPool;
+	class DescriptorManager;
 	struct Frame
 	{
-		size_t inFlightFrameIdx;
+		size_t inFlightFrameIdx = std::numeric_limits<size_t>::max();
 		std::unique_ptr<Fence> renderFence;
 		std::unique_ptr<Semaphore> renderSemaphore;
 		std::unique_ptr<Semaphore> presentSemaphore;
-		std::unique_ptr<DescriptorPool> globalDescriptorPool;
 
 	};
 
@@ -45,7 +44,7 @@ namespace sy
 		std::unique_ptr<ShaderModule> triVert;
 		std::unique_ptr<ShaderModule> triFrag;
 		std::unique_ptr<Pipeline> basicPipeline;
-		VkPipelineLayout nullLayout;
+		std::unique_ptr<DescriptorManager> descriptorManager;
 
 	};
 }

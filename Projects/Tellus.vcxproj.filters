@@ -66,7 +66,7 @@
     <ClCompile Include="..\Source\VK\PipelineBuilder.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\VK\DescriptorPool.cpp">
+    <ClCompile Include="..\Source\VK\DescriptorManager.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
   </ItemGroup>
@@ -140,11 +140,11 @@
     <ClInclude Include="..\Source\VK\PipelineBuilder.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\VK\DescriptorPool.h">
-      <Filter>Source\Vulkan</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\UniqueHandle.h">
       <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\DescriptorManager.h">
+      <Filter>Source\Vulkan</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
