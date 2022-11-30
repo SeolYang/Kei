@@ -10,16 +10,19 @@ namespace sy
 	class Fence;
 	class Semaphore;
 	class DescriptorPool;
-	class VulkanInstance
+	class VulkanContext
 	{
 	public:
-		VulkanInstance(const Window& window);
-		~VulkanInstance();
+		VulkanContext(const Window& window);
+		~VulkanContext();
 
-		[[nodiscard]] CommandPool& RequestCommandPool(EQueueType queueType, size_t currentFrameIdx);
+		VulkanContext(const VulkanContext&) = delete;
+		VulkanContext(VulkanContext&&) = delete;
+		VulkanContext& operator=(const VulkanContext&) = delete;
+		VulkanContext& operator=(VulkanContext&&) = delete;
 
 		[[nodiscard]] VkPhysicalDevice GetPhysicalDevice() const { return physicalDevice; }
-		[[nodiscard]] VkDevice GetLogicalDevice() const { return device; }
+		[[nodiscard]] VkDevice GetDevice() const { return device; }
 		[[nodiscard]] uint32_t GetQueueFamilyIndex(EQueueType queueType) const;
 		[[nodiscard]] VkQueue GetQueue(EQueueType queueType) const;
 		[[nodiscard]] VkSurfaceKHR GetSurface() const { return surface; }
@@ -38,8 +41,7 @@ namespace sy
 
 		void WaitQueueForIdle(EQueueType queueType) const;
 		void WaitAllQueuesForIdle() const;
-
-		void BeginFrame(size_t currentInFlightFrameIdx) const;
+		void WaitForDeviceIdle() const;
 
 	private:
 		void Startup();
@@ -70,8 +72,6 @@ namespace sy
 		uint32_t transferQueueFamilyIdx;
 		uint32_t presentQueueFamilyIdx;
 
-		std::shared_mutex cmdPoolMutex;
-		std::array<std::vector<std::unique_ptr<CommandPool>>, NumMaxInFlightFrames> cmdPools;
 
 	};
 }

@@ -1,13 +1,13 @@
 #include <Core.h>
 #include <VK/ShaderModule.h>
-#include <VK/VulkanInstance.h>
+#include <VK/VulkanContext.h>
 
 namespace sy
 {
-	ShaderModule::ShaderModule(const std::string_view name, const VulkanInstance& vulkanInstance, const std::string_view filePath, const VkShaderStageFlagBits shaderType, const std::string_view entryPoint) :
-		VulkanWrapper<VkShaderModule>(name, vulkanInstance, VK_DESTROY_LAMBDA_SIGNATURE(VkShaderModule)
+	ShaderModule::ShaderModule(const std::string_view name, const VulkanContext& vulkanContext, const std::string_view filePath, const VkShaderStageFlagBits shaderType, const std::string_view entryPoint) :
+		VulkanWrapper<VkShaderModule>(name, vulkanContext, VK_DESTROY_LAMBDA_SIGNATURE(VkShaderModule)
 		{
-			vkDestroyShaderModule(vulkanInstance.GetLogicalDevice(), handle, nullptr);
+			vkDestroyShaderModule(vulkanContext.GetDevice(), handle, nullptr);
 		}), 
 		path(filePath),
 		entryPoint(entryPoint),
@@ -35,6 +35,6 @@ namespace sy
         };
 
         spdlog::trace("Creating shader module from {}...", path);
-        VK_ASSERT(vkCreateShaderModule(vulkanInstance.GetLogicalDevice(), &createInfo, nullptr, &handle), "Failed to create shader module from {}.", path);
+        VK_ASSERT(vkCreateShaderModule(vulkanContext.GetDevice(), &createInfo, nullptr, &handle), "Failed to create shader module from {}.", path);
 	}
 }

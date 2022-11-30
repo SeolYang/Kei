@@ -21,7 +21,7 @@
     <ClCompile Include="..\Source\Core.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Instance.cpp">
+    <ClCompile Include="..\Source\Context.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\GameInstance.cpp">
@@ -45,7 +45,7 @@
     <ClCompile Include="..\Source\VK\Swapchain.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\VK\VulkanInstance.cpp">
+    <ClCompile Include="..\Source\VK\VulkanContext.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Renderer.cpp">
@@ -66,15 +66,21 @@
     <ClCompile Include="..\Source\VK\PipelineBuilder.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\VK\DescriptorManager.cpp">
-      <Filter>Source\Vulkan</Filter>
+    <ClCompile Include="..\Source\FrameTracker.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\DescriptorManager.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\CommandPoolManager.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Core.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Instance.h">
+    <ClInclude Include="..\Source\Context.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\GameInstance.h">
@@ -113,7 +119,7 @@
     <ClInclude Include="..\Source\VK\Swapchain.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\VK\VulkanInstance.h">
+    <ClInclude Include="..\Source\VK\VulkanContext.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\VK\VulkanTypes.h">
@@ -143,8 +149,14 @@
     <ClInclude Include="..\Source\UniqueHandle.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\VK\DescriptorManager.h">
-      <Filter>Source\Vulkan</Filter>
+    <ClInclude Include="..\Source\FrameTracker.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\DescriptorManager.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\CommandPoolManager.h">
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

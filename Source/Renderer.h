@@ -3,48 +3,38 @@
 
 namespace sy
 {
-	class VulkanInstance;
+	class VulkanContext;
 	class Window;
 	class Semaphore;
 	class Fence;
 	class ShaderModule;
 	class Pipeline;
+	class FrameTracker;
+	class CommandPoolManager;
 	class DescriptorManager;
-	struct Frame
-	{
-		size_t inFlightFrameIdx = std::numeric_limits<size_t>::max();
-		std::unique_ptr<Fence> renderFence;
-		std::unique_ptr<Semaphore> renderSemaphore;
-		std::unique_ptr<Semaphore> presentSemaphore;
-
-	};
-
 	class Renderer
 	{
 	public:
-		Renderer(const Window& window, VulkanInstance& vulkanInstance);
+		Renderer(const Window& window, VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, DescriptorManager& descriptorManager);
 		~Renderer();
 
 		void Render();
 
-		[[nodiscard]] size_t GetCurrentInFlightFrameIndex() const { return currentFrameIdx % NumMaxInFlightFrames; }
-		[[nodiscard]] const Frame& GetCurrentInFlightFrame() const { return frames[GetCurrentInFlightFrameIndex()]; }
-		[[nodiscard]] size_t GetCurrentFrameIndex() const { return currentFrameIdx; }
-
 	private:
-		const Frame& BeginFrame();
-		void EndFrame(const Frame& currentFrame);
+		void BeginFrame();
+		void EndFrame();
 
 	private:
 		const Window& window;
-		VulkanInstance& vulkanInstance;
-		std::array<Frame, NumMaxInFlightFrames> frames;
-		size_t currentFrameIdx = 0;
+		VulkanContext& vulkanContext;
+		const FrameTracker& frameTracker;
+		CommandPoolManager& cmdPoolManager;
+		DescriptorManager& descriptorManager;
+		
 
 		std::unique_ptr<ShaderModule> triVert;
 		std::unique_ptr<ShaderModule> triFrag;
 		std::unique_ptr<Pipeline> basicPipeline;
-		std::unique_ptr<DescriptorManager> descriptorManager;
 
 	};
 }

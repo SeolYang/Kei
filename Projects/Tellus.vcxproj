@@ -11,15 +11,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\CommandPoolManager.cpp" />
     <ClCompile Include="..\Source\Core.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\Source\DescriptorManager.cpp" />
+    <ClCompile Include="..\Source\FrameTracker.cpp" />
     <ClCompile Include="..\Source\GameInstance.cpp" />
-    <ClCompile Include="..\Source\Instance.cpp" />
+    <ClCompile Include="..\Source\Context.cpp" />
     <ClCompile Include="..\Source\main.cpp" />
     <ClCompile Include="..\Source\Renderer.cpp" />
-    <ClCompile Include="..\Source\VK\DescriptorManager.cpp" />
     <ClCompile Include="..\Source\VK\CommandBuffer.cpp" />
     <ClCompile Include="..\Source\VK\CommandPool.cpp" />
     <ClCompile Include="..\Source\VK\Fence.cpp" />
@@ -28,7 +30,7 @@
     <ClCompile Include="..\Source\VK\Semaphore.cpp" />
     <ClCompile Include="..\Source\VK\ShaderModule.cpp" />
     <ClCompile Include="..\Source\VK\Swapchain.cpp" />
-    <ClCompile Include="..\Source\VK\VulkanInstance.cpp" />
+    <ClCompile Include="..\Source\VK\VulkanContext.cpp" />
     <ClCompile Include="..\Source\Window.cpp" />
     <ClCompile Include="..\ThirdParty\volk\volk.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -36,7 +38,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Source\CommandPoolManager.h" />
+    <ClInclude Include="..\Source\DescriptorManager.h" />
     <ClInclude Include="..\Source\ECS.h" />
+    <ClInclude Include="..\Source\FrameTracker.h" />
     <ClInclude Include="..\Source\Pool.hpp" />
     <ClInclude Include="..\Source\Renderer.h" />
     <ClInclude Include="..\Source\TellusAssert.h" />
@@ -44,7 +49,6 @@
     <ClInclude Include="..\Source\Timer.h" />
     <ClInclude Include="..\Source\NamedType.h" />
     <ClInclude Include="..\Source\UniqueHandle.h" />
-    <ClInclude Include="..\Source\VK\DescriptorManager.h" />
     <ClInclude Include="..\Source\VK\CommandBuffer.h" />
     <ClInclude Include="..\Source\VK\CommandPool.h" />
     <ClInclude Include="..\Source\VK\Fence.h" />
@@ -53,13 +57,13 @@
     <ClInclude Include="..\Source\VK\Semaphore.h" />
     <ClInclude Include="..\Source\VK\ShaderModule.h" />
     <ClInclude Include="..\Source\VK\Swapchain.h" />
-    <ClInclude Include="..\Source\VK\VulkanInstance.h" />
+    <ClInclude Include="..\Source\VK\VulkanContext.h" />
     <ClInclude Include="..\Source\VK\VulkanTypes.h" />
     <ClInclude Include="..\Source\VK\VulkanWrapper.hpp" />
     <ClInclude Include="..\Source\Window.h" />
     <ClInclude Include="..\Source\Core.h" />
     <ClInclude Include="..\Source\GameInstance.h" />
-    <ClInclude Include="..\Source\Instance.h" />
+    <ClInclude Include="..\Source\Context.h" />
     <ClInclude Include="..\ThirdParty\volk\volk.h" />
   </ItemGroup>
   <ItemGroup>

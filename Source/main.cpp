@@ -1,10 +1,10 @@
 #include <Core.h>
-#include <Instance.h>
+#include <Context.h>
 #include <ECS.h>
 
 int main(int, char**)
 {
-	sy::Instance instance;
-	instance.Run();
+	sy::Context contextInstance;
+	contextInstance.Run();
 	return 0;
 }

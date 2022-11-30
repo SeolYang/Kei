@@ -1,13 +1,13 @@
 #include <Core.h>
 #include <VK/CommandBuffer.h>
 #include <VK/CommandPool.h>
-#include <VK/VulkanInstance.h>
+#include <VK/VulkanContext.h>
 #include <VK/Pipeline.h>
 
 namespace sy
 {
-	CommandBuffer::CommandBuffer(std::string_view name, const VulkanInstance& vulkanInstance, const CommandPool& cmdPool) :
-		VulkanWrapper<VkCommandBuffer>(name, vulkanInstance, VK_DESTROY_LAMBDA_SIGNATURE(VkCommandBuffer){ }),
+	CommandBuffer::CommandBuffer(std::string_view name, const VulkanContext& vulkanContext, const CommandPool& cmdPool) :
+		VulkanWrapper<VkCommandBuffer>(name, vulkanContext, VK_DESTROY_LAMBDA_SIGNATURE(VkCommandBuffer){ }),
 		queueType(cmdPool.GetQueueType())
 	{
 		const VkCommandBufferAllocateInfo allocInfo
@@ -19,7 +19,7 @@ namespace sy
 			.commandBufferCount = 1
 		};
 
-		VK_ASSERT(vkAllocateCommandBuffers(vulkanInstance.GetLogicalDevice(), &allocInfo, &handle), "Failed to creating command buffer.");
+		VK_ASSERT(vkAllocateCommandBuffers(vulkanContext.GetDevice(), &allocInfo, &handle), "Failed to creating command buffer.");
 	}
 
 	void CommandBuffer::Reset() const

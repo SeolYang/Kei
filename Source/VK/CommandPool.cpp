@@ -1,14 +1,14 @@
 #include <Core.h>
 #include <VK/CommandPool.h>
 #include <VK/CommandBuffer.h>
-#include <VK/VulkanInstance.h>
+#include <VK/VulkanContext.h>
 
 namespace sy
 {
-	CommandPool::CommandPool(const VulkanInstance& vulkanInstance, const EQueueType queueType) :
-		VulkanWrapper<VkCommandPool>("Unknown Pool", vulkanInstance, VK_DESTROY_LAMBDA_SIGNATURE(VkCommandPool)
+	CommandPool::CommandPool(const VulkanContext& vulkanContext, const EQueueType queueType) :
+		VulkanWrapper<VkCommandPool>("Unknown Pool", vulkanContext, VK_DESTROY_LAMBDA_SIGNATURE(VkCommandPool)
 	{
-		vkDestroyCommandPool(vulkanInstance.GetLogicalDevice(), handle, nullptr);
+		vkDestroyCommandPool(vulkanContext.GetDevice(), handle, nullptr);
 	}),
 		queueType(queueType),
 		offsetPool(1, 16)
@@ -29,7 +29,7 @@ namespace sy
 			break;
 		}
 
-		const auto queueFamilyIdx = vulkanInstance.GetQueueFamilyIndex(queueType);
+		const auto queueFamilyIdx = vulkanContext.GetQueueFamilyIndex(queueType);
 		const VkCommandPoolCreateInfo cmdPoolCreateInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
@@ -40,7 +40,7 @@ namespace sy
 
 		const size_t threadId = std::hash<std::thread::id>{}(std::this_thread::get_id());
 		//spdlog::trace("Creating command pool for thread {} and queue family {}; Dependent on In-flight frames {}/{}.", threadId, queueFamilyIdx, (inFlightFrameIdx + 1), NumMaxInFlightFrames);
-		VK_ASSERT(vkCreateCommandPool(vulkanInstance.GetLogicalDevice(), &cmdPoolCreateInfo, nullptr, &handle), "Failed to create vulkan command queue from create info.");
+		VK_ASSERT(vkCreateCommandPool(vulkanContext.GetDevice(), &cmdPoolCreateInfo, nullptr, &handle), "Failed to create vulkan command queue from create info.");
 	}
 
 	CommandPool::CommandBufferAllocation CommandPool::RequestCommandBuffer(std::string_view name)
@@ -53,7 +53,7 @@ namespace sy
 
 		if (allocatedSlot.Offset >= cmdBuffers.size())
 		{
-			cmdBuffers.emplace_back(std::make_unique<CommandBuffer>(name, vulkanInstance, *this));
+			cmdBuffers.emplace_back(std::make_unique<CommandBuffer>(name, vulkanContext, *this));
 		}
 
 		cmdBuffers[allocatedSlot.Offset]->Reset();
@@ -68,7 +68,7 @@ namespace sy
 
 	void CommandPool::Reset() const
 	{
-		vkResetCommandPool(vulkanInstance.GetLogicalDevice(), handle, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
+		vkResetCommandPool(vulkanContext.GetDevice(), handle, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
 	}
 
 	void CommandPool::BeginFrame()

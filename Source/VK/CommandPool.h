@@ -3,7 +3,7 @@
 
 namespace sy
 {
-	class VulkanInstance;
+	class VulkanContext;
 	class CommandBuffer;
 	class Fence;
 	class CommandPool : public VulkanWrapper<VkCommandPool>
@@ -17,7 +17,7 @@ namespace sy
 		using CommandBufferAllocation = std::unique_ptr<CommandBuffer, std::function<void(CommandBuffer*)>>;
 
 	public:
-		CommandPool(const VulkanInstance& vulkanInstance, EQueueType queueType);
+		CommandPool(const VulkanContext& vulkanContext, EQueueType queueType);
 		virtual ~CommandPool() override = default;
 
 		CommandBufferAllocation RequestCommandBuffer(std::string_view name);

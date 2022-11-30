@@ -3,12 +3,12 @@
 
 namespace sy
 {
-	class VulkanInstance;
+	class VulkanContext;
 	class Window;
 	class Swapchain : public VulkanWrapper<VkSwapchainKHR>
 	{
 	public:
-		Swapchain(const Window& window, const VulkanInstance& vulkanInstance);
+		Swapchain(const Window& window, const VulkanContext& vulkanContext);
 		virtual ~Swapchain() override;
 
 		void AcquireNext(const Semaphore& presentSemaphore);

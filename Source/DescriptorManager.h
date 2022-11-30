@@ -3,7 +3,8 @@
 
 namespace sy
 {
-	class VulkanInstance;
+	class VulkanContext;
+	class FrameTracker;
 	class DescriptorManager
 	{
 	public:
@@ -93,28 +94,26 @@ namespace sy
 		};
 
 	public:
-		DescriptorManager(const VulkanInstance& vulkanInstance);
+		DescriptorManager(const VulkanContext& vulkanContext, const FrameTracker& frameTracker);
 		~DescriptorManager();
 
-		void BeginFrame(size_t currentInFlightFrameIdx);
-		void EndFrame(size_t currentInFlightFrameIdx);
+		DescriptorManager(const DescriptorManager&) = delete;
+		DescriptorManager(DescriptorManager&&) = delete;
 
-		UniqueHandle<Allocation> RequestForTransientBuffer(size_t currentInFlightFrameIdx, EDescriptorType descriptorType);
-		UniqueHandle<Allocation> RequestForTransientImage(size_t currentInFlightFrameIdx, EDescriptorType descriptorType);
+		DescriptorManager& operator=(const DescriptorManager&) = delete;
+		DescriptorManager& operator=(DescriptorManager&&) = delete;
 
-		UniqueHandle<Allocation> RequestForPersistentBuffer(EDescriptorType descriptorType);
-		UniqueHandle<Allocation> RequestForPersistentImage(EDescriptorType descriptorType);
+		void BeginFrame();
+		void EndFrame();
 
 		[[nodiscard]] VkDescriptorSetLayout GetDescriptorSetLayout() const { return bindlessLayout; }
 
 	private:
-		const VulkanInstance& vulkanInstance;
+		const VulkanContext& vulkanContext;
+		const FrameTracker& frameTracker;
 		VkDescriptorSetLayout bindlessLayout = VK_NULL_HANDLE;
-		std::array<PoolPackage, NumMaxInFlightFrames> transientDescriptorPackages;
+		PoolPackage descriptorPoolPackage;
 		std::array<std::vector<Allocation>, NumMaxInFlightFrames> pendingTransientDeallocationLists;
-
-		PoolPackage persistentDescriptorPackage;
-		std::vector<Allocation> pendingPersistentDeallocations;
 
 	};
 }

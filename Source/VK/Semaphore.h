@@ -3,11 +3,11 @@
 
 namespace sy
 {
-	class VulkanInstance;
+	class VulkanContext;
 	class Semaphore : public VulkanWrapper<VkSemaphore>
 	{
 	public:
-		Semaphore(std::string_view name, const VulkanInstance& vulkanInstance);
+		Semaphore(std::string_view name, const VulkanContext& vulkanContext);
 		virtual ~Semaphore() = default;
 
 	};

@@ -1,6 +1,6 @@
 #include <Core.h>
 #include <Window.h>
-#include <VK/VulkanInstance.h>
+#include <VK/VulkanContext.h>
 #include <VK/Swapchain.h>
 #include <VK/CommandBuffer.h>
 #include <VK/CommandPool.h>
@@ -9,7 +9,7 @@
 
 namespace sy
 {
-	VulkanInstance::VulkanInstance(const Window& window) :
+	VulkanContext::VulkanContext(const Window& window) :
 		window(window),
 		instance(VK_NULL_HANDLE),
 		surface(VK_NULL_HANDLE),
@@ -20,12 +20,12 @@ namespace sy
 		Startup();
 	}
 
-	VulkanInstance::~VulkanInstance()
+	VulkanContext::~VulkanContext()
 	{
 		Cleanup();
 	}
 
-	uint32_t VulkanInstance::GetQueueFamilyIndex(const EQueueType queueType) const
+	uint32_t VulkanContext::GetQueueFamilyIndex(const EQueueType queueType) const
 	{
 		switch (queueType)
 		{
@@ -42,7 +42,7 @@ namespace sy
 		return graphicsQueueFamilyIdx;
 	}
 
-	VkQueue VulkanInstance::GetQueue(EQueueType queueType) const
+	VkQueue VulkanContext::GetQueue(EQueueType queueType) const
 	{
 		switch (queueType)
 		{
@@ -59,7 +59,7 @@ namespace sy
 		return graphicsQueue;
 	}
 
-	void VulkanInstance::SubmitTo(const EQueueType queueType, const VkSubmitInfo& submitInfo, const Fence& fence) const
+	void VulkanContext::SubmitTo(const EQueueType queueType, const VkSubmitInfo& submitInfo, const Fence& fence) const
 	{
 		const auto queue = GetQueue(queueType);
 		SY_ASSERT(queue != VK_NULL_HANDLE, "Invalid queue submission request.");
@@ -67,7 +67,7 @@ namespace sy
 		VK_ASSERT(vkQueueSubmit(queue, 1, &submitInfo, fence.GetNativeHandle()), "Failed to submit to queue.");
 	}
 
-	void VulkanInstance::SubmitTo(EQueueType queueType, const std::span<std::reference_wrapper<const Semaphore>> waitSemaphores, const std::span<std::reference_wrapper<const CommandBuffer>> cmdBuffers, std::span<std::reference_wrapper<const Semaphore>> signalSemaphores, const VkPipelineStageFlags waitStage, const Fence& fence) const
+	void VulkanContext::SubmitTo(EQueueType queueType, const std::span<std::reference_wrapper<const Semaphore>> waitSemaphores, const std::span<std::reference_wrapper<const CommandBuffer>> cmdBuffers, std::span<std::reference_wrapper<const Semaphore>> signalSemaphores, const VkPipelineStageFlags waitStage, const Fence& fence) const
 	{
 		const auto waitSemaphoreNatives = TransformVulkanWrappersToNatives(waitSemaphores);
 		const auto cmdBufferNatives = TransformVulkanWrappersToNativesWithValidation<CommandBuffer>(cmdBuffers
@@ -93,13 +93,13 @@ namespace sy
 		SubmitTo(queueType, submitInfo, fence);
 	}
 
-	void VulkanInstance::Present(const VkPresentInfoKHR& presentInfo) const
+	void VulkanContext::Present(const VkPresentInfoKHR& presentInfo) const
 	{
 		const auto queue = GetQueue(EQueueType::Present);
 		vkQueuePresentKHR(queue, &presentInfo);
 	}
 
-	void VulkanInstance::Present(const Swapchain& swapchain, const Semaphore& waitSemaphore) const
+	void VulkanContext::Present(const Swapchain& swapchain, const Semaphore& waitSemaphore) const
 	{
 		const auto swapchainImageIdx = swapchain.GetCurrentImageIndex();
 		const auto waitSemaphoreNative = waitSemaphore.GetNativeHandle();
@@ -118,13 +118,13 @@ namespace sy
 		Present(presentInfo);
 	}
 
-	void VulkanInstance::WaitQueueForIdle(const EQueueType queueType) const
+	void VulkanContext::WaitQueueForIdle(const EQueueType queueType) const
 	{
 		const VkQueue queue = GetQueue(queueType);
 		vkQueueWaitIdle(queue);
 	}
 
-	void VulkanInstance::WaitAllQueuesForIdle() const
+	void VulkanContext::WaitAllQueuesForIdle() const
 	{
 		vkQueueWaitIdle(graphicsQueue);
 		vkQueueWaitIdle(computeQueue);
@@ -132,16 +132,12 @@ namespace sy
 		vkQueueWaitIdle(presentQueue);
 	}
 
-	void VulkanInstance::BeginFrame(const size_t currentInFlightFrameIdx) const
+	void VulkanContext::WaitForDeviceIdle() const
 	{
-		const auto& frameDependCmdPools = cmdPools[currentInFlightFrameIdx];
-		for (const auto& cmdPool : frameDependCmdPools)
-		{
-			cmdPool->BeginFrame();
-		}
+		vkDeviceWaitIdle(device);
 	}
 
-	void VulkanInstance::Startup()
+	void VulkanContext::Startup()
 	{
 		volkInitialize();
 
@@ -223,23 +219,13 @@ namespace sy
 		spdlog::trace("VMA instance successfully created.");
 
 		InitQueues(vkbDevice);
-
 	}
 
-	void VulkanInstance::Cleanup()
+	void VulkanContext::Cleanup()
 	{
 		WaitAllQueuesForIdle();
 		{
-			spdlog::trace("Cleanup command pools...");
-			{
-				RWLock lock(cmdPoolMutex);
-				for (auto& cmdPoolVec : cmdPools)
-				{
-					cmdPoolVec.clear();
-				}
-			}
 			allocator = VK_NULL_HANDLE;
-
 			spdlog::trace("Cleanup swap chain...");
 			swapchain.reset();
 
@@ -257,7 +243,7 @@ namespace sy
 		}
 	}
 
-	void VulkanInstance::InitQueues(const vkb::Device& vkbDevice)
+	void VulkanContext::InitQueues(const vkb::Device& vkbDevice)
 	{
 		spdlog::trace("Initializing queues..");
 		const auto graphicsQueueRes = vkbDevice.get_queue(vkb::QueueType::graphics);
@@ -283,22 +269,5 @@ namespace sy
 		presentQueue = presentQueueRes.value();
 		presentQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::present).value();
 		spdlog::trace("Present Queue successfully acquired. Family Index: {}.", presentQueueFamilyIdx);
-	}
-
-	CommandPool& VulkanInstance::RequestCommandPool(const EQueueType queueType, const size_t currentInFlightFrameIdx)
-	{
-		thread_local robin_hood::unordered_map<EQueueType, std::array<CommandPool*, NumMaxInFlightFrames>> localCmdPools;
-		if (!localCmdPools.contains(queueType))
-		{
-			RWLock lock(cmdPoolMutex);
-			for (size_t inFlightFrameIdx = 0; inFlightFrameIdx < NumMaxInFlightFrames; ++inFlightFrameIdx)
-			{
-				auto* newCmdPool = new CommandPool(*this, queueType);
-				localCmdPools[queueType][inFlightFrameIdx] = newCmdPool;
-				cmdPools[inFlightFrameIdx].emplace_back(newCmdPool);
-			}
-		}
-
-		return *(localCmdPools[queueType][currentInFlightFrameIdx]);
 	}
 }

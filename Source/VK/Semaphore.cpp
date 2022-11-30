@@ -1,13 +1,13 @@
 #include <Core.h>
 #include <VK/Semaphore.h>
-#include <Vk/VulkanInstance.h>
+#include <Vk/VulkanContext.h>
 
 namespace sy
 {
-	Semaphore::Semaphore(const std::string_view name, const VulkanInstance& vulkanInstance) :
-		VulkanWrapper<VkSemaphore>(name, vulkanInstance, VK_DESTROY_LAMBDA_SIGNATURE(VkSemaphore)
+	Semaphore::Semaphore(const std::string_view name, const VulkanContext& vulkanContext) :
+		VulkanWrapper<VkSemaphore>(name, vulkanContext, VK_DESTROY_LAMBDA_SIGNATURE(VkSemaphore)
 		{
-			vkDestroySemaphore(vulkanInstance.GetLogicalDevice(), handle, nullptr);
+			vkDestroySemaphore(vulkanContext.GetDevice(), handle, nullptr);
 		})
 	{
 		const VkSemaphoreCreateInfo createInfo
@@ -17,6 +17,6 @@ namespace sy
 			.flags = 0
 		};
 
-		vkCreateSemaphore(vulkanInstance.GetLogicalDevice(), &createInfo, nullptr, &handle);
+		vkCreateSemaphore(vulkanContext.GetDevice(), &createInfo, nullptr, &handle);
 	}
 }

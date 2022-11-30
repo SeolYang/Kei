@@ -2,32 +2,32 @@
 
 namespace sy
 {
-	class VulkanInstance;
+	class VulkanContext;
 
 	template <typename VulkanHandleType>
 	class VulkanWrapper : public NamedType
 	{
 	public:
-		using VulkanDestroyFunction_t = std::function<void(const VulkanInstance& vulkanInstance, VulkanHandleType)>;
+		using VulkanDestroyFunction_t = std::function<void(const VulkanContext& VulkanContext, VulkanHandleType)>;
 		using Native_t = VulkanHandleType;
 
 	public:
-		VulkanWrapper(const std::string_view name, const VulkanInstance& vulkanInstance, const VulkanDestroyFunction_t destroyFunction) :
+		VulkanWrapper(const std::string_view name, const VulkanContext& vulkanContext, const VulkanDestroyFunction_t destroyFunction) :
 			NamedType(name),
-			vulkanInstance(vulkanInstance),
+			vulkanContext(vulkanContext),
 			destroyFunction(destroyFunction)
 		{
 		}
 
 		virtual ~VulkanWrapper()
 		{
-			destroyFunction(vulkanInstance, handle);
+			destroyFunction(vulkanContext, handle);
 		}
 
 		[[nodiscard]] Native_t GetNativeHandle() const { return handle; }
 
 	protected:
-		const VulkanInstance& vulkanInstance;
+		const VulkanContext& vulkanContext;
 		const VulkanDestroyFunction_t destroyFunction;
 		Native_t handle = VK_NULL_HANDLE;
 
@@ -61,4 +61,4 @@ namespace sy
 	}
 }
 
-#define VK_DESTROY_LAMBDA_SIGNATURE(HANDLE_TYPE) [](const VulkanInstance& vulkanInstance, HANDLE_TYPE handle)
+#define VK_DESTROY_LAMBDA_SIGNATURE(HANDLE_TYPE) [](const VulkanContext& vulkanContext, HANDLE_TYPE handle)

@@ -1,11 +1,13 @@
 #include <Core.h>
-#include <VK/DescriptorManager.h>
-#include <VK/VulkanInstance.h>
+#include <DescriptorManager.h>
+#include <FrameTracker.h>
+#include <VK/VulkanContext.h>
 
 namespace sy
 {
-	DescriptorManager::DescriptorManager(const VulkanInstance& vulkanInstance) :
-		vulkanInstance(vulkanInstance)
+	DescriptorManager::DescriptorManager(const VulkanContext& vulkanContext, const FrameTracker& frameTracker) :
+		vulkanContext(vulkanContext),
+		frameTracker(frameTracker)
 	{
 		DescriptorPoolSizeBuilder poolSizeBuilder;
 		poolSizeBuilder.AddDescriptors(EDescriptorType::CombinedImageSampler, 1000)
@@ -40,7 +42,7 @@ namespace sy
 			[](const DescriptorPoolSize& poolSize)
 			{
 				return
-				VkDescriptorSetLayoutBinding
+					VkDescriptorSetLayoutBinding
 				{
 					ToUnderlying(poolSize.Type),
 					ToNative(poolSize.Type),
@@ -74,57 +76,43 @@ namespace sy
 		};
 
 		spdlog::trace("Creating Bindless descriptor set layout...");
-		VK_ASSERT(vkCreateDescriptorSetLayout(vulkanInstance.GetLogicalDevice(), &bindlessLayoutInfo, nullptr, &bindlessLayout), "Failed to create bindless descriptor set layout.");
+		VK_ASSERT(vkCreateDescriptorSetLayout(vulkanContext.GetDevice(), &bindlessLayoutInfo, nullptr, &bindlessLayout), "Failed to create bindless descriptor set layout.");
 
-		RefVec<PoolPackage> poolPackageRefs;
-		poolPackageRefs.emplace_back(persistentDescriptorPackage);
-		for (auto& transientDescriptorPackage : transientDescriptorPackages)
+
+		spdlog::trace("Creating pool package...");
+		VK_ASSERT(vkCreateDescriptorPool(vulkanContext.GetDevice(), &poolCreateInfo, nullptr, &descriptorPoolPackage.DescriptorPool), "Failed to create descriptor pool.");
+
+		const VkDescriptorSetVariableDescriptorCountAllocateInfoEXT descriptorSetVariableDescriptorCountAllocateInfo
 		{
-			poolPackageRefs.emplace_back(transientDescriptorPackage);
-		}
+			.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT,
+			.pNext = nullptr,
+			.descriptorSetCount = 1,
+			.pDescriptorCounts = descriptorCounts.data()
+		};
 
-		spdlog::trace("Creating pool packages...");
-		for (auto& poolPackageRef : poolPackageRefs)
+		const VkDescriptorSetAllocateInfo setAllocateInfo
 		{
-			auto& poolPackage = poolPackageRef.get();
-			VK_ASSERT(vkCreateDescriptorPool(vulkanInstance.GetLogicalDevice(), &poolCreateInfo, nullptr, &poolPackage.DescriptorPool), "Failed to create descriptor pool.");
+			.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+			.pNext = &descriptorSetVariableDescriptorCountAllocateInfo,
+			.descriptorPool = descriptorPoolPackage.DescriptorPool,
+			.descriptorSetCount = 1,
+			.pSetLayouts = &bindlessLayout
+		};
 
-			const VkDescriptorSetVariableDescriptorCountAllocateInfoEXT descriptorSetVariableDescriptorCountAllocateInfo
-			{
-				.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT,
-				.pNext = nullptr,
-				.descriptorSetCount = 1,
-				.pDescriptorCounts = descriptorCounts.data()
-			};
-
-			const VkDescriptorSetAllocateInfo setAllocateInfo
-			{
-				.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-				.pNext = &descriptorSetVariableDescriptorCountAllocateInfo,
-				.descriptorPool = poolPackage.DescriptorPool,
-				.descriptorSetCount = 1,
-				.pSetLayouts = &bindlessLayout
-			};
-
-			VK_ASSERT(vkAllocateDescriptorSets(vulkanInstance.GetLogicalDevice(), &setAllocateInfo, &poolPackage.DescriptorSet), "Failed to allocate descriptor set.");
-		}
+		VK_ASSERT(vkAllocateDescriptorSets(vulkanContext.GetDevice(), &setAllocateInfo, &descriptorPoolPackage.DescriptorSet), "Failed to allocate descriptor set.");
 	}
 
 	DescriptorManager::~DescriptorManager()
 	{
-		for (const auto& poolPackage : transientDescriptorPackages)
-		{
-			vkDestroyDescriptorPool(vulkanInstance.GetLogicalDevice(), poolPackage.DescriptorPool, nullptr);
-		}
-
-		vkDestroyDescriptorSetLayout(vulkanInstance.GetLogicalDevice(), bindlessLayout, nullptr);
+		vkDestroyDescriptorPool(vulkanContext.GetDevice(), descriptorPoolPackage.DescriptorPool, nullptr);
+		vkDestroyDescriptorSetLayout(vulkanContext.GetDevice(), bindlessLayout, nullptr);
 	}
 
-	void DescriptorManager::BeginFrame(const size_t currentInFlightFrameIdx)
+	void DescriptorManager::BeginFrame()
 	{
 	}
 
-	void DescriptorManager::EndFrame(const size_t currentInFlightFrameIdx)
+	void DescriptorManager::EndFrame()
 	{
 	}
 }

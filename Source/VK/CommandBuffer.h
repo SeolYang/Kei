@@ -3,14 +3,14 @@
 
 namespace sy
 {
-	class VulkanInstance;
+	class VulkanContext;
 	class CommandPool;
 	class Fence;
 	class Pipeline;
 	class CommandBuffer : public VulkanWrapper<VkCommandBuffer>
 	{
 	public:
-		CommandBuffer(std::string_view name, const VulkanInstance& vulkanInstance, const CommandPool& cmdPool);
+		CommandBuffer(std::string_view name, const VulkanContext& vulkanContext, const CommandPool& cmdPool);
 		virtual ~CommandBuffer() override = default;
 
 		[[nodiscard]] EQueueType GetQueueType() const { return queueType; }
