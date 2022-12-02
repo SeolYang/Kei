@@ -14,7 +14,7 @@ namespace sy
 		Pipeline(std::string_view name, const VulkanContext& vulkanContext, const ComputePipelineBuilder& builder);
 
 		[[nodiscard]] auto GetPipelineType() const { return pipelineType; }
-		[[nodiscard]] auto GetPipelineBindPoint() const { return PipelineTypeToBindPoint(pipelineType); }
+		[[nodiscard]] auto GetPipelineBindPoint() const { return ToNative(pipelineType); }
 		[[nodiscard]] auto GetPipelineLayout() const { return layout; }
 
 	private:

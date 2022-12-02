@@ -18,16 +18,17 @@ namespace sy
 		RayTracing
 	};
 
-	static VkPipelineBindPoint PipelineTypeToBindPoint(const EPipelineType type)
+	static VkPipelineBindPoint ToNative(const EPipelineType type)
 	{
 		switch (type)
 		{
-		case EPipelineType::Graphics:
-			return VK_PIPELINE_BIND_POINT_GRAPHICS;
 		case EPipelineType::Compute:
 			return VK_PIPELINE_BIND_POINT_COMPUTE;
 		case EPipelineType::RayTracing:
 			return VK_PIPELINE_BIND_POINT_RAY_TRACING_NV;
+		default:
+		case EPipelineType::Graphics:
+			return VK_PIPELINE_BIND_POINT_GRAPHICS;
 		}
 	}
 
@@ -69,6 +70,7 @@ namespace sy
 			return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
 		default:
 			SY_ASSERT(false, "Invalid value!");
+			return VK_DESCRIPTOR_TYPE_MAX_ENUM;
 		}
 	}
 

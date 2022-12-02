@@ -18,6 +18,8 @@
       "assimp",
       "meshoptimizer",
       "spdlog",
-      "robin-hood-hashing"
+      "robin-hood-hashing",
+      "entt",
+      "taskflow"
     ]
   }

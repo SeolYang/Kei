@@ -32,6 +32,7 @@
 #include <numbers>
 #include <tuple>
 #include <fstream>
+#include <concurrent_queue.h>
 
 namespace sy
 {
@@ -83,6 +84,13 @@ namespace sy
 /** spdlog */
 #include <spdlog/spdlog.h>
 
+/** entt */
+#include <entt/entt.hpp>
+
+/** taskflow */
+#include <taskflow/taskflow.hpp>
+
+/** Internals */
 #include <UniqueHandle.h>
 #include <NamedType.h>
 #include <Extent.h>
