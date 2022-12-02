@@ -14,6 +14,7 @@ namespace sy
 	class CommandPoolManager;
 	class DescriptorManager;
 	class Texture2D;
+	class Buffer;
 	class Renderer
 	{
 	public:
@@ -40,6 +41,7 @@ namespace sy
 		std::unique_ptr<Pipeline> basicPipeline;
 
 		std::unique_ptr<Texture2D> test;
+		std::unique_ptr<Buffer> testBuffer;
 
 	};
 }

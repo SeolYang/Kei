@@ -1,5 +1,5 @@
 #pragma once
-
+#define VK_DESTROY_LAMBDA_SIGNATURE(HANDLE_TYPE) [](const VulkanContext& vulkanContext, HANDLE_TYPE handle)
 namespace sy
 {
 	class VulkanContext;
@@ -12,6 +12,11 @@ namespace sy
 		using Native_t = VulkanHandleType;
 
 	public:
+		VulkanWrapper(const std::string_view name, const VulkanContext& vulkanContext) :
+			VulkanWrapper(name, vulkanContext, VK_DESTROY_LAMBDA_SIGNATURE(Native_t){})
+		{
+		}
+
 		VulkanWrapper(const std::string_view name, const VulkanContext& vulkanContext, const VulkanDestroyFunction_t destroyFunction) :
 			NamedType(name),
 			vulkanContext(vulkanContext),
@@ -60,5 +65,3 @@ namespace sy
 			});
 	}
 }
-
-#define VK_DESTROY_LAMBDA_SIGNATURE(HANDLE_TYPE) [](const VulkanContext& vulkanContext, HANDLE_TYPE handle)

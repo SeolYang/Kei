@@ -90,6 +90,9 @@ namespace sy
 /** taskflow */
 #include <taskflow/taskflow.hpp>
 
+/** glm */
+#include <glm/glm.hpp>
+
 /** Internals */
 #include <UniqueHandle.h>
 #include <NamedType.h>

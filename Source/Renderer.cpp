@@ -12,12 +12,18 @@
 #include <VK/PipelineBuilder.h>
 #include <VK/LayoutCache.h>
 #include <VK/Texture.h>
+#include <VK/Buffer.h>
 #include <DescriptorManager.h>
 #include <CommandPoolManager.h>
 #include <FrameTracker.h>
 
 namespace sy
 {
+	struct ColorData
+	{
+		glm::vec4 color;
+	};
+
 	Renderer::Renderer(const Window& window, VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, DescriptorManager& descriptorManager) :
 		window(window),
 		vulkanContext(vulkanContext),
@@ -42,6 +48,7 @@ namespace sy
 		basicPipeline = std::make_unique<Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
 		test = std::make_unique<Texture2D>("test", vulkanContext, Extent2D<uint32_t>{ 1280, 720 }, 1, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VMA_MEMORY_USAGE_GPU_ONLY);
+		testBuffer = Buffer::CreateBuffer<ColorData>("ColorBuffer", vulkanContext, 0, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 	}
 
 	Renderer::~Renderer()
