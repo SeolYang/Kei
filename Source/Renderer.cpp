@@ -10,6 +10,7 @@
 #include <VK/ShaderModule.h>
 #include <VK/Pipeline.h>
 #include <VK/PipelineBuilder.h>
+#include <VK/Texture.h>
 #include <DescriptorManager.h>
 #include <CommandPoolManager.h>
 #include <FrameTracker.h>
@@ -35,6 +36,8 @@ namespace sy
 			.AddViewport(0.f, 0.f, static_cast<float>(windowExtent.width), static_cast<float>(windowExtent.height), 0.0f, 1.0f)
 			.AddScissor(0, 0, windowExtent.width, windowExtent.height);
 		basicPipeline = std::make_unique<Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
+
+		test = std::make_unique<Texture2D>("test", vulkanContext, Extent2D<uint32_t>{ 1280, 720 }, 1, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_LAYOUT_UNDEFINED);
 	}
 
 	Renderer::~Renderer()

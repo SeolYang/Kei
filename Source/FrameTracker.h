@@ -12,8 +12,10 @@ namespace sy
 		{
 			size_t InFlightFrameIndex = std::numeric_limits<size_t>::max();
 			std::unique_ptr<Fence> RenderFence;
+			std::unique_ptr<Fence> UploadFence;
 			std::unique_ptr<Semaphore> RenderSemaphore;
 			std::unique_ptr<Semaphore> PresentSemaphore;
+			std::unique_ptr<Semaphore> UploadSemaphore;
 		};
 
 	public:
@@ -31,9 +33,12 @@ namespace sy
 		void WaitForInFlightRenderFence() const;
 		void ResetInFlightRenderFence() const;
 
+		const Frame& GetCurrentInFlightFrame() const { return frames[GetCurrentInFlightFrameIndex()]; }
 		Fence& GetCurrentInFlightRenderFence() const;
+		Fence& GetCurrentInFlightUploadFence() const;
 		Semaphore& GetCurrentInFlightRenderSemaphore() const;
 		Semaphore& GetCurrentInFlightPresentSemaphore() const;
+		Semaphore& GetCurrentInFlightUploadSemaphore() const;
 
 		[[nodiscard]] size_t GetCurrentFrameIndex() const { return currentFrameIdx; }
 		[[nodiscard]] size_t GetCurrentInFlightFrameIndex() const { return currentFrameIdx % NumMaxInFlightFrames; }

@@ -75,6 +75,12 @@
     <ClCompile Include="..\Source\CommandPoolManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\VK\Texture.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\Buffer.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Core.h">
@@ -157,6 +163,15 @@
     </ClInclude>
     <ClInclude Include="..\Source\CommandPoolManager.h">
       <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\UploadContext.h">
+      <Filter>Source\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\Texture.h">
+      <Filter>Source\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\Buffer.h">
+      <Filter>Source\Vulkan</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

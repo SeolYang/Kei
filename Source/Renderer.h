@@ -12,6 +12,7 @@ namespace sy
 	class FrameTracker;
 	class CommandPoolManager;
 	class DescriptorManager;
+	class Texture2D;
 	class Renderer
 	{
 	public:
@@ -31,10 +32,11 @@ namespace sy
 		CommandPoolManager& cmdPoolManager;
 		DescriptorManager& descriptorManager;
 		
-
 		std::unique_ptr<ShaderModule> triVert;
 		std::unique_ptr<ShaderModule> triFrag;
 		std::unique_ptr<Pipeline> basicPipeline;
+
+		std::unique_ptr<Texture2D> test;
 
 	};
 }

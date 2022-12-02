@@ -27,6 +27,7 @@ namespace sy
 		[[nodiscard]] VkQueue GetQueue(EQueueType queueType) const;
 		[[nodiscard]] VkSurfaceKHR GetSurface() const { return surface; }
 		[[nodiscard]] Swapchain& GetSwapchain() const { return *swapchain; }
+		[[nodiscard]] VmaAllocator GetAllocator() const { return allocator; }
 
 		void SubmitTo(EQueueType queueType, const VkSubmitInfo& submitInfo, const Fence& fence) const;
 		void SubmitTo(
