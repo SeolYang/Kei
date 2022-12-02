@@ -27,10 +27,10 @@ namespace sy
 		/** Width, Height, Depth */
 		VmaAllocation allocation;
 		Extent3D<uint32_t> extent;
-		VkImageLayout layout;
-		VkImageView view;
-		uint32_t mipLevels;
-		VkSampler sampler;
+		VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
+		VkImageView view = VK_NULL_HANDLE;
+		uint32_t mipLevels = 1;
+		VkSampler sampler = VK_NULL_HANDLE;
 
 	};
 

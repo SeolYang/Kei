@@ -81,6 +81,9 @@
     <ClCompile Include="..\Source\VK\Buffer.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\VK\LayoutCache.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Core.h">
@@ -171,6 +174,9 @@
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\VK\Buffer.h">
+      <Filter>Source\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\LayoutCache.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
   </ItemGroup>

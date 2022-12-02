@@ -225,6 +225,7 @@ namespace sy
 	{
 		WaitAllQueuesForIdle();
 		{
+			vmaDestroyAllocator(allocator);
 			allocator = VK_NULL_HANDLE;
 			spdlog::trace("Cleanup swap chain...");
 			swapchain.reset();

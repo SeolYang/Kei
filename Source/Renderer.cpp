@@ -10,6 +10,7 @@
 #include <VK/ShaderModule.h>
 #include <VK/Pipeline.h>
 #include <VK/PipelineBuilder.h>
+#include <VK/LayoutCache.h>
 #include <VK/Texture.h>
 #include <DescriptorManager.h>
 #include <CommandPoolManager.h>
@@ -22,19 +23,22 @@ namespace sy
 		vulkanContext(vulkanContext),
 		frameTracker(frameTracker),
 		cmdPoolManager(cmdPoolManager),
-		descriptorManager(descriptorManager)
+		descriptorManager(descriptorManager),
+		pipelineLayoutCache(std::make_unique<PipelineLayoutCache>(vulkanContext))
 	{
 		const auto windowExtent = window.GetExtent();
 
 		triVert = std::make_unique<ShaderModule>("Triangle vertex shader", vulkanContext, "Assets/Shaders/bin/tri.vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 		triFrag = std::make_unique<ShaderModule>("Triangle fragment shader", vulkanContext, "Assets/Shaders/bin/tri.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
+		std::array descriptorSetLayouts = { descriptorManager.GetDescriptorSetLayout(), };
 		GraphicsPipelineBuilder basicPipelineBuilder;
 		basicPipelineBuilder.SetDefault()
 			.AddShaderStage(*triVert)
 			.AddShaderStage(*triFrag)
 			.AddViewport(0.f, 0.f, static_cast<float>(windowExtent.width), static_cast<float>(windowExtent.height), 0.0f, 1.0f)
-			.AddScissor(0, 0, windowExtent.width, windowExtent.height);
+			.AddScissor(0, 0, windowExtent.width, windowExtent.height)
+			.SetPipelineLayout(pipelineLayoutCache->Request(descriptorSetLayouts, {}));
 		basicPipeline = std::make_unique<Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
 		test = std::make_unique<Texture2D>("test", vulkanContext, Extent2D<uint32_t>{ 1280, 720 }, 1, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_LAYOUT_UNDEFINED);

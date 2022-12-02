@@ -9,6 +9,7 @@ namespace sy
 	class Fence;
 	class ShaderModule;
 	class Pipeline;
+	class PipelineLayoutCache;
 	class FrameTracker;
 	class CommandPoolManager;
 	class DescriptorManager;
@@ -31,6 +32,8 @@ namespace sy
 		const FrameTracker& frameTracker;
 		CommandPoolManager& cmdPoolManager;
 		DescriptorManager& descriptorManager;
+
+		std::unique_ptr<PipelineLayoutCache> pipelineLayoutCache;
 		
 		std::unique_ptr<ShaderModule> triVert;
 		std::unique_ptr<ShaderModule> triFrag;
