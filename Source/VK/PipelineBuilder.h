@@ -86,7 +86,7 @@ namespace sy
 		GraphicsPipelineBuilder& SetColorBlendConstants(std::array<float, 4> blendConstants);
 
 		GraphicsPipelineBuilder& SetPipelineLayout(VkPipelineLayout pipelineLayout);
-		VkPipelineLayout GetPipelineLayout() const { return pipelineLayout; }
+		VkPipelineLayout GetLayout() const { return pipelineLayout; }
 
 		[[nodiscard]] VkGraphicsPipelineCreateInfo Build() const;
 
@@ -122,7 +122,7 @@ namespace sy
 		ComputePipelineBuilder& SetPipelineLayout(VkPipelineLayout layout);
 
 		VkComputePipelineCreateInfo Build() const;
-		VkPipelineLayout GetPipelineLayout() const { return layout; }
+		VkPipelineLayout GetLayout() const { return layout; }
 
 	private:
 		VkPipelineCreateFlags createFlags;

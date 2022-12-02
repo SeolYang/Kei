@@ -107,6 +107,7 @@ namespace sy
 		void EndFrame();
 
 		[[nodiscard]] VkDescriptorSetLayout GetDescriptorSetLayout() const { return bindlessLayout; }
+		[[nodiscard]] VkDescriptorSet GetDescriptorSet() const { return descriptorPoolPackage.DescriptorSet; }
 
 	private:
 		const VulkanContext& vulkanContext;

@@ -94,7 +94,13 @@ namespace sy
 
 	void CommandBuffer::BindPipeline(const Pipeline& pipeline) const
 	{
-		vkCmdBindPipeline(handle, pipeline.GetPipelineBindPoint(), pipeline.GetNativeHandle());
+		vkCmdBindPipeline(handle, pipeline.GetBindPoint(), pipeline.GetNativeHandle());
+	}
+
+	void CommandBuffer::BindDescriptorSet(VkDescriptorSet descriptorSet, const Pipeline& pipeline) const
+	{
+		const VkDescriptorSet descriptorSets[] = { descriptorSet, };
+		vkCmdBindDescriptorSets(handle, pipeline.GetBindPoint(), pipeline.GetLayout(), 0, 1, descriptorSets, 0, nullptr);
 	}
 
 	void CommandBuffer::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const

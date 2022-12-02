@@ -26,6 +26,7 @@ namespace sy
 		void PipelineBarrier(VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, std::span<VkMemoryBarrier> memoryBarriers, std::span<VkBufferMemoryBarrier> bufferMemoryBarriers, std::span<VkImageMemoryBarrier> imageMemoryBarriers) const;
 
 		void BindPipeline(const Pipeline& pipeline) const;
+		void BindDescriptorSet(VkDescriptorSet descriptorSet, const Pipeline& pipeline) const;
 		void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const;
 
 	public:
