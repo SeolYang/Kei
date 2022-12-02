@@ -137,6 +137,16 @@ namespace sy
 		vkDeviceWaitIdle(device);
 	}
 
+	size_t VulkanContext::PadUniformBufferSize(const size_t allocSize) const
+	{
+		return PadSizeWithAlignment(allocSize, gpuProperties.limits.minUniformBufferOffsetAlignment);
+	}
+
+	size_t VulkanContext::PadStorageBufferSize(size_t allocSize) const
+	{
+		return PadSizeWithAlignment(allocSize, gpuProperties.limits.minStorageBufferOffsetAlignment);
+	}
+
 	void VulkanContext::Startup()
 	{
 		volkInitialize();
@@ -168,7 +178,21 @@ namespace sy
 			.value();
 
 		physicalDevice = vkbPhysicalDevice.physical_device;
-		gpuName = vkbPhysicalDevice.properties.deviceName;
+		gpuProperties = vkbPhysicalDevice.properties;
+		gpuName = gpuProperties.deviceName;
+		spdlog::trace("\n----------- GPU Properties -----------\n* Device Name: {}\n* GPU Vendor ID: {}\n* API Version: {}\n* Driver Version: {}\n* Device ID: {}\n* Max Bound Descriptor Sets: {}\n* Min Uniform Buffer Offset Alignment: {}\n* Min Storage Buffer Offset Alignment: {}\n* Max Frame Buffer Extent: {}x{}\n* Max Memory Allocation Count: {}\n* Max Sampler Allocation Count: {}\n",
+			gpuName,
+			gpuProperties.vendorID,
+			gpuProperties.apiVersion,
+			gpuProperties.driverVersion,
+			gpuProperties.deviceID,
+			gpuProperties.limits.maxBoundDescriptorSets,
+			gpuProperties.limits.minUniformBufferOffsetAlignment,
+			gpuProperties.limits.minStorageBufferOffsetAlignment,
+			gpuProperties.limits.maxFramebufferWidth,
+			gpuProperties.limits.maxFramebufferHeight,
+			gpuProperties.limits.maxMemoryAllocationCount,
+			gpuProperties.limits.maxSamplerAllocationCount);
 
 		vkb::DeviceBuilder deviceBuilder{ vkbPhysicalDevice };
 		VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures

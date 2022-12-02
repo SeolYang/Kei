@@ -66,6 +66,17 @@ namespace sy
 	{
 		return static_cast<std::underlying_type_t<T>>(val);
 	}
+
+	constexpr size_t PadSizeWithAlignment(const size_t allocSize, const size_t alignment)
+	{
+		size_t alignedSize = allocSize;
+		if (alignment > 0)
+		{
+			alignedSize = (alignedSize + alignment - 1) & ~(alignment - 1);
+		}
+
+		return alignedSize;
+	}
 }
 
 /** Vulkan Headers */

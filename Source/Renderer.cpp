@@ -120,7 +120,7 @@ namespace sy
 				{
 					// Rendering something here
 					graphicsCmdBuffer->BindPipeline(*basicPipeline);
-					//graphicsCmdBuffer->BindDescriptorSet(globalDescriptorPool, *basicPipeline);
+					graphicsCmdBuffer->BindDescriptorSet(descriptorManager.GetDescriptorSet(), *basicPipeline);
 					graphicsCmdBuffer->Draw(3, 1, 0, 0);
 				}
 				graphicsCmdBuffer->EndRendering();

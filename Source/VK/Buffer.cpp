@@ -9,13 +9,28 @@ namespace sy
 		const VmaMemoryUsage memoryUsage) :
 		VulkanWrapper(name, vulkanContext)
 	{
+		size_t alignedBufferSize = bufferSize;
+		switch (bufferUsageFlags)
+		{
+		case VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT:
+			alignedBufferSize = vulkanContext.PadUniformBufferSize(bufferSize);
+			break;
+
+		case VK_BUFFER_USAGE_STORAGE_BUFFER_BIT:
+			alignedBufferSize = vulkanContext.PadStorageBufferSize(bufferSize);
+			break;
+
+		default:
+			break;
+		}
+		this->bufferSize = alignedBufferSize;
 
 		const VkBufferCreateInfo createInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
 			.pNext = nullptr,
 			.flags = bufferCreateFlags,
-			.size = bufferSize,
+			.size = alignedBufferSize,
 			.usage = bufferUsageFlags,
 			.sharingMode = VK_SHARING_MODE_EXCLUSIVE
 		};

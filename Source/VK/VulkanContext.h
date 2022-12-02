@@ -44,6 +44,9 @@ namespace sy
 		void WaitAllQueuesForIdle() const;
 		void WaitForDeviceIdle() const;
 
+		size_t PadUniformBufferSize(size_t allocSize) const;
+		size_t PadStorageBufferSize(size_t allocSize) const;
+
 	private:
 		void Startup();
 		void Cleanup();
@@ -56,6 +59,7 @@ namespace sy
 		VkDebugUtilsMessengerEXT debugMessenger;
 		VkSurfaceKHR surface;
 		VkPhysicalDevice physicalDevice;
+		VkPhysicalDeviceProperties gpuProperties;
 		VkDevice device;
 		std::string gpuName;
 
