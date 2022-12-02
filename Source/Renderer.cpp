@@ -41,7 +41,7 @@ namespace sy
 			.SetPipelineLayout(pipelineLayoutCache->Request(descriptorSetLayouts, {}));
 		basicPipeline = std::make_unique<Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
-		test = std::make_unique<Texture2D>("test", vulkanContext, Extent2D<uint32_t>{ 1280, 720 }, 1, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_LAYOUT_UNDEFINED);
+		test = std::make_unique<Texture2D>("test", vulkanContext, Extent2D<uint32_t>{ 1280, 720 }, 1, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VMA_MEMORY_USAGE_GPU_ONLY);
 	}
 
 	Renderer::~Renderer()

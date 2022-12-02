@@ -4,10 +4,14 @@
 
 namespace sy
 {
-	Texture::Texture(const std::string_view name, const VulkanContext& vulkanContext) :
+	Texture::Texture(const std::string_view name, const VulkanContext& vulkanContext, const VkFormat format, const VkImageLayout initialLayout, const VmaMemoryUsage memoryUsage, const uint32_t mipLevels) :
 		VulkanWrapper(name, vulkanContext, VK_DESTROY_LAMBDA_SIGNATURE(VkImage)
 		{
-		})
+		}),
+		format(format),
+		initialLayout(initialLayout),
+		mipLevels(mipLevels),
+		memoryUsage(memoryUsage)
 	{
 	}
 
@@ -29,8 +33,8 @@ namespace sy
 	}
 
 	Texture2D::Texture2D(std::string_view name, const VulkanContext& vulkanContext, const Extent2D<uint32_t> extent, const uint32_t mipLevels, const VkFormat format,
-		const VkImageUsageFlags usageFlags, const VkImageLayout layout) :
-		Texture(name, vulkanContext)
+		const VkImageUsageFlags usageFlags, const VkImageLayout initialLayout, const VmaMemoryUsage memoryUsage) :
+		Texture(name, vulkanContext, format, initialLayout, memoryUsage, mipLevels)
 	{
 		const auto allocator = vulkanContext.GetAllocator();
 		const VkImageCreateInfo imageCreateInfo
@@ -47,12 +51,12 @@ namespace sy
 			.tiling = VK_IMAGE_TILING_OPTIMAL,
 			.usage = usageFlags,
 			.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-			.initialLayout = layout
+			.initialLayout = initialLayout
 		};
 
 		const VmaAllocationCreateInfo allocationCreateInfo
 		{
-			.usage = VMA_MEMORY_USAGE_GPU_ONLY
+			.usage = memoryUsage
 		};
 
 		VK_ASSERT(vmaCreateImage(allocator, &imageCreateInfo, &allocationCreateInfo, &handle, &allocation, nullptr), "Failed to create image {}.", name);
