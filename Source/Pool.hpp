@@ -3,23 +3,34 @@
 
 namespace sy
 {
+    template <typename DataType>
+    struct SlotType
+    {
+        size_t Offset;
+        DataType Data;
+
+        void Reset() { Offset = -1; }
+        [[nodiscard]] bool IsValidOffset() const { return Offset != -1; }
+
+    };
+
+    template <>
+    struct SlotType<void>
+    {
+        size_t Offset;
+
+        void Reset() { Offset = -1; }
+        [[nodiscard]] bool IsValidOffset() const { return Offset != -1; }
+    };
+
+    template <typename DataType>
+    using SlotPtr = std::unique_ptr<SlotType<DataType>, std::function<void(const SlotType<DataType>*)>>;
+    using OffsetSlotPtr = SlotPtr<void>;
+
     template <typename SlotDataType = void>
     class FixedPool
     {
     public:
-        template <typename DataType>
-        struct SlotType
-        {
-            size_t Offset;
-            DataType Data;
-        };
-
-        template <>
-        struct SlotType<void>
-        {
-            size_t Offset;
-        };
-
         using Slot_t = SlotType<SlotDataType>;
 
     public:
@@ -35,7 +46,7 @@ namespace sy
         {
             Slot_t slot = std::move(freeSlots.front());
             freeSlots.pop();
-            return slot;
+            return std::move(slot);
         }
 
         void Deallocate(const Slot_t& slot)
@@ -72,19 +83,6 @@ namespace sy
     class Pool
     {
     public:
-        template <typename DataType>
-        struct SlotType
-        {
-            size_t Offset;
-            DataType Data;
-        };
-
-        template <>
-        struct SlotType<void>
-        {
-            size_t Offset;
-        };
-
         using Slot_t = SlotType<SlotDataType>;
 
     public:

@@ -103,6 +103,12 @@ namespace sy
 		vkCmdBindDescriptorSets(handle, pipeline.GetBindPoint(), pipeline.GetLayout(), 0, 1, descriptorSets, 0, nullptr);
 	}
 
+	void CommandBuffer::PushConstants(const Pipeline& pipeline, const VkShaderStageFlags shaderStageFlags, const uint32_t offset,
+		const uint32_t size, const void* values) const
+	{
+		vkCmdPushConstants(handle, pipeline.GetLayout(), shaderStageFlags, offset, size, values);
+	}
+
 	void CommandBuffer::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const
 	{
 		vkCmdDraw(handle, vertexCount, instanceCount, firstVertex, firstInstance);

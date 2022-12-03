@@ -2,6 +2,8 @@
 #include <DescriptorManager.h>
 #include <FrameTracker.h>
 #include <VK/VulkanContext.h>
+#include <VK/Buffer.h>
+#include <VK/Texture.h>
 
 namespace sy
 {
@@ -100,6 +102,13 @@ namespace sy
 		};
 
 		VK_ASSERT(vkAllocateDescriptorSets(vulkanContext.GetDevice(), &setAllocateInfo, &descriptorPoolPackage.DescriptorSet), "Failed to allocate descriptor set.");
+
+		for (const auto& poolSize : poolSizes)
+		{
+			auto& offsetPoolPackage = descriptorPoolPackage.OffsetPoolPackages[ToUnderlying(poolSize.Type)];
+			offsetPoolPackage.Pool.Grow(poolSize.Size);
+			offsetPoolPackage.AllocatedSlots.resize(poolSize.Size);
+		}
 	}
 
 	DescriptorManager::~DescriptorManager()
@@ -110,9 +119,74 @@ namespace sy
 
 	void DescriptorManager::BeginFrame()
 	{
+		auto& pendingList = pendingDeallocations[frameTracker.GetCurrentInFlightFrameIndex()];
+		for (const Allocation& allocation : pendingList)
+		{
+			allocation.Owner.Pool.Deallocate(allocation.AllocatedSlot);
+		}
+		pendingList.clear();
 	}
 
 	void DescriptorManager::EndFrame()
 	{
+		if (!bufferWriteDescriptors.empty())
+		{
+			for (size_t idx = 0; idx < bufferWriteDescriptors.size(); ++idx)
+			{
+				bufferWriteDescriptors[idx].pBufferInfo = &bufferInfos[idx];
+			}
+
+			vkUpdateDescriptorSets(vulkanContext.GetDevice(), bufferWriteDescriptors.size(), bufferWriteDescriptors.data(), 0, nullptr);
+			bufferWriteDescriptors.clear();
+			bufferInfos.clear();
+		}
+	}
+
+	OffsetSlotPtr DescriptorManager::RequestBufferDescriptor(const Buffer& buffer, const bool bIsDynamic)
+	{
+		const auto descriptorType = ToDescriptorType(buffer.GetBufferUsage(), bIsDynamic);
+		const auto descriptorBinding = ToUnderlying(descriptorType);
+		auto& offsetPoolPackage = descriptorPoolPackage.OffsetPoolPackages[descriptorBinding];
+
+		auto& allocatedSlots = offsetPoolPackage.AllocatedSlots;
+		size_t slotOffset;
+		{
+			std::lock_guard lock{ offsetPoolPackage.Mutex };
+			const FixedOffsetPool::Slot_t allocatedSlot = offsetPoolPackage.Pool.Allocate();
+			slotOffset = allocatedSlot.Offset;
+			allocatedSlots[slotOffset] = allocatedSlot;
+		}
+
+		// Add new write descriptor set to write descriptor set list 
+		{
+			std::lock_guard lock{ bufferWriteDescriptorMutex };
+
+			const VkWriteDescriptorSet writeDescriptorSet
+			{
+				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+				.pNext = nullptr,
+				.dstSet = GetDescriptorSet(),
+				.dstBinding = descriptorBinding,
+				.dstArrayElement = static_cast<uint32_t>(slotOffset),
+				.descriptorCount = 1,
+				.descriptorType = ToNative(descriptorType),
+				.pImageInfo = nullptr,
+				.pTexelBufferView = nullptr
+			};
+
+			bufferInfos.emplace_back(buffer.GetDescriptorInfo());
+			bufferWriteDescriptors.emplace_back(writeDescriptorSet);
+		}
+
+		return{
+				&allocatedSlots[slotOffset],
+				[this, &offsetPoolPackage](const FixedOffsetPool::Slot_t* slotPtr)
+				{
+					auto& pendingList = pendingDeallocations[frameTracker.GetCurrentInFlightFrameIndex()];
+					auto& pendingListMutex = pendingMutexList[frameTracker.GetCurrentInFlightFrameIndex()];
+					std::lock_guard lock{ pendingListMutex };
+					pendingList.emplace_back(*slotPtr, offsetPoolPackage);
+				}
+		};
 	}
 }

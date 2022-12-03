@@ -27,6 +27,9 @@ namespace sy
 
 		void BindPipeline(const Pipeline& pipeline) const;
 		void BindDescriptorSet(VkDescriptorSet descriptorSet, const Pipeline& pipeline) const;
+
+		void PushConstants(const Pipeline& pipeline, VkShaderStageFlags shaderStageFlags, uint32_t offset, uint32_t size, const void* values) const;
+
 		void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const;
 
 	public:

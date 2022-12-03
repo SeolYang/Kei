@@ -21,7 +21,12 @@ namespace sy
 {
 	struct ColorData
 	{
-		glm::vec4 color;
+		glm::vec4 colors[3];
+	};
+
+	struct PushConstants
+	{
+		int colorDataIndex;
 	};
 
 	Renderer::Renderer(const Window& window, VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, DescriptorManager& descriptorManager) :
@@ -34,21 +39,28 @@ namespace sy
 	{
 		const auto windowExtent = window.GetExtent();
 
-		triVert = std::make_unique<ShaderModule>("Triangle vertex shader", vulkanContext, "Assets/Shaders/bin/tri.vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
-		triFrag = std::make_unique<ShaderModule>("Triangle fragment shader", vulkanContext, "Assets/Shaders/bin/tri.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+		triVert = std::make_unique<ShaderModule>("Triangle vertex shader", vulkanContext, "Assets/Shaders/bin/tri_bindless.vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+		triFrag = std::make_unique<ShaderModule>("Triangle fragment shader", vulkanContext, "Assets/Shaders/bin/tri_bindless.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
 		std::array descriptorSetLayouts = { descriptorManager.GetDescriptorSetLayout(), };
+		std::array pushConstantRanges = { VkPushConstantRange{ VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstants) } };
+
 		GraphicsPipelineBuilder basicPipelineBuilder;
 		basicPipelineBuilder.SetDefault()
 			.AddShaderStage(*triVert)
 			.AddShaderStage(*triFrag)
 			.AddViewport(0.f, 0.f, static_cast<float>(windowExtent.width), static_cast<float>(windowExtent.height), 0.0f, 1.0f)
 			.AddScissor(0, 0, windowExtent.width, windowExtent.height)
-			.SetPipelineLayout(pipelineLayoutCache->Request(descriptorSetLayouts, {}));
+			.SetPipelineLayout(pipelineLayoutCache->Request(descriptorSetLayouts, pushConstantRanges));
 		basicPipeline = std::make_unique<Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
 		test = std::make_unique<Texture2D>("test", vulkanContext, Extent2D<uint32_t>{ 1280, 720 }, 1, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VMA_MEMORY_USAGE_GPU_ONLY);
 		testBuffer = Buffer::CreateBuffer<ColorData>("ColorBuffer", vulkanContext, 0, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+		for (size_t idx = 0; idx < NumMaxInFlightFrames; ++idx)
+		{
+			colorBuffers[idx] = Buffer::CreateBuffer<ColorData>("ColorBuffer", vulkanContext, 0, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+			descriptorIndices[idx] = descriptorManager.RequestBufferDescriptor(*colorBuffers[idx]);
+		}
 	}
 
 	Renderer::~Renderer()
@@ -121,6 +133,23 @@ namespace sy
 					// Rendering something here
 					graphicsCmdBuffer->BindPipeline(*basicPipeline);
 					graphicsCmdBuffer->BindDescriptorSet(descriptorManager.GetDescriptorSet(), *basicPipeline);
+
+					const auto& colorBuffer = *colorBuffers[frameTracker.GetCurrentInFlightFrameIndex()];
+					void* colorBufferMappedPtr = vulkanContext.Map(colorBuffer);
+					ColorData colorData;
+					colorData.colors[0] = { 1.f - clearColorValue.float32[0], 1.f - clearColorValue.float32[1], 1.f - clearColorValue.float32[2], 1.f };
+					colorData.colors[1] = { colorData.colors[0].g, colorData.colors[0].r, colorData.colors[0].b, 1.f };
+					colorData.colors[2] = { colorData.colors[0].b, colorData.colors[0].g, colorData.colors[0].r, 1.f };
+					memcpy(colorBufferMappedPtr, &colorData, sizeof(ColorData));
+					vulkanContext.Unmap(colorBuffer);
+
+					const PushConstants pushConstants
+					{
+						.colorDataIndex = static_cast<int>(descriptorIndices[frameTracker.GetCurrentInFlightFrameIndex()]->Offset)
+					};
+
+					graphicsCmdBuffer->PushConstants(*basicPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstants), &pushConstants);
+
 					graphicsCmdBuffer->Draw(3, 1, 0, 0);
 				}
 				graphicsCmdBuffer->EndRendering();

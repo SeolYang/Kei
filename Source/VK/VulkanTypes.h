@@ -46,6 +46,37 @@ namespace sy
 		EnumMax
 	};
 
+	constexpr static auto ToBufferUsage(const EDescriptorType descriptorType)
+	{
+		switch (descriptorType)
+		{
+		
+		case EDescriptorType::UniformBuffer:
+		case EDescriptorType::UniformBufferDynamic:
+			return VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+		case EDescriptorType::StorageBuffer:
+		case EDescriptorType::StorageBufferDynamic:
+			return VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+		default:
+			SY_ASSERT(false, "Invalid value!");
+			return VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+		}
+	}
+
+	constexpr static auto ToDescriptorType(const VkBufferUsageFlags bufferUsageFlags, bool bIsDynamic = false)
+	{
+		switch (bufferUsageFlags)
+		{
+		case VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT:
+			return bIsDynamic ? EDescriptorType::UniformBufferDynamic : EDescriptorType::UniformBuffer;
+		case VK_BUFFER_USAGE_STORAGE_BUFFER_BIT:
+			return bIsDynamic ? EDescriptorType::StorageBufferDynamic : EDescriptorType::StorageBuffer;
+		default:
+			SY_ASSERT(false, "Invalid value!");
+			return EDescriptorType::EnumMax;
+		}
+	}
+
 	constexpr static auto ToNative(const EDescriptorType descriptorType)
 	{
 		switch (descriptorType)

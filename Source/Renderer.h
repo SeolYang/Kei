@@ -42,6 +42,8 @@ namespace sy
 
 		std::unique_ptr<Texture2D> test;
 		std::unique_ptr<Buffer> testBuffer;
+		std::array<std::unique_ptr<Buffer>, NumMaxInFlightFrames> colorBuffers;
+		std::array<OffsetSlotPtr, NumMaxInFlightFrames> descriptorIndices;
 
 	};
 }

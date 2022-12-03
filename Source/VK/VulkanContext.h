@@ -10,6 +10,7 @@ namespace sy
 	class Fence;
 	class Semaphore;
 	class DescriptorPool;
+	class Buffer;
 	class VulkanContext
 	{
 	public:
@@ -44,8 +45,11 @@ namespace sy
 		void WaitAllQueuesForIdle() const;
 		void WaitForDeviceIdle() const;
 
-		size_t PadUniformBufferSize(size_t allocSize) const;
-		size_t PadStorageBufferSize(size_t allocSize) const;
+		[[nodiscard]] size_t PadUniformBufferSize(size_t allocSize) const;
+		[[nodiscard]] size_t PadStorageBufferSize(size_t allocSize) const;
+
+		[[nodiscard]] void* Map(const Buffer& buffer) const;
+		void Unmap(const Buffer& buffer) const;
 
 	private:
 		void Startup();

@@ -6,6 +6,7 @@
 #include <VK/CommandPool.h>
 #include <VK/Semaphore.h>
 #include <VK/Fence.h>
+#include <VK/Buffer.h>
 
 namespace sy
 {
@@ -145,6 +146,18 @@ namespace sy
 	size_t VulkanContext::PadStorageBufferSize(size_t allocSize) const
 	{
 		return PadSizeWithAlignment(allocSize, gpuProperties.limits.minStorageBufferOffsetAlignment);
+	}
+
+	void* VulkanContext::Map(const Buffer& buffer) const
+	{
+		void* data;
+		vmaMapMemory(allocator, buffer.GetAllocation(), &data);
+		return data;
+	}
+
+	void VulkanContext::Unmap(const Buffer& buffer) const
+	{
+		vmaUnmapMemory(allocator, buffer.GetAllocation());
 	}
 
 	void VulkanContext::Startup()

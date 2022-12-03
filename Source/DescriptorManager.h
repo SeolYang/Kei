@@ -5,6 +5,8 @@ namespace sy
 {
 	class VulkanContext;
 	class FrameTracker;
+	class Buffer;
+	class Texture2D;
 	class DescriptorManager
 	{
 	public:
@@ -32,7 +34,7 @@ namespace sy
 				return *this;
 			}
 
-			auto Build() const
+			[[nodiscard]] auto Build() const
 			{
 				std::vector<DescriptorPoolSize> temp;
 				temp.reserve(poolSizes.size());
@@ -47,7 +49,7 @@ namespace sy
 				return temp;
 			}
 
-			auto BuildAsNative() const
+			[[nodiscard]] auto BuildAsNative() const
 			{
 				const auto temp = Build();
 				std::vector<VkDescriptorPoolSize> nativeTemp;
@@ -77,6 +79,7 @@ namespace sy
 		struct OffsetPoolPackage
 		{
 			FixedOffsetPool Pool;
+			std::vector<FixedOffsetPool::Slot_t> AllocatedSlots;
 			std::mutex Mutex;
 		};
 
@@ -89,8 +92,8 @@ namespace sy
 
 		struct Allocation
 		{
-			OffsetPool::Slot_t AllocatedSlot;
-			OffsetPool& Owner;
+			FixedOffsetPool::Slot_t AllocatedSlot;
+			OffsetPoolPackage& Owner;
 		};
 
 	public:
@@ -109,12 +112,23 @@ namespace sy
 		[[nodiscard]] VkDescriptorSetLayout GetDescriptorSetLayout() const { return bindlessLayout; }
 		[[nodiscard]] VkDescriptorSet GetDescriptorSet() const { return descriptorPoolPackage.DescriptorSet; }
 
+		OffsetSlotPtr RequestBufferDescriptor(const Buffer& buffer, bool bIsDynamic = false);
+		//AllocationPtr RequestBufferDescriptor(const Buffer& buffer, bool bIsDynamic = false);
+
 	private:
 		const VulkanContext& vulkanContext;
 		const FrameTracker& frameTracker;
 		VkDescriptorSetLayout bindlessLayout = VK_NULL_HANDLE;
 		PoolPackage descriptorPoolPackage;
-		std::array<std::vector<Allocation>, NumMaxInFlightFrames> pendingTransientDeallocationLists;
+		std::array<std::vector<Allocation>, NumMaxInFlightFrames> pendingDeallocations;
+		std::array<std::mutex, NumMaxInFlightFrames> pendingMutexList;
+
+		std::vector<VkWriteDescriptorSet> imageWriteDescriptors;
+		std::vector<VkDescriptorImageInfo> imageInfos;
+		std::mutex imageWriteDescriptorMutex;
+		std::vector<VkWriteDescriptorSet> bufferWriteDescriptors;
+		std::vector<VkDescriptorBufferInfo> bufferInfos;
+		std::mutex bufferWriteDescriptorMutex;
 
 	};
 }

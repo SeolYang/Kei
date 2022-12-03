@@ -7,7 +7,8 @@ namespace sy
 {
 	Buffer::Buffer(std::string_view name, const VulkanContext& vulkanContext, const size_t bufferSize, const VkBufferCreateFlags bufferCreateFlags, const VkBufferUsageFlags bufferUsageFlags,
 		const VmaMemoryUsage memoryUsage) :
-		VulkanWrapper(name, vulkanContext)
+		VulkanWrapper(name, vulkanContext),
+		bufferUsageFlags(bufferUsageFlags)
 	{
 		size_t alignedBufferSize = bufferSize;
 		switch (bufferUsageFlags)

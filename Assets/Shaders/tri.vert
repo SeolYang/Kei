@@ -1,5 +1,18 @@
 #version 450
 #extension GL_KHR_vulkan_glsl : enable
+#extension GL_EXT_nonuniform_qualifier : enable
+
+layout (set = 0, binding = 4) uniform ColorData
+{
+	vec4 colors[3];
+} colorData[];
+
+layout (push_constant) uniform PushConstants
+{
+	int colorDataIndex;
+} pushConstants;
+
+layout (location=0) out vec4 outColor;
 
 void main()
 {
@@ -10,4 +23,5 @@ void main()
 	);
 
 	gl_Position = vec4(positions[gl_VertexIndex], 1.0f);
+	outColor = colorData[pushConstants.colorDataIndex].colors[gl_VertexIndex];
 }
