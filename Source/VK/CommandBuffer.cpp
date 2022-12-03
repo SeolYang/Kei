@@ -142,7 +142,7 @@ namespace sy
 		switch (newLayout)
 		{
 		default:
-			SY_ASSERT(true, "Non-support image layout.");
+			SY_ASSERT(true, "Unsupported image layout.");
 			break;
 		case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
 			dstAccess = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;

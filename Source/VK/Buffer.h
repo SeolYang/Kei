@@ -22,9 +22,9 @@ namespace sy
 		[[nodiscard]] auto GetAllocation() const { return allocation; }
 
 		template <typename BufferData>
-		static std::unique_ptr<Buffer> CreateBuffer(std::string_view name, const VulkanContext& vulkanContext, VkBufferCreateFlags bufferCreateFlags, VkBufferUsageFlags bufferUsageFlags, VmaMemoryUsage memoryUsage)
+		static std::unique_ptr<Buffer> CreateUniformBuffer(std::string_view name, const VulkanContext& vulkanContext, const VkBufferCreateFlags bufferCreateFlags = 0)
 		{
-			return std::make_unique<Buffer>(name, vulkanContext, sizeof(BufferData), bufferCreateFlags, bufferUsageFlags, memoryUsage);
+			return std::make_unique<Buffer>(name, vulkanContext, sizeof(BufferData), bufferCreateFlags, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 		}
 
 
