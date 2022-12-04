@@ -1,16 +1,24 @@
 #include <Core.h>
-#include <VK/Texture.h>
 #include <VK/VulkanContext.h>
+#include <VK/Fence.h>
+#include <VK/Texture.h>
+#include <VK/Buffer.h>
+#include <VK/CommandPool.h>
+#include <VK/CommandBuffer.h>
+#include <CommandPoolManager.h>
+#include <FrameTracker.h>
 
 namespace sy
 {
-	Texture::Texture(const std::string_view name, const VulkanContext& vulkanContext, const VkFormat format, const VkImageLayout initialLayout, const VmaMemoryUsage memoryUsage, const uint32_t mipLevels) :
+	Texture::Texture(const std::string_view name, const VulkanContext& vulkanContext, const Extent3D<uint32_t> extent, const VkFormat format, const VkImageLayout desiredImageLayout, const VkImageUsageFlags imageUsageFlags, const VmaMemoryUsage memoryUsage, const uint32_t mipLevels) :
 		VulkanWrapper(name, vulkanContext, VK_DESTROY_LAMBDA_SIGNATURE(VkImage)
 		{
 		}),
+		extent(extent),
 		format(format),
-		initialLayout(initialLayout),
 		mipLevels(mipLevels),
+		desiredImageLayout(desiredImageLayout),
+		imageUsage(imageUsageFlags),
 		memoryUsage(memoryUsage)
 	{
 	}
@@ -21,6 +29,7 @@ namespace sy
 		{
 			vkDestroyImageView(vulkanContext.GetDevice(), view, nullptr);
 		}
+
 		if (sampler != VK_NULL_HANDLE)
 		{
 			vkDestroySampler(vulkanContext.GetDevice(), sampler, nullptr);
@@ -33,8 +42,8 @@ namespace sy
 	}
 
 	Texture2D::Texture2D(std::string_view name, const VulkanContext& vulkanContext, const Extent2D<uint32_t> extent, const uint32_t mipLevels, const VkFormat format,
-		const VkImageUsageFlags usageFlags, const VkImageLayout initialLayout, const VmaMemoryUsage memoryUsage) :
-		Texture(name, vulkanContext, format, initialLayout, memoryUsage, mipLevels)
+		const VkImageUsageFlags usageFlags, const VkImageLayout desiredImageLayout, const VmaMemoryUsage memoryUsage) :
+		Texture(name, vulkanContext, { extent.width, extent.height, 1 }, format, desiredImageLayout, usageFlags, memoryUsage, mipLevels)
 	{
 		const auto allocator = vulkanContext.GetAllocator();
 		const VkImageCreateInfo imageCreateInfo
@@ -51,7 +60,7 @@ namespace sy
 			.tiling = VK_IMAGE_TILING_OPTIMAL,
 			.usage = usageFlags,
 			.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-			.initialLayout = initialLayout
+			.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
 		};
 
 		const VmaAllocationCreateInfo allocationCreateInfo
@@ -80,5 +89,62 @@ namespace sy
 		};
 
 		VK_ASSERT(vkCreateImageView(vulkanContext.GetDevice(), &viewCreateInfo, nullptr, &view), "Failed to create image view {}.", name);
+
+		const VkSamplerCreateInfo samplerCreateInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+			.pNext = nullptr,
+			.magFilter = VK_FILTER_LINEAR,
+			.minFilter = VK_FILTER_LINEAR,
+			.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
+			.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+			.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+			.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT
+		};
+		VK_ASSERT(vkCreateSampler(vulkanContext.GetDevice(), &samplerCreateInfo, nullptr, &sampler), "Failed to create sampler.");
+	}
+
+	std::unique_ptr<Texture2D> Texture2D::LoadFromFile(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, const std::string_view filePath, const VulkanContext& vulkanContext,
+		const VkFormat format, const VkImageUsageFlags usageFlags, const VkImageLayout layout)
+	{
+		int texWidth, texHeight;
+		int texChannels;
+		stbi_uc* pixels = stbi_load(filePath.data(), &texWidth, &texHeight, &texChannels, ToNumberOfComponents(format));
+		if (pixels == nullptr)
+		{
+			spdlog::warn("Failed to load image from file {}.", filePath);
+			return nullptr;
+		}
+
+		const void* pixelsData = pixels;
+		const VkDeviceSize sizeOfData = (texWidth * texHeight) * ToByteSize(format);
+
+		const auto stagingBuffer = Buffer::CreateStagingBuffer(std::format("2D Texture {} staging buffer", filePath), vulkanContext, sizeOfData);
+		void* mappedData = vulkanContext.Map(*stagingBuffer);
+		memcpy(mappedData, pixelsData, sizeOfData);
+		vulkanContext.Unmap(*stagingBuffer);
+		stbi_image_free(pixels);
+
+		// @todo: Batched upload data
+		// @todo: Use of Transfer Queue ; need more practicing and knowledge about pipeline barriers!
+		auto& transferCmdPool = cmdPoolManager.RequestCommandPool(EQueueType::Graphics);
+		const auto transferCmdBuffer = transferCmdPool.RequestCommandBuffer(std::format("Texture {} transfer cmd buffer", filePath));
+		std::unique_ptr<Texture2D> newTexture = std::make_unique<Texture2D>(filePath, vulkanContext, Extent2D<uint32_t>{ static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight) }, 1, format, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VMA_MEMORY_USAGE_GPU_ONLY);
+
+		transferCmdBuffer->Begin();
+		{
+			std::array transferTexBarrier = { vkinit::ImageMemoryBarrier(0, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, newTexture->GetNativeHandle(), vkinit::ImageSubresourceRange()) };
+			transferCmdBuffer->PipelineBarrier(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, {}, {}, transferTexBarrier);
+			transferCmdBuffer->CopyBufferToImageSimple(*stagingBuffer, *newTexture);
+			std::array readableTexBarrier = { vkinit::ImageMemoryBarrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, newTexture->GetNativeHandle(), vkinit::ImageSubresourceRange()) };
+			transferCmdBuffer->PipelineBarrier(VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, {}, {}, readableTexBarrier);
+		}
+		transferCmdBuffer->End();
+
+		const auto& uploadFence = frameTracker.GetCurrentInFlightUploadFence();
+		vulkanContext.SubmitTo(*transferCmdBuffer, uploadFence);
+		uploadFence.Wait();
+		uploadFence.Reset();
+		return newTexture;
 	}
 }

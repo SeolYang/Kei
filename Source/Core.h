@@ -104,6 +104,9 @@ namespace sy
 /** glm */
 #include <glm/glm.hpp>
 
+/** stbi */
+#include <stb_image.h>
+
 /** Internals */
 #include <UniqueHandle.h>
 #include <NamedType.h>

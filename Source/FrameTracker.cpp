@@ -14,7 +14,7 @@ namespace sy
 			{
 				.InFlightFrameIndex = frameIdx,
 				.RenderFence = std::make_unique<Fence>(std::format("Render Fence {}", frameIdx), vulkanContext),
-				.UploadFence = std::make_unique<Fence>(std::format("Upload Fence {}", frameIdx), vulkanContext),
+				.UploadFence = std::make_unique<Fence>(std::format("Upload Fence {}", frameIdx), vulkanContext, false),
 				.RenderSemaphore = std::make_unique<Semaphore>(std::format("Render Semaphore {}", frameIdx), vulkanContext),
 				.PresentSemaphore = std::make_unique<Semaphore>(std::format("Present Semaphore {}", frameIdx), vulkanContext),
 				.UploadSemaphore = std::make_unique<Semaphore>(std::format("Upload Semaphore {}", frameIdx), vulkanContext),

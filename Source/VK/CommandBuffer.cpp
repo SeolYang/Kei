@@ -3,6 +3,8 @@
 #include <VK/CommandPool.h>
 #include <VK/VulkanContext.h>
 #include <VK/Pipeline.h>
+#include <VK/Buffer.h>
+#include <VK/Texture.h>
 
 namespace sy
 {
@@ -112,6 +114,33 @@ namespace sy
 	void CommandBuffer::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const
 	{
 		vkCmdDraw(handle, vertexCount, instanceCount, firstVertex, firstInstance);
+	}
+
+	void CommandBuffer::CopyBufferToImage(const Buffer& srcBuffer, const Texture& dstTexture, const std::span<VkBufferImageCopy> regions) const
+	{
+		vkCmdCopyBufferToImage(handle, srcBuffer.GetNativeHandle(), dstTexture.GetNativeHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, regions.size(), regions.data());
+	}
+
+	void CommandBuffer::CopyBufferToImageSimple(const Buffer& srcBuffer, const Texture& dstTexture) const
+	{
+		const auto imageExtent = dstTexture.GetExtent();
+		const VkBufferImageCopy imgCopy
+		{
+			.bufferOffset = 0,
+			.bufferRowLength = 0,
+			.bufferImageHeight = 0,
+			.imageSubresource =
+			{
+				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+				.mipLevel = 0,
+				.baseArrayLayer = 0,
+				.layerCount = 1
+			},
+			.imageExtent = { imageExtent.width, imageExtent.height, imageExtent.depth }
+		};
+
+		std::array region = { imgCopy };
+		CopyBufferToImage(srcBuffer, dstTexture, region);
 	}
 
 	std::pair<VkAccessFlags, VkAccessFlags>  CommandBuffer::QueryOptimalAccessFlagFromImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout)

@@ -10,9 +10,10 @@ layout (set = 0, binding = 4) uniform ColorData
 layout (push_constant) uniform PushConstants
 {
 	int colorDataIndex;
+	int textureIndex;
 } pushConstants;
 
-layout (location=0) out vec4 outColor;
+layout (location=0) out vec2 outUV;
 
 void main()
 {
@@ -22,6 +23,12 @@ void main()
 		vec3(0.f, -1.0f, 0.0f)
 	);
 
+	const vec2 uvs[3] = vec2[3](
+		vec2(1.f, 1.f),
+		vec2(0.f, 1.f),
+		vec2(0.5f, 0.f)
+	);
+
 	gl_Position = vec4(positions[gl_VertexIndex], 1.0f);
-	outColor = colorData[pushConstants.colorDataIndex].colors[gl_VertexIndex];
+	outUV = uvs[gl_VertexIndex];
 }

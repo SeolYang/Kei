@@ -27,12 +27,19 @@ namespace sy
 #else
 		spdlog::set_level(spdlog::level::warn);
 #endif
+		spdlog::info("Initializing Timer sub-context.");
 		timer = std::make_unique<Timer>();
+		spdlog::info("Initializing Window sub-context.");
 		window = std::make_unique<Window>("Test", Extent2D<uint32_t>{ 1280, 720 });
+		spdlog::info("Initializing Vulkan context.");
 		vulkanContext = std::make_unique<VulkanContext>(*window);
+		spdlog::info("Initializing frame tracker sub-context.");
 		frameTracker = std::make_unique<FrameTracker>(*vulkanContext);
+		spdlog::info("Initializing Command Pool Manager sub-context.");
 		cmdPoolManager = std::make_unique<CommandPoolManager>(*vulkanContext, *frameTracker);
+		spdlog::info("Initializing Bind-less Descriptor Manager sub-context.");
 		descriptorManager = std::make_unique<DescriptorManager>(*vulkanContext, *frameTracker);
+		spdlog::info("Initializing Renderer sub-context.");
 		renderer = std::make_unique<Renderer>(*window, *vulkanContext, *frameTracker, *cmdPoolManager, *descriptorManager);
 	}
 
@@ -40,17 +47,24 @@ namespace sy
 	{
 		vulkanContext->WaitForDeviceIdle();
 		{
+			spdlog::info("Clean-up Renderer sub-context.");
 			renderer.reset();
+			spdlog::info("Clean-up Bind-less Descriptor Manager sub-context.");
 			descriptorManager.reset();
+			spdlog::info("Clean-up Command Pool Manager sub-context.");
 			cmdPoolManager.reset();
+			spdlog::info("Clean-up frame tracker sub-context.");
 			frameTracker.reset();
+			spdlog::info("Clean-up Vulkan context.");
 			vulkanContext.reset();
 		}
+		spdlog::info("Clean-up Renderer sub-context");
 		window.reset();
 	}
 
 	void Context::Run()
 	{
+		spdlog::info("Startup main loop.");
         SDL_Event ev;
         bool bExit = false;
 
@@ -77,5 +91,6 @@ namespace sy
 			frameTracker->EndFrame();
 			timer->End();
         }
+		spdlog::info("Main loop finished.");
 	}
 }

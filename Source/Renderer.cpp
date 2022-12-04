@@ -27,6 +27,7 @@ namespace sy
 	struct PushConstants
 	{
 		int colorDataIndex;
+		int textureIndex;
 	};
 
 	Renderer::Renderer(const Window& window, VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, DescriptorManager& descriptorManager) :
@@ -39,11 +40,13 @@ namespace sy
 	{
 		const auto windowExtent = window.GetExtent();
 
-		triVert = std::make_unique<ShaderModule>("Triangle vertex shader", vulkanContext, "Assets/Shaders/bin/tri_bindless.vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
-		triFrag = std::make_unique<ShaderModule>("Triangle fragment shader", vulkanContext, "Assets/Shaders/bin/tri_bindless.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+		triVert = std::make_unique<ShaderModule>("Triangle vertex shader", vulkanContext, "Assets/Shaders/bin/textured_tri_bindless.vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+		triFrag = std::make_unique<ShaderModule>("Triangle fragment shader", vulkanContext, "Assets/Shaders/bin/textured_tri_bindless.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
 		std::array descriptorSetLayouts = { descriptorManager.GetDescriptorSetLayout(), };
-		std::array pushConstantRanges = { VkPushConstantRange{ VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstants) } };
+		std::array pushConstantRanges = {
+			VkPushConstantRange{ VK_SHADER_STAGE_ALL_GRAPHICS, 0, sizeof(PushConstants) },
+		};
 
 		GraphicsPipelineBuilder basicPipelineBuilder;
 		basicPipelineBuilder.SetDefault()
@@ -57,8 +60,11 @@ namespace sy
 		for (size_t idx = 0; idx < NumMaxInFlightFrames; ++idx)
 		{
 			colorBuffers[idx] = Buffer::CreateUniformBuffer<ColorData>("ColorBuffer", vulkanContext);
-			descriptorIndices[idx] = descriptorManager.RequestBufferDescriptor(*colorBuffers[idx]);
+			descriptorIndices[idx] = descriptorManager.RequestDescriptor(*colorBuffers[idx]);
 		}
+
+		loadedTexture = Texture2D::LoadFromFile(cmdPoolManager, frameTracker, "Assets/Textures/djmax_1st_anv.png", vulkanContext, VK_FORMAT_R8G8B8A8_SRGB);
+		loadedTextureDescriptor = descriptorManager.RequestDescriptor(*loadedTexture);
 	}
 
 	Renderer::~Renderer()
@@ -98,20 +104,7 @@ namespace sy
 				clearColorValue.float32[2] = std::cos(currentFrameIdx / 90.f) * 0.5f + 1.f;
 				clearColorValue.float32[3] = 1.f;
 
-				const VkRenderingAttachmentInfoKHR colorAttachmentInfo
-				{
-					.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
-					.pNext = nullptr,
-					.imageView = swapchainImageView,
-					.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
-					.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-					.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-					.clearValue = VkClearValue
-					{
-						.color = clearColorValue
-					}
-				};
-
+				const auto colorAttachmentInfo = swapchain.GetColorAttachmentInfo(clearColorValue);
 				const VkRenderingInfo renderingInfo
 				{
 					.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR,
@@ -132,21 +125,23 @@ namespace sy
 					graphicsCmdBuffer->BindPipeline(*basicPipeline);
 					graphicsCmdBuffer->BindDescriptorSet(descriptorManager.GetDescriptorSet(), *basicPipeline);
 
-					const auto& colorBuffer = *colorBuffers[frameTracker.GetCurrentInFlightFrameIndex()];
-					void* colorBufferMappedPtr = vulkanContext.Map(colorBuffer);
 					ColorData colorData;
 					colorData.colors[0] = { 1.f - clearColorValue.float32[0], 1.f - clearColorValue.float32[1], 1.f - clearColorValue.float32[2], 1.f };
 					colorData.colors[1] = { colorData.colors[0].g, colorData.colors[0].r, colorData.colors[0].b, 1.f };
 					colorData.colors[2] = { colorData.colors[0].b, colorData.colors[0].g, colorData.colors[0].r, 1.f };
+
+					const auto& colorBuffer = *colorBuffers[frameTracker.GetCurrentInFlightFrameIndex()];
+					void* colorBufferMappedPtr = vulkanContext.Map(colorBuffer);
 					memcpy(colorBufferMappedPtr, &colorData, sizeof(ColorData));
 					vulkanContext.Unmap(colorBuffer);
 
 					const PushConstants pushConstants
 					{
-						.colorDataIndex = static_cast<int>(descriptorIndices[frameTracker.GetCurrentInFlightFrameIndex()]->Offset)
+						.colorDataIndex = static_cast<int>(descriptorIndices[frameTracker.GetCurrentInFlightFrameIndex()]->Offset),
+						.textureIndex = static_cast<int>(loadedTextureDescriptor->Offset)
 					};
 
-					graphicsCmdBuffer->PushConstants(*basicPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstants), &pushConstants);
+					graphicsCmdBuffer->PushConstants(*basicPipeline, VK_SHADER_STAGE_ALL_GRAPHICS, 0, sizeof(PushConstants), &pushConstants);
 
 					graphicsCmdBuffer->Draw(3, 1, 0, 0);
 				}

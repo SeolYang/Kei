@@ -14,7 +14,10 @@ namespace sy
 		DescriptorPoolSizeBuilder poolSizeBuilder;
 		poolSizeBuilder.AddDescriptors(EDescriptorType::CombinedImageSampler, 1000)
 			.AddDescriptors(EDescriptorType::UniformBuffer, 1000)
-			.AddDescriptors(EDescriptorType::StorageBuffer, 1000);
+			.AddDescriptors(EDescriptorType::StorageBuffer, 1000)
+			.AddDescriptors(EDescriptorType::SampledImage, 1000)
+			.AddDescriptors(EDescriptorType::CombinedImageSampler, 1000)
+			.AddDescriptors(EDescriptorType::StorageImage, 1000);
 
 		const auto nativePoolSizes = poolSizeBuilder.BuildAsNative();
 		const auto poolSizes = poolSizeBuilder.Build();
@@ -129,6 +132,7 @@ namespace sy
 
 	void DescriptorManager::EndFrame()
 	{
+		combinedWriteDescriptorSets.reserve(bufferWriteDescriptors.size() + imageWriteDescriptors.size());
 		if (!bufferWriteDescriptors.empty())
 		{
 			for (size_t idx = 0; idx < bufferWriteDescriptors.size(); ++idx)
@@ -136,15 +140,33 @@ namespace sy
 				bufferWriteDescriptors[idx].pBufferInfo = &bufferInfos[idx];
 			}
 
-			vkUpdateDescriptorSets(vulkanContext.GetDevice(), bufferWriteDescriptors.size(), bufferWriteDescriptors.data(), 0, nullptr);
+			combinedWriteDescriptorSets.assign(bufferWriteDescriptors.begin(), bufferWriteDescriptors.end());
+		}
+
+		if (!imageWriteDescriptors.empty())
+		{
+			for (size_t idx = 0; idx < imageWriteDescriptors.size(); ++idx)
+			{
+				imageWriteDescriptors[idx].pImageInfo = &imageInfos[idx];
+			}
+
+			combinedWriteDescriptorSets.assign(imageWriteDescriptors.begin(), imageWriteDescriptors.end());
+		}
+
+		if (!combinedWriteDescriptorSets.empty())
+		{
+			vkUpdateDescriptorSets(vulkanContext.GetDevice(), combinedWriteDescriptorSets.size(), combinedWriteDescriptorSets.data(), 0, nullptr);
 			bufferWriteDescriptors.clear();
 			bufferInfos.clear();
+			imageWriteDescriptors.clear();
+			imageInfos.clear();
+			combinedWriteDescriptorSets.clear();
 		}
 	}
 
-	OffsetSlotPtr DescriptorManager::RequestBufferDescriptor(const Buffer& buffer, const bool bIsDynamic)
+	OffsetSlotPtr DescriptorManager::RequestDescriptor(const Buffer& buffer, const bool bIsDynamic)
 	{
-		const auto descriptorType = ToDescriptorType(buffer.GetBufferUsage(), bIsDynamic);
+		const auto descriptorType = BufferUsageToDescriptorType(buffer.GetUsage(), bIsDynamic);
 		const auto descriptorBinding = ToUnderlying(descriptorType);
 		auto& offsetPoolPackage = descriptorPoolPackage.OffsetPoolPackages[descriptorBinding];
 
@@ -187,6 +209,54 @@ namespace sy
 					std::lock_guard lock{ pendingListMutex };
 					pendingList.emplace_back(*slotPtr, offsetPoolPackage);
 				}
+		};
+	}
+
+	OffsetSlotPtr DescriptorManager::RequestDescriptor(const Texture& texture, const bool bIsCombinedSampler)
+	{
+		const auto descriptorType = ImageUsageToDescriptorType(texture.GetUsage(), bIsCombinedSampler);
+		const auto descriptorBinding = ToUnderlying(descriptorType);
+		auto& offsetPoolPackage = descriptorPoolPackage.OffsetPoolPackages[descriptorBinding];
+
+		auto& allocatedSlots = offsetPoolPackage.AllocatedSlots;
+		size_t slotOffset;
+		{
+			std::lock_guard lock{ offsetPoolPackage.Mutex };
+			const FixedOffsetPool::Slot_t allocatedSlot = offsetPoolPackage.Pool.Allocate();
+			slotOffset = allocatedSlot.Offset;
+			allocatedSlots[slotOffset] = allocatedSlot;
+		}
+
+		// Add new write descriptor set to write descriptor set list 
+		{
+			std::lock_guard lock{ imageWriteDescriptorMutex };
+
+			const VkWriteDescriptorSet writeDescriptorSet
+			{
+				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+				.pNext = nullptr,
+				.dstSet = GetDescriptorSet(),
+				.dstBinding = descriptorBinding,
+				.dstArrayElement = static_cast<uint32_t>(slotOffset),
+				.descriptorCount = 1,
+				.descriptorType = ToNative(descriptorType),
+				.pImageInfo = nullptr,
+				.pTexelBufferView = nullptr
+			};
+
+			imageInfos.emplace_back(texture.GetDescriptorInfo());
+			imageWriteDescriptors.emplace_back(writeDescriptorSet);
+		}
+
+		return{
+			&allocatedSlots[slotOffset],
+			[this, &offsetPoolPackage](const FixedOffsetPool::Slot_t* slotPtr)
+			{
+				auto& pendingList = pendingDeallocations[frameTracker.GetCurrentInFlightFrameIndex()];
+				auto& pendingListMutex = pendingMutexList[frameTracker.GetCurrentInFlightFrameIndex()];
+				std::lock_guard lock{ pendingListMutex };
+				pendingList.emplace_back(*slotPtr, offsetPoolPackage);
+			}
 		};
 	}
 }

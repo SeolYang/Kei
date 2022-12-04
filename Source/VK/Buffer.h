@@ -17,16 +17,20 @@ namespace sy
 		Buffer& operator=(Buffer&&) = delete;
 
 		[[nodiscard]] auto GetBufferSize() const { return bufferSize; }
-		[[nodiscard]] auto GetBufferUsage() const { return bufferUsageFlags; }
+		[[nodiscard]] auto GetUsage() const { return bufferUsageFlags; }
 		[[nodiscard]] VkDescriptorBufferInfo GetDescriptorInfo() const { return { handle, 0, bufferSize }; }
 		[[nodiscard]] auto GetAllocation() const { return allocation; }
 
 		template <typename BufferData>
-		static std::unique_ptr<Buffer> CreateUniformBuffer(std::string_view name, const VulkanContext& vulkanContext, const VkBufferCreateFlags bufferCreateFlags = 0)
+		static auto CreateUniformBuffer(std::string_view name, const VulkanContext& vulkanContext, const VkBufferCreateFlags bufferCreateFlags = 0)
 		{
 			return std::make_unique<Buffer>(name, vulkanContext, sizeof(BufferData), bufferCreateFlags, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 		}
 
+		static auto CreateStagingBuffer(std::string_view name, const VulkanContext& vulkanContext, const size_t bufferSize)
+		{
+			return std::make_unique<Buffer>(name, vulkanContext, bufferSize, 0, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
+		}
 
 	private:
 		VmaAllocation allocation;

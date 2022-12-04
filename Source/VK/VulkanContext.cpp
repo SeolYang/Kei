@@ -43,7 +43,7 @@ namespace sy
 		return graphicsQueueFamilyIdx;
 	}
 
-	VkQueue VulkanContext::GetQueue(EQueueType queueType) const
+	VkQueue VulkanContext::GetQueue(const EQueueType queueType) const
 	{
 		switch (queueType)
 		{
@@ -66,6 +66,25 @@ namespace sy
 		SY_ASSERT(queue != VK_NULL_HANDLE, "Invalid queue submission request.");
 
 		VK_ASSERT(vkQueueSubmit(queue, 1, &submitInfo, fence.GetNativeHandle()), "Failed to submit to queue.");
+	}
+
+	void VulkanContext::SubmitTo(const CommandBuffer& cmdBuffer, const Fence& fence) const
+	{
+		const auto cmdBufferHandle = cmdBuffer.GetNativeHandle();
+		const VkSubmitInfo submitInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+			.pNext = nullptr,
+			.waitSemaphoreCount = 0,
+			.pWaitSemaphores = nullptr,
+			.pWaitDstStageMask = nullptr,
+			.commandBufferCount = 1,
+			.pCommandBuffers = &cmdBufferHandle,
+			.signalSemaphoreCount = 0,
+			.pSignalSemaphores = nullptr
+		};
+
+		SubmitTo(cmdBuffer.GetQueueType(), submitInfo, fence);
 	}
 
 	void VulkanContext::SubmitTo(EQueueType queueType, const std::span<std::reference_wrapper<const Semaphore>> waitSemaphores, const std::span<std::reference_wrapper<const CommandBuffer>> cmdBuffers, std::span<std::reference_wrapper<const Semaphore>> signalSemaphores, const VkPipelineStageFlags waitStage, const Fence& fence) const
@@ -298,7 +317,7 @@ namespace sy
 
 		const auto transferQueueRes = vkbDevice.get_queue(vkb::QueueType::transfer);
 		SY_ASSERT(transferQueueRes.has_value(), "Failed to get transfer queue from logical device of vulkan.");
-		transferQueue = computeQueueRes.value();
+		transferQueue = transferQueueRes.value();
 		transferQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::transfer).value();
 		spdlog::trace("Transfer Queue successfully acquired. Family Index: {}.", transferQueueFamilyIdx);
 

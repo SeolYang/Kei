@@ -167,9 +167,6 @@
     <ClInclude Include="..\Source\CommandPoolManager.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\VK\UploadContext.h">
-      <Filter>Source\Vulkan</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\VK\Texture.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>

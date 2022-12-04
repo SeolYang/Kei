@@ -7,6 +7,8 @@ namespace sy
 	class CommandPool;
 	class Fence;
 	class Pipeline;
+	class Buffer;
+	class Texture;
 	class CommandBuffer : public VulkanWrapper<VkCommandBuffer>
 	{
 	public:
@@ -31,6 +33,9 @@ namespace sy
 		void PushConstants(const Pipeline& pipeline, VkShaderStageFlags shaderStageFlags, uint32_t offset, uint32_t size, const void* values) const;
 
 		void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const;
+
+		void CopyBufferToImage(const Buffer& srcBuffer, const Texture& dstTexture, std::span<VkBufferImageCopy> copySubresourceRegions) const;
+		void CopyBufferToImageSimple(const Buffer& srcBuffer, const Texture& dstTexture) const;
 
 	public:
 		static std::pair<VkAccessFlags, VkAccessFlags> QueryOptimalAccessFlagFromImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout);

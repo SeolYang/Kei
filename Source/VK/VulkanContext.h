@@ -31,6 +31,7 @@ namespace sy
 		[[nodiscard]] VmaAllocator GetAllocator() const { return allocator; }
 
 		void SubmitTo(EQueueType queueType, const VkSubmitInfo& submitInfo, const Fence& fence) const;
+		void SubmitTo(const CommandBuffer& cmdBuffer, const Fence& fence) const;
 		void SubmitTo(
 			EQueueType queueType, 
 			std::span<std::reference_wrapper<const Semaphore>> waitSemaphores,

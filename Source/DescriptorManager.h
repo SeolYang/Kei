@@ -6,7 +6,7 @@ namespace sy
 	class VulkanContext;
 	class FrameTracker;
 	class Buffer;
-	class Texture2D;
+	class Texture;
 	class DescriptorManager
 	{
 	public:
@@ -112,8 +112,8 @@ namespace sy
 		[[nodiscard]] VkDescriptorSetLayout GetDescriptorSetLayout() const { return bindlessLayout; }
 		[[nodiscard]] VkDescriptorSet GetDescriptorSet() const { return descriptorPoolPackage.DescriptorSet; }
 
-		OffsetSlotPtr RequestBufferDescriptor(const Buffer& buffer, bool bIsDynamic = false);
-		//AllocationPtr RequestBufferDescriptor(const Buffer& buffer, bool bIsDynamic = false);
+		OffsetSlotPtr RequestDescriptor(const Buffer& buffer, bool bIsDynamic = false);
+		OffsetSlotPtr RequestDescriptor(const Texture& texture, bool bIsCombinedSampler = true);
 
 	private:
 		const VulkanContext& vulkanContext;
@@ -123,6 +123,7 @@ namespace sy
 		std::array<std::vector<Allocation>, NumMaxInFlightFrames> pendingDeallocations;
 		std::array<std::mutex, NumMaxInFlightFrames> pendingMutexList;
 
+		std::vector<VkWriteDescriptorSet> combinedWriteDescriptorSets;
 		std::vector<VkWriteDescriptorSet> imageWriteDescriptors;
 		std::vector<VkDescriptorImageInfo> imageInfos;
 		std::mutex imageWriteDescriptorMutex;

@@ -18,20 +18,6 @@ namespace sy
 		RayTracing
 	};
 
-	static VkPipelineBindPoint ToNative(const EPipelineType type)
-	{
-		switch (type)
-		{
-		case EPipelineType::Compute:
-			return VK_PIPELINE_BIND_POINT_COMPUTE;
-		case EPipelineType::RayTracing:
-			return VK_PIPELINE_BIND_POINT_RAY_TRACING_NV;
-		default:
-		case EPipelineType::Graphics:
-			return VK_PIPELINE_BIND_POINT_GRAPHICS;
-		}
-	}
-
 	enum class EDescriptorType : uint8_t
 	{
 		Sampler = 0,
@@ -46,11 +32,25 @@ namespace sy
 		EnumMax
 	};
 
-	constexpr static auto ToBufferUsage(const EDescriptorType descriptorType)
+	constexpr static VkPipelineBindPoint ToNative(const EPipelineType type)
+	{
+		switch (type)
+		{
+		case EPipelineType::Compute:
+			return VK_PIPELINE_BIND_POINT_COMPUTE;
+		case EPipelineType::RayTracing:
+			return VK_PIPELINE_BIND_POINT_RAY_TRACING_NV;
+		default:
+		case EPipelineType::Graphics:
+			return VK_PIPELINE_BIND_POINT_GRAPHICS;
+		}
+	}
+
+	constexpr static auto DescriptorTypeToBufferUsage(const EDescriptorType descriptorType)
 	{
 		switch (descriptorType)
 		{
-		
+
 		case EDescriptorType::UniformBuffer:
 		case EDescriptorType::UniformBufferDynamic:
 			return VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
@@ -59,11 +59,28 @@ namespace sy
 			return VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 		default:
 			SY_ASSERT(false, "Invalid value!");
-			return VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+			return static_cast<VkBufferUsageFlagBits>(0);
 		}
 	}
 
-	constexpr static auto ToDescriptorType(const VkBufferUsageFlags bufferUsageFlags, bool bIsDynamic = false)
+	constexpr static auto DescriptorTypeToImageUsage(const EDescriptorType descriptorType)
+	{
+		switch (descriptorType)
+		{
+		case EDescriptorType::SampledImage:
+		case EDescriptorType::CombinedImageSampler:
+			return VK_IMAGE_USAGE_SAMPLED_BIT;
+		case EDescriptorType::StorageImage:
+			return VK_IMAGE_USAGE_STORAGE_BIT;
+		case EDescriptorType::InputAttachment:
+			return VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+		default:
+			SY_ASSERT(false, "Invalid value!");
+			return static_cast<VkImageUsageFlagBits>(0);
+		}
+	}
+
+	constexpr static auto BufferUsageToDescriptorType(const VkBufferUsageFlags bufferUsageFlags, bool bIsDynamic = false)
 	{
 		switch (bufferUsageFlags)
 		{
@@ -75,6 +92,27 @@ namespace sy
 			SY_ASSERT(false, "Invalid value!");
 			return EDescriptorType::EnumMax;
 		}
+	}
+
+	constexpr static auto ImageUsageToDescriptorType(const VkImageUsageFlags imageUsageFlags, const bool bIsCombinedSampler = true)
+	{
+		if ((imageUsageFlags & VK_IMAGE_USAGE_STORAGE_BIT) == VK_IMAGE_USAGE_STORAGE_BIT)
+		{
+			return EDescriptorType::StorageImage;
+		}
+
+		else if ((imageUsageFlags & VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT) == VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT)
+		{
+			return EDescriptorType::InputAttachment;
+		}
+
+		else if ((imageUsageFlags & VK_IMAGE_USAGE_SAMPLED_BIT) == VK_IMAGE_USAGE_SAMPLED_BIT)
+		{
+			return bIsCombinedSampler ? EDescriptorType::CombinedImageSampler : EDescriptorType::SampledImage;
+		}
+
+		SY_ASSERT(false, "Unable to convert to desscriptor type.");
+		return EDescriptorType::EnumMax;
 	}
 
 	constexpr static auto ToNative(const EDescriptorType descriptorType)
@@ -364,6 +402,35 @@ namespace sy
 		default:
 			SY_ASSERT(false, "Unsupported format.");
 			return 0;
+		}
+	}
+
+	namespace vkinit
+	{
+		constexpr static VkImageSubresourceRange ImageSubresourceRange(const VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT, const uint32_t baseMipLevel = 0, const uint32_t levelCount = 1, const uint32_t baseArrayLayer = 0, const uint32_t layerCount = 1)
+		{
+			return{
+				aspectMask,
+				baseMipLevel,
+				levelCount,
+				baseArrayLayer,
+				layerCount
+			};
+		}
+
+		constexpr static VkImageMemoryBarrier ImageMemoryBarrier(const VkAccessFlags srcAccessMask, const VkAccessFlags dstAccesMask, const VkImageLayout oldLayout, const VkImageLayout newLayout, const VkImage image, const VkImageSubresourceRange imageSubresourceRange)
+		{
+			return
+			{
+				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+				.pNext = nullptr,
+				.srcAccessMask = srcAccessMask,
+				.dstAccessMask = dstAccesMask,
+				.oldLayout = oldLayout,
+				.newLayout = newLayout,
+				.image = image,
+				.subresourceRange = imageSubresourceRange
+			};
 		}
 	}
 
