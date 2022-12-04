@@ -1,7 +1,11 @@
 #include <Core.h>
 #include <VK/Buffer.h>
-
-#include "VulkanContext.h"
+#include <VK/VulkanContext.h>
+#include <VK/CommandBuffer.h>
+#include <VK/CommandPool.h>
+#include <VK/Fence.h>
+#include <CommandPoolManager.h>
+#include <FrameTracker.h>
 
 namespace sy
 {
@@ -47,5 +51,31 @@ namespace sy
 	Buffer::~Buffer()
 	{
 		vmaDestroyBuffer(vulkanContext.GetAllocator(), handle, allocation);
+	}
+
+	std::unique_ptr<Buffer> Buffer::CreateVertexBuffer(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker,
+		std::string_view name, const VulkanContext& vulkanContext, size_t sizeOfData, void* vertices)
+	{
+		auto newBuffer = std::make_unique<Buffer>(name, vulkanContext, sizeOfData, 0, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY);
+		const auto stagingBuffer = CreateStagingBuffer(std::format("Staging buffer for {}", name), vulkanContext, sizeOfData);
+		void* mappedData = vulkanContext.Map(*stagingBuffer);
+		memcpy(mappedData, vertices, sizeOfData);
+		vulkanContext.Unmap(*stagingBuffer);
+
+		// @todo: Batched upload data
+		// @todo: Use of Transfer Queue ; need more practicing and knowledge about pipeline barriers!
+		auto& transferCmdPool = cmdPoolManager.RequestCommandPool(EQueueType::Transfer);
+		const auto transferCmdBuffer = transferCmdPool.RequestCommandBuffer(std::format("Vertex buffer {} transfer cmd buffer", name));
+		transferCmdBuffer->Begin();
+		{
+			transferCmdBuffer->CopyBufferSimple(*stagingBuffer, 0, *newBuffer, 0, sizeOfData);
+		}
+		transferCmdBuffer->End();
+
+		const auto& uploadFence = frameTracker.GetCurrentInFlightUploadFence();
+		vulkanContext.SubmitTo(*transferCmdBuffer, uploadFence);
+		uploadFence.Wait();
+		uploadFence.Reset();
+		return newBuffer;
 	}
 }

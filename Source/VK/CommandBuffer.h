@@ -36,6 +36,7 @@ namespace sy
 
 		void CopyBufferToImage(const Buffer& srcBuffer, const Texture& dstTexture, std::span<VkBufferImageCopy> copySubresourceRegions) const;
 		void CopyBufferToImageSimple(const Buffer& srcBuffer, const Texture& dstTexture) const;
+		void CopyBufferSimple(const Buffer& srcBuffer, size_t srcOffset, const Buffer& dstBuffer, size_t dstOffset, const size_t sizeofData) const;
 
 	public:
 		static std::pair<VkAccessFlags, VkAccessFlags> QueryOptimalAccessFlagFromImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout);

@@ -30,6 +30,12 @@ namespace sy
 		int textureIndex;
 	};
 
+	struct SimpleVertex
+	{
+		glm::vec4 pos;
+		glm::vec2 uvs;
+	};
+
 	Renderer::Renderer(const Window& window, VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, DescriptorManager& descriptorManager) :
 		window(window),
 		vulkanContext(vulkanContext),
@@ -67,6 +73,14 @@ namespace sy
 
 		loadedTexture = Texture2D::LoadFromFile(cmdPoolManager, frameTracker, "Assets/Textures/djmax_1st_anv.png", vulkanContext, VK_FORMAT_R8G8B8A8_SRGB);
 		loadedTextureDescriptor = descriptorManager.RequestDescriptor(*loadedTexture);
+
+		std::array vertices = {
+			SimpleVertex{glm::vec4{1.f, 1.f, 0.f, 1.f}, {1.f, 1.f} },
+			SimpleVertex{glm::vec4{-1.f, 1.f, 0.f, 1.f}, {0.f, 1.f} },
+			SimpleVertex{glm::vec4{0.f, -1.f, 0.f, 1.f}, {0.5f, 0.f} }
+		};
+
+		triangle = Buffer::CreateVertexBuffer<SimpleVertex>(cmdPoolManager, frameTracker, "Triangle Vertex Buffer", vulkanContext, vertices);
 	}
 
 	Renderer::~Renderer()

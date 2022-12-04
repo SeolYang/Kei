@@ -160,6 +160,11 @@ namespace sy
 			transferCmdBuffer->PipelineBarrier(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, {}, {}, transferTexBarrier);
 		}
 		transferCmdBuffer->End();
+
+		const auto& uploadFence = frameTracker.GetCurrentInFlightUploadFence();
+		vulkanContext.SubmitTo(*transferCmdBuffer, uploadFence);
+		uploadFence.Wait();
+		uploadFence.Reset();
 		return res;
 	}
 }

@@ -143,6 +143,18 @@ namespace sy
 		CopyBufferToImage(srcBuffer, dstTexture, region);
 	}
 
+	void CommandBuffer::CopyBufferSimple(const Buffer& srcBuffer, const size_t srcOffset, const Buffer& dstBuffer, const size_t dstOffset, const size_t sizeofData) const
+	{
+		const VkBufferCopy bufferCopy
+		{
+			.srcOffset = srcOffset,
+			.dstOffset = dstOffset,
+			.size = sizeofData
+		};
+
+		vkCmdCopyBuffer(handle, srcBuffer.GetNativeHandle(), dstBuffer.GetNativeHandle(), 1, &bufferCopy);
+	}
+
 	std::pair<VkAccessFlags, VkAccessFlags>  CommandBuffer::QueryOptimalAccessFlagFromImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout)
 	{
 		VkAccessFlags srcAccess = VK_ACCESS_NONE;
