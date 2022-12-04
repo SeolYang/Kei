@@ -40,6 +40,8 @@ namespace sy
 	{
 		const auto windowExtent = window.GetExtent();
 
+		depthStencil = Texture2D::CreateDepthStencil(cmdPoolManager, frameTracker, "Depth-Stencil buffer", vulkanContext, windowExtent);
+
 		triVert = std::make_unique<ShaderModule>("Triangle vertex shader", vulkanContext, "Assets/Shaders/bin/textured_tri_bindless.vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 		triFrag = std::make_unique<ShaderModule>("Triangle fragment shader", vulkanContext, "Assets/Shaders/bin/textured_tri_bindless.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
@@ -104,7 +106,9 @@ namespace sy
 				clearColorValue.float32[2] = std::cos(currentFrameIdx / 90.f) * 0.5f + 1.f;
 				clearColorValue.float32[3] = 1.f;
 
-				const auto colorAttachmentInfo = swapchain.GetColorAttachmentInfo(clearColorValue);
+				std::array colorAttachmentInfos = { swapchain.GetColorAttachmentInfo(clearColorValue) };
+				std::array depthAttachmentInfos = { vkinit::DepthAttachmentInfo(*depthStencil) };
+
 				const VkRenderingInfo renderingInfo
 				{
 					.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR,
@@ -115,8 +119,10 @@ namespace sy
 						.extent = VkExtent2D{windowExtent.width, windowExtent.height},
 					},
 					.layerCount = 1,
-					.colorAttachmentCount = 1,
-					.pColorAttachments = &colorAttachmentInfo
+					.colorAttachmentCount = colorAttachmentInfos.size(),
+					.pColorAttachments = colorAttachmentInfos.data(),
+					.pDepthAttachment = depthAttachmentInfos.data(),
+					.pStencilAttachment = depthAttachmentInfos.data()
 				};
 
 				graphicsCmdBuffer->BeginRendering(renderingInfo);

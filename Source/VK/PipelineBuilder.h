@@ -88,6 +88,8 @@ namespace sy
 		GraphicsPipelineBuilder& SetPipelineLayout(VkPipelineLayout pipelineLayout);
 		VkPipelineLayout GetLayout() const { return pipelineLayout; }
 
+		GraphicsPipelineBuilder& SetDepthStencilFormat(VkFormat format = VK_FORMAT_D24_UNORM_S8_UINT);
+
 		[[nodiscard]] VkGraphicsPipelineCreateInfo Build() const;
 
 	private:
@@ -105,6 +107,8 @@ namespace sy
 		VkPipelineMultisampleStateCreateInfo multiSampling;
 		VkPipelineLayout pipelineLayout;
 		VkPipelineDepthStencilStateCreateInfo depthStencil;
+
+		VkPipelineRenderingCreateInfo renderingCreateInfo;
 
 		std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
 		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;

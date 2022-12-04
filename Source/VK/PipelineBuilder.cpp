@@ -85,6 +85,12 @@ namespace sy
 		SetMinDepthBounds(0.f);
 		SetMaxDepthBounds(0.f);
 
+		renderingCreateInfo = {
+			.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
+			.pNext = nullptr
+		};
+		SetDepthStencilFormat();
+
 		return *this;
 	}
 
@@ -386,12 +392,19 @@ namespace sy
 		return *this;
 	}
 
+	GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetDepthStencilFormat(VkFormat format)
+	{
+		this->renderingCreateInfo.depthAttachmentFormat = format;
+		this->renderingCreateInfo.stencilAttachmentFormat = format;
+		return *this;
+	}
+
 	VkGraphicsPipelineCreateInfo GraphicsPipelineBuilder::Build() const
 	{
 		const VkGraphicsPipelineCreateInfo createInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-			.pNext = nullptr,
+			.pNext = &renderingCreateInfo,
 			.flags = pipelineCreateFlags,
 			.stageCount = static_cast<uint32_t>(shaderStages.size()),
 			.pStages = shaderStages.data(),

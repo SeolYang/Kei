@@ -3,6 +3,12 @@
 
 namespace sy
 {
+	class Buffer;
+	class Texture;
+	class Texture2D;
+	class TextureCube;
+	class Texture3D;
+
 	enum class EQueueType
 	{
 		Graphics,
@@ -418,20 +424,22 @@ namespace sy
 			};
 		}
 
-		constexpr static VkImageMemoryBarrier ImageMemoryBarrier(const VkAccessFlags srcAccessMask, const VkAccessFlags dstAccesMask, const VkImageLayout oldLayout, const VkImageLayout newLayout, const VkImage image, const VkImageSubresourceRange imageSubresourceRange)
+		constexpr static VkImageMemoryBarrier ImageMemoryBarrier(const VkAccessFlags srcAccessMask, const VkAccessFlags dstAccessMask, const VkImageLayout oldLayout, const VkImageLayout newLayout, const VkImage image, const VkImageSubresourceRange imageSubresourceRange)
 		{
 			return
 			{
 				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
 				.pNext = nullptr,
 				.srcAccessMask = srcAccessMask,
-				.dstAccessMask = dstAccesMask,
+				.dstAccessMask = dstAccessMask,
 				.oldLayout = oldLayout,
 				.newLayout = newLayout,
 				.image = image,
 				.subresourceRange = imageSubresourceRange
 			};
 		}
+
+		VkRenderingAttachmentInfo DepthAttachmentInfo(const Texture2D& depthStencil, float depthClearValue = 1.f, uint8_t stencilClearValue = 0);
 	}
 
 	constexpr uint32_t MaxBindlessResourcesPerDescriptor = 2048;
