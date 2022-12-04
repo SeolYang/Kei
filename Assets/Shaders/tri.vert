@@ -1,5 +1,4 @@
 #version 450
-#extension GL_KHR_vulkan_glsl : enable
 #extension GL_EXT_nonuniform_qualifier : enable
 
 layout (set = 0, binding = 4) uniform ColorData
@@ -13,22 +12,13 @@ layout (push_constant) uniform PushConstants
 	int textureIndex;
 } pushConstants;
 
-layout (location=0) out vec2 outUV;
+layout (location = 0) in vec4 vPos;
+layout (location = 1) in vec2 vTexCoord;
+
+layout (location = 0) out vec2 outUV;
 
 void main()
 {
-	const vec3 positions[3] = vec3[3](
-		vec3(1.f, 1.f, 0.0f),
-		vec3(-1.f, 1.f, 0.0f),
-		vec3(0.f, -1.0f, 0.0f)
-	);
-
-	const vec2 uvs[3] = vec2[3](
-		vec2(1.f, 1.f),
-		vec2(0.f, 1.f),
-		vec2(0.5f, 0.f)
-	);
-
-	gl_Position = vec4(positions[gl_VertexIndex], 1.0f);
-	outUV = uvs[gl_VertexIndex];
+	gl_Position = vPos;
+	outUV = vTexCoord;
 }

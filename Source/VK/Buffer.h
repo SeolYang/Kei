@@ -38,10 +38,13 @@ namespace sy
 		template <typename Vertex>
 		static auto CreateVertexBuffer(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext, const std::span<Vertex> vertices)
 		{
-			return CreateVertexBuffer(cmdPoolManager, frameTracker, name, vulkanContext, sizeof(Vertex) * vertices.size(), vertices.data());
+			return CreateBufferWithData(cmdPoolManager, frameTracker, name, vulkanContext, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, sizeof(Vertex) * vertices.size(), vertices.data());
 		}
 
-		static std::unique_ptr<Buffer> CreateVertexBuffer(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext, size_t sizeOfData, void* vertices);
+		static std::unique_ptr<Buffer> CreateIndexBuffer(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext, std::span<uint32_t> indices);
+
+	private:
+		static std::unique_ptr<Buffer> CreateBufferWithData(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext, VkBufferUsageFlags bufferUsage, size_t sizeOfData, void* data);
 
 	private:
 		VmaAllocation allocation;

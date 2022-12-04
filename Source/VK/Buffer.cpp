@@ -53,13 +53,20 @@ namespace sy
 		vmaDestroyBuffer(vulkanContext.GetAllocator(), handle, allocation);
 	}
 
-	std::unique_ptr<Buffer> Buffer::CreateVertexBuffer(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker,
-		std::string_view name, const VulkanContext& vulkanContext, size_t sizeOfData, void* vertices)
+	std::unique_ptr<Buffer> Buffer::CreateIndexBuffer(CommandPoolManager& cmdPoolManager,
+		const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext,
+		std::span<uint32_t> indices)
 	{
-		auto newBuffer = std::make_unique<Buffer>(name, vulkanContext, sizeOfData, 0, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY);
+		return CreateBufferWithData(cmdPoolManager, frameTracker, name, vulkanContext, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, sizeof(uint32_t) * indices.size(), indices.data());
+	}
+
+	std::unique_ptr<Buffer> Buffer::CreateBufferWithData(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker,
+	                                                   std::string_view name, const VulkanContext& vulkanContext, const VkBufferUsageFlags bufferUsage, size_t sizeOfData, void* data)
+	{
+		auto newBuffer = std::make_unique<Buffer>(name, vulkanContext, sizeOfData, 0, bufferUsage | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY);
 		const auto stagingBuffer = CreateStagingBuffer(std::format("Staging buffer for {}", name), vulkanContext, sizeOfData);
 		void* mappedData = vulkanContext.Map(*stagingBuffer);
-		memcpy(mappedData, vertices, sizeOfData);
+		memcpy(mappedData, data, sizeOfData);
 		vulkanContext.Unmap(*stagingBuffer);
 
 		// @todo: Batched upload data

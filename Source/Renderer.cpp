@@ -62,7 +62,11 @@ namespace sy
 			.AddShaderStage(*triFrag)
 			.AddViewport(0.f, 0.f, static_cast<float>(windowExtent.width), static_cast<float>(windowExtent.height), 0.0f, 1.0f)
 			.AddScissor(0, 0, windowExtent.width, windowExtent.height)
-			.SetPipelineLayout(pipelineLayoutCache->Request(descriptorSetLayouts, pushConstantRanges));
+			.SetPipelineLayout(pipelineLayoutCache->Request(descriptorSetLayouts, pushConstantRanges))
+			.AddVertexInputBinding<SimpleVertex>(0, VK_VERTEX_INPUT_RATE_VERTEX)
+			.AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 0)
+			.AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(SimpleVertex, uvs));
+
 		basicPipeline = std::make_unique<Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
 		for (size_t idx = 0; idx < NumMaxInFlightFrames; ++idx)
@@ -75,12 +79,23 @@ namespace sy
 		loadedTextureDescriptor = descriptorManager.RequestDescriptor(*loadedTexture);
 
 		std::array vertices = {
-			SimpleVertex{glm::vec4{1.f, 1.f, 0.f, 1.f}, {1.f, 1.f} },
-			SimpleVertex{glm::vec4{-1.f, 1.f, 0.f, 1.f}, {0.f, 1.f} },
-			SimpleVertex{glm::vec4{0.f, -1.f, 0.f, 1.f}, {0.5f, 0.f} }
+			SimpleVertex{glm::vec4{-0.5f, 0.5f, 0.f, 1.f}, {0.f, 1.f} },
+			SimpleVertex{glm::vec4{-0.5f, -0.5f, 0.f, 1.f}, {0.f, 0.f} },
+			SimpleVertex{glm::vec4{0.5f, -0.5f, 0.f, 1.f}, {1.f, 0.f} },
+			SimpleVertex{glm::vec4{0.5f, 0.5f, 0.f, 1.f}, {1.f, 1.f} }
 		};
 
-		triangle = Buffer::CreateVertexBuffer<SimpleVertex>(cmdPoolManager, frameTracker, "Triangle Vertex Buffer", vulkanContext, vertices);
+		std::array indices = {
+			static_cast<uint32_t>(0),
+			static_cast<uint32_t>(1),
+			static_cast<uint32_t>(2),
+			static_cast<uint32_t>(2),
+			static_cast<uint32_t>(3),
+			static_cast<uint32_t>(0),
+		};
+
+		quadVertexBuffer = Buffer::CreateVertexBuffer<SimpleVertex>(cmdPoolManager, frameTracker, "Quad Vertex Buffer", vulkanContext, vertices);
+		quadIndexBuffer = Buffer::CreateIndexBuffer(cmdPoolManager, frameTracker, "Quad Index Buffer", vulkanContext, indices);
 	}
 
 	Renderer::~Renderer()
@@ -161,9 +176,13 @@ namespace sy
 						.textureIndex = static_cast<int>(loadedTextureDescriptor->Offset)
 					};
 
+					std::array<CRef<Buffer>, 1> vertexBuffers = { *quadVertexBuffer };
+					std::array offsets = { uint64_t() };
+					graphicsCmdBuffer->BindVertexBuffers(0, vertexBuffers, offsets);
+					graphicsCmdBuffer->BindIndexBuffer(*quadIndexBuffer);
 					graphicsCmdBuffer->PushConstants(*basicPipeline, VK_SHADER_STAGE_ALL_GRAPHICS, 0, sizeof(PushConstants), &pushConstants);
 
-					graphicsCmdBuffer->Draw(3, 1, 0, 0);
+					graphicsCmdBuffer->DrawIndexed(6, 1, 0, 0, 0);
 				}
 				graphicsCmdBuffer->EndRendering();
 

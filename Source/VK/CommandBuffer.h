@@ -29,10 +29,13 @@ namespace sy
 
 		void BindPipeline(const Pipeline& pipeline) const;
 		void BindDescriptorSet(VkDescriptorSet descriptorSet, const Pipeline& pipeline) const;
+		void BindVertexBuffers(uint32_t firstBinding, std::span<CRef<Buffer>> buffers, std::span<size_t> offsets) const;
+		void BindIndexBuffer(const Buffer& indexBuffer, size_t offset = 0) const;
 
 		void PushConstants(const Pipeline& pipeline, VkShaderStageFlags shaderStageFlags, uint32_t offset, uint32_t size, const void* values) const;
 
 		void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const;
+		void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) const;
 
 		void CopyBufferToImage(const Buffer& srcBuffer, const Texture& dstTexture, std::span<VkBufferImageCopy> copySubresourceRegions) const;
 		void CopyBufferToImageSimple(const Buffer& srcBuffer, const Texture& dstTexture) const;

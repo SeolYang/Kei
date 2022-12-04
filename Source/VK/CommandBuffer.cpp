@@ -105,15 +105,40 @@ namespace sy
 		vkCmdBindDescriptorSets(handle, pipeline.GetBindPoint(), pipeline.GetLayout(), 0, 1, descriptorSets, 0, nullptr);
 	}
 
+	void CommandBuffer::BindVertexBuffers(const uint32_t firstBinding, const std::span<CRef<Buffer>> buffers, const std::span<size_t> offsets) const
+	{
+		std::vector<VkBuffer> handles;
+		handles.resize(buffers.size());
+		std::transform(buffers.begin(), buffers.end(),
+			handles.begin(),
+			[](const Buffer& buffer)
+			{
+				return buffer.GetNativeHandle();
+			});
+
+		vkCmdBindVertexBuffers(handle, firstBinding, handles.size(), handles.data(), offsets.data());
+	}
+
+	void CommandBuffer::BindIndexBuffer(const Buffer& indexBuffer, const size_t offset) const
+	{
+		vkCmdBindIndexBuffer(handle, indexBuffer.GetNativeHandle(), offset, VK_INDEX_TYPE_UINT32);
+	}
+
 	void CommandBuffer::PushConstants(const Pipeline& pipeline, const VkShaderStageFlags shaderStageFlags, const uint32_t offset,
-		const uint32_t size, const void* values) const
+	                                  const uint32_t size, const void* values) const
 	{
 		vkCmdPushConstants(handle, pipeline.GetLayout(), shaderStageFlags, offset, size, values);
 	}
 
-	void CommandBuffer::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const
+	void CommandBuffer::Draw(const uint32_t vertexCount, const uint32_t instanceCount, const uint32_t firstVertex, const uint32_t firstInstance) const
 	{
 		vkCmdDraw(handle, vertexCount, instanceCount, firstVertex, firstInstance);
+	}
+
+	void CommandBuffer::DrawIndexed(const uint32_t indexCount, const uint32_t instanceCount, const uint32_t firstIndex,
+		const int32_t vertexOffset, const uint32_t firstInstance) const
+	{
+		vkCmdDrawIndexed(handle, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 	}
 
 	void CommandBuffer::CopyBufferToImage(const Buffer& srcBuffer, const Texture& dstTexture, const std::span<VkBufferImageCopy> regions) const

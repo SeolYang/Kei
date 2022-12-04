@@ -48,7 +48,8 @@ namespace sy
 		std::unique_ptr<Texture2D> loadedTexture;
 		OffsetSlotPtr loadedTextureDescriptor;
 
-		std::unique_ptr<Buffer> triangle;
+		std::unique_ptr<Buffer> quadVertexBuffer;
+		std::unique_ptr<Buffer> quadIndexBuffer;
 
 	};
 }
