@@ -109,7 +109,7 @@ namespace sy
 	{
 		int texWidth, texHeight;
 		int texChannels;
-		stbi_uc* pixels = stbi_load(filePath.data(), &texWidth, &texHeight, &texChannels, ToNumberOfComponents(format));
+		stbi_uc* pixels = stbi_load(filePath.data(), &texWidth, &texHeight, &texChannels, static_cast<int>(ToNumberOfComponents(format)));
 		if (pixels == nullptr)
 		{
 			spdlog::warn("Failed to load image from file {}.", filePath);
@@ -117,7 +117,7 @@ namespace sy
 		}
 
 		const void* pixelsData = pixels;
-		const VkDeviceSize sizeOfData = (texWidth * texHeight) * ToByteSize(format);
+		const VkDeviceSize sizeOfData = (static_cast<uint64_t>(texWidth) * static_cast<uint64_t>(texHeight)) * ToByteSize(format);
 
 		const auto stagingBuffer = Buffer::CreateStagingBuffer(std::format("2D Texture {} staging buffer", filePath), vulkanContext, sizeOfData);
 		void* mappedData = vulkanContext.Map(*stagingBuffer);

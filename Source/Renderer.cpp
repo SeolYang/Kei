@@ -65,7 +65,7 @@ namespace sy
 			.SetPipelineLayout(pipelineLayoutCache->Request(descriptorSetLayouts, pushConstantRanges))
 			.AddVertexInputBinding<SimpleVertex>(0, VK_VERTEX_INPUT_RATE_VERTEX)
 			.AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 0)
-			.AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(SimpleVertex, uvs));
+			.AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32_SFLOAT, static_cast<uint32_t>(offsetof(SimpleVertex, uvs)));
 
 		basicPipeline = std::make_unique<Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
@@ -184,9 +184,9 @@ namespace sy
 					VK_IMAGE_ASPECT_COLOR_BIT);
 
 				VkClearColorValue clearColorValue;
-				clearColorValue.float32[0] = std::cos(currentFrameIdx / 180.f) * 0.5f + 1.f;
-				clearColorValue.float32[1] = std::sin(currentFrameIdx / 270.f) * 0.5f + 1.f;
-				clearColorValue.float32[2] = std::cos(currentFrameIdx / 90.f) * 0.5f + 1.f;
+				clearColorValue.float32[0] = std::cos(static_cast<float>(currentFrameIdx) / 180.f) * 0.5f + 1.f;
+				clearColorValue.float32[1] = std::sin(static_cast<float>(currentFrameIdx) / 270.f) * 0.5f + 1.f;
+				clearColorValue.float32[2] = std::cos(static_cast<float>(currentFrameIdx) / 90.f) * 0.5f + 1.f;
 				clearColorValue.float32[3] = 1.f;
 
 				std::array colorAttachmentInfos = { swapchain.GetColorAttachmentInfo(clearColorValue) };
@@ -202,7 +202,7 @@ namespace sy
 						.extent = VkExtent2D{windowExtent.width, windowExtent.height},
 					},
 					.layerCount = 1,
-					.colorAttachmentCount = colorAttachmentInfos.size(),
+					.colorAttachmentCount = static_cast<uint32_t>(colorAttachmentInfos.size()),
 					.pColorAttachments = colorAttachmentInfos.data(),
 					.pDepthAttachment = depthAttachmentInfos.data(),
 					.pStencilAttachment = depthAttachmentInfos.data()

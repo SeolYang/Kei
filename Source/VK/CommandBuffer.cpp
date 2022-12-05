@@ -89,9 +89,9 @@ namespace sy
 	{
 		vkCmdPipelineBarrier(handle,
 			srcStage, dstStage, 0,
-			memoryBarriers.size(), memoryBarriers.data(),
-			bufferMemoryBarriers.size(), bufferMemoryBarriers.data(),
-			imageMemoryBarriers.size(), imageMemoryBarriers.data());
+			static_cast<uint32_t>(memoryBarriers.size()), memoryBarriers.data(),
+			static_cast<uint32_t>(bufferMemoryBarriers.size()), bufferMemoryBarriers.data(),
+			static_cast<uint32_t>(imageMemoryBarriers.size()), imageMemoryBarriers.data());
 	}
 
 	void CommandBuffer::BindPipeline(const Pipeline& pipeline) const
@@ -116,7 +116,7 @@ namespace sy
 				return buffer.GetNativeHandle();
 			});
 
-		vkCmdBindVertexBuffers(handle, firstBinding, handles.size(), handles.data(), offsets.data());
+		vkCmdBindVertexBuffers(handle, firstBinding, static_cast<uint32_t>(handles.size()), handles.data(), offsets.data());
 	}
 
 	void CommandBuffer::BindIndexBuffer(const Buffer& indexBuffer, const size_t offset) const
@@ -143,7 +143,7 @@ namespace sy
 
 	void CommandBuffer::CopyBufferToImage(const Buffer& srcBuffer, const Texture& dstTexture, const std::span<VkBufferImageCopy> regions) const
 	{
-		vkCmdCopyBufferToImage(handle, srcBuffer.GetNativeHandle(), dstTexture.GetNativeHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, regions.size(), regions.data());
+		vkCmdCopyBufferToImage(handle, srcBuffer.GetNativeHandle(), dstTexture.GetNativeHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, static_cast<uint32_t>(regions.size()), regions.data());
 	}
 
 	void CommandBuffer::CopyBufferToImageSimple(const Buffer& srcBuffer, const Texture& dstTexture) const

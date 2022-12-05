@@ -61,7 +61,7 @@ namespace sy
 			descriptorCounts.begin(),
 			[](const DescriptorPoolSize& poolSize)
 			{
-				return poolSize.Size;
+				return static_cast<uint32_t>(poolSize.Size);
 			});
 
 		const VkDescriptorSetLayoutBindingFlagsCreateInfoEXT extendedLayoutInfo
@@ -155,7 +155,7 @@ namespace sy
 
 		if (!combinedWriteDescriptorSets.empty())
 		{
-			vkUpdateDescriptorSets(vulkanContext.GetDevice(), combinedWriteDescriptorSets.size(), combinedWriteDescriptorSets.data(), 0, nullptr);
+			vkUpdateDescriptorSets(vulkanContext.GetDevice(), static_cast<uint32_t>(combinedWriteDescriptorSets.size()), combinedWriteDescriptorSets.data(), 0, nullptr);
 			bufferWriteDescriptors.clear();
 			bufferInfos.clear();
 			imageWriteDescriptors.clear();

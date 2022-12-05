@@ -18,8 +18,8 @@ namespace sy
 		template <typename T>
 		GraphicsPipelineBuilder& AddVertexInputBinding(uint32_t binding, const VkVertexInputRate inputRate)
 		{
-			vertexInputBindingDescriptions.emplace_back(binding, sizeof(T), inputRate);
-			vertexInputInfo.vertexBindingDescriptionCount = vertexInputBindingDescriptions.size();
+			vertexInputBindingDescriptions.emplace_back(binding, static_cast<uint32_t>(sizeof(T)), inputRate);
+			vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(vertexInputBindingDescriptions.size());
 			vertexInputInfo.pVertexBindingDescriptions = vertexInputBindingDescriptions.data();
 			return *this;
 		}

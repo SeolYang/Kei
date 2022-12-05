@@ -117,7 +117,7 @@ namespace sy
 		VkFormat format, uint32_t offset)
 	{
 		vertexInputAttributeDescriptions.emplace_back(location, binding, format, offset);
-		vertexInputInfo.vertexAttributeDescriptionCount = vertexInputAttributeDescriptions.size();
+		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexInputAttributeDescriptions.size());
 		vertexInputInfo.pVertexAttributeDescriptions = vertexInputAttributeDescriptions.data();
 
 		return *this;
@@ -346,7 +346,7 @@ namespace sy
 		VkColorComponentFlags colorWriteMask)
 	{
 		colorBlendAttachments.emplace_back(bBlendEnable ? VK_TRUE : VK_FALSE, srcColorBlendFactor, dstColorBlendFactor, colorBlendOp, srcAlphaBlendFactor, dstAlphaBlendFactor, alphaBlendOp, colorWriteMask);
-		colorBlend.attachmentCount = colorBlendAttachments.size();
+		colorBlend.attachmentCount = static_cast<uint32_t>(colorBlendAttachments.size());
 		colorBlend.pAttachments = colorBlendAttachments.data();
 		return *this;
 	}
@@ -360,7 +360,7 @@ namespace sy
 			VK_COLOR_COMPONENT_A_BIT;
 		colorBlendAttachment.blendEnable = VK_FALSE;
 		colorBlendAttachments.emplace_back(colorBlendAttachment);
-		colorBlend.attachmentCount = colorBlendAttachments.size();
+		colorBlend.attachmentCount = static_cast<uint32_t>(colorBlendAttachments.size());
 		colorBlend.pAttachments = colorBlendAttachments.data();
 		return *this;
 	}
