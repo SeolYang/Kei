@@ -150,7 +150,7 @@ namespace sy
 				imageWriteDescriptors[idx].pImageInfo = &imageInfos[idx];
 			}
 
-			combinedWriteDescriptorSets.assign(imageWriteDescriptors.begin(), imageWriteDescriptors.end());
+			combinedWriteDescriptorSets.insert(combinedWriteDescriptorSets.end(), imageWriteDescriptors.begin(), imageWriteDescriptors.end());
 		}
 
 		if (!combinedWriteDescriptorSets.empty())
