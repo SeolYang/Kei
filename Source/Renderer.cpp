@@ -87,64 +87,65 @@ namespace sy
 
 		std::array vertices =
 		{
-			SimpleVertex{ {-.5f, .5f, -.5f, 1.f}, {0.f, 1.f} },
-			SimpleVertex{ {-.5f, -.5f, -.5f, 1.f}, {0.f, 0.f} },
-			SimpleVertex{ {.5f, -.5f, -.5f, 1.f}, {1.f, 0.f} },
-			SimpleVertex{ {.5f, .5f, -.5f, 1.f}, {1.f, 1.f} },
-			SimpleVertex{ {-.5f, .5f, .5f, 1.f}, {1.f, 1.f} },
-			SimpleVertex{ {-.5f, -.5f, .5f, 1.f}, {1.f, 0.f} },
-			SimpleVertex{ {.5f, -.5f, .5f, 1.f}, {0.f, 0.f} },
-			SimpleVertex{ {.5f, .5f, .5f, 1.f}, {0.f, 1.f} },
+			SimpleVertex{ {-.5f, -.5f, -.5f, 1.f}, {0.f, 1.f} },
+			SimpleVertex{ {-.5f, .5f, -.5f, 1.f}, {0.f, 0.f} },
+			SimpleVertex{ {.5f, .5f, -.5f, 1.f}, {1.f, 0.f} },
+			SimpleVertex{ {.5f, -.5f, -.5f, 1.f}, {1.f, 1.f} },
+			SimpleVertex{ {-.5f, -.5f, .5f, 1.f}, {1.f, 1.f} },
+			SimpleVertex{ {-.5f, .5f, .5f, 1.f}, {1.f, 0.f} },
+			SimpleVertex{ {.5f, .5f, .5f, 1.f}, {0.f, 0.f} },
+			SimpleVertex{ {.5f, -.5f, .5f, 1.f}, {0.f, 1.f} },
 		};
 
 		std::array indices = {
-			static_cast<uint32_t>(2), // front face
+			static_cast<uint32_t>(0), // front face
 			static_cast<uint32_t>(1),
-			static_cast<uint32_t>(0),
-			static_cast<uint32_t>(0),
-			static_cast<uint32_t>(3),
 			static_cast<uint32_t>(2),
-
-			static_cast<uint32_t>(4), // left
-			static_cast<uint32_t>(0),
-			static_cast<uint32_t>(1),
-			static_cast<uint32_t>(1),
-			static_cast<uint32_t>(5),
-			static_cast<uint32_t>(4),
-
-			static_cast<uint32_t>(2), // right
-			static_cast<uint32_t>(3),
-			static_cast<uint32_t>(7),
-			static_cast<uint32_t>(7),
-			static_cast<uint32_t>(6),
 			static_cast<uint32_t>(2),
+			static_cast<uint32_t>(3),
+			static_cast<uint32_t>(0),
 
-			static_cast<uint32_t>(6), // behind
-			static_cast<uint32_t>(7),
+			static_cast<uint32_t>(1), // left
+			static_cast<uint32_t>(0),
 			static_cast<uint32_t>(4),
 			static_cast<uint32_t>(4),
 			static_cast<uint32_t>(5),
-			static_cast<uint32_t>(6),
+			static_cast<uint32_t>(1),
 
-			static_cast<uint32_t>(6), // up
-			static_cast<uint32_t>(5),
-			static_cast<uint32_t>(1),
-			static_cast<uint32_t>(1),
+			static_cast<uint32_t>(7), // right
+			static_cast<uint32_t>(3),
+			static_cast<uint32_t>(2),
 			static_cast<uint32_t>(2),
 			static_cast<uint32_t>(6),
+			static_cast<uint32_t>(7),
 
-			static_cast<uint32_t>(0), // down
+			static_cast<uint32_t>(4), // behind
+			static_cast<uint32_t>(7),
+			static_cast<uint32_t>(6),
+			static_cast<uint32_t>(6),
+			static_cast<uint32_t>(5),
 			static_cast<uint32_t>(4),
-			static_cast<uint32_t>(7),
-			static_cast<uint32_t>(7),
-			static_cast<uint32_t>(3),
+
+			static_cast<uint32_t>(1), // up
+			static_cast<uint32_t>(5),
+			static_cast<uint32_t>(6),
+			static_cast<uint32_t>(6),
+			static_cast<uint32_t>(2),
+			static_cast<uint32_t>(1),
+
+			static_cast<uint32_t>(7), // down
+			static_cast<uint32_t>(4),
 			static_cast<uint32_t>(0),
+			static_cast<uint32_t>(0),
+			static_cast<uint32_t>(3),
+			static_cast<uint32_t>(7),
 		};
 
 		cubeVertexBuffer = Buffer::CreateVertexBuffer<SimpleVertex>(cmdPoolManager, frameTracker, "Quad Vertex Buffer", vulkanContext, vertices);
 		cubeIndexBuffer = Buffer::CreateIndexBuffer(cmdPoolManager, frameTracker, "Quad Index Buffer", vulkanContext, indices);
 
-		const auto proj = glm::perspective(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
+		auto proj = glm::perspective(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
+		proj[1][1] *= -1.f; /* Flip y-axis, +y = (0, -1, 0) -> (0, 1, 0)*/
 		viewProjMat = proj * glm::lookAt(glm::vec3{ 1.5f, -2.f, -5.f }, { 0.f, 0.f ,0.f }, { 0.f ,1.f, 0.f });
 	}
 
@@ -213,7 +214,8 @@ namespace sy
 
 					const auto& transformBuffer = *transformBuffers[frameTracker.GetCurrentInFlightFrameIndex()];
 					void* transformBufferMappedPtr = vulkanContext.Map(transformBuffer);
-					const TransformUniformBuffer uniformBuffer{ viewProjMat * glm::rotate(glm::mat4(1.f), elapsedTime, { 0.f, 1.f, 0.f }) };
+					const auto model = glm::rotate(glm::mat4(1.f), elapsedTime, { 0.f, 1.f, 0.f });
+					const TransformUniformBuffer uniformBuffer{ viewProjMat *  model };
 					memcpy(transformBufferMappedPtr, &uniformBuffer, sizeof(TransformUniformBuffer));
 					vulkanContext.Unmap(transformBuffer);
 

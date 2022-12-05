@@ -63,7 +63,7 @@ namespace sy
 		SetRasterizerDiscardEnable(false);
 		SetPolygonMode(VK_POLYGON_MODE_FILL);
 		SetCullMode(VK_CULL_MODE_BACK_BIT);
-		SetFrontFace(VK_FRONT_FACE_CLOCKWISE);
+		SetFrontFace(VK_FRONT_FACE_COUNTER_CLOCKWISE);
 		SetDepthBiasEnable(false);
 		SetDepthBiasConstantFactor(0.f);
 		SetDepthBiasClamp(0.f);
