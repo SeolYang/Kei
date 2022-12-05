@@ -22,7 +22,7 @@ namespace sy
 	}
 
 	Pipeline::Pipeline(std::string_view name, const VulkanContext& vulkanContext, EPipelineType pipelineType, VkPipelineLayout layout) :
-		VulkanWrapper<VkPipeline>(name, vulkanContext, VK_DESTROY_LAMBDA_SIGNATURE(VkPipeline)
+		VulkanWrapper<VkPipeline>(name, vulkanContext, VK_OBJECT_TYPE_PIPELINE, VK_DESTROY_LAMBDA_SIGNATURE(VkPipeline)
 		{
 			vkDestroyPipeline(vulkanContext.GetDevice(), handle, nullptr);
 		}),

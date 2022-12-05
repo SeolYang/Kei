@@ -179,6 +179,25 @@ namespace sy
 		vmaUnmapMemory(allocator, buffer.GetAllocation());
 	}
 
+	void VulkanContext::SetObjectName(const uint64_t object, const VkObjectType objectType, const std::string_view name) const
+	{
+#if defined(DEBUG) || defined(_DEBUG)
+		if (!name.empty())
+		{
+			const VkDebugUtilsObjectNameInfoEXT nameInfo
+			{
+				.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+				.pNext = nullptr,
+				.objectType = objectType,
+				.objectHandle = object,
+				.pObjectName = name.data()
+			};
+
+			VK_ASSERT(vkSetDebugUtilsObjectNameEXT(device, &nameInfo), "Failed to set object name {}", name);
+		}
+#endif
+	}
+
 	void VulkanContext::Startup()
 	{
 		volkInitialize();
@@ -203,9 +222,9 @@ namespace sy
 		vkb::PhysicalDeviceSelector physicalDeviceSelector { vkbInstance };
 		auto vkbPhysicalDevice = physicalDeviceSelector.set_minimum_version(1, 3)
 			.set_surface(surface)
-			.add_required_extension("VK_EXT_descriptor_indexing")
-			.add_required_extension("VK_KHR_swapchain")
-			.add_required_extension("VK_KHR_dynamic_rendering")
+			.add_required_extension(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME)
+			.add_required_extension(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
+			.add_required_extension(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME)
 			.select()
 			.value();
 
@@ -246,6 +265,7 @@ namespace sy
 			.descriptorBindingVariableDescriptorCount = VK_TRUE,
 			.runtimeDescriptorArray = VK_TRUE,
 		};
+
 
 		auto vkbDeviceRes = 
 			deviceBuilder.add_pNext(&dynamicRenderingFeatures)

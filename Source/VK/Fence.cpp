@@ -5,7 +5,7 @@
 namespace sy
 {
 	Fence::Fence(std::string_view name, const VulkanContext& vulkanContext, const bool bIsSignaled) :
-		VulkanWrapper<VkFence>(name, vulkanContext, VK_DESTROY_LAMBDA_SIGNATURE(VkFence)
+		VulkanWrapper<VkFence>(name, vulkanContext, VK_OBJECT_TYPE_FENCE, VK_DESTROY_LAMBDA_SIGNATURE(VkFence)
 		{
 			vkDestroyFence(vulkanContext.GetDevice(), handle, nullptr);
 		})

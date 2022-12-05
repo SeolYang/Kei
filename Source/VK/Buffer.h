@@ -34,7 +34,6 @@ namespace sy
 			return std::make_unique<Buffer>(name, vulkanContext, bufferSize, 0, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
 		}
 
-
 		template <typename Vertex>
 		static auto CreateVertexBuffer(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext, const std::span<Vertex> vertices)
 		{

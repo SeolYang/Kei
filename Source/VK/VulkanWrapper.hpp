@@ -12,14 +12,15 @@ namespace sy
 		using Native_t = VulkanHandleType;
 
 	public:
-		VulkanWrapper(const std::string_view name, const VulkanContext& vulkanContext) :
-			VulkanWrapper(name, vulkanContext, VK_DESTROY_LAMBDA_SIGNATURE(Native_t){})
+		VulkanWrapper(const std::string_view name, const VulkanContext& vulkanContext, const VkObjectType type) :
+			VulkanWrapper(name, vulkanContext, type, VK_DESTROY_LAMBDA_SIGNATURE(Native_t){})
 		{
 		}
 
-		VulkanWrapper(const std::string_view name, const VulkanContext& vulkanContext, const VulkanDestroyFunction_t destroyFunction) :
+		VulkanWrapper(const std::string_view name, const VulkanContext& vulkanContext, const VkObjectType type, const VulkanDestroyFunction_t destroyFunction) :
 			NamedType(name),
 			vulkanContext(vulkanContext),
+			type(type),
 			destroyFunction(destroyFunction)
 		{
 		}
@@ -30,10 +31,12 @@ namespace sy
 		}
 
 		[[nodiscard]] Native_t GetNativeHandle() const { return handle; }
+		[[nodiscard]] VkObjectType GetType() const { return type; }
 
 	protected:
 		const VulkanContext& vulkanContext;
 		const VulkanDestroyFunction_t destroyFunction;
+		const VkObjectType type;
 		Native_t handle = VK_NULL_HANDLE;
 
 	};

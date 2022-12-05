@@ -7,7 +7,7 @@
 namespace sy
 {
 	Swapchain::Swapchain(const Window& window, const VulkanContext& vulkanContext) :
-		VulkanWrapper<VkSwapchainKHR>("Swapchain", vulkanContext, VK_DESTROY_LAMBDA_SIGNATURE(VkSwapchainKHR)
+		VulkanWrapper<VkSwapchainKHR>("Swapchain", vulkanContext, VK_OBJECT_TYPE_SWAPCHAIN_KHR, VK_DESTROY_LAMBDA_SIGNATURE(VkSwapchainKHR)
 		{
 			vkDestroySwapchainKHR(vulkanContext.GetDevice(), handle, nullptr);
 		}),

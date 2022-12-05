@@ -52,6 +52,14 @@ namespace sy
 		[[nodiscard]] void* Map(const Buffer& buffer) const;
 		void Unmap(const Buffer& buffer) const;
 
+		void SetObjectName(uint64_t object, VkObjectType objectType, std::string_view name) const;
+
+		template <typename HandleType>
+		void SetObjectName(const VulkanWrapper<HandleType>& object)
+		{
+			SetObjectName(reinterpret_cast<uint64_t>(object.GetNativeHandle()), object.GetType(), object.GetName());
+		}
+
 	private:
 		void Startup();
 		void Cleanup();
@@ -81,7 +89,6 @@ namespace sy
 		uint32_t computeQueueFamilyIdx;
 		uint32_t transferQueueFamilyIdx;
 		uint32_t presentQueueFamilyIdx;
-
 
 	};
 }

@@ -9,7 +9,7 @@
 namespace sy
 {
 	CommandBuffer::CommandBuffer(std::string_view name, const VulkanContext& vulkanContext, const CommandPool& cmdPool) :
-		VulkanWrapper<VkCommandBuffer>(name, vulkanContext, VK_DESTROY_LAMBDA_SIGNATURE(VkCommandBuffer){ }),
+		VulkanWrapper<VkCommandBuffer>(name, vulkanContext, VK_OBJECT_TYPE_COMMAND_BUFFER, VK_DESTROY_LAMBDA_SIGNATURE(VkCommandBuffer){ }),
 		queueType(cmdPool.GetQueueType())
 	{
 		const VkCommandBufferAllocateInfo allocInfo

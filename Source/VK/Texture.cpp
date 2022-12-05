@@ -11,7 +11,7 @@
 namespace sy
 {
 	Texture::Texture(const std::string_view name, const VulkanContext& vulkanContext, const Extent3D<uint32_t> extent, const uint32_t mipLevels, const VkFormat format, const VkImageUsageFlags usageFlags, const VkImageLayout desiredImageLayout, const VmaMemoryUsage memoryUsage, const VkImageAspectFlags imageAspect, const VkMemoryPropertyFlags requiredMemoryPropertyFlags) :
-		VulkanWrapper(name, vulkanContext, VK_DESTROY_LAMBDA_SIGNATURE(VkImage)
+		VulkanWrapper(name, vulkanContext, VK_OBJECT_TYPE_IMAGE, VK_DESTROY_LAMBDA_SIGNATURE(VkImage)
 		{
 		}),
 		extent(extent),

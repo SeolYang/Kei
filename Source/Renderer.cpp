@@ -141,8 +141,10 @@ namespace sy
 			static_cast<uint32_t>(7),
 		};
 
-		cubeVertexBuffer = Buffer::CreateVertexBuffer<SimpleVertex>(cmdPoolManager, frameTracker, "Quad Vertex Buffer", vulkanContext, vertices);
-		cubeIndexBuffer = Buffer::CreateIndexBuffer(cmdPoolManager, frameTracker, "Quad Index Buffer", vulkanContext, indices);
+		cubeVertexBuffer = Buffer::CreateVertexBuffer<SimpleVertex>(cmdPoolManager, frameTracker, "Cube Vertex Buffer", vulkanContext, vertices);
+		vulkanContext.SetObjectName(*cubeVertexBuffer);
+		cubeIndexBuffer = Buffer::CreateIndexBuffer(cmdPoolManager, frameTracker, "Cube Index Buffer", vulkanContext, indices);
+		vulkanContext.SetObjectName(*cubeIndexBuffer);
 
 		auto proj = glm::perspective(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
 		proj[1][1] *= -1.f; /* Flip y-axis, +y = (0, -1, 0) -> (0, 1, 0)*/
@@ -159,7 +161,7 @@ namespace sy
 		BeginFrame();
 		{
 			elapsedTime += 0.01633333f; // hard-coded
-			auto& renderFence = frameTracker.GetCurrentInFlightRenderFence();
+			const auto& renderFence = frameTracker.GetCurrentInFlightRenderFence();
 			auto& renderSemaphore = frameTracker.GetCurrentInFlightRenderSemaphore();
 			auto& presentSemaphore = frameTracker.GetCurrentInFlightPresentSemaphore();
 			const size_t currentFrameIdx = frameTracker.GetCurrentFrameIndex();
