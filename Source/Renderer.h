@@ -42,14 +42,17 @@ namespace sy
 
 		std::unique_ptr<Texture2D> depthStencil;
 
-		std::array<std::unique_ptr<Buffer>, NumMaxInFlightFrames> colorBuffers;
-		std::array<OffsetSlotPtr, NumMaxInFlightFrames> descriptorIndices;
+		std::array<std::unique_ptr<Buffer>, NumMaxInFlightFrames> transformBuffers;
+		std::array<OffsetSlotPtr, NumMaxInFlightFrames> transformBufferIndices;
 
 		std::unique_ptr<Texture2D> loadedTexture;
 		OffsetSlotPtr loadedTextureDescriptor;
 
-		std::unique_ptr<Buffer> quadVertexBuffer;
-		std::unique_ptr<Buffer> quadIndexBuffer;
+		std::unique_ptr<Buffer> cubeVertexBuffer;
+		std::unique_ptr<Buffer> cubeIndexBuffer;
+
+		glm::mat4 viewProjMat;
+		float elapsedTime;
 
 	};
 }

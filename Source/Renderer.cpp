@@ -19,15 +19,15 @@
 
 namespace sy
 {
-	struct ColorData
+	struct TransformUniformBuffer
 	{
-		glm::vec4 colors[3];
+		glm::mat4 modelViewProj;
 	};
 
 	struct PushConstants
 	{
-		int colorDataIndex;
 		int textureIndex;
+		int transformDataIndex;
 	};
 
 	struct SimpleVertex
@@ -71,31 +71,81 @@ namespace sy
 
 		for (size_t idx = 0; idx < NumMaxInFlightFrames; ++idx)
 		{
-			colorBuffers[idx] = Buffer::CreateUniformBuffer<ColorData>("ColorBuffer", vulkanContext);
-			descriptorIndices[idx] = descriptorManager.RequestDescriptor(*colorBuffers[idx]);
+			transformBuffers[idx] = Buffer::CreateUniformBuffer<TransformUniformBuffer>("TransformBuffer", vulkanContext);
+			transformBufferIndices[idx] = descriptorManager.RequestDescriptor(*transformBuffers[idx]);
 		}
 
 		loadedTexture = Texture2D::LoadFromFile(cmdPoolManager, frameTracker, "Assets/Textures/djmax_1st_anv.png", vulkanContext, VK_FORMAT_R8G8B8A8_SRGB);
 		loadedTextureDescriptor = descriptorManager.RequestDescriptor(*loadedTexture);
 
-		std::array vertices = {
-			SimpleVertex{glm::vec4{-0.5f, 0.5f, 0.f, 1.f}, {0.f, 1.f} },
-			SimpleVertex{glm::vec4{-0.5f, -0.5f, 0.f, 1.f}, {0.f, 0.f} },
-			SimpleVertex{glm::vec4{0.5f, -0.5f, 0.f, 1.f}, {1.f, 0.f} },
-			SimpleVertex{glm::vec4{0.5f, 0.5f, 0.f, 1.f}, {1.f, 1.f} }
+		//std::array vertices = {
+		//	SimpleVertex{glm::vec4{-0.5f, 0.5f, 0.f, 1.f}, {0.f, 1.f} },
+		//	SimpleVertex{glm::vec4{-0.5f, -0.5f, 0.f, 1.f}, {0.f, 0.f} },
+		//	SimpleVertex{glm::vec4{0.5f, -0.5f, 0.f, 1.f}, {1.f, 0.f} },
+		//	SimpleVertex{glm::vec4{0.5f, 0.5f, 0.f, 1.f}, {1.f, 1.f} }
+		//};
+
+		std::array vertices =
+		{
+			SimpleVertex{ {-.5f, .5f, -.5f, 1.f}, {0.f, 1.f} },
+			SimpleVertex{ {-.5f, -.5f, -.5f, 1.f}, {0.f, 0.f} },
+			SimpleVertex{ {.5f, -.5f, -.5f, 1.f}, {1.f, 0.f} },
+			SimpleVertex{ {.5f, .5f, -.5f, 1.f}, {1.f, 1.f} },
+			SimpleVertex{ {-.5f, .5f, .5f, 1.f}, {1.f, 1.f} },
+			SimpleVertex{ {-.5f, -.5f, .5f, 1.f}, {1.f, 0.f} },
+			SimpleVertex{ {.5f, -.5f, .5f, 1.f}, {0.f, 0.f} },
+			SimpleVertex{ {.5f, .5f, .5f, 1.f}, {0.f, 1.f} },
 		};
 
 		std::array indices = {
+			static_cast<uint32_t>(2), // front face
+			static_cast<uint32_t>(1),
+			static_cast<uint32_t>(0),
+			static_cast<uint32_t>(0),
+			static_cast<uint32_t>(3),
+			static_cast<uint32_t>(2),
+
+			static_cast<uint32_t>(4), // left
 			static_cast<uint32_t>(0),
 			static_cast<uint32_t>(1),
+			static_cast<uint32_t>(1),
+			static_cast<uint32_t>(5),
+			static_cast<uint32_t>(4),
+
+			static_cast<uint32_t>(2), // right
+			static_cast<uint32_t>(3),
+			static_cast<uint32_t>(7),
+			static_cast<uint32_t>(7),
+			static_cast<uint32_t>(6),
 			static_cast<uint32_t>(2),
+
+			static_cast<uint32_t>(6), // behind
+			static_cast<uint32_t>(7),
+			static_cast<uint32_t>(4),
+			static_cast<uint32_t>(4),
+			static_cast<uint32_t>(5),
+			static_cast<uint32_t>(6),
+
+			static_cast<uint32_t>(6), // up
+			static_cast<uint32_t>(5),
+			static_cast<uint32_t>(1),
+			static_cast<uint32_t>(1),
 			static_cast<uint32_t>(2),
+			static_cast<uint32_t>(6),
+
+			static_cast<uint32_t>(0), // down
+			static_cast<uint32_t>(4),
+			static_cast<uint32_t>(7),
+			static_cast<uint32_t>(7),
 			static_cast<uint32_t>(3),
 			static_cast<uint32_t>(0),
 		};
 
-		quadVertexBuffer = Buffer::CreateVertexBuffer<SimpleVertex>(cmdPoolManager, frameTracker, "Quad Vertex Buffer", vulkanContext, vertices);
-		quadIndexBuffer = Buffer::CreateIndexBuffer(cmdPoolManager, frameTracker, "Quad Index Buffer", vulkanContext, indices);
+		cubeVertexBuffer = Buffer::CreateVertexBuffer<SimpleVertex>(cmdPoolManager, frameTracker, "Quad Vertex Buffer", vulkanContext, vertices);
+		cubeIndexBuffer = Buffer::CreateIndexBuffer(cmdPoolManager, frameTracker, "Quad Index Buffer", vulkanContext, indices);
+
+		const auto proj = glm::perspective(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
+		viewProjMat = proj * glm::lookAt(glm::vec3{ 1.5f, -2.f, -5.f }, { 0.f, 0.f ,0.f }, { 0.f ,1.f, 0.f });
 	}
 
 	Renderer::~Renderer()
@@ -107,6 +157,7 @@ namespace sy
 	{
 		BeginFrame();
 		{
+			elapsedTime += 0.01633333f; // hard-coded
 			auto& renderFence = frameTracker.GetCurrentInFlightRenderFence();
 			auto& renderSemaphore = frameTracker.GetCurrentInFlightRenderSemaphore();
 			auto& presentSemaphore = frameTracker.GetCurrentInFlightPresentSemaphore();
@@ -160,29 +211,25 @@ namespace sy
 					graphicsCmdBuffer->BindPipeline(*basicPipeline);
 					graphicsCmdBuffer->BindDescriptorSet(descriptorManager.GetDescriptorSet(), *basicPipeline);
 
-					ColorData colorData;
-					colorData.colors[0] = { 1.f - clearColorValue.float32[0], 1.f - clearColorValue.float32[1], 1.f - clearColorValue.float32[2], 1.f };
-					colorData.colors[1] = { colorData.colors[0].g, colorData.colors[0].r, colorData.colors[0].b, 1.f };
-					colorData.colors[2] = { colorData.colors[0].b, colorData.colors[0].g, colorData.colors[0].r, 1.f };
-
-					const auto& colorBuffer = *colorBuffers[frameTracker.GetCurrentInFlightFrameIndex()];
-					void* colorBufferMappedPtr = vulkanContext.Map(colorBuffer);
-					memcpy(colorBufferMappedPtr, &colorData, sizeof(ColorData));
-					vulkanContext.Unmap(colorBuffer);
+					const auto& transformBuffer = *transformBuffers[frameTracker.GetCurrentInFlightFrameIndex()];
+					void* transformBufferMappedPtr = vulkanContext.Map(transformBuffer);
+					const TransformUniformBuffer uniformBuffer{ viewProjMat * glm::rotate(glm::mat4(1.f), elapsedTime, { 0.f, 1.f, 0.f }) };
+					memcpy(transformBufferMappedPtr, &uniformBuffer, sizeof(TransformUniformBuffer));
+					vulkanContext.Unmap(transformBuffer);
 
 					const PushConstants pushConstants
 					{
-						.colorDataIndex = static_cast<int>(descriptorIndices[frameTracker.GetCurrentInFlightFrameIndex()]->Offset),
-						.textureIndex = static_cast<int>(loadedTextureDescriptor->Offset)
+						.textureIndex = static_cast<int>(loadedTextureDescriptor->Offset),
+						.transformDataIndex = static_cast<int>(transformBufferIndices[frameTracker.GetCurrentInFlightFrameIndex()]->Offset)
 					};
 
-					std::array<CRef<Buffer>, 1> vertexBuffers = { *quadVertexBuffer };
+					std::array<CRef<Buffer>, 1> vertexBuffers = { *cubeVertexBuffer };
 					std::array offsets = { uint64_t() };
 					graphicsCmdBuffer->BindVertexBuffers(0, vertexBuffers, offsets);
-					graphicsCmdBuffer->BindIndexBuffer(*quadIndexBuffer);
+					graphicsCmdBuffer->BindIndexBuffer(*cubeIndexBuffer);
 					graphicsCmdBuffer->PushConstants(*basicPipeline, VK_SHADER_STAGE_ALL_GRAPHICS, 0, sizeof(PushConstants), &pushConstants);
 
-					graphicsCmdBuffer->DrawIndexed(6, 1, 0, 0, 0);
+					graphicsCmdBuffer->DrawIndexed(36, 1, 0, 0, 0);
 				}
 				graphicsCmdBuffer->EndRendering();
 

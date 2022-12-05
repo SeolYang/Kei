@@ -4,8 +4,8 @@
 
 layout (push_constant) uniform PushConstants
 {
-	int colorDataIndex;
-	int textureIndex;
+	int textureIdx;
+	int transformDataIdx;
 } pushConstants;
 
 layout (set = 0, binding = 2) uniform sampler2D textures[];
@@ -15,5 +15,5 @@ layout (location = 0) out vec4 outFragColor;
 
 void main()
 {
-	outFragColor = vec4(texture(textures[pushConstants.textureIndex], inUV).rgb, 1.f);
+	outFragColor = vec4(texture(textures[pushConstants.textureIdx], inUV).rgb, 1.f);
 }

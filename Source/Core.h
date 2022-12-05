@@ -103,6 +103,7 @@ namespace sy
 
 /** glm */
 #include <glm/glm.hpp>
+#include <glm/gtx/transform.hpp>
 
 /** stbi */
 #include <stb_image.h>
