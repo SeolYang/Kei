@@ -16,6 +16,7 @@
 #include <DescriptorManager.h>
 #include <CommandPoolManager.h>
 #include <FrameTracker.h>
+#include <MathUtils.h>
 
 namespace sy
 {
@@ -146,8 +147,7 @@ namespace sy
 		cubeIndexBuffer = Buffer::CreateIndexBuffer(cmdPoolManager, frameTracker, "Cube Index Buffer", vulkanContext, indices);
 		vulkanContext.SetObjectName(*cubeIndexBuffer);
 
-		auto proj = glm::perspective(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
-		proj[1][1] *= -1.f; /* Flip y-axis, +y = (0, -1, 0) -> (0, 1, 0)*/
+		auto proj = mathutils::PerspectiveYFlipped(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
 		viewProjMat = proj * glm::lookAt(glm::vec3{ 1.5f, -2.f, -5.f }, { 0.f, 0.f ,0.f }, { 0.f ,1.f, 0.f });
 	}
 

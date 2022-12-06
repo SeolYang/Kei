@@ -179,6 +179,9 @@
     <ClInclude Include="..\Source\VK\LayoutCache.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\MathUtils.h">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Assets\Shaders\tri.frag">
