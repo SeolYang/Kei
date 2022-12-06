@@ -34,7 +34,7 @@ namespace sy
 
 		std::vector<VkDescriptorBindingFlags> bindingFlags;
 		bindingFlags.resize(nativePoolSizes.size());
-		ranges::fill(bindingFlags.begin(), bindingFlags.end(),
+		std::fill(bindingFlags.begin(), bindingFlags.end(),
 			VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT_EXT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT);
 		bindingFlags.back() |= VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT_EXT;
 

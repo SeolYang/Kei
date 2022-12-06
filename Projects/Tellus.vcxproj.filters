@@ -87,6 +87,9 @@
     <ClCompile Include="..\Source\VK\VulkanTypes.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\AudioContext.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Core.h">
@@ -108,9 +111,6 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Timer.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\ECS.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\ThirdParty\volk\volk.h">
@@ -180,6 +180,12 @@
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\MathUtils.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\AudioContext.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Utils.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

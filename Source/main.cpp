@@ -1,6 +1,5 @@
 #include <Core.h>
 #include <Context.h>
-#include <ECS.h>
 
 int main(int, char**)
 {

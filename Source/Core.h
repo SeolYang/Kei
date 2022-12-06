@@ -85,15 +85,19 @@ namespace sy
 #include <vulkan/vulkan.h>
 #include <volk.h>
 #include <VkBootstrap.h>
-
 #include <vk_mem_alloc.h>
+
+/** robinhood hash */
+#include <robin_hood.h>
 
 /** SDL2 */
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
+#include <SDL2/SDL_mixer.h>
 
 /** spdlog */
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
 
 /** entt */
 #include <entt/entt.hpp>
@@ -118,5 +122,4 @@ namespace sy
 #include <VK/VulkanTypes.h>
 #include <VK/VulkanWrapper.hpp>
 
-#include <ECS.h>
 #include <Timer.h>

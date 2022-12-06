@@ -19,11 +19,9 @@ namespace sy
 	{
 		SY_ASSERT(extent.IsValid(), "Extent may contains non-valid values.");
 
-		SDL_Init(SDL_INIT_VIDEO);
-
 		constexpr SDL_WindowFlags windowFlags = SDL_WINDOW_VULKAN;
 		window = SDL_CreateWindow(
-			"Vulkan Engine",
+			"Tellus",
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
 			extent.width,

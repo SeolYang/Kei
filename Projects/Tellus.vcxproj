@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\AudioContext.cpp" />
     <ClCompile Include="..\Source\CommandPoolManager.cpp" />
     <ClCompile Include="..\Source\Core.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -42,9 +43,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Source\AudioContext.h" />
     <ClInclude Include="..\Source\CommandPoolManager.h" />
     <ClInclude Include="..\Source\DescriptorManager.h" />
-    <ClInclude Include="..\Source\ECS.h" />
     <ClInclude Include="..\Source\FrameTracker.h" />
     <ClInclude Include="..\Source\MathUtils.h" />
     <ClInclude Include="..\Source\Pool.hpp" />
@@ -54,6 +55,7 @@
     <ClInclude Include="..\Source\Timer.h" />
     <ClInclude Include="..\Source\NamedType.h" />
     <ClInclude Include="..\Source\UniqueHandle.h" />
+    <ClInclude Include="..\Source\Utils.h" />
     <ClInclude Include="..\Source\VK\Buffer.h" />
     <ClInclude Include="..\Source\VK\CommandBuffer.h" />
     <ClInclude Include="..\Source\VK\CommandPool.h" />
