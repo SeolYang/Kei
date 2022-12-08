@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\AssetContext.cpp" />
     <ClCompile Include="..\Source\AudioContext.cpp" />
     <ClCompile Include="..\Source\CommandPoolManager.cpp" />
     <ClCompile Include="..\Source\Core.cpp">
@@ -43,6 +44,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Source\AssetContext.h" />
     <ClInclude Include="..\Source\AudioContext.h" />
     <ClInclude Include="..\Source\CommandPoolManager.h" />
     <ClInclude Include="..\Source\DescriptorManager.h" />

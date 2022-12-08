@@ -90,6 +90,9 @@
     <ClCompile Include="..\Source\AudioContext.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\AssetContext.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Core.h">
@@ -186,6 +189,9 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Utils.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\AssetContext.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

@@ -54,29 +54,6 @@ namespace sy
 
 	using RWLock = std::unique_lock<std::shared_mutex>;
 	using ReadLock = std::shared_lock<std::shared_mutex>;
-
-	template <typename T, size_t N>
-	constexpr size_t LengthOfArray(T (&)[N])
-	{
-		return N;
-	}
-
-	template <typename T>
-	constexpr auto ToUnderlying(const T& val)
-	{
-		return static_cast<std::underlying_type_t<T>>(val);
-	}
-
-	constexpr size_t PadSizeWithAlignment(const size_t allocSize, const size_t alignment)
-	{
-		size_t alignedSize = allocSize;
-		if (alignment > 0)
-		{
-			alignedSize = (alignedSize + alignment - 1) & ~(alignment - 1);
-		}
-
-		return alignedSize;
-	}
 }
 
 /** Vulkan Headers */
@@ -112,6 +89,12 @@ namespace sy
 /** stbi */
 #include <stb_image.h>
 
+/** lz4 compression */
+#include <lz4.h>
+
+/** nlohmann-json */
+#include <nlohmann/json.hpp>
+
 /** Internals */
 #include <UniqueHandle.h>
 #include <NamedType.h>
@@ -123,3 +106,5 @@ namespace sy
 #include <VK/VulkanWrapper.hpp>
 
 #include <Timer.h>
+#include <Utils.h>
+#include <MathUtils.h>

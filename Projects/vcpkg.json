@@ -21,6 +21,8 @@
       "spdlog",
       "robin-hood-hashing",
       "entt",
-      "taskflow"
+      "taskflow",
+      "lz4",
+      "nlohmann-json"
     ]
   }
