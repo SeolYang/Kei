@@ -11,6 +11,9 @@ namespace sy
 		class TextureCube;
 		class Texture3D;
 
+		constexpr uint32_t MaxBindlessResourcesPerDescriptor = 2048;
+		constexpr size_t NumMaxInFlightFrames = 2;
+
 		enum class EQueueType
 		{
 			Graphics,
@@ -440,8 +443,5 @@ namespace sy
 		}
 
 		VkRenderingAttachmentInfo DepthAttachmentInfo(const Texture2D& depthStencil, float depthClearValue = 1.f, uint8_t stencilClearValue = 0);
-
-		constexpr uint32_t MaxBindlessResourcesPerDescriptor = 2048;
-		constexpr size_t NumMaxInFlightFrames = 2;
 	}
 }
