@@ -1,5 +1,4 @@
 #pragma once
-
 /** Standard Library */
 #include <vector>
 #include <array>
@@ -33,28 +32,6 @@
 #include <tuple>
 #include <fstream>
 #include <concurrent_queue.h>
-
-namespace sy
-{
-	namespace chrono = std::chrono;
-	namespace fs = std::filesystem;
-
-	template <typename T>
-	using Ref = std::reference_wrapper<T>;
-	template <typename T>
-	using CRef = Ref<const T>;
-	template <typename T>
-	using RefVec = std::vector<Ref<T>>;
-	template <typename T>
-	using CRefVec = std::vector<CRef<T>>;
-	template <typename T>
-	using RefSpan = std::span<Ref<T>>;
-	template <typename T>
-	using CRefSpan = std::span<CRef<T>>;
-
-	using RWLock = std::unique_lock<std::shared_mutex>;
-	using ReadLock = std::shared_lock<std::shared_mutex>;
-}
 
 /** Vulkan Headers */
 #define VK_USE_PLATFORM_WIN32_KHR
@@ -95,16 +72,21 @@ namespace sy
 /** nlohmann-json */
 #include <nlohmann/json.hpp>
 
-/** Internals */
-#include <UniqueHandle.h>
-#include <NamedType.h>
-#include <Extent.h>
-#include <TellusAssert.h>
-#include <Pool.hpp>
+/** magic-enum */
+#include <magic_enum.hpp>
 
+/** Internal - Core */
+#include <Core/Types.h>
+#include <Core/UniqueHandle.h>
+#include <Core/Extent.h>
+#include <Core/TellusAssert.h>
+#include <Core/Pool.hpp>
+#include <Core/Timer.h>
+#include <Core/Utils.h>
+
+/** Internal - Vulkan */
 #include <VK/VulkanTypes.h>
 #include <VK/VulkanWrapper.hpp>
 
-#include <Timer.h>
-#include <Utils.h>
-#include <MathUtils.h>
+/** Internal - Math */
+#include <Math/MathUtils.h>

@@ -1,10 +1,10 @@
-#include <Core.h>
+#include <Core/Core.h>
 #include <VK/VulkanTypes.h>
 #include <VK/Texture.h>
 
 namespace sy
 {
-	namespace vkinit
+	namespace vk
 	{
 		VkRenderingAttachmentInfo DepthAttachmentInfo(const Texture2D& depthStencil, const float depthClearValue, const uint8_t stencilClearValue)
 		{

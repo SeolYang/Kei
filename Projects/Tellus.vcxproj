@@ -11,23 +11,27 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\AssetContext.cpp" />
-    <ClCompile Include="..\Source\AudioContext.cpp" />
-    <ClCompile Include="..\Source\CommandPoolManager.cpp" />
-    <ClCompile Include="..\Source\Core.cpp">
+    <ClCompile Include="..\Source\Assets\AssetConverter.cpp" />
+    <ClCompile Include="..\Source\Assets\AssetCore.cpp" />
+    <ClCompile Include="..\Source\Assets\MeshAssets.cpp" />
+    <ClCompile Include="..\Source\Assets\TextureAsset.cpp" />
+    <ClCompile Include="..\Source\Audio\AudioContext.cpp" />
+    <ClCompile Include="..\Source\Core\Context.cpp" />
+    <ClCompile Include="..\Source\Core\Core.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\Source\DescriptorManager.cpp" />
-    <ClCompile Include="..\Source\FrameTracker.cpp" />
+    <ClCompile Include="..\Source\Core\Window.cpp" />
     <ClCompile Include="..\Source\GameInstance.cpp" />
-    <ClCompile Include="..\Source\Context.cpp" />
     <ClCompile Include="..\Source\main.cpp" />
-    <ClCompile Include="..\Source\Renderer.cpp" />
+    <ClCompile Include="..\Source\Render\Renderer.cpp" />
     <ClCompile Include="..\Source\VK\Buffer.cpp" />
     <ClCompile Include="..\Source\VK\CommandBuffer.cpp" />
     <ClCompile Include="..\Source\VK\CommandPool.cpp" />
+    <ClCompile Include="..\Source\VK\CommandPoolManager.cpp" />
+    <ClCompile Include="..\Source\VK\DescriptorManager.cpp" />
     <ClCompile Include="..\Source\VK\Fence.cpp" />
+    <ClCompile Include="..\Source\VK\FrameTracker.cpp" />
     <ClCompile Include="..\Source\VK\LayoutCache.cpp" />
     <ClCompile Include="..\Source\VK\Texture.cpp" />
     <ClCompile Include="..\Source\VK\Pipeline.cpp" />
@@ -37,31 +41,36 @@
     <ClCompile Include="..\Source\VK\Swapchain.cpp" />
     <ClCompile Include="..\Source\VK\VulkanContext.cpp" />
     <ClCompile Include="..\Source\VK\VulkanTypes.cpp" />
-    <ClCompile Include="..\Source\Window.cpp" />
     <ClCompile Include="..\ThirdParty\volk\volk.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Source\AssetContext.h" />
-    <ClInclude Include="..\Source\AudioContext.h" />
-    <ClInclude Include="..\Source\CommandPoolManager.h" />
-    <ClInclude Include="..\Source\DescriptorManager.h" />
-    <ClInclude Include="..\Source\FrameTracker.h" />
-    <ClInclude Include="..\Source\MathUtils.h" />
-    <ClInclude Include="..\Source\Pool.hpp" />
-    <ClInclude Include="..\Source\Renderer.h" />
-    <ClInclude Include="..\Source\TellusAssert.h" />
-    <ClInclude Include="..\Source\Extent.h" />
-    <ClInclude Include="..\Source\Timer.h" />
-    <ClInclude Include="..\Source\NamedType.h" />
-    <ClInclude Include="..\Source\UniqueHandle.h" />
-    <ClInclude Include="..\Source\Utils.h" />
+    <ClInclude Include="..\Source\Assets\AssetConverter.h" />
+    <ClInclude Include="..\Source\Assets\AssetCore.h" />
+    <ClInclude Include="..\Source\Assets\MeshAsset.h" />
+    <ClInclude Include="..\Source\Assets\TextureAsset.h" />
+    <ClInclude Include="..\Source\Audio\AudioContext.h" />
+    <ClInclude Include="..\Source\Core\Context.h" />
+    <ClInclude Include="..\Source\Core\Core.h" />
+    <ClInclude Include="..\Source\Core\Extent.h" />
+    <ClInclude Include="..\Source\Core\Pool.hpp" />
+    <ClInclude Include="..\Source\Core\TellusAssert.h" />
+    <ClInclude Include="..\Source\Core\Timer.h" />
+    <ClInclude Include="..\Source\Core\Types.h" />
+    <ClInclude Include="..\Source\Core\UniqueHandle.h" />
+    <ClInclude Include="..\Source\Core\Utils.h" />
+    <ClInclude Include="..\Source\Core\Window.h" />
+    <ClInclude Include="..\Source\Math\MathUtils.h" />
+    <ClInclude Include="..\Source\Render\Renderer.h" />
     <ClInclude Include="..\Source\VK\Buffer.h" />
     <ClInclude Include="..\Source\VK\CommandBuffer.h" />
     <ClInclude Include="..\Source\VK\CommandPool.h" />
+    <ClInclude Include="..\Source\VK\CommandPoolManager.h" />
+    <ClInclude Include="..\Source\VK\DescriptorManager.h" />
     <ClInclude Include="..\Source\VK\Fence.h" />
+    <ClInclude Include="..\Source\VK\FrameTracker.h" />
     <ClInclude Include="..\Source\VK\LayoutCache.h" />
     <ClInclude Include="..\Source\VK\Texture.h" />
     <ClInclude Include="..\Source\VK\Pipeline.h" />
@@ -72,10 +81,7 @@
     <ClInclude Include="..\Source\VK\VulkanContext.h" />
     <ClInclude Include="..\Source\VK\VulkanTypes.h" />
     <ClInclude Include="..\Source\VK\VulkanWrapper.hpp" />
-    <ClInclude Include="..\Source\Window.h" />
-    <ClInclude Include="..\Source\Core.h" />
     <ClInclude Include="..\Source\GameInstance.h" />
-    <ClInclude Include="..\Source\Context.h" />
     <ClInclude Include="..\ThirdParty\volk\volk.h" />
   </ItemGroup>
   <ItemGroup>
@@ -139,7 +145,7 @@
       <PreprocessorDefinitions>NOMINMAX;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>Core.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Core/Core.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(SolutionDir)..\Source;$(SolutionDir)..\Thirdparty\volk</AdditionalIncludeDirectories>
@@ -150,6 +156,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(VcpkgManifestRoot)\vcpkg_installed\x64-windows\lib\manual-link</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(ProjectDir)..\Assets" "$(TargetDir)Assets" /e /d /r /i /y
@@ -165,7 +172,7 @@ xcopy "$(ProjectDir)..\Assets" "$(ProjectDir)Assets" /e /d /r /i /y</Command>
       <PreprocessorDefinitions>NOMINMAX;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>Core.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Core/Core.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(SolutionDir)..\Source;$(SolutionDir)..\Thirdparty\volk</AdditionalIncludeDirectories>
@@ -178,6 +185,7 @@ xcopy "$(ProjectDir)..\Assets" "$(ProjectDir)Assets" /e /d /r /i /y</Command>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(VcpkgManifestRoot)\vcpkg_installed\x64-windows\lib\manual-link</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(ProjectDir)..\Assets" "$(TargetDir)Assets" /e /d /r /i /y

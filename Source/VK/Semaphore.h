@@ -1,14 +1,17 @@
 #pragma once
-#include <Core.h>
+#include <Core/Core.h>
 
 namespace sy
 {
-	class VulkanContext;
-	class Semaphore : public VulkanWrapper<VkSemaphore>
+	namespace vk
 	{
-	public:
-		Semaphore(std::string_view name, const VulkanContext& vulkanContext);
-		virtual ~Semaphore() = default;
+		class VulkanContext;
+		class Semaphore : public VulkanWrapper<VkSemaphore>
+		{
+		public:
+			Semaphore(std::string_view name, const VulkanContext& vulkanContext);
+			virtual ~Semaphore() = default;
 
-	};
+		};
+	}
 }

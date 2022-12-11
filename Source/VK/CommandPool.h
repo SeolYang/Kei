@@ -1,35 +1,38 @@
 #pragma once
-#include <Core.h>
+#include <Core/Core.h>
 
 namespace sy
 {
-	class VulkanContext;
-	class CommandBuffer;
-	class Fence;
-	class CommandPool : public VulkanWrapper<VkCommandPool>
+	namespace vk
 	{
-	public:
-		struct Deallocation
+		class VulkanContext;
+		class CommandBuffer;
+		class Fence;
+		class CommandPool : public VulkanWrapper<VkCommandPool>
 		{
-			const OffsetPool::Slot_t slot;
+		public:
+			struct Deallocation
+			{
+				const OffsetPool::Slot_t slot;
+			};
+
+			using CommandBufferAllocation = std::unique_ptr<CommandBuffer, std::function<void(CommandBuffer*)>>;
+
+		public:
+			CommandPool(const VulkanContext& vulkanContext, EQueueType queueType);
+			virtual ~CommandPool() override = default;
+
+			CommandBufferAllocation RequestCommandBuffer(std::string_view name);
+			[[nodiscard]] EQueueType GetQueueType() const { return queueType; }
+			void BeginFrame();
+
+			void Reset() const;
+
+		private:
+			const EQueueType queueType;
+			OffsetPool offsetPool;
+			std::vector<std::unique_ptr<CommandBuffer>> cmdBuffers;
+			std::vector<Deallocation> pendingDeallocations;
 		};
-
-		using CommandBufferAllocation = std::unique_ptr<CommandBuffer, std::function<void(CommandBuffer*)>>;
-
-	public:
-		CommandPool(const VulkanContext& vulkanContext, EQueueType queueType);
-		virtual ~CommandPool() override = default;
-
-		CommandBufferAllocation RequestCommandBuffer(std::string_view name);
-		[[nodiscard]] EQueueType GetQueueType() const { return queueType; }
-		void BeginFrame();
-
-		void Reset() const;
-
-	private:
-		const EQueueType queueType;
-		OffsetPool offsetPool;
-		std::vector<std::unique_ptr<CommandBuffer>> cmdBuffers;
-		std::vector<Deallocation> pendingDeallocations;
-	};
+	}
 }

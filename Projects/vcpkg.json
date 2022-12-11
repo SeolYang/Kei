@@ -23,6 +23,7 @@
       "entt",
       "taskflow",
       "lz4",
-      "nlohmann-json"
+      "nlohmann-json",
+      "magic-enum"
     ]
   }

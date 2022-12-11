@@ -1,9 +1,9 @@
 #pragma once
-#include <Core.h>
+#include <Core/Core.h>
 
 namespace sy
 {
-	namespace mathutils
+	namespace math
 	{
 		static auto PerspectiveYFlipped(const float fovy, const float aspectRatio, const float nearPlane, const float farPlane)
 		{

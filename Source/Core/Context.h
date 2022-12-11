@@ -1,14 +1,22 @@
 #pragma once
-#include <Core.h>
+#include <Core/Core.h>
 
 namespace sy
 {
+	namespace vk
+	{
+		class VulkanContext;
+		class FrameTracker;
+		class CommandPoolManager;
+		class DescriptorManager;
+	}
+
+	namespace render
+	{
+		class Renderer;
+	}
+
 	class Window;
-	class VulkanContext;
-	class FrameTracker;
-	class CommandPoolManager;
-	class DescriptorManager;
-	class Renderer;
 	class GameInstance;
 	class Context
 	{
@@ -31,11 +39,11 @@ namespace sy
 	private:
 		std::unique_ptr<Timer> timer;
 		std::unique_ptr<Window> window;
-		std::unique_ptr<VulkanContext> vulkanContext;
-		std::unique_ptr<FrameTracker> frameTracker;
-		std::unique_ptr<CommandPoolManager> cmdPoolManager;
-		std::unique_ptr<DescriptorManager> descriptorManager;
-		std::unique_ptr<Renderer> renderer;
+		std::unique_ptr<vk::VulkanContext> vulkanContext;
+		std::unique_ptr<vk::FrameTracker> frameTracker;
+		std::unique_ptr<vk::CommandPoolManager> cmdPoolManager;
+		std::unique_ptr<vk::DescriptorManager> descriptorManager;
+		std::unique_ptr<render::Renderer> renderer;
 		std::unique_ptr<GameInstance> gameInstance;
 
 	};

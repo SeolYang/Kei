@@ -1,13 +1,13 @@
-#include <Core.h>
-#include <Context.h>
-#include <Window.h>
+#include <Core/Core.h>
+#include <Core/Context.h>
+#include <Core/Window.h>
+#include <Core/Utils.h>
 #include <VK/VulkanContext.h>
-#include <FrameTracker.h>
-#include <CommandPoolManager.h>
-#include <DescriptorManager.h>
-#include <Renderer.h>
+#include <VK/FrameTracker.h>
+#include <VK/CommandPoolManager.h>
+#include <VK/DescriptorManager.h>
+#include <Render/Renderer.h>
 #include <GameInstance.h>
-#include <Utils.h>
 
 namespace sy
 {
@@ -59,15 +59,15 @@ namespace sy
 		spdlog::info("Initializing Window sub-context.");
 		window = std::make_unique<Window>("Test", Extent2D<uint32_t>{ 1280, 720 });
 		spdlog::info("Initializing Vulkan context.");
-		vulkanContext = std::make_unique<VulkanContext>(*window);
+		vulkanContext = std::make_unique<vk::VulkanContext>(*window);
 		spdlog::info("Initializing frame tracker sub-context.");
-		frameTracker = std::make_unique<FrameTracker>(*vulkanContext);
+		frameTracker = std::make_unique<vk::FrameTracker>(*vulkanContext);
 		spdlog::info("Initializing Command Pool Manager sub-context.");
-		cmdPoolManager = std::make_unique<CommandPoolManager>(*vulkanContext, *frameTracker);
+		cmdPoolManager = std::make_unique<vk::CommandPoolManager>(*vulkanContext, *frameTracker);
 		spdlog::info("Initializing Bind-less Descriptor Manager sub-context.");
-		descriptorManager = std::make_unique<DescriptorManager>(*vulkanContext, *frameTracker);
+		descriptorManager = std::make_unique<vk::DescriptorManager>(*vulkanContext, *frameTracker);
 		spdlog::info("Initializing Renderer sub-context.");
-		renderer = std::make_unique<Renderer>(*window, *vulkanContext, *frameTracker, *cmdPoolManager, *descriptorManager);
+		renderer = std::make_unique<render::Renderer>(*window, *vulkanContext, *frameTracker, *cmdPoolManager, *descriptorManager);
 	}
 
 	void Context::Cleanup()

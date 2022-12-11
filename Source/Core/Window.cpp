@@ -1,5 +1,5 @@
-#include <Core.h>
-#include <Window.h>
+#include <Core/Core.h>
+#include <Core/Window.h>
 
 namespace sy
 {
