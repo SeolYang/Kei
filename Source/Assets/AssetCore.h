@@ -12,6 +12,7 @@ namespace sy
 
 		enum class ECompressionMode : uint32_t
 		{
+			None,
 			LZ4,
 			/* More efficient compress algorithm for each assets. **/
 		};

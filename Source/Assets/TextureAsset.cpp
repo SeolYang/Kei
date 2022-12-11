@@ -10,7 +10,7 @@ namespace sy::asset::texture
 		auto metadataJson = nlohmann::json::parse(asset.Metadata);
 
 		const std::string textureFormatStr = metadataJson["Format"];
-		const auto formatOpt = magic_enum::enum_cast<EFormat>(textureFormatStr);
+		const auto formatOpt = magic_enum::enum_cast<VkFormat>(textureFormatStr);
 		if (!formatOpt.has_value())
 		{
 			spdlog::critical("Found invalid texture format from asset metadata.");
@@ -59,7 +59,7 @@ namespace sy::asset::texture
 		}
 
 		nlohmann::json metadataJson;
-		metadataJson["Format"] = magic_enum::enum_name<EFormat>(metadata.Format);
+		metadataJson["Format"] = magic_enum::enum_name<VkFormat>(metadata.Format);
 		metadataJson["Width"] = metadata.Extent.width;
 		metadataJson["Height"] = metadata.Extent.height;
 		metadataJson["Depth"] = metadata.Extent.depth;
@@ -102,14 +102,14 @@ namespace sy::asset::texture
 		return dest;
 	}
 
-	EFormat FormatToExtension(const EExtension extension)
+	VkFormat FormatToExtension(const EExtension extension)
 	{
-		static const robin_hood::unordered_map<EExtension, EFormat> Table
+		static const robin_hood::unordered_map<EExtension, VkFormat> Table
 		{
-				{ EExtension::HDR,		EFormat::HDR		},
-				{ EExtension::PNG,		EFormat::RGBA8		},
-				{ EExtension::JPEG,		EFormat::RGBA8		},
-				{ EExtension::JPG,		EFormat::RGBA8		}
+				{ EExtension::HDR,		VK_FORMAT_R32G32B32_SFLOAT		},
+				{ EExtension::PNG,		VK_FORMAT_R8G8B8A8_SRGB			},
+				{ EExtension::JPEG,		VK_FORMAT_R8G8B8A8_SRGB			},
+				{ EExtension::JPG,		VK_FORMAT_R8G8B8A8_SRGB			}
 		};
 
 		return Table.find(extension)->second;

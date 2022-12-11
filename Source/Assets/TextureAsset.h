@@ -4,13 +4,6 @@
 
 namespace sy::asset::texture
 {
-	enum class EFormat : uint32_t
-	{
-		Unknown = 0,
-		RGBA8,
-		HDR,
-	};
-
 	enum class EExtension
 	{
 		PNG,
@@ -20,12 +13,12 @@ namespace sy::asset::texture
 		Unknown
 	};
 
-	EFormat FormatToExtension(const EExtension extension);
+	VkFormat FormatToExtension(EExtension extension);
 
 	struct Metadata
 	{
 		uint64_t BufferSize = 0;
-		EFormat Format = EFormat::Unknown;
+		VkFormat Format = VK_FORMAT_UNDEFINED;
 		ECompressionMode CompressionMode = ECompressionMode::LZ4;
 		Extent3D<uint32_t> Extent = { 1, 1, 1 };
 		std::string SrcPath;
