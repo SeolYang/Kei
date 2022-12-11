@@ -10,9 +10,9 @@ namespace sy::vk
 	class FrameTracker;
 }
 
-namespace sy::asset::texture
+namespace sy::asset
 {
-	enum class EExtension
+	enum class ETextureExtension
 	{
 		PNG,
 		JPEG,
@@ -21,20 +21,29 @@ namespace sy::asset::texture
 		Unknown
 	};
 
-	VkFormat ExtensionToFormat(EExtension extension);
+	enum class ETextureAssetType
+	{
+		Texture2D,
+		Texture2DArray,
+		Texture3D,
+		TextureCube,
+	};
 
-	struct Metadata
+	VkFormat ExtensionToFormat(ETextureExtension extension);
+
+	struct TextureMetadata
 	{
 		uint64_t BufferSize = 0;
+		//ETextureAssetType Type = ETextureAssetType::Texture2D;
 		VkFormat Format = VK_FORMAT_UNDEFINED;
 		ECompressionMode CompressionMode = ECompressionMode::LZ4;
 		Extent3D<uint32_t> Extent = { 1, 1, 1 };
 		std::string SrcPath;
 	};
 
-	std::optional<Metadata> ParseMetadata(const Asset& asset);
-	std::optional<Asset> Pack(Metadata& metadata, const void* pixelData);
-	std::vector<char> Unpack(const Metadata& metadata, std::span<const char> src);
+	std::optional<TextureMetadata> ParseMetadata(const Asset& asset);
+	std::optional<Asset> Pack(TextureMetadata& metadata, const void* pixelData);
+	std::vector<char> Unpack(const TextureMetadata& metadata, std::span<const char> src);
 
 	std::unique_ptr<vk::Texture2D> LoadTextureFromAsset(std::string_view assetPath, const vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager);
 }

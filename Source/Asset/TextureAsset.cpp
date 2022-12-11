@@ -2,11 +2,11 @@
 #include <Asset/TextureAsset.h>
 #include <VK/Texture.h>
 
-namespace sy::asset::texture
+namespace sy::asset
 {
-	std::optional<Metadata> ParseMetadata(const Asset& asset)
+	std::optional<TextureMetadata> ParseMetadata(const Asset& asset)
 	{
-		Metadata metadata;
+		TextureMetadata metadata;
 
 		auto metadataJson = nlohmann::json::parse(asset.Metadata);
 
@@ -37,7 +37,7 @@ namespace sy::asset::texture
 		return metadata;
 	}
 
-	std::optional<Asset> Pack(Metadata& metadata, const void* pixelData)
+	std::optional<Asset> Pack(TextureMetadata& metadata, const void* pixelData)
 	{
 		if (pixelData == nullptr)
 		{
@@ -97,7 +97,7 @@ namespace sy::asset::texture
 		}
 
 		auto& loadedAsset = loadedAssetOpt.value();
-		const auto metadataOpt = asset::texture::ParseMetadata(loadedAsset);
+		const auto metadataOpt = asset::ParseMetadata(loadedAsset);
 		if (!metadataOpt.has_value())
 		{
 			SY_ASSERT(false, "Failed to parse metadata from {}.", assetPath);
@@ -115,7 +115,7 @@ namespace sy::asset::texture
 			metadata.Format);
 	}
 
-	std::vector<char> Unpack(const Metadata& metadata, std::span<const char> src)
+	std::vector<char> Unpack(const TextureMetadata& metadata, std::span<const char> src)
 	{
 		std::vector<char> dest;
 		dest.resize(metadata.BufferSize);
@@ -133,14 +133,14 @@ namespace sy::asset::texture
 		return dest;
 	}
 
-	VkFormat ExtensionToFormat(const EExtension extension)
+	VkFormat ExtensionToFormat(const ETextureExtension extension)
 	{
-		static const robin_hood::unordered_map<EExtension, VkFormat> Table
+		static const robin_hood::unordered_map<ETextureExtension, VkFormat> Table
 		{
-				{ EExtension::HDR,		VK_FORMAT_R32G32B32_SFLOAT		},
-				{ EExtension::PNG,		VK_FORMAT_R8G8B8A8_SRGB			},
-				{ EExtension::JPEG,		VK_FORMAT_R8G8B8A8_SRGB			},
-				{ EExtension::JPG,		VK_FORMAT_R8G8B8A8_SRGB			}
+				{ ETextureExtension::HDR,		VK_FORMAT_R32G32B32_SFLOAT		},
+				{ ETextureExtension::PNG,		VK_FORMAT_R8G8B8A8_SRGB			},
+				{ ETextureExtension::JPEG,		VK_FORMAT_R8G8B8A8_SRGB			},
+				{ ETextureExtension::JPG,		VK_FORMAT_R8G8B8A8_SRGB			}
 		};
 
 		return Table.find(extension)->second;

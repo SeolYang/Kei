@@ -19,6 +19,12 @@ namespace sy
 			/* More efficient compress algorithm for each assets. **/
 		};
 
+		enum class EAssetExtension
+		{
+			TEX,
+			MESH,
+		};
+
 		struct Asset
 		{
 			char Identifier[4] = { 0, 0, 0, 0 };

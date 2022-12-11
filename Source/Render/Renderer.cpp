@@ -79,8 +79,7 @@ namespace sy
 				transformBufferIndices[idx] = descriptorManager.RequestDescriptor(*transformBuffers[idx]);
 			}
 
-			loadedTexture = asset::texture::LoadTextureFromAsset("Assets/Textures/djmax_1st_anv.tex", vulkanContext, frameTracker, cmdPoolManager);
-			//loadedTexture = vk::Texture2D::LoadFromFile("Assets/Textures/djmax_1st_anv.png", vulkanContext, frameTracker, cmdPoolManager, VK_FORMAT_R8G8B8A8_SRGB);
+			loadedTexture = asset::LoadTextureFromAsset("Assets/Textures/djmax_1st_anv.tex", vulkanContext, frameTracker, cmdPoolManager);
 			loadedTextureDescriptor = descriptorManager.RequestDescriptor(*loadedTexture);
 
 			//std::array vertices = {
