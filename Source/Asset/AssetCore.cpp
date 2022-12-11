@@ -1,5 +1,5 @@
 #include <Core/Core.h>
-#include <Assets/AssetCore.h>
+#include <Asset/AssetCore.h>
 
 namespace sy
 {
@@ -17,9 +17,11 @@ namespace sy
 
 			const auto metadataSize = asset.Metadata.size();
 			outFileStream.write(reinterpret_cast<const char*>(&metadataSize), sizeof(metadataSize));
+			outFileStream.write(reinterpret_cast<const char*>(asset.Metadata.data()), metadataSize);
 
 			const auto blobSize = asset.Blob.size();
 			outFileStream.write(reinterpret_cast<const char*>(&blobSize), sizeof(blobSize));
+			outFileStream.write(reinterpret_cast<const char*>(asset.Blob.data()), blobSize);
 
 			outFileStream.close();
 
@@ -44,14 +46,12 @@ namespace sy
 
 			auto metadataSize = asset.Metadata.size();
 			inFileStream.read(reinterpret_cast<char*>(&metadataSize), sizeof(metadataSize));
+			asset.Metadata.resize(metadataSize);
+			inFileStream.read(asset.Metadata.data(), metadataSize);
 
 			auto blobSize = asset.Blob.size();
 			inFileStream.read(reinterpret_cast<char*>(&blobSize), sizeof(blobSize));
-
-			asset.Metadata.resize(metadataSize);
 			asset.Blob.resize(blobSize);
-
-			inFileStream.read(asset.Metadata.data(), metadataSize);
 			inFileStream.read(asset.Blob.data(), blobSize);
 
 			return asset;

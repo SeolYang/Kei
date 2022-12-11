@@ -54,8 +54,9 @@ namespace sy
 		{
 		public:
 			Texture2D(std::string_view name, const VulkanContext& vulkanContext, Extent2D<uint32_t> extent, uint32_t mipLevels, VkFormat format, VkImageUsageFlags usageFlags, VkImageLayout desiredLayout, VmaMemoryUsage memoryUsage, VkImageAspectFlags imageAspect = VK_IMAGE_ASPECT_COLOR_BIT, VkMemoryPropertyFlags requiredMemoryPropertyFlags = 0);
-			static std::unique_ptr<Texture2D> LoadFromFile(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, std::string_view filePath, const VulkanContext& vulkanContext, VkFormat format, VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-			static std::unique_ptr<Texture2D> CreateDepthStencil(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext, Extent2D<uint32_t> extent);
+			static std::unique_ptr<Texture2D> LoadFromFile(std::string_view filePath, const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, VkFormat format, VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			static std::unique_ptr<Texture2D> LoadFromMemory(std::string_view name, const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, std::span<const char> data, Extent2D<uint32_t> extent, VkFormat format, VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			static std::unique_ptr<Texture2D> CreateDepthStencil(std::string_view name, const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, Extent2D<uint32_t> extent);
 
 		};
 	}

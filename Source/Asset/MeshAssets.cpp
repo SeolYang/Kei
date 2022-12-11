@@ -1,5 +1,5 @@
 #include <Core/Core.h>
-#include <Assets/MeshAsset.h>
+#include <Asset/MeshAsset.h>
 
 namespace sy
 {

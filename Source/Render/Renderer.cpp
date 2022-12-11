@@ -17,6 +17,7 @@
 #include <VK/FrameTracker.h>
 #include <Render/Renderer.h>
 #include <Math/MathUtils.h>
+#include <Asset/TextureAsset.h>
 
 namespace sy
 {
@@ -49,7 +50,7 @@ namespace sy
 		{
 			const auto windowExtent = window.GetExtent();
 
-			depthStencil = vk::Texture2D::CreateDepthStencil(cmdPoolManager, frameTracker, "Depth-Stencil buffer", vulkanContext, windowExtent);
+			depthStencil = vk::Texture2D::CreateDepthStencil("Depth-Stencil buffer", vulkanContext, frameTracker, cmdPoolManager, windowExtent);
 
 			triVert = std::make_unique<vk::ShaderModule>("Triangle vertex shader", vulkanContext, "Assets/Shaders/bin/textured_tri_bindless.vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 			triFrag = std::make_unique<vk::ShaderModule>("Triangle fragment shader", vulkanContext, "Assets/Shaders/bin/textured_tri_bindless.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
@@ -78,7 +79,8 @@ namespace sy
 				transformBufferIndices[idx] = descriptorManager.RequestDescriptor(*transformBuffers[idx]);
 			}
 
-			loadedTexture = vk::Texture2D::LoadFromFile(cmdPoolManager, frameTracker, "Assets/Textures/djmax_1st_anv.png", vulkanContext, VK_FORMAT_R8G8B8A8_SRGB);
+			loadedTexture = asset::texture::LoadTextureFromAsset("Assets/Textures/djmax_1st_anv.tex", vulkanContext, frameTracker, cmdPoolManager);
+			//loadedTexture = vk::Texture2D::LoadFromFile("Assets/Textures/djmax_1st_anv.png", vulkanContext, frameTracker, cmdPoolManager, VK_FORMAT_R8G8B8A8_SRGB);
 			loadedTextureDescriptor = descriptorManager.RequestDescriptor(*loadedTexture);
 
 			//std::array vertices = {

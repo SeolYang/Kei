@@ -14,6 +14,8 @@ namespace sy
 		{
 			None,
 			LZ4,
+			//ETC2,
+			//BC7
 			/* More efficient compress algorithm for each assets. **/
 		};
 

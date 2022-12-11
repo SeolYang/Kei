@@ -11,10 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\Assets\AssetConverter.cpp" />
-    <ClCompile Include="..\Source\Assets\AssetCore.cpp" />
-    <ClCompile Include="..\Source\Assets\MeshAssets.cpp" />
-    <ClCompile Include="..\Source\Assets\TextureAsset.cpp" />
+    <ClCompile Include="..\Source\Asset\AssetConverter.cpp" />
+    <ClCompile Include="..\Source\Asset\AssetCore.cpp" />
+    <ClCompile Include="..\Source\Asset\MeshAssets.cpp" />
+    <ClCompile Include="..\Source\Asset\TextureAsset.cpp" />
     <ClCompile Include="..\Source\Audio\AudioContext.cpp" />
     <ClCompile Include="..\Source\Core\Context.cpp" />
     <ClCompile Include="..\Source\Core\Core.cpp">
@@ -47,10 +47,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Source\Assets\AssetConverter.h" />
-    <ClInclude Include="..\Source\Assets\AssetCore.h" />
-    <ClInclude Include="..\Source\Assets\MeshAsset.h" />
-    <ClInclude Include="..\Source\Assets\TextureAsset.h" />
+    <ClInclude Include="..\Source\Asset\AssetConverter.h" />
+    <ClInclude Include="..\Source\Asset\AssetCore.h" />
+    <ClInclude Include="..\Source\Asset\MeshAsset.h" />
+    <ClInclude Include="..\Source\Asset\TextureAsset.h" />
     <ClInclude Include="..\Source\Audio\AudioContext.h" />
     <ClInclude Include="..\Source\Core\Context.h" />
     <ClInclude Include="..\Source\Core\Core.h" />

@@ -1,9 +1,10 @@
 #include <Core/Core.h>
-#include <Assets/TextureAsset.h>
+#include <Asset/TextureAsset.h>
+#include <VK/Texture.h>
 
 namespace sy::asset::texture
 {
-	std::optional<Metadata> ParseTextureAssetInfo(Asset& asset)
+	std::optional<Metadata> ParseMetadata(const Asset& asset)
 	{
 		Metadata metadata;
 
@@ -84,6 +85,36 @@ namespace sy::asset::texture
 		return asset;
 	}
 
+	std::unique_ptr<vk::Texture2D> LoadTextureFromAsset(std::string_view assetPath,
+		const vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker,
+		vk::CommandPoolManager& cmdPoolManager)
+	{
+		auto loadedAssetOpt = asset::LoadBinary(assetPath);
+		if (!loadedAssetOpt.has_value())
+		{
+			SY_ASSERT(false, "Failed to load texture 2d asset from {}.", assetPath);
+			return nullptr;
+		}
+
+		auto& loadedAsset = loadedAssetOpt.value();
+		const auto metadataOpt = asset::texture::ParseMetadata(loadedAsset);
+		if (!metadataOpt.has_value())
+		{
+			SY_ASSERT(false, "Failed to parse metadata from {}.", assetPath);
+			return nullptr;
+		}
+
+		const auto& metadata = metadataOpt.value();
+		const std::vector<char> data = Unpack(metadata, loadedAsset.Blob);
+
+		return vk::Texture2D::LoadFromMemory(
+			assetPath,
+			vulkanContext, frameTracker, cmdPoolManager,
+			data, 
+			Extent2D<uint32_t>{metadata.Extent.width, metadata.Extent.height},
+			metadata.Format);
+	}
+
 	std::vector<char> Unpack(const Metadata& metadata, std::span<const char> src)
 	{
 		std::vector<char> dest;
@@ -102,7 +133,7 @@ namespace sy::asset::texture
 		return dest;
 	}
 
-	VkFormat FormatToExtension(const EExtension extension)
+	VkFormat ExtensionToFormat(const EExtension extension)
 	{
 		static const robin_hood::unordered_map<EExtension, VkFormat> Table
 		{

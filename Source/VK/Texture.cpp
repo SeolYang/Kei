@@ -106,8 +106,9 @@ namespace sy
 			VK_ASSERT(vkCreateImageView(vulkanContext.GetDevice(), &viewCreateInfo, nullptr, &view), "Failed to create image view {}.", name);
 		}
 
-		std::unique_ptr<Texture2D> Texture2D::LoadFromFile(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, const std::string_view filePath, const VulkanContext& vulkanContext,
-			const VkFormat format, const VkImageUsageFlags usageFlags, const VkImageLayout layout)
+		std::unique_ptr<Texture2D> Texture2D::LoadFromFile(std::string_view filePath,
+			const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager,
+			VkFormat format, VkImageUsageFlags usageFlags, VkImageLayout layout)
 		{
 			int texWidth, texHeight;
 			int texChannels;
@@ -118,20 +119,34 @@ namespace sy
 				return nullptr;
 			}
 
-			const void* pixelsData = pixels;
+			const char* pixelsData = reinterpret_cast<char*>(pixels);
 			const VkDeviceSize sizeOfData = (static_cast<uint64_t>(texWidth) * static_cast<uint64_t>(texHeight)) * ToByteSize(format);
+			auto result = LoadFromMemory(
+				filePath,
+				vulkanContext, frameTracker, cmdPoolManager,
+				std::span{ pixelsData, sizeOfData },
+				Extent2D<uint32_t>{static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight)},
+				format, usageFlags, layout);
 
-			const auto stagingBuffer = Buffer::CreateStagingBuffer(std::format("2D Texture {} staging buffer", filePath), vulkanContext, sizeOfData);
-			void* mappedData = vulkanContext.Map(*stagingBuffer);
-			memcpy(mappedData, pixelsData, sizeOfData);
-			vulkanContext.Unmap(*stagingBuffer);
 			stbi_image_free(pixels);
+			return result;
+		}
+
+		std::unique_ptr<Texture2D> Texture2D::LoadFromMemory(std::string_view name, const VulkanContext& vulkanContext,
+			const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, 
+			std::span<const char> data,
+			Extent2D<uint32_t> extent, VkFormat format, VkImageUsageFlags usageFlags, VkImageLayout layout)
+		{
+			const auto stagingBuffer = Buffer::CreateStagingBuffer(std::format("2D Texture {} staging buffer", name), vulkanContext, data.size());
+			void* mappedData = vulkanContext.Map(*stagingBuffer);
+			memcpy(mappedData, data.data(), data.size());
+			vulkanContext.Unmap(*stagingBuffer);
 
 			// @todo: Batched upload data
 			// @todo: Use of Transfer Queue ; need more practicing and knowledge about pipeline barriers!
 			auto& transferCmdPool = cmdPoolManager.RequestCommandPool(EQueueType::Graphics);
-			const auto transferCmdBuffer = transferCmdPool.RequestCommandBuffer(std::format("Texture {} transfer cmd buffer", filePath));
-			std::unique_ptr<Texture2D> newTexture = std::make_unique<Texture2D>(filePath, vulkanContext, Extent2D<uint32_t>{ static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight) }, 1, format, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VMA_MEMORY_USAGE_GPU_ONLY);
+			const auto transferCmdBuffer = transferCmdPool.RequestCommandBuffer(std::format("Texture {} transfer cmd buffer", name));
+			std::unique_ptr<Texture2D> newTexture = std::make_unique<Texture2D>(name, vulkanContext, extent, 1, format, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VMA_MEMORY_USAGE_GPU_ONLY);
 
 			transferCmdBuffer->Begin();
 			{
@@ -145,12 +160,15 @@ namespace sy
 
 			const auto& uploadFence = frameTracker.GetCurrentInFlightUploadFence();
 			vulkanContext.SubmitTo(*transferCmdBuffer, uploadFence);
+
 			uploadFence.Wait();
 			uploadFence.Reset();
 			return newTexture;
 		}
 
-		std::unique_ptr<Texture2D> Texture2D::CreateDepthStencil(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext, const Extent2D<uint32_t> extent)
+		std::unique_ptr<Texture2D> Texture2D::CreateDepthStencil(std::string_view name,
+			const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager,
+			Extent2D<uint32_t> extent)
 		{
 			auto res = std::make_unique<Texture2D>("Depth-Stencil", vulkanContext, extent, 1, VK_FORMAT_D24_UNORM_S8_UINT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VMA_MEMORY_USAGE_GPU_ONLY, VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 			auto& transferCmdPool = cmdPoolManager.RequestCommandPool(EQueueType::Graphics);

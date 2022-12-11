@@ -81,18 +81,6 @@
     <ClCompile Include="..\Source\VK\VulkanTypes.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Assets\TextureAsset.cpp">
-      <Filter>Source\Asset</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Assets\MeshAssets.cpp">
-      <Filter>Source\Asset</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Assets\AssetConverter.cpp">
-      <Filter>Source\Asset</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Assets\AssetCore.cpp">
-      <Filter>Source\Asset</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Core\Context.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
@@ -116,6 +104,18 @@
     </ClCompile>
     <ClCompile Include="..\Source\VK\FrameTracker.cpp">
       <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\MeshAssets.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\TextureAsset.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\AssetConverter.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\AssetCore.cpp">
+      <Filter>Source\Asset</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -167,18 +167,6 @@
     <ClInclude Include="..\Source\VK\LayoutCache.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Assets\TextureAsset.h">
-      <Filter>Source\Asset</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Assets\MeshAsset.h">
-      <Filter>Source\Asset</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Assets\AssetCore.h">
-      <Filter>Source\Asset</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Assets\AssetConverter.h">
-      <Filter>Source\Asset</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Core\Context.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
@@ -226,6 +214,18 @@
     </ClInclude>
     <ClInclude Include="..\Source\Core\Types.h">
       <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\AssetCore.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\MeshAsset.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\TextureAsset.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\AssetConverter.h">
+      <Filter>Source\Asset</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
