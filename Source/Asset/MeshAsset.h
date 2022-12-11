@@ -4,10 +4,5 @@
 
 namespace sy::asset
 {
-	enum class EMeshExtension
-	{
-		FBX,
-		OBJ,
-		GLTF
-	};
+
 }

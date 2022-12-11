@@ -4,6 +4,5 @@
 
 namespace sy::asset
 {
-	bool ConvertTexture2D(const fs::path& input);
-	bool ConvertTexture2D(const fs::path& input, const fs::path& output);
+	void ConvertAssets(std::string_view rootFolderPath);
 }

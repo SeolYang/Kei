@@ -25,6 +25,98 @@ namespace sy
 			MESH,
 		};
 
+		enum class EAssetType
+		{
+			Unknown,
+			Texture,
+			Mesh,
+			Audio,
+			Shader,
+			ShaderBinary,
+		};
+
+		enum class ETextureExtension
+		{
+			PNG,
+			JPEG,
+			JPG,
+			HDR,
+		};
+
+		enum class EMeshExtension
+		{
+			FBX,
+			OBJ,
+			GLTF,
+			GLTF2,
+		};
+
+		enum class EAudioExtension
+		{
+			MP3,
+			WAV,
+			OGG
+		};
+
+		enum class EShaderExtension
+		{
+			GLSL,
+			HLSL,
+		};
+
+		enum class EShaderBinaryExtension
+		{
+			SPV,
+		};
+
+		inline EAssetType FileExtensionToAssetType(const std::string& extension)
+		{
+			static std::once_flag initTableFlag;
+			static robin_hood::unordered_map<std::string, EAssetType> ExtensionTable;
+
+			std::call_once(initTableFlag,
+				[&]()
+				{
+					for (const std::string_view name : magic_enum::enum_names<ETextureExtension>())
+					{
+						std::string nameStr{ name };
+						ExtensionTable[nameStr] = EAssetType::Texture;
+					}
+
+					for (const std::string_view name : magic_enum::enum_names<EMeshExtension>())
+					{
+						std::string nameStr{ name };
+						ExtensionTable[nameStr] = EAssetType::Mesh;
+					}
+
+					for (const std::string_view name : magic_enum::enum_names<EAudioExtension>())
+					{
+						std::string nameStr{ name };
+						ExtensionTable[nameStr] = EAssetType::Audio;
+					}
+
+					for (const std::string_view name : magic_enum::enum_names<EShaderExtension>())
+					{
+						std::string nameStr{ name };
+						ExtensionTable[nameStr] = EAssetType::Shader;
+					}
+
+					for (const std::string_view name : magic_enum::enum_names<EShaderBinaryExtension>())
+					{
+						std::string nameStr{ name };
+						ExtensionTable[nameStr] = EAssetType::ShaderBinary;
+					}
+				});
+
+			const auto foundItr = ExtensionTable.find(extension);
+			if (foundItr != ExtensionTable.end())
+			{
+				return foundItr->second;
+			}
+
+			return EAssetType::Unknown;
+		}
+
 		struct Asset
 		{
 			char Identifier[4] = { 0, 0, 0, 0 };

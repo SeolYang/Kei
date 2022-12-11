@@ -12,15 +12,6 @@ namespace sy::vk
 
 namespace sy::asset
 {
-	enum class ETextureExtension
-	{
-		PNG,
-		JPEG,
-		JPG,
-		HDR,
-		Unknown
-	};
-
 	enum class ETextureAssetType
 	{
 		Texture2D,
@@ -34,6 +25,7 @@ namespace sy::asset
 	struct TextureMetadata
 	{
 		uint64_t BufferSize = 0;
+		/** @todo considering texture type */
 		//ETextureAssetType Type = ETextureAssetType::Texture2D;
 		VkFormat Format = VK_FORMAT_UNDEFINED;
 		ECompressionMode CompressionMode = ECompressionMode::LZ4;
@@ -46,4 +38,7 @@ namespace sy::asset
 	std::vector<char> Unpack(const TextureMetadata& metadata, std::span<const char> src);
 
 	std::unique_ptr<vk::Texture2D> LoadTextureFromAsset(std::string_view assetPath, const vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager);
+
+	bool ConvertTexture2D(const fs::path& input);
+	bool ConvertTexture2D(const fs::path& input, const fs::path& output);
 }
