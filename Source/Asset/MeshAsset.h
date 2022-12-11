@@ -2,10 +2,12 @@
 #include <Core/Core.h>
 #include <Asset/AssetCore.h>
 
-namespace sy
+namespace sy::asset
 {
-	namespace asset
+	enum class EMeshExtension
 	{
-		
-	}
+		FBX,
+		OBJ,
+		GLTF
+	};
 }

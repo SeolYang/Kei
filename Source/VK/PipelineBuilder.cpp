@@ -1,6 +1,7 @@
 #include <Core/Core.h>
 #include <VK/PipelineBuilder.h>
 #include <VK/ShaderModule.h>
+#include <VK/VertexInputBuilder.h>
 
 namespace sy
 {
@@ -15,7 +16,6 @@ namespace sy
 		GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetDefault()
 		{
 			ZeroMemory(&pipelineCreateFlags, sizeof(pipelineCreateFlags));
-			ZeroMemory(&vertexInputInfo, sizeof(vertexInputInfo));
 			ZeroMemory(&inputAssembly, sizeof(inputAssembly));
 			ZeroMemory(&tessellation, sizeof(tessellation));
 			ZeroMemory(&rasterizer, sizeof(rasterizer));
@@ -24,14 +24,7 @@ namespace sy
 			ZeroMemory(&depthStencil, sizeof(depthStencil));
 
 			SetPipelineCreateFlags(0);
-			vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-			vertexInputInfo.pNext = nullptr;
-			vertexInputBindingDescriptions.clear();
-			vertexInputInfo.vertexBindingDescriptionCount = 0;
-			vertexInputInfo.pVertexBindingDescriptions = nullptr;
-			vertexInputAttributeDescriptions.clear();
-			vertexInputInfo.vertexAttributeDescriptionCount = 0;
-			vertexInputInfo.pVertexAttributeDescriptions = nullptr;
+			vertexInput = std::nullopt;
 			inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 			inputAssembly.pNext = nullptr;
 			tessellation.sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
@@ -114,14 +107,9 @@ namespace sy
 			return *this;
 		}
 
-		GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddVertexInputAttribute(
-			uint32_t location, uint32_t binding,
-			VkFormat format, uint32_t offset)
+		GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetVertexInputLayout(const VertexInputBuilder& builder)
 		{
-			vertexInputAttributeDescriptions.emplace_back(location, binding, format, offset);
-			vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexInputAttributeDescriptions.size());
-			vertexInputInfo.pVertexAttributeDescriptions = vertexInputAttributeDescriptions.data();
-
+			vertexInput = builder.Build();
 			return *this;
 		}
 
@@ -403,6 +391,7 @@ namespace sy
 
 		VkGraphicsPipelineCreateInfo GraphicsPipelineBuilder::Build() const
 		{
+			/** @todo Optional style builder refactoring */
 			const VkGraphicsPipelineCreateInfo createInfo
 			{
 				.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -410,7 +399,7 @@ namespace sy
 				.flags = pipelineCreateFlags,
 				.stageCount = static_cast<uint32_t>(shaderStages.size()),
 				.pStages = shaderStages.data(),
-				.pVertexInputState = &vertexInputInfo,
+				.pVertexInputState = vertexInput.has_value() ? &vertexInput.value() : nullptr,
 				.pInputAssemblyState = &inputAssembly,
 				.pTessellationState = &tessellation,
 				.pViewportState = &viewportState,

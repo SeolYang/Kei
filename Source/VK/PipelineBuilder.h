@@ -6,6 +6,7 @@ namespace sy
 	namespace vk
 	{
 		class ShaderModule;
+		class VertexInputBuilder;
 		class GraphicsPipelineBuilder
 		{
 		public:
@@ -17,17 +18,7 @@ namespace sy
 
 			GraphicsPipelineBuilder& AddShaderStage(const ShaderModule& shaderModule);
 
-			template <typename T>
-			GraphicsPipelineBuilder& AddVertexInputBinding(uint32_t binding, const VkVertexInputRate inputRate)
-			{
-				vertexInputBindingDescriptions.emplace_back(binding, static_cast<uint32_t>(sizeof(T)), inputRate);
-				vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(vertexInputBindingDescriptions.size());
-				vertexInputInfo.pVertexBindingDescriptions = vertexInputBindingDescriptions.data();
-				return *this;
-			}
-
-			GraphicsPipelineBuilder& AddVertexInputAttribute(uint32_t location, uint32_t binding, VkFormat format, uint32_t offset);
-
+			GraphicsPipelineBuilder& SetVertexInputLayout(const VertexInputBuilder& builder);
 
 			/** Input Assembly State */
 
@@ -97,7 +88,6 @@ namespace sy
 		private:
 			VkPipelineCreateFlags pipelineCreateFlags;
 			std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
-			VkPipelineVertexInputStateCreateInfo vertexInputInfo;
 			VkPipelineInputAssemblyStateCreateInfo inputAssembly;
 			VkPipelineTessellationStateCreateInfo tessellation;
 			VkPipelineViewportStateCreateInfo viewportState;
@@ -112,8 +102,7 @@ namespace sy
 
 			VkPipelineRenderingCreateInfo renderingCreateInfo;
 
-			std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
-			std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
+			std::optional<VkPipelineVertexInputStateCreateInfo> vertexInput;
 
 		};
 

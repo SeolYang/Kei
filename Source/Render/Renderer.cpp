@@ -1,5 +1,7 @@
 #include <Core/Core.h>
 #include <Core/Window.h>
+#include <Render/Renderer.h>
+#include <Render/Vertex.h>
 #include <VK/VulkanContext.h>
 #include <VK/Fence.h>
 #include <VK/Semaphore.h>
@@ -15,7 +17,6 @@
 #include <VK/DescriptorManager.h>
 #include <VK/CommandPoolManager.h>
 #include <VK/FrameTracker.h>
-#include <Render/Renderer.h>
 #include <Math/MathUtils.h>
 #include <Asset/TextureAsset.h>
 
@@ -32,12 +33,6 @@ namespace sy
 		{
 			int textureIndex;
 			int transformDataIndex;
-		};
-
-		struct SimpleVertex
-		{
-			glm::vec4 pos;
-			glm::vec2 uvs;
 		};
 
 		Renderer::Renderer(const Window& window, vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager) :
@@ -60,6 +55,7 @@ namespace sy
 				VkPushConstantRange{ VK_SHADER_STAGE_ALL_GRAPHICS, 0, sizeof(PushConstants) },
 			};
 
+			const vk::VertexInputBuilder vertexInputLayout = BuildVertexInputLayout<VertexPT>();
 			vk::GraphicsPipelineBuilder basicPipelineBuilder;
 			basicPipelineBuilder.SetDefault()
 				.AddShaderStage(*triVert)
@@ -67,9 +63,7 @@ namespace sy
 				.AddViewport(0.f, 0.f, static_cast<float>(windowExtent.width), static_cast<float>(windowExtent.height), 0.0f, 1.0f)
 				.AddScissor(0, 0, windowExtent.width, windowExtent.height)
 				.SetPipelineLayout(pipelineLayoutCache->Request(descriptorSetLayouts, pushConstantRanges))
-				.AddVertexInputBinding<SimpleVertex>(0, VK_VERTEX_INPUT_RATE_VERTEX)
-				.AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 0)
-				.AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32_SFLOAT, static_cast<uint32_t>(offsetof(SimpleVertex, uvs)));
+				.SetVertexInputLayout(vertexInputLayout);
 
 			basicPipeline = std::make_unique<vk::Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
@@ -91,14 +85,14 @@ namespace sy
 
 			std::array vertices =
 			{
-				SimpleVertex{ {-.5f, -.5f, -.5f, 1.f}, {0.f, 1.f} },
-				SimpleVertex{ {-.5f, .5f, -.5f, 1.f}, {0.f, 0.f} },
-				SimpleVertex{ {.5f, .5f, -.5f, 1.f}, {1.f, 0.f} },
-				SimpleVertex{ {.5f, -.5f, -.5f, 1.f}, {1.f, 1.f} },
-				SimpleVertex{ {-.5f, -.5f, .5f, 1.f}, {1.f, 1.f} },
-				SimpleVertex{ {-.5f, .5f, .5f, 1.f}, {1.f, 0.f} },
-				SimpleVertex{ {.5f, .5f, .5f, 1.f}, {0.f, 0.f} },
-				SimpleVertex{ {.5f, -.5f, .5f, 1.f}, {0.f, 1.f} },
+				VertexPT{ {-.5f, -.5f, -.5f}, {0.f, 1.f} },
+				VertexPT{ {-.5f, .5f, -.5f}, {0.f, 0.f} },
+				VertexPT{ {.5f, .5f, -.5f}, {1.f, 0.f} },
+				VertexPT{ {.5f, -.5f, -.5f}, {1.f, 1.f} },
+				VertexPT{ {-.5f, -.5f, .5f}, {1.f, 1.f} },
+				VertexPT{ {-.5f, .5f, .5f}, {1.f, 0.f} },
+				VertexPT{ {.5f, .5f, .5f}, {0.f, 0.f} },
+				VertexPT{ {.5f, -.5f, .5f}, {0.f, 1.f} },
 			};
 
 			std::array indices = {
@@ -145,7 +139,7 @@ namespace sy
 				static_cast<uint32_t>(7),
 			};
 
-			cubeVertexBuffer = vk::Buffer::CreateVertexBuffer<SimpleVertex>(cmdPoolManager, frameTracker, "Cube Vertex Buffer", vulkanContext, vertices);
+			cubeVertexBuffer = vk::Buffer::CreateVertexBuffer<VertexPT>(cmdPoolManager, frameTracker, "Cube Vertex Buffer", vulkanContext, vertices);
 			vulkanContext.SetObjectName(*cubeVertexBuffer);
 			cubeIndexBuffer = vk::Buffer::CreateIndexBuffer(cmdPoolManager, frameTracker, "Cube Index Buffer", vulkanContext, indices);
 			vulkanContext.SetObjectName(*cubeIndexBuffer);

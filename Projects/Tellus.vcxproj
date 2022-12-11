@@ -39,6 +39,7 @@
     <ClCompile Include="..\Source\VK\Semaphore.cpp" />
     <ClCompile Include="..\Source\VK\ShaderModule.cpp" />
     <ClCompile Include="..\Source\VK\Swapchain.cpp" />
+    <ClCompile Include="..\Source\VK\VertexInputBuilder.cpp" />
     <ClCompile Include="..\Source\VK\VulkanContext.cpp" />
     <ClCompile Include="..\Source\VK\VulkanTypes.cpp" />
     <ClCompile Include="..\ThirdParty\volk\volk.c">
@@ -64,6 +65,7 @@
     <ClInclude Include="..\Source\Core\Window.h" />
     <ClInclude Include="..\Source\Math\MathUtils.h" />
     <ClInclude Include="..\Source\Render\Renderer.h" />
+    <ClInclude Include="..\Source\Render\Vertex.h" />
     <ClInclude Include="..\Source\VK\Buffer.h" />
     <ClInclude Include="..\Source\VK\CommandBuffer.h" />
     <ClInclude Include="..\Source\VK\CommandPool.h" />
@@ -78,6 +80,7 @@
     <ClInclude Include="..\Source\VK\Semaphore.h" />
     <ClInclude Include="..\Source\VK\ShaderModule.h" />
     <ClInclude Include="..\Source\VK\Swapchain.h" />
+    <ClInclude Include="..\Source\VK\VertexInputBuilder.h" />
     <ClInclude Include="..\Source\VK\VulkanContext.h" />
     <ClInclude Include="..\Source\VK\VulkanTypes.h" />
     <ClInclude Include="..\Source\VK\VulkanWrapper.hpp" />
