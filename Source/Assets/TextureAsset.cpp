@@ -112,6 +112,6 @@ namespace sy::asset::texture
 				{ EExtension::JPG,		EFormat::RGBA8		}
 		};
 
-		return Table[extension];
+		return Table.find(extension)->second;
 	}
 }
