@@ -202,7 +202,6 @@ namespace sy::asset
 		stbi_image_free(pixels);
 
 		SaveBinary(output.string(), newAssetOpt.value());
-		spdlog::info("Convert texture resource {} to texture asset {}.", input.string(), output.string());
 		return true;
 	}
 }

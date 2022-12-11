@@ -1,13 +1,10 @@
 #include <Core/Core.h>
 #include <Core/Context.h>
-#include <Asset/AssetConverter.h>
 
-int main(int, char**)
+int main(int argc, char** argv)
 {
 	using namespace sy;
-	//asset::convert::ConvertTexture2D("Assets/Textures/djmax_1st_anv.png");
-	//asset::ConvertAssets("Assets");
-	sy::Context contextInstance;
+	sy::Context contextInstance{ argc, argv };
 	contextInstance.Run();
 	return 0;
 }

@@ -16,12 +16,13 @@ namespace sy
 		class Renderer;
 	}
 
+	class CommandLineParser;
 	class Window;
 	class GameInstance;
 	class Context
 	{
 	public:
-		Context();
+		Context(int argc, char** argv);
 		Context(const Context&) = delete;
 		Context(Context&&) = default;
 
@@ -33,10 +34,11 @@ namespace sy
 		void Run();
 
 	private:
-		void Startup();
+		void Startup(int argc, char** argv);
 		void Cleanup();
 
 	private:
+		std::unique_ptr<CommandLineParser> cmdLineParser;
 		std::unique_ptr<Timer> timer;
 		std::unique_ptr<Window> window;
 		std::unique_ptr<vk::VulkanContext> vulkanContext;

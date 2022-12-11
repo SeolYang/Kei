@@ -1,5 +1,6 @@
 #include <Core/Core.h>
 #include <Core/Context.h>
+#include <Core/CommandLineParser.h>
 #include <Core/Window.h>
 #include <Core/Utils.h>
 #include <VK/VulkanContext.h>
@@ -7,13 +8,14 @@
 #include <VK/CommandPoolManager.h>
 #include <VK/DescriptorManager.h>
 #include <Render/Renderer.h>
+#include <Asset/AssetConverter.h>
 #include <GameInstance.h>
 
 namespace sy
 {
-	Context::Context()
+	Context::Context(int argc, char** argv)
 	{
-		Startup();
+		Startup(argc, argv);
 	}
 
 	Context::~Context()
@@ -21,7 +23,7 @@ namespace sy
 		Cleanup();
 	}
 
-	void Context::Startup()
+	void Context::Startup(int argc, char** argv)
 	{
 		const auto currentTime = std::chrono::system_clock::now();
 		const auto localTime = std::chrono::current_zone()->to_local(currentTime);
@@ -48,6 +50,13 @@ namespace sy
 #endif
 
 		spdlog::info("Logger initialized: output : {}", logFilePathAnsi);
+		spdlog::info("Initializing Command Line Parser sub-context.");
+		cmdLineParser = std::make_unique<CommandLineParser>(argc, argv);
+		if (cmdLineParser->ShouldConvertAssets())
+		{
+			asset::ConvertAssets(cmdLineParser->GetAssetPath());
+		}
+
 		spdlog::info("Initializing SDL.");
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
 		{
@@ -85,8 +94,12 @@ namespace sy
 			spdlog::info("Clean-up Vulkan context.");
 			vulkanContext.reset();
 		}
-		spdlog::info("Clean-up Renderer sub-context");
+
+		spdlog::info("Clean-up Window sub-context");
 		window.reset();
+
+		spdlog::info("Clean-up Cmd Line Parser sub-context");
+		cmdLineParser.reset();
 	}
 
 	void Context::Run()

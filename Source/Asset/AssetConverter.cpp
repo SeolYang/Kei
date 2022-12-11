@@ -6,9 +6,9 @@
 
 namespace sy::asset
 {
-	void ConvertAssets(std::string_view rootFolderPath)
+	void ConvertAssets(const fs::path root)
 	{
-		const fs::path root = rootFolderPath;
+		spdlog::info("Converting assets in {}.", root.string());
 		const fs::recursive_directory_iterator itr{ root };
 		for (const auto entry : itr)
 		{
@@ -26,6 +26,7 @@ namespace sy::asset
 				{
 				case EAssetType::Texture:
 					/** @todo more generic convert methods for texture */
+					spdlog::info("Converting texture resource {}.", filePath.string());
 					ConvertTexture2D(filePath);
 					break;
 

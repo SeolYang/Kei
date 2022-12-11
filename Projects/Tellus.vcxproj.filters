@@ -120,6 +120,9 @@
     <ClCompile Include="..\Source\VK\VertexInputBuilder.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Core\CommandLineParser.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\GameInstance.h">
@@ -235,6 +238,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\VK\VertexInputBuilder.h">
       <Filter>Source\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\CommandLineParser.h">
+      <Filter>Source\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
