@@ -180,7 +180,7 @@ namespace sy::asset
 		}
 
 		/** @TODO Impl convert mesh */
-		constexpr unsigned int importFlags = aiProcess_GenNormals | aiProcess_GenUVCoords | aiProcess_GenBoundingBoxes | aiProcess_Triangulate;
+		constexpr unsigned int importFlags = aiProcess_GenNormals | aiProcess_GenUVCoords | aiProcess_GenBoundingBoxes | aiProcess_Triangulate | aiProcess_MakeLeftHanded;
 		const aiScene* scene = aiImportFile(input.string().c_str(), importFlags);
 		if (scene == nullptr || !scene->HasMeshes())
 		{

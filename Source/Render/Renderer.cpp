@@ -77,12 +77,12 @@ namespace sy
 			loadedTexture = asset::LoadTextureFromAsset("Assets/Textures/djmax_1st_anv.tex", vulkanContext, frameTracker, cmdPoolManager);
 			loadedTextureDescriptor = descriptorManager.RequestDescriptor(*loadedTexture);
 
-			auto [vb, ib] = asset::LoadMeshFromAsset("Assets/Models/rubber_duck/scene.mesh", vulkanContext, cmdPoolManager, frameTracker);
+			auto [vb, ib] = asset::LoadMeshFromAsset("Assets/Models/box_textured/BoxTextured.mesh", vulkanContext, cmdPoolManager, frameTracker);
 			cubeVertexBuffer = std::move(vb);
 			cubeIndexBuffer = std::move(ib);
 
 			auto proj = math::PerspectiveYFlipped(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
-			viewProjMat = proj * glm::lookAt(glm::vec3{ 1.5f, -2.f, -5.f }, { 0.f, 0.f ,0.f }, { 0.f ,1.f, 0.f });
+			viewProjMat = proj * glm::lookAt(glm::vec3{ 1.5f, 2.f, -5.f }, { 0.f, 0.f ,0.f }, { 0.f ,1.f, 0.f });
 		}
 
 		Renderer::~Renderer()
@@ -167,7 +167,7 @@ namespace sy
 						graphicsCmdBuffer->BindIndexBuffer(*cubeIndexBuffer);
 						graphicsCmdBuffer->PushConstants(*basicPipeline, VK_SHADER_STAGE_ALL_GRAPHICS, 0, sizeof(PushConstants), &pushConstants);
 
-						graphicsCmdBuffer->DrawIndexed(33216, 1, 0, 0, 0);
+						graphicsCmdBuffer->DrawIndexed(36, 1, 0, 0, 0);
 					}
 					graphicsCmdBuffer->EndRendering();
 

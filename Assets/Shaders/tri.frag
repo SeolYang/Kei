@@ -16,6 +16,6 @@ layout (location = 0) out vec4 outFragColor;
 
 void main()
 {
-	//outFragColor = vec4(texture(textures[pushConstants.textureIdx], inUV).rgb, 1.f);
-	outFragColor = vec4(inNormal, 1.f);
+	outFragColor = vec4(texture(textures[pushConstants.textureIdx], inUV).rgb, 1.f);
+	//outFragColor = vec4(inNormal, 1.f);
 }
