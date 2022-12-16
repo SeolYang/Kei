@@ -105,7 +105,7 @@
     <ClCompile Include="..\Source\VK\FrameTracker.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Asset\MeshAssets.cpp">
+    <ClCompile Include="..\Source\Asset\MeshAsset.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Asset\TextureAsset.cpp">

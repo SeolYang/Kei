@@ -3,11 +3,12 @@
 
 #if defined(_DEBUG) || defined(DEBUG)
 #define SY_ASSERT(CONDITION, FORMAT_STR, ...) \
+    do \
     if (!(CONDITION)) { \
 		spdlog::critical("Assert failed at File: {}, Line: {}", __FILE__, __LINE__); \
         spdlog::critical(FORMAT_STR, __VA_ARGS__); \
         __debugbreak(); \
-        }
+        } while(0)
 #else
 #define SY_ASSERT(CONDITION, ...) \
     do { (void)sizeof(CONDITION); } while(0)

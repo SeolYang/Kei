@@ -6,15 +6,15 @@
 
 namespace sy::asset
 {
-	void ConvertAssets(const fs::path root)
+	void ConvertAssets(const fs::path& root)
 	{
 		spdlog::info("Converting assets in {}.", root.string());
 		const fs::recursive_directory_iterator itr{ root };
-		for (const auto entry : itr)
+		for (const auto& entry : itr)
 		{
 			if (entry.is_regular_file())
 			{
-				const fs::path filePath = entry.path();
+				const fs::path filePath = fs::relative(entry.path(), root.parent_path());
 				std::string extension = filePath.extension().string();
 				if (extension.find('.') == 0)
 				{
@@ -31,6 +31,8 @@ namespace sy::asset
 					break;
 
 				case EAssetType::Mesh:
+					spdlog::info("Converting mesh resource {}.", filePath.string());
+					ConvertMesh(filePath);
 					break;
 				}
 			}

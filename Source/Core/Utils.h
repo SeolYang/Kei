@@ -43,6 +43,21 @@ namespace sy
         return alignedSize;
     }
 
+    template <typename T>
+    size_t SizeBytes(const std::vector<T>& vec)
+    {
+        return sizeof(T) * vec.size();
+    }
+
+    template <typename T>
+    std::vector<char> ToBytes(const std::span<const T> data)
+    {
+        std::vector<char> bytes;
+        bytes.resize(data.size_bytes());
+        memcpy(bytes.data(), data.data(), data.size_bytes());
+        return bytes;
+    }
+
     /************************ Helpers ************************/
     template<typename T>
     [[nodiscard]] bool FlagsContains(T flags, T flag) noexcept

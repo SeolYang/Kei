@@ -67,7 +67,7 @@ namespace sy
 			return asset;
 		}
 
-		std::vector<char> LZ4(const std::span<const char> data)
+		std::vector<char> CompressLZ4(const std::span<const char> data)
 		{
 			const auto compressStagingSize = LZ4_compressBound(static_cast<int>(data.size()));
 			std::vector<char> comp;
@@ -79,7 +79,7 @@ namespace sy
 			return comp;
 		}
 
-		std::vector<char> None(const std::span<const char> data)
+		std::vector<char> CompressNone(const std::span<const char> data)
 		{
 			std::vector<char> comp;
 			comp.resize(data.size());
@@ -92,10 +92,44 @@ namespace sy
 			switch (compressionMode)
 			{
 			case ECompressionMode::LZ4:
-				return LZ4(data);
+				return CompressLZ4(data);
 			case ECompressionMode::None:
-				return None(data);
+				return CompressNone(data);
 			}
+		}
+
+		std::vector<char> UncompressLZ4(const std::span<const char> compressedData, const size_t dataSize)
+		{
+			std::vector<char> uncompressedData;
+			uncompressedData.resize(dataSize);
+			LZ4_decompress_safe(compressedData.data(), uncompressedData.data(), static_cast<int>(compressedData.size()), static_cast<int>(uncompressedData.size()));
+			return uncompressedData;
+		}
+
+		std::vector<char> UncompressNone(const std::span<const char> compressedData, const size_t dataSize)
+		{
+			std::vector<char> uncompressedData;
+			uncompressedData.resize(dataSize);
+			memcpy(uncompressedData.data(), compressedData.data(), compressedData.size());
+			return uncompressedData;
+		}
+
+		std::vector<char> Uncompress(const ECompressionMode compressionMode, const size_t dataSize, std::span<const char> compressedData)
+		{
+			std::vector<char> uncompressedData;
+			uncompressedData.resize(dataSize);
+
+			switch (compressionMode)
+			{
+			case ECompressionMode::LZ4:
+				return UncompressLZ4(compressedData, dataSize);
+				break;
+
+			default:
+				break;
+			}
+
+			return UncompressNone(compressedData, dataSize);
 		}
 	}
 }

@@ -16,7 +16,7 @@ namespace sy::asset
 	enum class EMeshType
 	{
 		Static,
-		Skinned /** @todo not impl yet! Bones, Animations, etc... */
+		Skeletal /** @todo not impl yet! Bones, Animations, etc... */
 	};
 
 	struct MeshMetadata
@@ -63,7 +63,6 @@ namespace sy::asset
 
 	std::optional<MeshMetadata> ParseMeshMetadata(const Asset& asset);
 	std::optional<Asset> Pack(const MeshMetadata& metadata, const void* vertices, const uint32_t* indices);
-	std::vector<char> Uncompress(const MeshMetadata& metadata, std::span<const char> compressedData);
 	std::vector<char> UnpackVertex(const MeshMetadata& metadata, std::span<const char> uncompressedData);
 	std::vector<render::IndexType> UnpackIndex(const MeshMetadata& metadata, std::span<const char> uncompressedData);
 

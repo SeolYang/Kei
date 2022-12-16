@@ -129,4 +129,6 @@ namespace sy::asset
 	std::optional<Asset> LoadBinary(std::string_view path, uint32_t version, bool bIgnoreAssetVersionCheck = false);
 
 	std::vector<char> CompressData(ECompressionMode compressionMode, std::span<const char> data);
+	std::vector<char> Uncompress(ECompressionMode compressionMode, size_t dataSize, std::span<const char> compressedData);
+
 }

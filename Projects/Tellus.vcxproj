@@ -13,7 +13,7 @@
   <ItemGroup>
     <ClCompile Include="..\Source\Asset\AssetConverter.cpp" />
     <ClCompile Include="..\Source\Asset\AssetCore.cpp" />
-    <ClCompile Include="..\Source\Asset\MeshAssets.cpp" />
+    <ClCompile Include="..\Source\Asset\MeshAsset.cpp" />
     <ClCompile Include="..\Source\Asset\TextureAsset.cpp" />
     <ClCompile Include="..\Source\Audio\AudioContext.cpp" />
     <ClCompile Include="..\Source\Core\CommandLineParser.cpp" />

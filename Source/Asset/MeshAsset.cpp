@@ -50,6 +50,7 @@ namespace sy::asset
 
 	std::optional<Asset> Pack(const MeshMetadata& metadata, const void* vertices, const uint32_t* indices)
 	{
+		/** @todo mesh optimization options */
 		if (vertices == nullptr)
 		{
 			SY_ASSERT(false, "Invalid vertex data.");
@@ -70,7 +71,7 @@ namespace sy::asset
 		metadataJson[MESH_METADATA_MESH_TYPE] = magic_enum::enum_name<EMeshType>(metadata.MeshType);
 		metadataJson[MESH_METADATA_VERTICES] = metadata.Vertices;
 		metadataJson[MESH_METADATA_INDICES] = metadata.Indices;
-		metadataJson[MESH_METADATA_SRC_PATH] = metadataJson["SrcPath"];
+		metadataJson[MESH_METADATA_SRC_PATH] = metadata.SrcPath;
 
 		if (!CheckMeshCompressionSupport(metadata.CompressionMode))
 		{
@@ -95,27 +96,6 @@ namespace sy::asset
 		asset.Blob = CompressData(metadata.CompressionMode, { packedData.data(), packedData.size()});
 		asset.Metadata = metadataJson.dump();
 		return asset;
-	}
-
-	std::vector<char> Uncompress(const MeshMetadata& metadata, std::span<const char> compressedData)
-	{
-		const size_t packedDataSize = CalculateVertexDataSizeFromMetadata(metadata) + CalculateIndexDataSizeFromMetadata(metadata);
-		std::vector<char> uncompressedData;
-		uncompressedData.resize(packedDataSize);
-
-		switch (metadata.CompressionMode)
-		{
-		case ECompressionMode::LZ4:
-			LZ4_decompress_safe(compressedData.data(), uncompressedData.data(), static_cast<int>(compressedData.size()), static_cast<int>(uncompressedData.size()));
-			break;
-
-		case ECompressionMode::None:
-		default:
-			memcpy(uncompressedData.data(), compressedData.data(), compressedData.size());
-			break;
-		}
-
-		return uncompressedData;
 	}
 
 	std::vector<char> UnpackVertex(const MeshMetadata& metadata, std::span<const char> uncompressedData)
@@ -144,9 +124,101 @@ namespace sy::asset
 		return ConvertMesh(input, newOutputPath);
 	}
 
+	size_t ProcessStaticMesh(const aiScene& scene, std::vector<char>& vertices, std::vector<render::IndexType>& indices)
+	{
+		std::vector<render::VertexPTN> mergedVertices;
+
+		for (size_t meshIdx = 0; meshIdx < scene.mNumMeshes; ++meshIdx)
+		{
+			const aiMesh& mesh = *scene.mMeshes[meshIdx];
+			for (unsigned int idx = 0; idx < mesh.mNumVertices; ++idx)
+			{
+				const aiVector3D v = mesh.mVertices[idx];
+				const aiVector3D t = mesh.mTextureCoords[0][idx];
+				const aiVector3D n = mesh.mNormals[idx];
+				mergedVertices.emplace_back(glm::vec3(v.x, v.z, v.y), glm::vec2(t.x, t.y), glm::vec3(n.x, n.y, n.z));
+			}
+
+			for (unsigned int idx = 0; idx < mesh.mNumFaces; ++idx)
+			{
+				for (int j = 0; j != 3; ++j)
+				{
+					indices.push_back(mesh.mFaces[idx].mIndices[j]);
+				}
+			}
+		}
+
+		vertices = ToBytes<render::VertexPTN>(mergedVertices);
+		return mergedVertices.size();
+	}
+
+	size_t ProcessSkeletalMesh(const aiScene& scene, std::vector<char>& vertices, std::vector<render::IndexType>& indices)
+	{
+		SY_ASSERT(false, "Not implemented");
+		return 0;
+	}
+
 	bool ConvertMesh(const fs::path& input, const fs::path& output)
 	{
+		const auto inputPathStr = input.string();
+		auto inputExtension = input.extension().string();
+		if (inputExtension.size() < 2)
+		{
+			SY_ASSERT(false, "Invalid input extension length.");
+			return false;
+		}
+
+		inputExtension = inputExtension.substr(1);
+		std::transform(inputExtension.begin(), inputExtension.end(), inputExtension.begin(), ::toupper);
+
+		const auto srcExtension = magic_enum::enum_cast<EMeshExtension>(inputExtension);
+		if (!srcExtension.has_value())
+		{
+			SY_ASSERT(false, "Invalid input mesh extension {}.", inputExtension);
+			return false;
+		}
+
 		/** @TODO Impl convert mesh */
-		return false;
+		constexpr unsigned int importFlags = aiProcess_GenNormals | aiProcess_GenUVCoords | aiProcess_GenBoundingBoxes | aiProcess_Triangulate;
+		const aiScene* scene = aiImportFile(input.string().c_str(), importFlags);
+		if (scene == nullptr || !scene->HasMeshes())
+		{
+			SY_ASSERT(false, "Unable to load scene from {}.", input.string());
+			return false;
+		}
+
+		MeshMetadata metadata;
+		metadata.SrcPath = inputPathStr;
+
+		/** @todo: material import */
+		std::vector<char> vertices;
+		std::vector<render::IndexType> indices;
+		if (scene->hasSkeletons())
+		{
+			// @todo additional data for animations?
+			// @todo impl for skeletal mesh
+			metadata.Vertices = ProcessStaticMesh(*scene, vertices, indices);
+			metadata.MeshType = EMeshType::Static;
+			//ProcessSkeletalMesh(*scene, vertices, indices);
+			//metadata.MeshType = EMeshType::Skeletal;
+		}
+		else
+		{
+			metadata.Vertices = ProcessStaticMesh(*scene, vertices, indices);
+			metadata.MeshType = EMeshType::Static;
+		}
+
+		metadata.Indices = indices.size();
+
+		const auto newAssetOpt = Pack(metadata, vertices.data(), indices.data());
+		if (!newAssetOpt.has_value())
+		{
+			SY_ASSERT(false, "Failed to packing mesh {}.", inputPathStr);
+			return false;
+		}
+
+		aiReleaseImport(scene);
+		SaveBinary(output.string(), newAssetOpt.value());
+		return true;
 	}
 }

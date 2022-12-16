@@ -75,6 +75,15 @@
 /** magic-enum */
 #include <magic_enum.hpp>
 
+/** assimp */
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/cimport.h>
+#include <assimp/version.h>
+
+/** mesh optimizer */
+#include <meshoptimizer.h>
+
 /** Internal - Core */
 #include <Core/Types.h>
 #include <Core/UniqueHandle.h>

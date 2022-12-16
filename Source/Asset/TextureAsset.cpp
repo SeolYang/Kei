@@ -99,21 +99,7 @@ namespace sy::asset
 
 	std::vector<char> Unpack(const TextureMetadata& metadata, std::span<const char> src)
 	{
-		std::vector<char> dest;
-		dest.resize(metadata.BufferSize);
-		switch (metadata.CompressionMode)
-		{
-		case ECompressionMode::LZ4:
-			LZ4_decompress_safe(src.data(), dest.data(), static_cast<int>(src.size()), static_cast<int>(dest.size()));
-			break;
-
-		case ECompressionMode::None:
-		default:
-			memcpy(dest.data(), src.data(), src.size());
-			break;
-		}
-
-		return dest;
+		return Uncompress(metadata.CompressionMode, metadata.BufferSize, src);
 	}
 
 	std::unique_ptr<vk::Texture2D> LoadTextureFromAsset(std::string_view assetPath,
@@ -169,7 +155,7 @@ namespace sy::asset
 		const auto srcExtension = magic_enum::enum_cast<ETextureExtension>(inputExtension);
 		if (!srcExtension.has_value())
 		{
-			SY_ASSERT(false, "Invalid input texture extension {}.", inputExtension)
+			SY_ASSERT(false, "Invalid input texture extension {}.", inputExtension);
 				return false;
 		}
 
@@ -195,7 +181,7 @@ namespace sy::asset
 		const auto newAssetOpt = Pack(metadata, pixels);
 		if (!newAssetOpt.has_value())
 		{
-			spdlog::warn("Failed to packing texture {}.", inputPathStr);
+			SY_ASSERT(false, "Failed to packing texture {}.", inputPathStr);
 			return false;
 		}
 
