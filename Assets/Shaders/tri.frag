@@ -11,9 +11,11 @@ layout (push_constant) uniform PushConstants
 layout (set = 0, binding = 2) uniform sampler2D textures[];
 
 layout (location = 0) in vec2 inUV;
+layout (location = 1) in vec3 inNormal;
 layout (location = 0) out vec4 outFragColor;
 
 void main()
 {
-	outFragColor = vec4(texture(textures[pushConstants.textureIdx], inUV).rgb, 1.f);
+	//outFragColor = vec4(texture(textures[pushConstants.textureIdx], inUV).rgb, 1.f);
+	outFragColor = vec4(inNormal, 1.f);
 }

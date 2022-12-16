@@ -102,36 +102,6 @@ namespace sy::asset
 		return Uncompress(metadata.CompressionMode, metadata.BufferSize, src);
 	}
 
-	std::unique_ptr<vk::Texture2D> LoadTextureFromAsset(std::string_view assetPath,
-		const vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker,
-		vk::CommandPoolManager& cmdPoolManager)
-	{
-		auto loadedAssetOpt = asset::LoadBinary(assetPath, TEXTURE_ASSET_VERSION);
-		if (!loadedAssetOpt.has_value())
-		{
-			SY_ASSERT(false, "Failed to load texture 2d asset from {}.", assetPath);
-			return nullptr;
-		}
-
-		auto& loadedAsset = loadedAssetOpt.value();
-		const auto metadataOpt = asset::ParseTextureMetadata(loadedAsset);
-		if (!metadataOpt.has_value())
-		{
-			SY_ASSERT(false, "Failed to parse metadata from {}.", assetPath);
-			return nullptr;
-		}
-
-		const auto& metadata = metadataOpt.value();
-		const std::vector<char> data = Unpack(metadata, loadedAsset.Blob);
-
-		return vk::Texture2D::LoadFromMemory(
-			assetPath,
-			vulkanContext, frameTracker, cmdPoolManager,
-			data, 
-			Extent2D<uint32_t>{metadata.Extent.width, metadata.Extent.height},
-			metadata.Format);
-	}
-
 	bool ConvertTexture2D(const fs::path& input)
 	{
 		fs::path newOutputPath = input;
@@ -189,5 +159,35 @@ namespace sy::asset
 
 		SaveBinary(output.string(), newAssetOpt.value());
 		return true;
+	}
+
+	std::unique_ptr<vk::Texture2D> LoadTextureFromAsset(std::string_view assetPath,
+		const vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker,
+		vk::CommandPoolManager& cmdPoolManager)
+	{
+		auto loadedAssetOpt = asset::LoadBinary(assetPath, TEXTURE_ASSET_VERSION);
+		if (!loadedAssetOpt.has_value())
+		{
+			SY_ASSERT(false, "Failed to load texture 2d asset from {}.", assetPath);
+			return nullptr;
+		}
+
+		auto& loadedAsset = loadedAssetOpt.value();
+		const auto metadataOpt = asset::ParseTextureMetadata(loadedAsset);
+		if (!metadataOpt.has_value())
+		{
+			SY_ASSERT(false, "Failed to parse metadata from {}.", assetPath);
+			return nullptr;
+		}
+
+		const auto& metadata = metadataOpt.value();
+		const std::vector<char> data = Unpack(metadata, loadedAsset.Blob);
+
+		return vk::Texture2D::LoadFromMemory(
+			assetPath,
+			vulkanContext, frameTracker, cmdPoolManager,
+			data,
+			Extent2D<uint32_t>{metadata.Extent.width, metadata.Extent.height},
+			metadata.Format);
 	}
 }

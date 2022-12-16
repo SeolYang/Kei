@@ -19,6 +19,7 @@
 #include <VK/FrameTracker.h>
 #include <Math/MathUtils.h>
 #include <Asset/TextureAsset.h>
+#include <Asset/MeshAsset.h>
 
 namespace sy
 {
@@ -55,7 +56,7 @@ namespace sy
 				VkPushConstantRange{ VK_SHADER_STAGE_ALL_GRAPHICS, 0, sizeof(PushConstants) },
 			};
 
-			const vk::VertexInputBuilder vertexInputLayout = BuildVertexInputLayout<VertexPT>();
+			const vk::VertexInputBuilder vertexInputLayout = BuildVertexInputLayout<VertexPTN>();
 			vk::GraphicsPipelineBuilder basicPipelineBuilder;
 			basicPipelineBuilder.SetDefault()
 				.AddShaderStage(*triVert)
@@ -76,73 +77,9 @@ namespace sy
 			loadedTexture = asset::LoadTextureFromAsset("Assets/Textures/djmax_1st_anv.tex", vulkanContext, frameTracker, cmdPoolManager);
 			loadedTextureDescriptor = descriptorManager.RequestDescriptor(*loadedTexture);
 
-			//std::array vertices = {
-			//	SimpleVertex{glm::vec4{-0.5f, 0.5f, 0.f, 1.f}, {0.f, 1.f} },
-			//	SimpleVertex{glm::vec4{-0.5f, -0.5f, 0.f, 1.f}, {0.f, 0.f} },
-			//	SimpleVertex{glm::vec4{0.5f, -0.5f, 0.f, 1.f}, {1.f, 0.f} },
-			//	SimpleVertex{glm::vec4{0.5f, 0.5f, 0.f, 1.f}, {1.f, 1.f} }
-			//};
-
-			std::array vertices =
-			{
-				VertexPT{ {-.5f, -.5f, -.5f}, {0.f, 1.f} },
-				VertexPT{ {-.5f, .5f, -.5f}, {0.f, 0.f} },
-				VertexPT{ {.5f, .5f, -.5f}, {1.f, 0.f} },
-				VertexPT{ {.5f, -.5f, -.5f}, {1.f, 1.f} },
-				VertexPT{ {-.5f, -.5f, .5f}, {1.f, 1.f} },
-				VertexPT{ {-.5f, .5f, .5f}, {1.f, 0.f} },
-				VertexPT{ {.5f, .5f, .5f}, {0.f, 0.f} },
-				VertexPT{ {.5f, -.5f, .5f}, {0.f, 1.f} },
-			};
-
-			std::array indices = {
-				static_cast<uint32_t>(0), // front face
-				static_cast<uint32_t>(1),
-				static_cast<uint32_t>(2),
-				static_cast<uint32_t>(2),
-				static_cast<uint32_t>(3),
-				static_cast<uint32_t>(0),
-
-				static_cast<uint32_t>(1), // left
-				static_cast<uint32_t>(0),
-				static_cast<uint32_t>(4),
-				static_cast<uint32_t>(4),
-				static_cast<uint32_t>(5),
-				static_cast<uint32_t>(1),
-
-				static_cast<uint32_t>(7), // right
-				static_cast<uint32_t>(3),
-				static_cast<uint32_t>(2),
-				static_cast<uint32_t>(2),
-				static_cast<uint32_t>(6),
-				static_cast<uint32_t>(7),
-
-				static_cast<uint32_t>(4), // behind
-				static_cast<uint32_t>(7),
-				static_cast<uint32_t>(6),
-				static_cast<uint32_t>(6),
-				static_cast<uint32_t>(5),
-				static_cast<uint32_t>(4),
-
-				static_cast<uint32_t>(1), // up
-				static_cast<uint32_t>(5),
-				static_cast<uint32_t>(6),
-				static_cast<uint32_t>(6),
-				static_cast<uint32_t>(2),
-				static_cast<uint32_t>(1),
-
-				static_cast<uint32_t>(7), // down
-				static_cast<uint32_t>(4),
-				static_cast<uint32_t>(0),
-				static_cast<uint32_t>(0),
-				static_cast<uint32_t>(3),
-				static_cast<uint32_t>(7),
-			};
-
-			cubeVertexBuffer = vk::Buffer::CreateVertexBuffer<VertexPT>(cmdPoolManager, frameTracker, "Cube Vertex Buffer", vulkanContext, vertices);
-			vulkanContext.SetObjectName(*cubeVertexBuffer);
-			cubeIndexBuffer = vk::Buffer::CreateIndexBuffer(cmdPoolManager, frameTracker, "Cube Index Buffer", vulkanContext, indices);
-			vulkanContext.SetObjectName(*cubeIndexBuffer);
+			auto [vb, ib] = asset::LoadMeshFromAsset("Assets/Models/rubber_duck/scene.mesh", vulkanContext, cmdPoolManager, frameTracker);
+			cubeVertexBuffer = std::move(vb);
+			cubeIndexBuffer = std::move(ib);
 
 			auto proj = math::PerspectiveYFlipped(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
 			viewProjMat = proj * glm::lookAt(glm::vec3{ 1.5f, -2.f, -5.f }, { 0.f, 0.f ,0.f }, { 0.f ,1.f, 0.f });
@@ -230,7 +167,7 @@ namespace sy
 						graphicsCmdBuffer->BindIndexBuffer(*cubeIndexBuffer);
 						graphicsCmdBuffer->PushConstants(*basicPipeline, VK_SHADER_STAGE_ALL_GRAPHICS, 0, sizeof(PushConstants), &pushConstants);
 
-						graphicsCmdBuffer->DrawIndexed(36, 1, 0, 0, 0);
+						graphicsCmdBuffer->DrawIndexed(33216, 1, 0, 0, 0);
 					}
 					graphicsCmdBuffer->EndRendering();
 

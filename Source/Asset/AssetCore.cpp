@@ -8,7 +8,7 @@ namespace sy
 		bool SaveBinary(const std::string_view path, const Asset& asset)
 		{
 			std::ofstream outFileStream;
-			outFileStream.open(path, std::ios::binary | std::ios::out);
+			outFileStream.open(path, std::ios::binary | std::ios::out | std::ios::trunc);
 
 			outFileStream.write(asset.Identifier, LengthOfArray(asset.Identifier));
 

@@ -10,6 +10,13 @@
  * 4. Compressed Index data
  */
 
+namespace sy::vk
+{
+	class VulkanContext;
+	class CommandPoolManager;
+	class FrameTracker;
+}
+
 namespace sy::asset
 {
 
@@ -68,4 +75,6 @@ namespace sy::asset
 
 	bool ConvertMesh(const fs::path& input);
 	bool ConvertMesh(const fs::path& input, const fs::path& output);
+
+	std::pair<std::unique_ptr<vk::Buffer>, std::unique_ptr<vk::Buffer>> LoadMeshFromAsset(std::string_view assetPath, const vk::VulkanContext& vulkanContext, vk::CommandPoolManager& cmdPoolManager, const vk::FrameTracker& frameTracker);
 }
