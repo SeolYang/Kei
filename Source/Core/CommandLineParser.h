@@ -18,7 +18,7 @@ namespace sy
 	private:
 		fs::path executablePath;
 		fs::path assetPath;
-		bool bShouldConvertAssets;
+		bool bShouldConvertAssets = false;
 
 	};
 }

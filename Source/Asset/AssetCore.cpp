@@ -28,7 +28,7 @@ namespace sy
 			return true;
 		}
 
-		std::optional<Asset> LoadBinary(const std::string_view path)
+		std::optional<Asset> LoadBinary(const std::string_view path, const uint32_t version, const bool bIgnoreAssetVersionCheck)
 		{
 			std::ifstream inFileStream;
 			inFileStream.open(path, std::ios::binary);
@@ -43,6 +43,16 @@ namespace sy
 			Asset asset;
 			inFileStream.read(asset.Identifier, LengthOfArray(asset.Identifier));
 			inFileStream.read(reinterpret_cast<char*>(&asset.Version), sizeof(asset.Version));
+			const bool bAssetVersionMismatched = asset.Version != version;
+			if (!bIgnoreAssetVersionCheck && bAssetVersionMismatched)
+			{
+				SY_ASSERT(false, "Asset version mismatch: loaded asset version is {}, required version is {}", asset.Version, version);
+				return std::nullopt;
+			}
+			else if (bAssetVersionMismatched)
+			{
+				spdlog::warn("Asset version mismatch: loaded asset version is {}, required version is {}", asset.Version, version);
+			}
 
 			auto metadataSize = asset.Metadata.size();
 			inFileStream.read(reinterpret_cast<char*>(&metadataSize), sizeof(metadataSize));
@@ -55,6 +65,37 @@ namespace sy
 			inFileStream.read(asset.Blob.data(), blobSize);
 
 			return asset;
+		}
+
+		std::vector<char> LZ4(const std::span<const char> data)
+		{
+			const auto compressStagingSize = LZ4_compressBound(static_cast<int>(data.size()));
+			std::vector<char> comp;
+			comp.resize(compressStagingSize);
+
+			const auto compressedSize = LZ4_compress_default(data.data(), comp.data(), data.size(), comp.size());
+			comp.resize(compressedSize);
+			comp.shrink_to_fit();
+			return comp;
+		}
+
+		std::vector<char> None(const std::span<const char> data)
+		{
+			std::vector<char> comp;
+			comp.resize(data.size());
+			memcpy(comp.data(), data.data(), data.size());
+			return comp;
+		}
+
+		std::vector<char> CompressData(const ECompressionMode compressionMode, const std::span<const char> data)
+		{
+			switch (compressionMode)
+			{
+			case ECompressionMode::LZ4:
+				return LZ4(data);
+			case ECompressionMode::None:
+				return None(data);
+			}
 		}
 	}
 }

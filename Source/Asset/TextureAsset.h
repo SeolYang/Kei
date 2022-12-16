@@ -2,6 +2,13 @@
 #include <Core/Core.h>
 #include <Asset/AssetCore.h>
 
+/**
+ * Texture Asset structure
+ * 1. Asset metadata
+ * 2. Texture metadata
+ * 3. Compressed Texture data
+ */
+
 namespace sy::vk
 {
 	class VulkanContext;
@@ -20,8 +27,6 @@ namespace sy::asset
 		TextureCube,
 	};
 
-	VkFormat ExtensionToFormat(ETextureExtension extension);
-
 	struct TextureMetadata
 	{
 		uint64_t BufferSize = 0;
@@ -33,12 +38,36 @@ namespace sy::asset
 		std::string SrcPath;
 	};
 
-	std::optional<TextureMetadata> ParseMetadata(const Asset& asset);
-	std::optional<Asset> Pack(TextureMetadata& metadata, const void* pixelData);
-	std::vector<char> Unpack(const TextureMetadata& metadata, std::span<const char> src);
+	inline VkFormat ExtensionToFormat(ETextureExtension extension)
+	{
+		static const robin_hood::unordered_map<ETextureExtension, VkFormat> Table
+		{
+				{ ETextureExtension::HDR,		VK_FORMAT_R32G32B32_SFLOAT		},
+				{ ETextureExtension::PNG,		VK_FORMAT_R8G8B8A8_SRGB			},
+				{ ETextureExtension::JPEG,		VK_FORMAT_R8G8B8A8_SRGB			},
+				{ ETextureExtension::JPG,		VK_FORMAT_R8G8B8A8_SRGB			}
+		};
 
-	std::unique_ptr<vk::Texture2D> LoadTextureFromAsset(std::string_view assetPath, const vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager);
+		return Table.find(extension)->second;
+	}
+
+	inline bool CheckTextureCompressionSupport(const ECompressionMode compression)
+	{
+		static robin_hood::unordered_set<ECompressionMode> SupportedCompression
+		{
+			ECompressionMode::LZ4
+		};
+
+		return SupportedCompression.find(compression) != SupportedCompression.end();
+	}
+
+	std::optional<TextureMetadata> ParseTextureMetadata(const Asset& asset);
+	std::optional<Asset> Pack(const TextureMetadata& metadata, const void* pixelData);
+	std::vector<char> Unpack(const TextureMetadata& metadata, std::span<const char> src);
 
 	bool ConvertTexture2D(const fs::path& input);
 	bool ConvertTexture2D(const fs::path& input, const fs::path& output);
+
+	std::unique_ptr<vk::Texture2D> LoadTextureFromAsset(std::string_view assetPath, const vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager);
+
 }

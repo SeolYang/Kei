@@ -90,3 +90,6 @@
 
 /** Internal - Math */
 #include <Math/MathUtils.h>
+
+/** Internal - Render */
+#include <Render/Vertex.h>

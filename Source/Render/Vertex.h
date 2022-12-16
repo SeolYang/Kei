@@ -4,6 +4,7 @@
 
 namespace sy::render
 {
+	using IndexType = uint32_t;
 	enum class EVertexType
 	{
 		VertexPT,
@@ -37,6 +38,20 @@ namespace sy::render
 		glm::vec2 TexCoords;
 		glm::vec3 Normal;
 	};
+
+	inline size_t SizeOfVertex(const EVertexType type)
+	{
+		switch (type)
+		{
+		case EVertexType::VertexPT:
+			return sizeof(VertexPT);
+
+		case EVertexType::VertexPTN:
+			return sizeof(VertexPTN);
+		}
+
+		return 0;
+	}
 
 	template <>
 	inline vk::VertexInputBuilder BuildVertexInputLayout<VertexPTN>()
