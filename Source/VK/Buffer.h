@@ -42,10 +42,9 @@ namespace sy
 				return CreateBufferWithData(cmdPoolManager, frameTracker, name, vulkanContext, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, sizeof(Vertex) * vertices.size(), vertices.data());
 			}
 
-			static std::unique_ptr<Buffer> CreateIndexBuffer(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext, std::span<uint32_t> indices);
+			static std::unique_ptr<Buffer> CreateIndexBuffer(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext, std::span<const uint32_t> indices);
 
-		private:
-			static std::unique_ptr<Buffer> CreateBufferWithData(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext, VkBufferUsageFlags bufferUsage, size_t sizeOfData, void* data);
+			static std::unique_ptr<Buffer> CreateBufferWithData(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext, VkBufferUsageFlags bufferUsage, size_t sizeOfData, const void* data);
 
 		private:
 			VmaAllocation allocation;
