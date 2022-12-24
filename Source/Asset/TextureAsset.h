@@ -68,6 +68,6 @@ namespace sy::asset
 	bool ConvertTexture2D(const fs::path& input);
 	bool ConvertTexture2D(const fs::path& input, const fs::path& output);
 
-	std::unique_ptr<vk::Texture2D> LoadTextureFromAsset(std::string_view assetPath, const vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager);
+	std::unique_ptr<vk::Texture> LoadTexture2DFromAsset(std::string_view assetPath, const vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager);
 
 }

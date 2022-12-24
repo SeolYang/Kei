@@ -11,20 +11,15 @@ namespace sy
 		class Texture : public VulkanWrapper<VkImage>
 		{
 		public:
-			Texture(std::string_view name, const VulkanContext& vulkanContext, Extent3D<uint32_t> extent, uint32_t mipLevels, VkFormat format, VkImageUsageFlags usageFlags, VkImageLayout desiredLayout, VmaMemoryUsage memoryUsage, VkImageAspectFlags imageAspect = VK_IMAGE_ASPECT_COLOR_BIT, VkMemoryPropertyFlags requiredMemoryPropertyFlags = 0);
+			Texture(std::string_view name, const VulkanContext& vulkanContext, VkImageType type, VkFormat format, Extent3D<uint32_t> extent, uint32_t mipLevels, uint32_t arrayLayers, VkSampleCountFlags samples, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memoryUsage, VkMemoryPropertyFlags memoryProperties);
 			virtual ~Texture() override;
 
 			[[nodiscard]] auto GetExtent() const { return extent; }
-			[[nodiscard]] VkDescriptorImageInfo GetDescriptorInfo() const { return { sampler, view, desiredImageLayout }; }
-			[[nodiscard]] auto GetDesiredLayout() const { return desiredImageLayout; }
-			[[nodiscard]] auto GetImageView() const { return view; }
 			[[nodiscard]] auto GetMipLevels() const { return mipLevels; }
-			[[nodiscard]] auto GetSampler() const { return sampler; }
 			[[nodiscard]] auto GetFormat() const { return format; }
 			[[nodiscard]] auto GetMemoryUsage() const { return memoryUsage; }
 			[[nodiscard]] auto GetUsage() const { return imageUsage; }
-			[[nodiscard]] auto GetImageAspect() const { return imageAspect; }
-			[[nodiscard]] auto GetMemoryProperty() const { return memoryProperty; }
+			[[nodiscard]] auto GetMemoryProperties() const { return memoryProperties; }
 
 			Texture(const Texture&) = delete;
 			Texture(Texture&&) = delete;
@@ -32,31 +27,23 @@ namespace sy
 			Texture& operator=(const Texture&) = delete;
 			Texture& operator=(Texture&&) = delete;
 
+		public:
+			static std::unique_ptr<Texture> CreateTexture2D(std::string_view name, const VulkanContext& vulkanContext, Extent2D<uint32_t> extent, uint32_t mipLevels, VkFormat format, VkImageUsageFlags usages, VmaMemoryUsage memoryUsage, VkMemoryPropertyFlags memoryProperties = 0);
+			static std::unique_ptr<Texture> CreateTexture2DFromMemory(std::string_view name, const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, std::span<const char> data, Extent2D<uint32_t> extent, VkFormat format, VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			static std::unique_ptr<Texture> CreateTexture2DFromFile(std::string_view filePath, const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, VkFormat format, VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			static std::unique_ptr<Texture> CreateDepthStencil(std::string_view name, const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, Extent2D<uint32_t> extent);
+
 		protected:
 			VmaAllocation allocation = VK_NULL_HANDLE;
-			VkImageView view = VK_NULL_HANDLE;
-			VkSampler sampler = VK_NULL_HANDLE;
 
 		private:
 			Extent3D<uint32_t> extent;
 			const VkFormat format;
 			const uint32_t mipLevels;
 
-			const VkImageLayout desiredImageLayout;
 			const VkImageUsageFlags imageUsage;
 			const VmaMemoryUsage memoryUsage;
-			const VkImageAspectFlags imageAspect;
-			const VkMemoryPropertyFlags memoryProperty;
-
-		};
-
-		class Texture2D : public Texture
-		{
-		public:
-			Texture2D(std::string_view name, const VulkanContext& vulkanContext, Extent2D<uint32_t> extent, uint32_t mipLevels, VkFormat format, VkImageUsageFlags usageFlags, VkImageLayout desiredLayout, VmaMemoryUsage memoryUsage, VkImageAspectFlags imageAspect = VK_IMAGE_ASPECT_COLOR_BIT, VkMemoryPropertyFlags requiredMemoryPropertyFlags = 0);
-			static std::unique_ptr<Texture2D> LoadFromFile(std::string_view filePath, const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, VkFormat format, VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-			static std::unique_ptr<Texture2D> LoadFromMemory(std::string_view name, const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, std::span<const char> data, Extent2D<uint32_t> extent, VkFormat format, VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-			static std::unique_ptr<Texture2D> CreateDepthStencil(std::string_view name, const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, Extent2D<uint32_t> extent);
+			const VkMemoryPropertyFlags memoryProperties;
 
 		};
 	}

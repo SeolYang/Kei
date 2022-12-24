@@ -161,7 +161,7 @@ namespace sy::asset
 		return true;
 	}
 
-	std::unique_ptr<vk::Texture2D> LoadTextureFromAsset(std::string_view assetPath,
+	std::unique_ptr<vk::Texture> LoadTexture2DFromAsset(std::string_view assetPath,
 		const vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker,
 		vk::CommandPoolManager& cmdPoolManager)
 	{
@@ -183,7 +183,7 @@ namespace sy::asset
 		const auto& metadata = metadataOpt.value();
 		const std::vector<char> data = Unpack(metadata, loadedAsset.Blob);
 
-		return vk::Texture2D::LoadFromMemory(
+		return vk::Texture::CreateTexture2DFromMemory(
 			assetPath,
 			vulkanContext, frameTracker, cmdPoolManager,
 			data,

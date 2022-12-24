@@ -4,6 +4,8 @@
 #include <VK/VulkanContext.h>
 #include <VK/Buffer.h>
 #include <VK/Texture.h>
+#include <VK/TextureView.h>
+#include <VK/Sampler.h>
 
 namespace sy
 {
@@ -214,7 +216,7 @@ namespace sy
 			};
 		}
 
-		OffsetSlotPtr DescriptorManager::RequestDescriptor(const vk::Texture& texture, const bool bIsCombinedSampler)
+		OffsetSlotPtr DescriptorManager::RequestDescriptor(const vk::Texture& texture, const TextureView& view, const Sampler& sampler, const VkImageLayout currentLayout, const bool bIsCombinedSampler)
 		{
 			const auto descriptorType = vk::ImageUsageToDescriptorType(texture.GetUsage(), bIsCombinedSampler);
 			const auto descriptorBinding = ToUnderlying(descriptorType);
@@ -246,7 +248,13 @@ namespace sy
 					.pTexelBufferView = nullptr
 				};
 
-				imageInfos.emplace_back(texture.GetDescriptorInfo());
+				const VkDescriptorImageInfo descriptorImageInfo
+				{
+					.sampler = sampler.GetNativeHandle(),
+					.imageView = view.GetNativeHandle(),
+					.imageLayout = currentLayout
+				};
+				imageInfos.emplace_back(descriptorImageInfo);
 				imageWriteDescriptors.emplace_back(writeDescriptorSet);
 			}
 

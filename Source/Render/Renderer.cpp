@@ -13,6 +13,8 @@
 #include <VK/PipelineBuilder.h>
 #include <VK/LayoutCache.h>
 #include <VK/Texture.h>
+#include <VK/TextureView.h>
+#include <Vk/Sampler.h>
 #include <VK/Buffer.h>
 #include <VK/DescriptorManager.h>
 #include <VK/CommandPoolManager.h>
@@ -46,7 +48,8 @@ namespace sy
 		{
 			const auto windowExtent = window.GetExtent();
 
-			depthStencil = vk::Texture2D::CreateDepthStencil("Depth-Stencil buffer", vulkanContext, frameTracker, cmdPoolManager, windowExtent);
+			depthStencil = vk::Texture::CreateDepthStencil("Depth-Stencil buffer", vulkanContext, frameTracker, cmdPoolManager, windowExtent);
+			depthStencilView = std::make_unique<vk::TextureView>("DepthStencil view", vulkanContext, *depthStencil, VK_IMAGE_VIEW_TYPE_2D);
 
 			triVert = std::make_unique<vk::ShaderModule>("Triangle vertex shader", vulkanContext, "Assets/Shaders/bin/textured_tri_bindless.vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 			triFrag = std::make_unique<vk::ShaderModule>("Triangle fragment shader", vulkanContext, "Assets/Shaders/bin/textured_tri_bindless.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
@@ -74,8 +77,10 @@ namespace sy
 				transformBufferIndices[idx] = descriptorManager.RequestDescriptor(*transformBuffers[idx]);
 			}
 
-			loadedTexture = asset::LoadTextureFromAsset("Assets/Textures/djmax_1st_anv.tex", vulkanContext, frameTracker, cmdPoolManager);
-			loadedTextureDescriptor = descriptorManager.RequestDescriptor(*loadedTexture);
+			linearSampler = std::make_unique<vk::Sampler>("Linear Sampler", vulkanContext);
+			loadedTexture = asset::LoadTexture2DFromAsset("Assets/Textures/djmax_1st_anv.tex", vulkanContext, frameTracker, cmdPoolManager);
+			loadedTextureView = std::make_unique<vk::TextureView>("Loaded Texture View", vulkanContext, *loadedTexture, VK_IMAGE_VIEW_TYPE_2D);
+			loadedTextureDescriptor = descriptorManager.RequestDescriptor(*loadedTexture, *loadedTextureView, *linearSampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 			auto [vb, ib] = asset::LoadMeshFromAsset("Assets/Models/box_textured/BoxTextured.mesh", vulkanContext, cmdPoolManager, frameTracker);
 			cubeVertexBuffer = std::move(vb);
@@ -124,7 +129,7 @@ namespace sy
 					clearColorValue.float32[3] = 1.f;
 
 					std::array colorAttachmentInfos = { swapchain.GetColorAttachmentInfo(clearColorValue) };
-					std::array depthAttachmentInfos = { vk::DepthAttachmentInfo(*depthStencil) };
+					std::array depthAttachmentInfos = { vk::DepthAttachmentInfo(*depthStencilView) };
 
 					const VkRenderingInfo renderingInfo
 					{

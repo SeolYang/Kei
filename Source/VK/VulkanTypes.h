@@ -7,9 +7,7 @@ namespace sy
 	{
 		class Buffer;
 		class Texture;
-		class Texture2D;
-		class TextureCube;
-		class Texture3D;
+		class TextureView;
 
 		constexpr uint32_t MaxBindlessResourcesPerDescriptor = 2048;
 		constexpr size_t NumMaxInFlightFrames = 2;
@@ -442,6 +440,11 @@ namespace sy
 			};
 		}
 
-		VkRenderingAttachmentInfo DepthAttachmentInfo(const Texture2D& depthStencil, float depthClearValue = 1.f, uint8_t stencilClearValue = 0);
+		VkRenderingAttachmentInfo DepthAttachmentInfo(const TextureView& depthStencil, float depthClearValue = 1.f, uint8_t stencilClearValue = 0);
+
+		constexpr static bool IsDepthStencilFormat(const VkFormat format)
+		{
+			return (format >= VK_FORMAT_D16_UNORM) && (format <= VK_FORMAT_D32_SFLOAT_S8_UINT);
+		}
 	}
 }

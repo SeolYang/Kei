@@ -8,6 +8,8 @@ namespace sy
 		class VulkanContext;
 		class Buffer;
 		class Texture;
+		class TextureView;
+		class Sampler;
 		class FrameTracker;
 		class DescriptorManager
 		{
@@ -115,7 +117,7 @@ namespace sy
 			[[nodiscard]] VkDescriptorSet GetDescriptorSet() const { return descriptorPoolPackage.DescriptorSet; }
 
 			OffsetSlotPtr RequestDescriptor(const Buffer& buffer, bool bIsDynamic = false);
-			OffsetSlotPtr RequestDescriptor(const Texture& texture, bool bIsCombinedSampler = true);
+			OffsetSlotPtr RequestDescriptor(const Texture& texture, const TextureView& view, const Sampler& sampler, VkImageLayout currentLayout, bool bIsCombinedSampler = true);
 
 		private:
 			const VulkanContext& vulkanContext;

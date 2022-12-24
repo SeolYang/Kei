@@ -33,6 +33,9 @@ namespace sy
 				destroyFunction(vulkanContext, handle);
 			}
 
+			VulkanWrapper& operator=(const VulkanWrapper&) = delete;
+			VulkanWrapper& operator=(VulkanWrapper&&) = delete;
+
 			[[nodiscard]] Native_t GetNativeHandle() const { return handle; }
 			[[nodiscard]] VkObjectType GetType() const { return type; }
 

@@ -10,8 +10,10 @@ namespace sy
 		class ShaderModule;
 		class Pipeline;
 		class Buffer;
+		class Texture;
+		class TextureView;
+		class Sampler;
 		class Fence;
-		class Texture2D;
 		class PipelineLayoutCache;
 		class FrameTracker;
 		class CommandPoolManager;
@@ -46,12 +48,15 @@ namespace sy
 			std::unique_ptr<vk::ShaderModule> triFrag;
 			std::unique_ptr<vk::Pipeline> basicPipeline;
 
-			std::unique_ptr<vk::Texture2D> depthStencil;
+			std::unique_ptr<vk::Texture> depthStencil;
+			std::unique_ptr<vk::TextureView> depthStencilView;
 
 			std::array<std::unique_ptr<vk::Buffer>, vk::NumMaxInFlightFrames> transformBuffers;
 			std::array<OffsetSlotPtr, vk::NumMaxInFlightFrames> transformBufferIndices;
 
-			std::unique_ptr<vk::Texture2D> loadedTexture;
+			std::unique_ptr<vk::Sampler> linearSampler;
+			std::unique_ptr<vk::Texture> loadedTexture;
+			std::unique_ptr<vk::TextureView> loadedTextureView;
 			OffsetSlotPtr loadedTextureDescriptor;
 
 			std::unique_ptr<vk::Buffer> cubeVertexBuffer;
