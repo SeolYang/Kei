@@ -73,28 +73,18 @@ namespace sy
 				aspectMask, mipLevelCount, baseMipLevel, arrayLayerCount, baseArrayLayer);
 		}
 
-		void CommandBuffer::ChangeImageLayout(const VkPipelineStageFlags srcStage, const VkPipelineStageFlags dstStage, const VkImage image, const VkImageLayout oldLayout, const VkImageLayout newLayout, const VkImageAspectFlags aspectMask, const uint32_t mipLevelCount, const uint32_t baseMipLevel, const uint32_t arrayLayerCount, const uint32_t baseArrayLayer) const
-		{
-			SY_ASSERT(srcStage != dstStage, "Redundant image layout change detected.");
-			const auto [srcAccess, dstAccess] = QueryOptimalAccessFlagFromImageLayout(oldLayout, newLayout);
-			ImageMemoryBarrier(
-				srcStage, dstStage,
-				srcAccess, dstAccess, 
-				image,
-				oldLayout, newLayout,
-				aspectMask, mipLevelCount, baseMipLevel, arrayLayerCount, baseArrayLayer);
-		}
-
-		void CommandBuffer::ImageMemoryBarrier(const VkPipelineStageFlags srcStage, const VkPipelineStageFlags dstStage,
-			const VkAccessFlags srcAccess, const VkAccessFlags dstAccess, const VkImage image, const VkImageLayout oldLayout,
+		void CommandBuffer::ImageMemoryBarrier(const VkPipelineStageFlags2 srcStage, const VkPipelineStageFlags2 dstStage,
+			const VkAccessFlags2 srcAccess, const VkAccessFlags2 dstAccess, const VkImage image, const VkImageLayout oldLayout,
 			const VkImageLayout newLayout, const VkImageAspectFlags aspectMask, const uint32_t mipLevelCount, const uint32_t baseMipLevel,
 			const uint32_t arrayLayerCount, const uint32_t baseArrayLayer) const
 		{
-			const VkImageMemoryBarrier barrier
+			const VkImageMemoryBarrier2 barrier
 			{
-				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
 				.pNext = nullptr,
+				.srcStageMask = srcStage,
 				.srcAccessMask = srcAccess,
+				.dstStageMask = dstStage,
 				.dstAccessMask = dstAccess,
 				.oldLayout = oldLayout,
 				.newLayout = newLayout,
@@ -110,17 +100,25 @@ namespace sy
 				}
 			};
 
-			VkImageMemoryBarrier barriers[] = { barrier };
-			PipelineBarrier(srcStage, dstStage, {}, {}, barriers);
+			VkImageMemoryBarrier2 barriers[] = { barrier };
+			PipelineBarrier({}, {}, barriers);
 		}
 
-		void CommandBuffer::PipelineBarrier(VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, std::span<VkMemoryBarrier> memoryBarriers, std::span<VkBufferMemoryBarrier> bufferMemoryBarriers, std::span<VkImageMemoryBarrier> imageMemoryBarriers) const
+		void CommandBuffer::PipelineBarrier(std::span<VkMemoryBarrier2> memoryBarriers, std::span<VkBufferMemoryBarrier2> bufferMemoryBarriers, std::span<VkImageMemoryBarrier2> imageMemoryBarriers) const
 		{
-			vkCmdPipelineBarrier(handle,
-				srcStage, dstStage, 0,
-				static_cast<uint32_t>(memoryBarriers.size()), memoryBarriers.data(),
-				static_cast<uint32_t>(bufferMemoryBarriers.size()), bufferMemoryBarriers.data(),
-				static_cast<uint32_t>(imageMemoryBarriers.size()), imageMemoryBarriers.data());
+			const VkDependencyInfo dependencyInfo
+			{
+				.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+				.pNext = nullptr,
+				.memoryBarrierCount = static_cast<uint32_t>(memoryBarriers.size()),
+				.pMemoryBarriers = memoryBarriers.data(),
+				.bufferMemoryBarrierCount = static_cast<uint32_t>(bufferMemoryBarriers.size()),
+				.pBufferMemoryBarriers = bufferMemoryBarriers.data(),
+				.imageMemoryBarrierCount = static_cast<uint32_t>(imageMemoryBarriers.size()),
+				.pImageMemoryBarriers = imageMemoryBarriers.data()
+			};
+
+			vkCmdPipelineBarrier2(handle, &dependencyInfo);
 		}
 
 		void CommandBuffer::BindPipeline(const Pipeline& pipeline) const
@@ -207,60 +205,6 @@ namespace sy
 			};
 
 			vkCmdCopyBuffer(handle, srcBuffer.GetNativeHandle(), dstBuffer.GetNativeHandle(), 1, &bufferCopy);
-		}
-
-		std::pair<VkAccessFlags, VkAccessFlags>  CommandBuffer::QueryOptimalAccessFlagFromImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout)
-		{
-			VkAccessFlags srcAccess = VK_ACCESS_NONE;
-			VkAccessFlags dstAccess = VK_ACCESS_NONE;
-
-			switch (oldLayout)
-			{
-			default:
-				SY_ASSERT(true, "Unsupported image layout.");
-				break;
-			case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
-				srcAccess = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-				break;
-			case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
-				srcAccess = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-			case VK_IMAGE_LAYOUT_PREINITIALIZED:
-				srcAccess = VK_ACCESS_HOST_WRITE_BIT;
-			case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-				srcAccess = VK_ACCESS_SHADER_READ_BIT;
-			case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
-				srcAccess = VK_ACCESS_TRANSFER_READ_BIT;
-			case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
-				srcAccess = VK_ACCESS_TRANSFER_WRITE_BIT;
-			}
-
-			switch (newLayout)
-			{
-			default:
-				SY_ASSERT(true, "Unsupported image layout.");
-				break;
-			case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
-				dstAccess = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-				break;
-			case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
-				dstAccess = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-				break;
-			case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-				if (srcAccess == VK_ACCESS_NONE)
-				{
-					srcAccess = VK_ACCESS_HOST_READ_BIT | VK_ACCESS_HOST_WRITE_BIT;
-				}
-				dstAccess = VK_ACCESS_SHADER_READ_BIT;
-				break;
-			case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
-				dstAccess = VK_ACCESS_TRANSFER_READ_BIT;
-				break;
-			case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
-				dstAccess = VK_ACCESS_TRANSFER_WRITE_BIT;
-				break;
-			}
-
-			return { srcAccess, dstAccess };
 		}
 	}
 }

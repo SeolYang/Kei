@@ -82,11 +82,9 @@ namespace sy
 
 			transferCmdBuffer->Begin();
 			{
-				std::array transferTexBarrier = { vk::ImageMemoryBarrier(0, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, newTexture->GetNativeHandle(), vk::ImageSubresourceRange()) };
-				transferCmdBuffer->PipelineBarrier(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, {}, {}, transferTexBarrier);
+				transferCmdBuffer->ChangeImageAccessPattern(vk::EAccessPattern::None, vk::EAccessPattern::TransferWrite, newTexture->GetNativeHandle(), VK_IMAGE_ASPECT_COLOR_BIT);
 				transferCmdBuffer->CopyBufferToImageSimple(*stagingBuffer, *newTexture);
-				std::array readableTexBarrier = { vk::ImageMemoryBarrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, newTexture->GetNativeHandle(), vk::ImageSubresourceRange()) };
-				transferCmdBuffer->PipelineBarrier(VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, {}, {}, readableTexBarrier);
+				transferCmdBuffer->ChangeImageAccessPattern(vk::EAccessPattern::TransferWrite, vk::EAccessPattern::FragmentShaderReadSampledImage, newTexture->GetNativeHandle(), VK_IMAGE_ASPECT_COLOR_BIT);
 			}
 			transferCmdBuffer->End();
 
@@ -134,7 +132,7 @@ namespace sy
 
 			transferCmdBuffer->Begin();
 			{
-				transferCmdBuffer->ChangeImageLayout(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, res->GetNativeHandle(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT);
+				transferCmdBuffer->ChangeImageAccessPattern(vk::EAccessPattern::None, vk::EAccessPattern::DepthStencilAttachmentWrite, res->GetNativeHandle(), VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT);
 			}
 			transferCmdBuffer->End();
 
