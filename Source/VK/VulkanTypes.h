@@ -443,31 +443,37 @@ namespace sy
 			VertexBuffer,
 
 			VertexShaderReadUniformBuffer,
+			VertexShaderReadStorageBuffer,
 			VertexShaderReadSampledImage,
 			VertexShaderReadUniformTexelBuffer,
 			VertexShaderReadGeneral,
 
 			TessellationControlShaderReadUniformBuffer,
+			TessellationControlShaderReadStorageBuffer,
 			TessellationControlShaderReadSampledImage,
 			TessellationControlShaderReadUniformTexelBuffer,
 			TessellationControlShaderReadGeneral,
 
 			TessellationEvaluationShaderReadUniformBuffer,
+			TessellationEvaluationShaderReadStorageBuffer,
 			TessellationEvaluationShaderReadSampledImage,
 			TessellationEvaluationShaderReadUniformTexelBuffer,
 			TessellationEvaluationShaderReadGeneral,
 
 			GeometryShaderReadUniformBuffer,
+			GeometryShaderReadStorageBuffer,
 			GeometryShaderReadSampledImage,
 			GeometryShaderReadUniformTexelBuffer,
 			GeometryShaderReadGeneral,
 
 			TaskShaderReadUniformBuffer,
+			TaskShaderReadStorageBuffer,
 			TaskShaderReadSampledImage,
 			TaskShaderReadUniformTexelBuffer,
 			TaskShaderReadGeneral,
 
 			MeshShaderReadUniformBuffer,
+			MeshShaderReadStorageBuffer,
 			MeshShaderReadSampledImage,
 			MeshShaderReadUniformTexelBuffer,
 			MeshShaderReadGeneral,
@@ -477,6 +483,7 @@ namespace sy
 			ShadingRateRead,
 
 			FragmentShaderReadUniformBuffer,
+			FragmentShaderReadStorageBuffer,
 			FragmentShaderReadSampledImage,
 			FragmentShaderReadUniformTexelBuffer,
 			FragmentShaderReadColorInputAttachment,
@@ -488,11 +495,13 @@ namespace sy
 			DepthStencilAttachmentRead,
 
 			ComputeShaderReadUniformBuffer,
+			ComputeShaderReadStorageBuffer,
 			ComputeShaderReadSampledImage,
 			ComputeShaderReadUniformTexelBuffer,
 			ComputeShaderReadGeneral,
 
 			AnyShaderReadUniformBuffer,
+			AnyShaderReadStorageBuffer,
 			AnyShaderReadUniformBufferOrVertexBuffer,
 			AnyShaderReadSampledImage,
 			AnyShaderReadUniformTexelBuffer,
@@ -562,7 +571,12 @@ namespace sy
 			case EAccessPattern::VertexShaderReadUniformBuffer:
 				return { VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
 
+			case EAccessPattern::VertexShaderReadStorageBuffer:
+				return { VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
 			case EAccessPattern::VertexShaderReadSampledImage:
+				return { VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
 			case EAccessPattern::VertexShaderReadUniformTexelBuffer:
 				return { VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
@@ -572,7 +586,12 @@ namespace sy
 			case EAccessPattern::TessellationControlShaderReadUniformBuffer:
 				return { VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
 
+			case EAccessPattern::TessellationControlShaderReadStorageBuffer:
+				return { VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
 			case EAccessPattern::TessellationControlShaderReadSampledImage:
+				return { VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
 			case EAccessPattern::TessellationControlShaderReadUniformTexelBuffer:
 				return { VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
@@ -582,7 +601,12 @@ namespace sy
 			case EAccessPattern::TessellationEvaluationShaderReadUniformBuffer:
 				return { VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
 
+			case EAccessPattern::TessellationEvaluationShaderReadStorageBuffer:
+				return { VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
 			case EAccessPattern::TessellationEvaluationShaderReadSampledImage:
+				return { VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
 			case EAccessPattern::TessellationEvaluationShaderReadUniformTexelBuffer:
 				return { VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
@@ -592,7 +616,12 @@ namespace sy
 			case EAccessPattern::GeometryShaderReadUniformBuffer:
 				return { VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
 
+			case EAccessPattern::GeometryShaderReadStorageBuffer:
+				return { VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
 			case EAccessPattern::GeometryShaderReadSampledImage:
+				return { VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
 			case EAccessPattern::GeometryShaderReadUniformTexelBuffer:
 				return { VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
@@ -602,7 +631,12 @@ namespace sy
 			case EAccessPattern::TaskShaderReadUniformBuffer:
 				return { VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_NV, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
 
+			case EAccessPattern::TaskShaderReadStorageBuffer:
+				return { VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_NV, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
 			case EAccessPattern::TaskShaderReadSampledImage:
+				return { VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_NV, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
 			case EAccessPattern::TaskShaderReadUniformTexelBuffer:
 				return { VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_NV, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
@@ -612,7 +646,12 @@ namespace sy
 			case EAccessPattern::MeshShaderReadUniformBuffer:
 				return { VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_NV, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
 
+			case EAccessPattern::MeshShaderReadStorageBuffer:
+				return { VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_NV, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
 			case EAccessPattern::MeshShaderReadSampledImage:
+				return { VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_NV, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
 			case EAccessPattern::MeshShaderReadUniformTexelBuffer:
 				return { VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_NV, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
@@ -631,7 +670,12 @@ namespace sy
 			case EAccessPattern::FragmentShaderReadUniformBuffer:
 				return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
 
+			case EAccessPattern::FragmentShaderReadStorageBuffer:
+				return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
 			case EAccessPattern::FragmentShaderReadSampledImage:
+				return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT_KHR, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
 			case EAccessPattern::FragmentShaderReadUniformTexelBuffer:
 				return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
@@ -656,7 +700,12 @@ namespace sy
 			case EAccessPattern::ComputeShaderReadUniformBuffer:
 				return { VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
 
+			case EAccessPattern::ComputeShaderReadStorageBuffer:
+				return { VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
 			case EAccessPattern::ComputeShaderReadSampledImage:
+				return { VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
 			case EAccessPattern::ComputeShaderReadUniformTexelBuffer:
 				return { VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
@@ -667,6 +716,8 @@ namespace sy
 				return { VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
 
 			case EAccessPattern::AnyShaderReadSampledImage:
+				return { VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
 			case EAccessPattern::AnyShaderReadUniformTexelBuffer:
 				return { VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 

@@ -99,7 +99,7 @@ namespace sy
 		{
 			BeginFrame();
 			{
-				elapsedTime += 0.01633333f; // hard-coded
+				elapsedTime += 0.01633333f; // hard-coded delta time
 				const auto& renderFence = frameTracker.GetCurrentInFlightRenderFence();
 				auto& renderSemaphore = frameTracker.GetCurrentInFlightRenderSemaphore();
 				auto& presentSemaphore = frameTracker.GetCurrentInFlightPresentSemaphore();
