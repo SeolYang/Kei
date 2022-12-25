@@ -88,7 +88,7 @@
 #include <Core/Types.h>
 #include <Core/UniqueHandle.h>
 #include <Core/Extent.h>
-#include <Core/TellusAssert.h>
+#include <Core/HitoriAssert.h>
 #include <Core/Pool.hpp>
 #include <Core/Timer.h>
 #include <Core/Utils.h>

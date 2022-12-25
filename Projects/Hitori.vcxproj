@@ -60,8 +60,8 @@
     <ClInclude Include="..\Source\Core\Context.h" />
     <ClInclude Include="..\Source\Core\Core.h" />
     <ClInclude Include="..\Source\Core\Extent.h" />
+    <ClInclude Include="..\Source\Core\HitoriAssert.h" />
     <ClInclude Include="..\Source\Core\Pool.hpp" />
-    <ClInclude Include="..\Source\Core\TellusAssert.h" />
     <ClInclude Include="..\Source\Core\Timer.h" />
     <ClInclude Include="..\Source\Core\Types.h" />
     <ClInclude Include="..\Source\Core\UniqueHandle.h" />
@@ -69,6 +69,7 @@
     <ClInclude Include="..\Source\Core\Window.h" />
     <ClInclude Include="..\Source\Math\MathUtils.h" />
     <ClInclude Include="..\Source\Render\Renderer.h" />
+    <ClInclude Include="..\Source\Render\RenderGraph.h" />
     <ClInclude Include="..\Source\Render\Vertex.h" />
     <ClInclude Include="..\Source\VK\Buffer.h" />
     <ClInclude Include="..\Source\VK\CommandBuffer.h" />
