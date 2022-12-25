@@ -227,6 +227,7 @@ namespace sy
 				.add_required_extension(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME)
 				.add_required_extension(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
 				.add_required_extension(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME)
+				.add_required_extension(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME)
 				.select()
 				.value();
 
@@ -268,10 +269,17 @@ namespace sy
 				.runtimeDescriptorArray = VK_TRUE,
 			};
 
+			VkPhysicalDeviceSynchronization2Features synchronization2Features
+			{
+				.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES,
+				.pNext = nullptr,
+				.synchronization2 = true
+			};
 
 			auto vkbDeviceRes =
 				deviceBuilder.add_pNext(&dynamicRenderingFeatures)
 				.add_pNext(&descriptorIndexingFeatures)
+				.add_pNext(&synchronization2Features)
 				.build();
 			SY_ASSERT(vkbDeviceRes.has_value(), "Failed to create device using GPU {}.", gpuName);
 			auto& vkbDevice = vkbDeviceRes.value();

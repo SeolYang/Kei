@@ -59,10 +59,37 @@ namespace sy
 			vkCmdEndRendering(handle);
 		}
 
-		void CommandBuffer::ChangeImageLayout(VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask, uint32_t mipLevelCount, uint32_t baseMipLevel, uint32_t arrayLayerCount, uint32_t baseArrayLayer) const
+		void CommandBuffer::ChangeImageAccessPattern(const EAccessPattern srcAccessPattern, const EAccessPattern dstAccessPattern,
+			const VkImage image, const VkImageAspectFlags aspectMask, const uint32_t mipLevelCount, const uint32_t baseMipLevel,
+			const uint32_t arrayLayerCount, const uint32_t baseArrayLayer) const
+		{
+			const AccessPattern srcAccess = QueryAccessPattern(srcAccessPattern);
+			const AccessPattern dstAccess = QueryAccessPattern(dstAccessPattern);
+			ImageMemoryBarrier(
+				srcAccess.PipelineStage, dstAccess.PipelineStage,
+				srcAccess.Access, dstAccess.Access, 
+				image,
+				srcAccess.ImageLayout, dstAccess.ImageLayout, 
+				aspectMask, mipLevelCount, baseMipLevel, arrayLayerCount, baseArrayLayer);
+		}
+
+		void CommandBuffer::ChangeImageLayout(const VkPipelineStageFlags srcStage, const VkPipelineStageFlags dstStage, const VkImage image, const VkImageLayout oldLayout, const VkImageLayout newLayout, const VkImageAspectFlags aspectMask, const uint32_t mipLevelCount, const uint32_t baseMipLevel, const uint32_t arrayLayerCount, const uint32_t baseArrayLayer) const
 		{
 			SY_ASSERT(srcStage != dstStage, "Redundant image layout change detected.");
 			const auto [srcAccess, dstAccess] = QueryOptimalAccessFlagFromImageLayout(oldLayout, newLayout);
+			ImageMemoryBarrier(
+				srcStage, dstStage,
+				srcAccess, dstAccess, 
+				image,
+				oldLayout, newLayout,
+				aspectMask, mipLevelCount, baseMipLevel, arrayLayerCount, baseArrayLayer);
+		}
+
+		void CommandBuffer::ImageMemoryBarrier(const VkPipelineStageFlags srcStage, const VkPipelineStageFlags dstStage,
+			const VkAccessFlags srcAccess, const VkAccessFlags dstAccess, const VkImage image, const VkImageLayout oldLayout,
+			const VkImageLayout newLayout, const VkImageAspectFlags aspectMask, const uint32_t mipLevelCount, const uint32_t baseMipLevel,
+			const uint32_t arrayLayerCount, const uint32_t baseArrayLayer) const
+		{
 			const VkImageMemoryBarrier barrier
 			{
 				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
