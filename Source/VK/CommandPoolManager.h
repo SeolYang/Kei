@@ -9,16 +9,11 @@ namespace sy
 		class CommandPool;
 		class CommandBuffer;
 		class FrameTracker;
-		class CommandPoolManager
+		class CommandPoolManager final : public NonCopyable
 		{
 		public:
 			CommandPoolManager(const VulkanContext& vulkanContext, const FrameTracker& frameTracker);
-			~CommandPoolManager();
-
-			CommandPoolManager(const CommandPoolManager&) = delete;
-			CommandPoolManager(CommandPoolManager&&) = delete;
-			CommandPoolManager& operator=(const CommandPoolManager&) = delete;
-			CommandPoolManager& operator=(CommandPoolManager&&) = delete;
+			virtual ~CommandPoolManager() override;
 
 			[[nodiscard]] CommandPool& RequestCommandPool(EQueueType queueType);
 

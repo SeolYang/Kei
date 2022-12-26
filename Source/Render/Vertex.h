@@ -65,7 +65,7 @@ namespace sy::render
 		return builder;
 	}
 
-	inline vk::VertexInputBuilder BuildVertexInputLayout(const EVertexType type)
+	inline std::optional<vk::VertexInputBuilder> BuildVertexInputLayout(const EVertexType type)
 	{
 		switch (type)
 		{
@@ -74,9 +74,8 @@ namespace sy::render
 
 		case EVertexType::VertexPTN:
 			return BuildVertexInputLayout<VertexPTN>();
-
-		default:
-			return {};
 		}
+
+		return std::nullopt;
 	}
 }

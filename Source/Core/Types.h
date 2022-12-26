@@ -41,5 +41,16 @@ namespace sy
 
 	private:
 		std::string name;
+
+	};
+
+	class NonCopyable
+	{
+	public:
+		NonCopyable() = default;
+		virtual ~NonCopyable() = default;
+		NonCopyable(const NonCopyable&) = delete;
+		NonCopyable& operator=(const NonCopyable) = delete;
+
 	};
 }

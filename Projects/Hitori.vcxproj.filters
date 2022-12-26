@@ -129,6 +129,9 @@
     <ClCompile Include="..\Source\VK\Sampler.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Render\RenderPass.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\GameInstance.h">
@@ -256,6 +259,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\Core\HitoriAssert.h">
       <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\RenderPass.h">
+      <Filter>Source\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -125,7 +125,7 @@ namespace sy::asset
 		return ConvertMesh(input, newOutputPath);
 	}
 
-	size_t ProcessStaticMesh(const aiScene& scene, std::vector<char>& vertices, std::vector<render::IndexType>& indices)
+	uint32_t ProcessStaticMesh(const aiScene& scene, std::vector<char>& vertices, std::vector<render::IndexType>& indices)
 	{
 		std::vector<render::VertexPTN> mergedVertices;
 
@@ -150,7 +150,7 @@ namespace sy::asset
 		}
 
 		vertices = ToBytes<render::VertexPTN>(mergedVertices);
-		return mergedVertices.size();
+		return static_cast<uint32_t>(mergedVertices.size());
 	}
 
 	size_t ProcessSkeletalMesh(const aiScene& scene, std::vector<char>& vertices, std::vector<render::IndexType>& indices)
@@ -209,7 +209,7 @@ namespace sy::asset
 			metadata.MeshType = EMeshType::Static;
 		}
 
-		metadata.Indices = indices.size();
+		metadata.Indices = static_cast<uint32_t>(indices.size());
 
 		const auto newAssetOpt = Pack(metadata, vertices.data(), indices.data());
 		if (!newAssetOpt.has_value())

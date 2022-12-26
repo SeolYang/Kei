@@ -23,7 +23,7 @@ namespace sy
 	class Window;
 	namespace render
 	{
-		class Renderer
+		class Renderer final : public NonCopyable
 		{
 		public:
 			Renderer(const Window& window, vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager);

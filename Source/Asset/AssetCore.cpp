@@ -73,7 +73,7 @@ namespace sy
 			std::vector<char> comp;
 			comp.resize(compressStagingSize);
 
-			const auto compressedSize = LZ4_compress_default(data.data(), comp.data(), data.size(), comp.size());
+			const auto compressedSize = LZ4_compress_default(data.data(), comp.data(), static_cast<int>(data.size()), static_cast<int>(comp.size()));
 			comp.resize(compressedSize);
 			comp.shrink_to_fit();
 			return comp;
@@ -93,9 +93,9 @@ namespace sy
 			{
 			case ECompressionMode::LZ4:
 				return CompressLZ4(data);
-			case ECompressionMode::None:
-				return CompressNone(data);
 			}
+
+			return CompressNone(data);
 		}
 
 		std::vector<char> UncompressLZ4(const std::span<const char> compressedData, const size_t dataSize)

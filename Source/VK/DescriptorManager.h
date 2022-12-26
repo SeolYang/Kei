@@ -11,7 +11,7 @@ namespace sy
 		class TextureView;
 		class Sampler;
 		class FrameTracker;
-		class DescriptorManager
+		class DescriptorManager : public NonCopyable
 		{
 		public:
 			struct DescriptorPoolSize
@@ -102,13 +102,7 @@ namespace sy
 
 		public:
 			DescriptorManager(const VulkanContext& vulkanContext, const FrameTracker& frameTracker);
-			~DescriptorManager();
-
-			DescriptorManager(const DescriptorManager&) = delete;
-			DescriptorManager(DescriptorManager&&) = delete;
-
-			DescriptorManager& operator=(const DescriptorManager&) = delete;
-			DescriptorManager& operator=(DescriptorManager&&) = delete;
+			virtual ~DescriptorManager() override;
 
 			void BeginFrame();
 			void EndFrame();

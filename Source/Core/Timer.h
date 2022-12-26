@@ -3,18 +3,9 @@
 
 namespace sy
 {
-    class Timer
+    class Timer final : public NonCopyable
     {
     public:
-        Timer() noexcept = default;
-        ~Timer() = default;
-
-        Timer(const Timer&) = default;
-        Timer(Timer&&) noexcept = default;
-
-        Timer& operator=(const Timer&) = default;
-        Timer& operator=(Timer&&) noexcept = default;
-
         void Startup() noexcept
         {
             Begin();

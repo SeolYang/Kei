@@ -19,17 +19,11 @@ namespace sy
 	class CommandLineParser;
 	class Window;
 	class GameInstance;
-	class Context
+	class Context final : public NonCopyable
 	{
 	public:
 		Context(int argc, char** argv);
-		Context(const Context&) = delete;
-		Context(Context&&) = default;
-
-		~Context();
-
-		Context& operator=(const Context&) = delete;
-		Context& operator=(Context&&) = default;
+		virtual ~Context() override;
 
 		void Run();
 

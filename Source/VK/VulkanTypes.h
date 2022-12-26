@@ -152,7 +152,7 @@ namespace sy
 			}
 		}
 
-		constexpr static size_t ToByteSize(const VkFormat format)
+		constexpr static uint8_t ToByteSize(const VkFormat format)
 		{
 			switch (format)
 			{
@@ -287,7 +287,7 @@ namespace sy
 			}
 		}
 
-		constexpr static size_t ToNumberOfComponents(const VkFormat format)
+		constexpr static uint8_t ToNumberOfComponents(const VkFormat format)
 		{
 			switch (format)
 			{

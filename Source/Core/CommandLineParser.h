@@ -3,7 +3,7 @@
 
 namespace sy
 {
-	class CommandLineParser
+	class CommandLineParser final : public NonCopyable
 	{
 	public:
 		CommandLineParser(int argc, char** argv);
