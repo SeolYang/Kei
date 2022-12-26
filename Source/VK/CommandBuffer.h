@@ -34,7 +34,9 @@ namespace sy
 			void BindPipeline(const Pipeline& pipeline) const;
 			void BindDescriptorSet(VkDescriptorSet descriptorSet, const Pipeline& pipeline) const;
 			void BindVertexBuffers(uint32_t firstBinding, std::span<CRef<Buffer>> buffers, std::span<size_t> offsets) const;
+			void BindVertexBuffers(uint32_t firstBinding, std::span<VkBuffer> buffers, std::span<size_t> offsets) const;
 			void BindIndexBuffer(const Buffer& indexBuffer, size_t offset = 0) const;
+			void BindIndexBuffer(VkBuffer indexBuffer, size_t offset = 0) const;
 
 			void PushConstants(const Pipeline& pipeline, VkShaderStageFlags shaderStageFlags, uint32_t offset, uint32_t size, const void* values) const;
 

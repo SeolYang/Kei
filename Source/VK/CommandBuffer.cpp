@@ -143,16 +143,26 @@ namespace sy
 					return buffer.GetNativeHandle();
 				});
 
-			vkCmdBindVertexBuffers(handle, firstBinding, static_cast<uint32_t>(handles.size()), handles.data(), offsets.data());
+			BindVertexBuffers(firstBinding, handles, offsets);
+		}
+
+		void CommandBuffer::BindVertexBuffers(const uint32_t firstBinding, const std::span<VkBuffer> buffers, const std::span<size_t> offsets) const
+		{
+			vkCmdBindVertexBuffers(handle, firstBinding, static_cast<uint32_t>(buffers.size()), buffers.data(), offsets.data());
 		}
 
 		void CommandBuffer::BindIndexBuffer(const Buffer& indexBuffer, const size_t offset) const
 		{
-			vkCmdBindIndexBuffer(handle, indexBuffer.GetNativeHandle(), offset, VK_INDEX_TYPE_UINT32);
+			BindIndexBuffer(indexBuffer.GetNativeHandle(), offset);
+		}
+
+		void CommandBuffer::BindIndexBuffer(const VkBuffer indexBuffer, const size_t offset) const
+		{
+			vkCmdBindIndexBuffer(handle, indexBuffer, offset, VK_INDEX_TYPE_UINT32);
 		}
 
 		void CommandBuffer::PushConstants(const Pipeline& pipeline, const VkShaderStageFlags shaderStageFlags, const uint32_t offset,
-			const uint32_t size, const void* values) const
+		                                  const uint32_t size, const void* values) const
 		{
 			vkCmdPushConstants(handle, pipeline.GetLayout(), shaderStageFlags, offset, size, values);
 		}

@@ -23,6 +23,7 @@ namespace sy
 	class Window;
 	namespace render
 	{
+		class SimpleRenderPass;
 		class Renderer final : public NonCopyable
 		{
 		public:
@@ -51,16 +52,15 @@ namespace sy
 			std::unique_ptr<vk::Texture> depthStencil;
 			std::unique_ptr<vk::TextureView> depthStencilView;
 
-			std::array<std::unique_ptr<vk::Buffer>, vk::NumMaxInFlightFrames> transformBuffers;
-			std::array<OffsetSlotPtr, vk::NumMaxInFlightFrames> transformBufferIndices;
-
 			std::unique_ptr<vk::Sampler> linearSampler;
 			std::unique_ptr<vk::Texture> loadedTexture;
 			std::unique_ptr<vk::TextureView> loadedTextureView;
-			OffsetSlotPtr loadedTextureDescriptor;
+			vk::Descriptor loadedTextureDescriptor;
 
 			std::unique_ptr<vk::Buffer> cubeVertexBuffer;
 			std::unique_ptr<vk::Buffer> cubeIndexBuffer;
+
+			std::unique_ptr<SimpleRenderPass> renderPass;
 
 			glm::mat4 viewProjMat;
 			float elapsedTime;

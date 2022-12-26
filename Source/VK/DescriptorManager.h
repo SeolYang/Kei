@@ -11,7 +11,7 @@ namespace sy
 		class TextureView;
 		class Sampler;
 		class FrameTracker;
-		class DescriptorManager : public NonCopyable
+		class DescriptorManager final : public NonCopyable
 		{
 		public:
 			struct DescriptorPoolSize
@@ -110,8 +110,8 @@ namespace sy
 			[[nodiscard]] VkDescriptorSetLayout GetDescriptorSetLayout() const { return bindlessLayout; }
 			[[nodiscard]] VkDescriptorSet GetDescriptorSet() const { return descriptorPoolPackage.DescriptorSet; }
 
-			OffsetSlotPtr RequestDescriptor(const Buffer& buffer, bool bIsDynamic = false);
-			OffsetSlotPtr RequestDescriptor(const Texture& texture, const TextureView& view, const Sampler& sampler, VkImageLayout currentLayout, bool bIsCombinedSampler = true);
+			Descriptor RequestDescriptor(const Buffer& buffer, bool bIsDynamic = false);
+			Descriptor RequestDescriptor(const Texture& texture, const TextureView& view, const Sampler& sampler, VkImageLayout currentLayout, bool bIsCombinedSampler = true);
 
 		private:
 			const VulkanContext& vulkanContext;

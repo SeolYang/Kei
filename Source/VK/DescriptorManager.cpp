@@ -168,7 +168,7 @@ namespace sy
 			}
 		}
 
-		OffsetSlotPtr DescriptorManager::RequestDescriptor(const vk::Buffer& buffer, const bool bIsDynamic)
+		Descriptor DescriptorManager::RequestDescriptor(const vk::Buffer& buffer, const bool bIsDynamic)
 		{
 			const auto descriptorType = vk::BufferUsageToDescriptorType(buffer.GetUsage(), bIsDynamic);
 			const auto descriptorBinding = ToUnderlying(descriptorType);
@@ -216,7 +216,7 @@ namespace sy
 			};
 		}
 
-		OffsetSlotPtr DescriptorManager::RequestDescriptor(const vk::Texture& texture, const TextureView& view, const Sampler& sampler, const VkImageLayout currentLayout, const bool bIsCombinedSampler)
+		Descriptor DescriptorManager::RequestDescriptor(const vk::Texture& texture, const TextureView& view, const Sampler& sampler, const VkImageLayout currentLayout, const bool bIsCombinedSampler)
 		{
 			const auto descriptorType = vk::ImageUsageToDescriptorType(texture.GetUsage(), bIsCombinedSampler);
 			const auto descriptorBinding = ToUnderlying(descriptorType);

@@ -2,6 +2,7 @@
 #include <Core/Window.h>
 #include <Render/Renderer.h>
 #include <Render/Vertex.h>
+#include <Render/RenderPasses/SimpleRenderPass.h>
 #include <VK/VulkanContext.h>
 #include <VK/Fence.h>
 #include <VK/Semaphore.h>
@@ -27,17 +28,6 @@ namespace sy
 {
 	namespace render
 	{
-		struct TransformUniformBuffer
-		{
-			glm::mat4 modelViewProj;
-		};
-
-		struct PushConstants
-		{
-			int textureIndex;
-			int transformDataIndex;
-		};
-
 		Renderer::Renderer(const Window& window, vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager) :
 			window(window),
 			vulkanContext(vulkanContext),
@@ -71,12 +61,6 @@ namespace sy
 
 			basicPipeline = std::make_unique<vk::Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
-			for (size_t idx = 0; idx < vk::NumMaxInFlightFrames; ++idx)
-			{
-				transformBuffers[idx] = vk::Buffer::CreateUniformBuffer<TransformUniformBuffer>("TransformBuffer", vulkanContext);
-				transformBufferIndices[idx] = descriptorManager.RequestDescriptor(*transformBuffers[idx]);
-			}
-
 			linearSampler = std::make_unique<vk::Sampler>("Linear Sampler", vulkanContext);
 			loadedTexture = asset::LoadTexture2DFromAsset("Assets/Textures/djmax_1st_anv.tex", vulkanContext, frameTracker, cmdPoolManager);
 			loadedTextureView = std::make_unique<vk::TextureView>("Loaded Texture View", vulkanContext, *loadedTexture, VK_IMAGE_VIEW_TYPE_2D);
@@ -88,6 +72,8 @@ namespace sy
 
 			auto proj = math::PerspectiveYFlipped(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
 			viewProjMat = proj * glm::lookAt(glm::vec3{ 1.5f, 2.f, -5.f }, { 0.f, 0.f ,0.f }, { 0.f ,1.f, 0.f });
+
+			renderPass = std::make_unique<SimpleRenderPass>("Simple Render Pass", vulkanContext, descriptorManager, frameTracker, *basicPipeline);
 		}
 
 		Renderer::~Renderer()
@@ -100,94 +86,29 @@ namespace sy
 			BeginFrame();
 			{
 				elapsedTime += 0.01633333f; // hard-coded delta time
-				const auto& renderFence = frameTracker.GetCurrentInFlightRenderFence();
-				auto& renderSemaphore = frameTracker.GetCurrentInFlightRenderSemaphore();
-				auto& presentSemaphore = frameTracker.GetCurrentInFlightPresentSemaphore();
+				const auto& renderSemaphore = frameTracker.GetCurrentInFlightRenderSemaphore();
 				const size_t currentFrameIdx = frameTracker.GetCurrentFrameIndex();
 
-				const auto windowExtent = window.GetExtent();
-				auto& swapchain = vulkanContext.GetSwapchain();
-				const auto swapchainImage = swapchain.GetCurrentImage();
-				const auto swapchainImageView = swapchain.GetCurrentImageView();
+				const auto& swapchain = vulkanContext.GetSwapchain();
 
-				auto& graphicsCmdPool = cmdPoolManager.RequestCommandPool(vk::EQueueType::Graphics);
-				CRefVec<vk::CommandBuffer> graphicsCmdBufferBatch;
-				const auto graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Render Cmd Buffer");
-				graphicsCmdBufferBatch.emplace_back(*graphicsCmdBuffer);
-				graphicsCmdBuffer->Begin();
-				{
-					graphicsCmdBuffer->ChangeImageAccessPattern(vk::EAccessPattern::None, vk::EAccessPattern::ColorAttachmentWrite, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
+				VkClearColorValue clearColorValue;
+				clearColorValue.float32[0] = std::cos(static_cast<float>(currentFrameIdx) / 180.f) * 0.5f + 1.f;
+				clearColorValue.float32[1] = std::sin(static_cast<float>(currentFrameIdx) / 270.f) * 0.5f + 1.f;
+				clearColorValue.float32[2] = std::cos(static_cast<float>(currentFrameIdx) / 90.f) * 0.5f + 1.f;
+				clearColorValue.float32[3] = 1.f;
 
-					VkClearColorValue clearColorValue;
-					clearColorValue.float32[0] = std::cos(static_cast<float>(currentFrameIdx) / 180.f) * 0.5f + 1.f;
-					clearColorValue.float32[1] = std::sin(static_cast<float>(currentFrameIdx) / 270.f) * 0.5f + 1.f;
-					clearColorValue.float32[2] = std::cos(static_cast<float>(currentFrameIdx) / 90.f) * 0.5f + 1.f;
-					clearColorValue.float32[3] = 1.f;
+				renderPass->SetVertexBuffer(*cubeVertexBuffer);
+				renderPass->SetIndexBuffer(*cubeIndexBuffer);
+				renderPass->SetTextureDescriptor(loadedTextureDescriptor);
+				renderPass->SetWindowExtent(window.GetExtent());
+				renderPass->SetSwapchain(swapchain, clearColorValue);
+				renderPass->SetDepthStencilView(*depthStencilView);
 
-					std::array colorAttachmentInfos = { swapchain.GetColorAttachmentInfo(clearColorValue) };
-					std::array depthAttachmentInfos = { vk::DepthAttachmentInfo(*depthStencilView) };
+				const auto model = glm::rotate(glm::mat4(1.f), elapsedTime, { 0.f, 1.f, 0.f });
+				const TransformUniformBuffer uniformBuffer{ viewProjMat * model };
+				renderPass->UpdateUniformBuffer(uniformBuffer);
 
-					const VkRenderingInfo renderingInfo
-					{
-						.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR,
-						.pNext = nullptr,
-						.renderArea = VkRect2D
-						{
-							.offset = VkOffset2D{0, 0},
-							.extent = VkExtent2D{windowExtent.width, windowExtent.height},
-						},
-						.layerCount = 1,
-						.colorAttachmentCount = static_cast<uint32_t>(colorAttachmentInfos.size()),
-						.pColorAttachments = colorAttachmentInfos.data(),
-						.pDepthAttachment = depthAttachmentInfos.data(),
-						.pStencilAttachment = depthAttachmentInfos.data()
-					};
-
-					graphicsCmdBuffer->BeginRendering(renderingInfo);
-					{
-						// Rendering something here
-						graphicsCmdBuffer->BindPipeline(*basicPipeline);
-						graphicsCmdBuffer->BindDescriptorSet(descriptorManager.GetDescriptorSet(), *basicPipeline);
-
-						const auto& transformBuffer = *transformBuffers[frameTracker.GetCurrentInFlightFrameIndex()];
-						void* transformBufferMappedPtr = vulkanContext.Map(transformBuffer);
-						const auto model = glm::rotate(glm::mat4(1.f), elapsedTime, { 0.f, 1.f, 0.f });
-						const TransformUniformBuffer uniformBuffer{ viewProjMat * model };
-						memcpy(transformBufferMappedPtr, &uniformBuffer, sizeof(TransformUniformBuffer));
-						vulkanContext.Unmap(transformBuffer);
-
-						const PushConstants pushConstants
-						{
-							.textureIndex = static_cast<int>(loadedTextureDescriptor->Offset),
-							.transformDataIndex = static_cast<int>(transformBufferIndices[frameTracker.GetCurrentInFlightFrameIndex()]->Offset)
-						};
-
-						std::array<CRef<vk::Buffer>, 1> vertexBuffers = { *cubeVertexBuffer };
-						std::array offsets = { uint64_t() };
-						graphicsCmdBuffer->BindVertexBuffers(0, vertexBuffers, offsets);
-						graphicsCmdBuffer->BindIndexBuffer(*cubeIndexBuffer);
-						graphicsCmdBuffer->PushConstants(*basicPipeline, VK_SHADER_STAGE_ALL_GRAPHICS, 0, sizeof(PushConstants), &pushConstants);
-
-						graphicsCmdBuffer->DrawIndexed(36, 1, 0, 0, 0);
-					}
-					graphicsCmdBuffer->EndRendering();
-
-					graphicsCmdBuffer->ChangeImageAccessPattern(vk::EAccessPattern::ColorAttachmentWrite, vk::EAccessPattern::Present, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
-				}
-				graphicsCmdBuffer->End();
-
-				CRefVec<vk::Semaphore> waitSemaphores;
-				waitSemaphores.emplace_back(presentSemaphore);
-				CRefVec<vk::Semaphore> signalSemaphores;
-				signalSemaphores.emplace_back(renderSemaphore);
-
-				vulkanContext.SubmitTo(
-					vk::EQueueType::Graphics,
-					waitSemaphores,
-					graphicsCmdBufferBatch,
-					signalSemaphores,
-					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, renderFence);
-
+				renderPass->Render(cmdPoolManager);
 				vulkanContext.Present(swapchain, renderSemaphore);
 			}
 			EndFrame();

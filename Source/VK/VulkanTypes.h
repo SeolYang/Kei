@@ -9,6 +9,8 @@ namespace sy
 		class Texture;
 		class TextureView;
 
+		using Descriptor = OffsetSlotPtr;
+
 		constexpr uint32_t MaxBindlessResourcesPerDescriptor = 2048;
 		constexpr size_t NumMaxInFlightFrames = 2;
 
