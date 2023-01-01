@@ -260,9 +260,6 @@
     <ClInclude Include="..\Source\VK\Sampler.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Render\RenderGraph.h">
-      <Filter>Source\Render</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Core\HitoriAssert.h">
       <Filter>Source\Core</Filter>
     </ClInclude>

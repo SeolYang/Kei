@@ -248,8 +248,8 @@ namespace sy::asset
 		const std::vector<render::IndexType> indices = UnpackIndex(metadata, uncompressedData);
 
 		return {
-			vk::Buffer::CreateBufferWithData(cmdPoolManager, frameTracker, std::format("{}_Vertex", assetPath), vulkanContext, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, vertices.size(), vertices.data()),
-			vk::Buffer::CreateIndexBuffer(cmdPoolManager, frameTracker, std::format("{}_Index", assetPath), vulkanContext, indices)
+			vk::CreateBufferWithData(cmdPoolManager, frameTracker, std::format("{}_Vertex", assetPath), vulkanContext, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, vertices.size(), vertices.data()),
+			vk::CreateIndexBuffer(cmdPoolManager, frameTracker, std::format("{}_Index", assetPath), vulkanContext, indices)
 		};
 	}
 }

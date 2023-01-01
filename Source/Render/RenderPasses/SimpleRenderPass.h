@@ -25,9 +25,8 @@ namespace sy::render
 	public:
 		SimpleRenderPass(std::string_view name, const vk::VulkanContext& vulkanContext, vk::DescriptorManager& descriptorManager, const vk::FrameTracker& frameTracker, const vk::Pipeline& pipeline);
 
-		virtual void PreRender(vk::CommandPoolManager& cmdPoolManager) override {}
-		virtual void Render(vk::CommandPoolManager& cmdPoolManager) override;
-		virtual void PostRender(vk::CommandPoolManager& cmdPoolManager) override {}
+		virtual vk::ManagedCommandBuffer Render(vk::CommandPoolManager& cmdPoolManager) override;
+		virtual void UpdateBuffers() override;
 
 		void SetVertexBuffer(const vk::Buffer& vertexBuffer);
 		void SetIndexBuffer(const vk::Buffer& indexBuffer);
@@ -35,8 +34,7 @@ namespace sy::render
 		void SetWindowExtent(Extent2D<uint32_t> extent);
 		void SetSwapchain(const vk::Swapchain& swapchain, VkClearColorValue clearColorValue);
 		void SetDepthStencilView(const vk::TextureView& depthStencilView);
-
-		void UpdateUniformBuffer(TransformUniformBuffer buffer) const;
+		void SetTransformData(TransformUniformBuffer buffer);
 
 	private:
 		VkBuffer vertexBuffer;
@@ -50,6 +48,8 @@ namespace sy::render
 		VkImage swapchainImage;
 		VkRenderingAttachmentInfo swapchainAttachmentInfo;
 		VkRenderingAttachmentInfo depthAttachmentInfo;
+
+		TransformUniformBuffer transformData;
 
 	};
 }

@@ -45,7 +45,7 @@ namespace sy
 			VK_ASSERT(vkCreateCommandPool(vulkanContext.GetDevice(), &cmdPoolCreateInfo, nullptr, &handle), "Failed to create vulkan command queue from create info.");
 		}
 
-		CommandPool::CommandBufferAllocation CommandPool::RequestCommandBuffer(std::string_view name)
+		ManagedCommandBuffer CommandPool::RequestCommandBuffer(std::string_view name)
 		{
 			const auto allocatedSlot = offsetPool.Allocate();
 			const Deallocation deallocation

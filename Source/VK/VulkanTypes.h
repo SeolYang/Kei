@@ -10,6 +10,8 @@ namespace sy
 		class TextureView;
 
 		using Descriptor = OffsetSlotPtr;
+		class CommandBuffer;
+		using ManagedCommandBuffer = std::unique_ptr<CommandBuffer, std::function<void(CommandBuffer*)>>;
 
 		constexpr uint32_t MaxBindlessResourcesPerDescriptor = 2048;
 		constexpr size_t NumMaxInFlightFrames = 2;

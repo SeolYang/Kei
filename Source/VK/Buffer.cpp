@@ -55,14 +55,20 @@ namespace sy
 			vmaDestroyBuffer(vulkanContext.GetAllocator(), handle, allocation);
 		}
 
-		std::unique_ptr<Buffer> Buffer::CreateIndexBuffer(CommandPoolManager& cmdPoolManager,
-			const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext,
-			const std::span<const uint32_t> indices)
+		std::unique_ptr<Buffer> CreateStagingBuffer(std::string_view name, const VulkanContext& vulkanContext,
+			const size_t bufferSize)
+		{
+			return std::make_unique<Buffer>(name, vulkanContext, bufferSize, 0, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
+		}
+
+		std::unique_ptr<Buffer> CreateIndexBuffer(CommandPoolManager& cmdPoolManager,
+		                                          const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext,
+		                                          const std::span<const uint32_t> indices)
 		{
 			return CreateBufferWithData(cmdPoolManager, frameTracker, name, vulkanContext, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, sizeof(uint32_t) * indices.size(), indices.data());
 		}
 
-		std::unique_ptr<Buffer> Buffer::CreateBufferWithData(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker,
+		std::unique_ptr<Buffer> CreateBufferWithData(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker,
 			std::string_view name, const VulkanContext& vulkanContext, const VkBufferUsageFlags bufferUsage, size_t sizeOfData, const void* data)
 		{
 			auto newBuffer = std::make_unique<Buffer>(name, vulkanContext, sizeOfData, 0, bufferUsage | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY);

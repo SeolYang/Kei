@@ -27,12 +27,6 @@ namespace sy
 			Texture& operator=(const Texture&) = delete;
 			Texture& operator=(Texture&&) = delete;
 
-		public:
-			static std::unique_ptr<Texture> CreateTexture2D(std::string_view name, const VulkanContext& vulkanContext, Extent2D<uint32_t> extent, uint32_t mipLevels, VkFormat format, VkImageUsageFlags usages, VmaMemoryUsage memoryUsage, VkMemoryPropertyFlags memoryProperties = 0);
-			static std::unique_ptr<Texture> CreateTexture2DFromMemory(std::string_view name, const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, std::span<const char> data, Extent2D<uint32_t> extent, VkFormat format, VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-			static std::unique_ptr<Texture> CreateTexture2DFromFile(std::string_view filePath, const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, VkFormat format, VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-			static std::unique_ptr<Texture> CreateDepthStencil(std::string_view name, const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, Extent2D<uint32_t> extent);
-
 		protected:
 			VmaAllocation allocation = VK_NULL_HANDLE;
 
@@ -46,5 +40,11 @@ namespace sy
 			const VkMemoryPropertyFlags memoryProperties;
 
 		};
+
+		std::unique_ptr<Texture> CreateTexture2D(std::string_view name, const VulkanContext& vulkanContext, Extent2D<uint32_t> extent, uint32_t mipLevels, VkFormat format, VkImageUsageFlags usages, VmaMemoryUsage memoryUsage, VkMemoryPropertyFlags memoryProperties = 0);
+		std::unique_ptr<Texture> CreateTexture2DFromMemory(std::string_view name, const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, std::span<const char> data, Extent2D<uint32_t> extent, VkFormat format, VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		std::unique_ptr<Texture> CreateTexture2DFromFile(std::string_view filePath, const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, VkFormat format);
+		std::unique_ptr<Texture> CreateDepthStencil(std::string_view name, const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager, Extent2D<uint32_t> extent);
+
 	}
 }

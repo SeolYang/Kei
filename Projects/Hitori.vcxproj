@@ -71,7 +71,6 @@
     <ClInclude Include="..\Source\Core\Window.h" />
     <ClInclude Include="..\Source\Math\MathUtils.h" />
     <ClInclude Include="..\Source\Render\Renderer.h" />
-    <ClInclude Include="..\Source\Render\RenderGraph.h" />
     <ClInclude Include="..\Source\Render\RenderPass.h" />
     <ClInclude Include="..\Source\Render\RenderPasses\SimpleRenderPass.h" />
     <ClInclude Include="..\Source\Render\Vertex.h" />

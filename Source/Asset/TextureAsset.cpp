@@ -183,7 +183,7 @@ namespace sy::asset
 		const auto& metadata = metadataOpt.value();
 		const std::vector<char> data = Unpack(metadata, loadedAsset.Blob);
 
-		return vk::Texture::CreateTexture2DFromMemory(
+		return vk::CreateTexture2DFromMemory(
 			assetPath,
 			vulkanContext, frameTracker, cmdPoolManager,
 			data,

@@ -19,21 +19,19 @@ namespace sy::render
 	{
 		for (size_t idx = 0; idx < vk::NumMaxInFlightFrames; ++idx)
 		{
-			transformBuffers[idx] = vk::Buffer::CreateUniformBuffer<TransformUniformBuffer>("TransformBuffer", vulkanContext);
+			transformBuffers[idx] = vk::CreateUniformBuffer<TransformUniformBuffer>("TransformBuffer", vulkanContext);
 			transformBufferIndices[idx] = descriptorManager.RequestDescriptor(*transformBuffers[idx]);
 		}
 	}
 
-	void SimpleRenderPass::Render(vk::CommandPoolManager& cmdPoolManager)
+	vk::ManagedCommandBuffer SimpleRenderPass::Render(vk::CommandPoolManager& cmdPoolManager)
 	{
-		const auto& renderFence = frameTracker.GetCurrentInFlightRenderFence();
-		auto& renderSemaphore = frameTracker.GetCurrentInFlightRenderSemaphore();
-		auto& presentSemaphore = frameTracker.GetCurrentInFlightPresentSemaphore();
+		const auto& frameTracker = GetFrameTracker();
+		const auto& descriptorManager = GetDescriptorManager();
+		const auto& pipeline = GetPipeline();
 
 		auto& graphicsCmdPool = cmdPoolManager.RequestCommandPool(vk::EQueueType::Graphics);
-		CRefVec<vk::CommandBuffer> graphicsCmdBufferBatch;
-		const auto graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Render Cmd Buffer");
-		graphicsCmdBufferBatch.emplace_back(*graphicsCmdBuffer);
+		auto graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Render Cmd Buffer");
 		graphicsCmdBuffer->Begin();
 		{
 			graphicsCmdBuffer->ChangeImageAccessPattern(vk::EAccessPattern::None, vk::EAccessPattern::ColorAttachmentWrite, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
@@ -83,17 +81,17 @@ namespace sy::render
 		}
 		graphicsCmdBuffer->End();
 
-		CRefVec<vk::Semaphore> waitSemaphores;
-		waitSemaphores.emplace_back(presentSemaphore);
-		CRefVec<vk::Semaphore> signalSemaphores;
-		signalSemaphores.emplace_back(renderSemaphore);
+		return graphicsCmdBuffer;
+	}
 
-		vulkanContext.SubmitTo(
-			vk::EQueueType::Graphics,
-			waitSemaphores,
-			graphicsCmdBufferBatch,
-			signalSemaphores,
-			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, renderFence);
+	void SimpleRenderPass::UpdateBuffers()
+	{
+		const auto& vulkanContext = GetVulkanContext();
+		const auto& frameTracker = GetFrameTracker();
+		const auto& transformBuffer = *transformBuffers[frameTracker.GetCurrentInFlightFrameIndex()];
+		void* transformBufferMappedPtr = vulkanContext.Map(transformBuffer);
+		memcpy(transformBufferMappedPtr, &transformData, sizeof(TransformUniformBuffer));
+		vulkanContext.Unmap(transformBuffer);
 	}
 
 	void SimpleRenderPass::SetVertexBuffer(const vk::Buffer& vertexBuffer)
@@ -127,11 +125,8 @@ namespace sy::render
 		depthAttachmentInfo = vk::DepthAttachmentInfo(depthStencilView);
 	}
 
-	void SimpleRenderPass::UpdateUniformBuffer(TransformUniformBuffer buffer) const
+	void SimpleRenderPass::SetTransformData(const TransformUniformBuffer buffer)
 	{
-		const auto& transformBuffer = *transformBuffers[frameTracker.GetCurrentInFlightFrameIndex()];
-		void* transformBufferMappedPtr = vulkanContext.Map(transformBuffer);
-		memcpy(transformBufferMappedPtr, &buffer, sizeof(TransformUniformBuffer));
-		vulkanContext.Unmap(transformBuffer);
+		transformData = buffer;
 	}
 }

@@ -17,6 +17,10 @@ namespace sy
 	using RefSpan = std::span<Ref<T>>;
 	template <typename T>
 	using CRefSpan = std::span<CRef<T>>;
+	template <typename T, size_t C>
+	using RefArray = std::array<Ref<T>, C>;
+	template <typename T, size_t C>
+	using CRefArray = std::array<CRef<T>, C>;
 
 	using RWLock = std::unique_lock<std::shared_mutex>;
 	using ReadOnlyLock = std::shared_lock<std::shared_mutex>;

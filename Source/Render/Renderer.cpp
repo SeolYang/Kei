@@ -38,7 +38,7 @@ namespace sy
 		{
 			const auto windowExtent = window.GetExtent();
 
-			depthStencil = vk::Texture::CreateDepthStencil("Depth-Stencil buffer", vulkanContext, frameTracker, cmdPoolManager, windowExtent);
+			depthStencil = vk::CreateDepthStencil("Depth-Stencil buffer", vulkanContext, frameTracker, cmdPoolManager, windowExtent);
 			depthStencilView = std::make_unique<vk::TextureView>("DepthStencil view", vulkanContext, *depthStencil, VK_IMAGE_VIEW_TYPE_2D);
 
 			triVert = std::make_unique<vk::ShaderModule>("Triangle vertex shader", vulkanContext, "Assets/Shaders/bin/textured_tri_bindless.vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
@@ -105,10 +105,27 @@ namespace sy
 				renderPass->SetDepthStencilView(*depthStencilView);
 
 				const auto model = glm::rotate(glm::mat4(1.f), elapsedTime, { 0.f, 1.f, 0.f });
-				const TransformUniformBuffer uniformBuffer{ viewProjMat * model };
-				renderPass->UpdateUniformBuffer(uniformBuffer);
+				renderPass->SetTransformData({ viewProjMat * model });
+				renderPass->UpdateBuffers();
+				const auto simpleRenderPassCmdBuffer = renderPass->Render(cmdPoolManager);
 
-				renderPass->Render(cmdPoolManager);
+				const auto& renderFence = frameTracker.GetCurrentInFlightRenderFence();
+				auto& presentSemaphore = frameTracker.GetCurrentInFlightPresentSemaphore();
+
+				CRefVec<vk::Semaphore> waitSemaphores;
+				waitSemaphores.emplace_back(presentSemaphore);
+				CRefVec<vk::Semaphore> signalSemaphores;
+				signalSemaphores.emplace_back(renderSemaphore);
+
+				CRefVec<vk::CommandBuffer> batchedCmdBuffers = { *simpleRenderPassCmdBuffer };
+
+				vulkanContext.SubmitTo(
+					vk::EQueueType::Graphics,
+					waitSemaphores,
+					batchedCmdBuffers,
+					signalSemaphores,
+					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, renderFence);
+
 				vulkanContext.Present(swapchain, renderSemaphore);
 			}
 			EndFrame();

@@ -1,6 +1,5 @@
 #include <Core/Core.h>
 #include <Core/Context.h>
-#include <Render/RenderGraph.h>
 
 int main(int argc, char** argv)
 {
