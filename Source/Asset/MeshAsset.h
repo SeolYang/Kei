@@ -1,6 +1,7 @@
 #pragma once
 #include <Core/Core.h>
 #include <Asset/AssetCore.h>
+#include <Render/Mesh.h>
 
 /**
  * Mesh Asset structure
@@ -76,5 +77,5 @@ namespace sy::asset
 	bool ConvertMesh(const fs::path& input);
 	bool ConvertMesh(const fs::path& input, const fs::path& output);
 
-	std::pair<std::unique_ptr<vk::Buffer>, std::unique_ptr<vk::Buffer>> LoadMeshFromAsset(std::string_view assetPath, const vk::VulkanContext& vulkanContext, vk::CommandPoolManager& cmdPoolManager, const vk::FrameTracker& frameTracker);
+	std::unique_ptr<render::Mesh> LoadMeshFromAsset(std::string_view assetPath, const vk::VulkanContext& vulkanContext, vk::CommandPoolManager& cmdPoolManager, const vk::FrameTracker& frameTracker);
 }

@@ -7,6 +7,7 @@
 #include <VK/Semaphore.h>
 #include <VK/Fence.h>
 #include <VK/Buffer.h>
+#include <VK/FrameTracker.h>
 
 namespace sy
 {
@@ -87,6 +88,24 @@ namespace sy
 			};
 
 			SubmitTo(cmdBuffer.GetQueueType(), submitInfo, fence);
+		}
+
+		void VulkanContext::SubmitTo(const EQueueType queueType, const FrameTracker& frameTracker, const std::span<CRef<CommandBuffer>> cmdBuffers)
+		{
+			const auto& renderFence = frameTracker.GetCurrentInFlightRenderFence();
+			auto& presentSemaphore = frameTracker.GetCurrentInFlightPresentSemaphore();
+			const auto& renderSemaphore = frameTracker.GetCurrentInFlightRenderSemaphore();
+
+			CRefVec<vk::Semaphore> waitSemaphores;
+			waitSemaphores.emplace_back(presentSemaphore);
+			CRefVec<vk::Semaphore> signalSemaphores;
+			signalSemaphores.emplace_back(renderSemaphore);
+
+			SubmitTo(queueType,
+				waitSemaphores,
+				cmdBuffers,
+				signalSemaphores,
+				VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, renderFence);
 		}
 
 		void VulkanContext::SubmitTo(EQueueType queueType, const std::span<std::reference_wrapper<const Semaphore>> waitSemaphores, const std::span<std::reference_wrapper<const CommandBuffer>> cmdBuffers, std::span<std::reference_wrapper<const Semaphore>> signalSemaphores, const VkPipelineStageFlags waitStage, const Fence& fence) const

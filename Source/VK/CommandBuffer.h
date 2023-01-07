@@ -38,6 +38,12 @@ namespace sy
 			void BindIndexBuffer(const Buffer& indexBuffer, size_t offset = 0) const;
 			void BindIndexBuffer(VkBuffer indexBuffer, size_t offset = 0) const;
 
+			template <typename T>
+			void PushConstants(const Pipeline& pipeline, const VkShaderStageFlags shaderStageFlags, const T& value) const
+			{
+				PushConstants(pipeline, shaderStageFlags, 0, sizeof(T), &value);
+			}
+
 			void PushConstants(const Pipeline& pipeline, VkShaderStageFlags shaderStageFlags, uint32_t offset, uint32_t size, const void* values) const;
 
 			void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const;

@@ -138,6 +138,12 @@
     <ClCompile Include="..\Source\Render\RenderPasses\SimpleRenderPass.cpp">
       <Filter>Source\Render\RenderPasses</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Render\Mesh.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Render\Model.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\GameInstance.h">
@@ -203,7 +209,7 @@
     <ClInclude Include="..\Source\Core\Timer.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Core\UniqueHandle.h">
+    <ClInclude Include="..\Source\Core\Handle.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Core\Utils.h">
@@ -268,6 +274,15 @@
     </ClInclude>
     <ClInclude Include="..\Source\Render\RenderPasses\SimpleRenderPass.h">
       <Filter>Source\Render\RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\Mesh.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\Model.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\Material.h">
+      <Filter>Source\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

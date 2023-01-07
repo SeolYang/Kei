@@ -66,9 +66,7 @@ namespace sy
 			loadedTextureView = std::make_unique<vk::TextureView>("Loaded Texture View", vulkanContext, *loadedTexture, VK_IMAGE_VIEW_TYPE_2D);
 			loadedTextureDescriptor = descriptorManager.RequestDescriptor(*loadedTexture, *loadedTextureView, *linearSampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-			auto [vb, ib] = asset::LoadMeshFromAsset("Assets/Models/box_textured/BoxTextured.mesh", vulkanContext, cmdPoolManager, frameTracker);
-			cubeVertexBuffer = std::move(vb);
-			cubeIndexBuffer = std::move(ib);
+			cube = asset::LoadMeshFromAsset("Assets/Models/box_textured/BoxTextured.mesh", vulkanContext, cmdPoolManager, frameTracker);
 
 			auto proj = math::PerspectiveYFlipped(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
 			viewProjMat = proj * glm::lookAt(glm::vec3{ 1.5f, 2.f, -5.f }, { 0.f, 0.f ,0.f }, { 0.f ,1.f, 0.f });
@@ -97,8 +95,7 @@ namespace sy
 				clearColorValue.float32[2] = std::cos(static_cast<float>(currentFrameIdx) / 90.f) * 0.5f + 1.f;
 				clearColorValue.float32[3] = 1.f;
 
-				renderPass->SetVertexBuffer(*cubeVertexBuffer);
-				renderPass->SetIndexBuffer(*cubeIndexBuffer);
+				renderPass->SetMesh(*cube);
 				renderPass->SetTextureDescriptor(loadedTextureDescriptor);
 				renderPass->SetWindowExtent(window.GetExtent());
 				renderPass->SetSwapchain(swapchain, clearColorValue);
@@ -121,10 +118,8 @@ namespace sy
 
 				vulkanContext.SubmitTo(
 					vk::EQueueType::Graphics,
-					waitSemaphores,
-					batchedCmdBuffers,
-					signalSemaphores,
-					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, renderFence);
+					frameTracker,
+					batchedCmdBuffers);
 
 				vulkanContext.Present(swapchain, renderSemaphore);
 			}

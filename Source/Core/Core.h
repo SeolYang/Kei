@@ -86,7 +86,7 @@
 
 /** Internal - Core */
 #include <Core/Types.h>
-#include <Core/UniqueHandle.h>
+#include <Core/Handle.h>
 #include <Core/Extent.h>
 #include <Core/HitoriAssert.h>
 #include <Core/Pool.hpp>

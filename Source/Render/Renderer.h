@@ -23,6 +23,7 @@ namespace sy
 	class Window;
 	namespace render
 	{
+		class Mesh;
 		class SimpleRenderPass;
 		class Renderer final : public NonCopyable
 		{
@@ -57,8 +58,7 @@ namespace sy
 			std::unique_ptr<vk::TextureView> loadedTextureView;
 			vk::Descriptor loadedTextureDescriptor;
 
-			std::unique_ptr<vk::Buffer> cubeVertexBuffer;
-			std::unique_ptr<vk::Buffer> cubeIndexBuffer;
+			std::unique_ptr<Mesh> cube;
 
 			std::unique_ptr<SimpleRenderPass> renderPass;
 

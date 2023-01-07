@@ -9,6 +9,8 @@
 #include <VK/FrameTracker.h>
 #include <VK/Swapchain.h>
 
+#include "Render/Mesh.h"
+
 namespace sy::render
 {
 	SimpleRenderPass::SimpleRenderPass(std::string_view name, const vk::VulkanContext& vulkanContext, vk::DescriptorManager& descriptorManager, const vk::FrameTracker& frameTracker, const vk::Pipeline& pipeline) :
@@ -72,9 +74,9 @@ namespace sy::render
 				std::array offsets = { uint64_t() };
 				graphicsCmdBuffer->BindVertexBuffers(0, vertexBuffers, offsets);
 				graphicsCmdBuffer->BindIndexBuffer(indexBuffer);
-				graphicsCmdBuffer->PushConstants(pipeline, VK_SHADER_STAGE_ALL_GRAPHICS, 0, sizeof(PushConstants), &pushConstants);
+				graphicsCmdBuffer->PushConstants(pipeline, VK_SHADER_STAGE_ALL_GRAPHICS, pushConstants);
 
-				graphicsCmdBuffer->DrawIndexed(36, 1, 0, 0, 0);
+				graphicsCmdBuffer->DrawIndexed(numIndices, 1, 0, 0, 0);
 			}
 			graphicsCmdBuffer->EndRendering();
 			graphicsCmdBuffer->ChangeImageAccessPattern(vk::EAccessPattern::ColorAttachmentWrite, vk::EAccessPattern::Present, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
@@ -94,14 +96,14 @@ namespace sy::render
 		vulkanContext.Unmap(transformBuffer);
 	}
 
-	void SimpleRenderPass::SetVertexBuffer(const vk::Buffer& vertexBuffer)
+	void SimpleRenderPass::SetMesh(const Mesh& mesh)
 	{
+		const auto& vertexBuffer = mesh.GetVertexBuffer();
+		const auto& indexBuffer = mesh.GetIndexBuffer();
 		this->vertexBuffer = vertexBuffer.GetNativeHandle();
-	}
-
-	void SimpleRenderPass::SetIndexBuffer(const vk::Buffer& indexBuffer)
-	{
 		this->indexBuffer = indexBuffer.GetNativeHandle();
+		this->numVertices = mesh.GetNumVertices();
+		this->numIndices = mesh.GetNumIndices();
 	}
 
 	void SimpleRenderPass::SetTextureDescriptor(const vk::Descriptor& descriptor)

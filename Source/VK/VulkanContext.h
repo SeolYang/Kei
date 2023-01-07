@@ -13,6 +13,7 @@ namespace sy
 		class Semaphore;
 		class DescriptorPool;
 		class Buffer;
+		class FrameTracker;
 		class VulkanContext
 		{
 		public:
@@ -34,6 +35,7 @@ namespace sy
 
 			void SubmitTo(EQueueType queueType, const VkSubmitInfo& submitInfo, const Fence& fence) const;
 			void SubmitTo(const CommandBuffer& cmdBuffer, const Fence& fence) const;
+			void SubmitTo(EQueueType queueType, const FrameTracker& frameTracker, std::span<CRef<CommandBuffer>> cmdBuffers);
 			void SubmitTo(
 				EQueueType queueType,
 				std::span<std::reference_wrapper<const Semaphore>> waitSemaphores,

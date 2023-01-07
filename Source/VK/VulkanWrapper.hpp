@@ -8,7 +8,7 @@ namespace sy
 		class VulkanContext;
 
 		template <typename VulkanHandleType>
-		class VulkanWrapper : public NamedType
+		class VulkanWrapper : public NamedType, public NonCopyable
 		{
 		public:
 			using VulkanDestroyFunction_t = std::function<void(const VulkanContext& VulkanContext, VulkanHandleType)>;
@@ -32,10 +32,7 @@ namespace sy
 			{
 				destroyFunction(vulkanContext, handle);
 			}
-
-			VulkanWrapper& operator=(const VulkanWrapper&) = delete;
-			VulkanWrapper& operator=(VulkanWrapper&&) = delete;
-
+			
 			[[nodiscard]] Native_t GetNativeHandle() const { return handle; }
 			[[nodiscard]] VkObjectType GetType() const { return type; }
 

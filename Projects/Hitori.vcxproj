@@ -25,6 +25,8 @@
     <ClCompile Include="..\Source\Core\Window.cpp" />
     <ClCompile Include="..\Source\GameInstance.cpp" />
     <ClCompile Include="..\Source\main.cpp" />
+    <ClCompile Include="..\Source\Render\Mesh.cpp" />
+    <ClCompile Include="..\Source\Render\Model.cpp" />
     <ClCompile Include="..\Source\Render\Renderer.cpp" />
     <ClCompile Include="..\Source\Render\RenderPass.cpp" />
     <ClCompile Include="..\Source\Render\RenderPasses\SimpleRenderPass.cpp" />
@@ -66,10 +68,13 @@
     <ClInclude Include="..\Source\Core\Pool.hpp" />
     <ClInclude Include="..\Source\Core\Timer.h" />
     <ClInclude Include="..\Source\Core\Types.h" />
-    <ClInclude Include="..\Source\Core\UniqueHandle.h" />
+    <ClInclude Include="..\Source\Core\Handle.h" />
     <ClInclude Include="..\Source\Core\Utils.h" />
     <ClInclude Include="..\Source\Core\Window.h" />
     <ClInclude Include="..\Source\Math\MathUtils.h" />
+    <ClInclude Include="..\Source\Render\Material.h" />
+    <ClInclude Include="..\Source\Render\Mesh.h" />
+    <ClInclude Include="..\Source\Render\Model.h" />
     <ClInclude Include="..\Source\Render\Renderer.h" />
     <ClInclude Include="..\Source\Render\RenderPass.h" />
     <ClInclude Include="..\Source\Render\RenderPasses\SimpleRenderPass.h" />

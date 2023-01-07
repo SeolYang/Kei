@@ -223,7 +223,7 @@ namespace sy::asset
 		return true;
 	}
 
-	std::pair<std::unique_ptr<vk::Buffer>, std::unique_ptr<vk::Buffer>> LoadMeshFromAsset(std::string_view assetPath,
+	std::unique_ptr<render::Mesh> LoadMeshFromAsset(std::string_view assetPath,
 		const vk::VulkanContext& vulkanContext, vk::CommandPoolManager& cmdPoolManager,
 		const vk::FrameTracker& frameTracker)
 	{
@@ -231,7 +231,7 @@ namespace sy::asset
 		if (!loadedAssetOpt.has_value())
 		{
 			SY_ASSERT(false, "Failed to load model asset from {}.", assetPath);
-			return { nullptr, nullptr };
+			return nullptr;
 		}
 
 		auto& loadedAsset = loadedAssetOpt.value();
@@ -239,17 +239,18 @@ namespace sy::asset
 		if (!metadataOpt.has_value())
 		{
 			SY_ASSERT(false, "Failed to parse metadata from {}.", assetPath);
-			return { nullptr, nullptr };
+			return nullptr;
 		}
 
 		const auto& metadata = metadataOpt.value();
 		const std::vector<char> uncompressedData = Uncompress(metadata.CompressionMode, CalculateVertexDataSizeFromMetadata(metadata) + CalculateIndexDataSizeFromMetadata(metadata), loadedAsset.Blob);
-		const std::vector<char> vertices = UnpackVertex(metadata, uncompressedData);
+		const std::vector<char> verticesBytes = UnpackVertex(metadata, uncompressedData);
 		const std::vector<render::IndexType> indices = UnpackIndex(metadata, uncompressedData);
 
-		return {
-			vk::CreateBufferWithData(cmdPoolManager, frameTracker, std::format("{}_Vertex", assetPath), vulkanContext, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, vertices.size(), vertices.data()),
-			vk::CreateIndexBuffer(cmdPoolManager, frameTracker, std::format("{}_Index", assetPath), vulkanContext, indices)
-		};
+		return render::Mesh::Create<render::VertexPTN, render::IndexType>(
+			metadata.SrcPath,
+			vulkanContext, cmdPoolManager, frameTracker,
+			std::span{ reinterpret_cast<const render::VertexPTN*>(verticesBytes.data()), verticesBytes.size() / sizeof(render::VertexPTN) },
+			indices);
 	}
 }

@@ -26,23 +26,26 @@ namespace sy
 
 		};
 
+		std::unique_ptr<Buffer> CreateBufferWithData(std::string_view name, const VulkanContext& vulkanContext, CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, VkBufferUsageFlags bufferUsage, size_t sizeOfData, const void* data);
+
+		std::unique_ptr<Buffer> CreateStagingBuffer(std::string_view name, const VulkanContext& vulkanContext, size_t bufferSize);
+
 		template <typename BufferData>
 		auto CreateUniformBuffer(std::string_view name, const VulkanContext& vulkanContext, const VkBufferCreateFlags bufferCreateFlags = 0)
 		{
 			return std::make_unique<Buffer>(name, vulkanContext, sizeof(BufferData), bufferCreateFlags, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 		}
 
-		std::unique_ptr<Buffer> CreateStagingBuffer(std::string_view name, const VulkanContext& vulkanContext, const size_t bufferSize);
-
 		template <typename Vertex>
-		auto CreateVertexBuffer(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext, const std::span<Vertex> vertices)
+		auto CreateVertexBuffer(const std::string_view name, const VulkanContext& vulkanContext, CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, const std::span<Vertex> vertices)
 		{
-			return CreateBufferWithData(cmdPoolManager, frameTracker, name, vulkanContext, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, sizeof(Vertex) * vertices.size(), vertices.data());
+			return CreateBufferWithData(name, vulkanContext, cmdPoolManager, frameTracker, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, sizeof(Vertex) * vertices.size(), vertices.data());
 		}
 
-		std::unique_ptr<Buffer> CreateIndexBuffer(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext, std::span<const uint32_t> indices);
-
-		std::unique_ptr<Buffer> CreateBufferWithData(CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, std::string_view name, const VulkanContext& vulkanContext, VkBufferUsageFlags bufferUsage, size_t sizeOfData, const void* data);
-
+		template <typename Index = uint32_t>
+		std::unique_ptr<Buffer> CreateIndexBuffer(const std::string_view name, const VulkanContext& vulkanContext, CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, std::span<const Index> indices)
+		{
+			return CreateBufferWithData(name, vulkanContext, cmdPoolManager, frameTracker, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, sizeof(Index) * indices.size(), indices.data());
+		}
 	}
 }
