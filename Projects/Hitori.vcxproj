@@ -88,6 +88,7 @@
     <ClInclude Include="..\Source\VK\FrameTracker.h" />
     <ClInclude Include="..\Source\VK\LayoutCache.h" />
     <ClInclude Include="..\Source\VK\Sampler.h" />
+    <ClInclude Include="..\Source\VK\Synchronization.h" />
     <ClInclude Include="..\Source\VK\Texture.h" />
     <ClInclude Include="..\Source\VK\Pipeline.h" />
     <ClInclude Include="..\Source\VK\PipelineBuilder.h" />

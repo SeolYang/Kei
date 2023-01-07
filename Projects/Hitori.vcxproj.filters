@@ -284,6 +284,9 @@
     <ClInclude Include="..\Source\Render\Material.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\VK\Synchronization.h">
+      <Filter>Source\Vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Assets\Shaders\tri.frag">
