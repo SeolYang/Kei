@@ -1,4 +1,4 @@
-#include <Core/Core.h>
+#include <PCH.h>
 #include <Core/Window.h>
 
 namespace sy

@@ -1,5 +1,5 @@
 #pragma once
-#include <Core/Core.h>
+#include <PCH.h>
 
 namespace sy
 {
@@ -7,7 +7,8 @@ namespace sy
 	{
 		class Fence;
 		class Semaphore;
-		class FrameTracker
+		class VulkanContext;
+		class FrameTracker : public NonCopyable
 		{
 		private:
 			struct Frame
@@ -23,11 +24,6 @@ namespace sy
 		public:
 			explicit FrameTracker(const VulkanContext& vulkanContext);
 			~FrameTracker();
-
-			FrameTracker(const FrameTracker&) = delete;
-			FrameTracker(FrameTracker&&) = delete;
-			FrameTracker& operator=(const FrameTracker&) = delete;
-			FrameTracker& operator=(FrameTracker&&) = delete;
 
 			void BeginFrame();
 			void EndFrame();

@@ -1,12 +1,17 @@
 #pragma once
-#include <Core/Core.h>
+#include <PCH.h>
 
 namespace sy
 {
 	template<typename T>
 	struct Handle
 	{
+	public:
 		size_t Value = InvalidValue;
-		constexpr static size_t InvalidValue = -1;
+
+		[[nodiscard]] operator bool() const { return Value != InvalidValue; }
+
+	private:
+		constexpr static size_t InvalidValue = std::numeric_limits<size_t>::max();
 	};
 }

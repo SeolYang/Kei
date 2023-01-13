@@ -1,4 +1,4 @@
-#include <Core/Core.h>
+#include <PCH.h>
 #include <VK/LayoutCache.h>
 #include <VK/VulkanContext.h>
 
@@ -70,11 +70,11 @@ namespace sy
 			}
 		}
 
-		VkPipelineLayout PipelineLayoutCache::Request(const std::span<VkDescriptorSetLayout> descriptorSetLayouts, const std::span<VkPushConstantRange> pushConstantRanges, const VkPipelineLayoutCreateFlags flags)
+		VkPipelineLayout PipelineLayoutCache::Request(const std::span<VkDescriptorSetLayout> descriptorSetLayouts, const std::span<VkPushConstantRange> pushConstantRanges)
 		{
 			PipelineLayoutInfo pipelineLayoutInfo
 			{
-				.Flags = flags,
+				.Flags = 0,
 			};
 
 			pipelineLayoutInfo.DescriptorSetLayouts.assign(descriptorSetLayouts.begin(), descriptorSetLayouts.end());
@@ -86,7 +86,7 @@ namespace sy
 				{
 					.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 					.pNext = nullptr,
-					.flags = flags,
+					.flags = 0,
 					.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size()),
 					.pSetLayouts = descriptorSetLayouts.data(),
 					.pushConstantRangeCount = static_cast<uint32_t>(pushConstantRanges.size()),

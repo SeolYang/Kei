@@ -34,11 +34,14 @@
     <Filter Include="Source\Render\RenderPasses">
       <UniqueIdentifier>{21e1ba4b-fd40-4246-8b0c-7267e94a69be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Game">
+      <UniqueIdentifier>{cf3cd6a8-b3a1-4135-a14f-34956e218355}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Component">
+      <UniqueIdentifier>{bbbf03be-e372-4413-bf34-317c34395dff}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\GameInstance.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\main.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -85,9 +88,6 @@
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Core\Context.cpp">
-      <Filter>Source\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Core\Core.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Core\Window.cpp">
@@ -141,14 +141,23 @@
     <ClCompile Include="..\Source\Render\Mesh.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Game\GameContext.cpp">
+      <Filter>Source\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Game\World.cpp">
+      <Filter>Source\Game</Filter>
+    </ClCompile>
     <ClCompile Include="..\Source\Render\Model.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Core\ResourceCache.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Core\PCH.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Source\GameInstance.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="..\ThirdParty\volk\volk.h">
       <Filter>Thirdparty\volk</Filter>
     </ClInclude>
@@ -195,9 +204,6 @@
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Core\Context.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Core\Core.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Core\Extent.h">
@@ -278,14 +284,35 @@
     <ClInclude Include="..\Source\Render\Mesh.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Render\Model.h">
-      <Filter>Source\Render</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Render\Material.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\VK\Synchronization.h">
       <Filter>Source\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\ECS.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Game\GameContext.h">
+      <Filter>Source\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Game\World.h">
+      <Filter>Source\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Component\Transform.h">
+      <Filter>Source\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Component\StaticMesh.h">
+      <Filter>Source\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\Model.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\ResourceCache.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\PCH.h">
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

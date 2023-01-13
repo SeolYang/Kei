@@ -1,4 +1,4 @@
-#include <Core/Core.h>
+#include <PCH.h>
 #include <VK/VulkanContext.h>
 #include <VK/Fence.h>
 #include <VK/Texture.h>
@@ -46,13 +46,18 @@ namespace sy
 				.usage = memoryUsage,
 				.requiredFlags = memoryProperties
 			};
+
+			Native_t handle = VK_NULL_HANDLE;
 			VK_ASSERT(vmaCreateImage(allocator, &imageCreateInfo, &allocationCreateInfo, &handle, &allocation, nullptr), "Failed to create image {}.", name);
+			UpdateHandle(handle);
 		}
 
 		Texture::~Texture()
 		{
 			if (allocation != VK_NULL_HANDLE)
 			{
+				const auto& vulkanContext = GetContext();
+				const auto handle = GetNativeHandle();
 				vmaDestroyImage(vulkanContext.GetAllocator(), handle, allocation);
 			}
 		}

@@ -1,4 +1,4 @@
-#include <Core/Core.h>
+#include <PCH.h>
 #include <VK/ShaderModule.h>
 #include <VK/VulkanContext.h>
 
@@ -37,7 +37,10 @@ namespace sy
 			};
 
 			spdlog::trace("Creating shader module from {}...", path);
+
+			Native_t handle = VK_NULL_HANDLE;
 			VK_ASSERT(vkCreateShaderModule(vulkanContext.GetDevice(), &createInfo, nullptr, &handle), "Failed to create shader module from {}.", path);
+			UpdateHandle(handle);
 		}
 	}
 }

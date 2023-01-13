@@ -18,12 +18,14 @@
     <ClCompile Include="..\Source\Audio\AudioContext.cpp" />
     <ClCompile Include="..\Source\Core\CommandLineParser.cpp" />
     <ClCompile Include="..\Source\Core\Context.cpp" />
-    <ClCompile Include="..\Source\Core\Core.cpp">
+    <ClCompile Include="..\Source\Core\PCH.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\Source\Core\ResourceCache.cpp" />
     <ClCompile Include="..\Source\Core\Window.cpp" />
-    <ClCompile Include="..\Source\GameInstance.cpp" />
+    <ClCompile Include="..\Source\Game\GameContext.cpp" />
+    <ClCompile Include="..\Source\Game\World.cpp" />
     <ClCompile Include="..\Source\main.cpp" />
     <ClCompile Include="..\Source\Render\Mesh.cpp" />
     <ClCompile Include="..\Source\Render\Model.cpp" />
@@ -60,17 +62,23 @@
     <ClInclude Include="..\Source\Asset\MeshAsset.h" />
     <ClInclude Include="..\Source\Asset\TextureAsset.h" />
     <ClInclude Include="..\Source\Audio\AudioContext.h" />
+    <ClInclude Include="..\Source\Component\StaticMesh.h" />
+    <ClInclude Include="..\Source\Component\Transform.h" />
     <ClInclude Include="..\Source\Core\CommandLineParser.h" />
     <ClInclude Include="..\Source\Core\Context.h" />
-    <ClInclude Include="..\Source\Core\Core.h" />
+    <ClInclude Include="..\Source\Core\PCH.h" />
+    <ClInclude Include="..\Source\Core\ECS.h" />
     <ClInclude Include="..\Source\Core\Extent.h" />
     <ClInclude Include="..\Source\Core\HitoriAssert.h" />
     <ClInclude Include="..\Source\Core\Pool.hpp" />
+    <ClInclude Include="..\Source\Core\ResourceCache.h" />
     <ClInclude Include="..\Source\Core\Timer.h" />
     <ClInclude Include="..\Source\Core\Types.h" />
     <ClInclude Include="..\Source\Core\Handle.h" />
     <ClInclude Include="..\Source\Core\Utils.h" />
     <ClInclude Include="..\Source\Core\Window.h" />
+    <ClInclude Include="..\Source\Game\GameContext.h" />
+    <ClInclude Include="..\Source\Game\World.h" />
     <ClInclude Include="..\Source\Math\MathUtils.h" />
     <ClInclude Include="..\Source\Render\Material.h" />
     <ClInclude Include="..\Source\Render\Mesh.h" />
@@ -100,7 +108,6 @@
     <ClInclude Include="..\Source\VK\VulkanContext.h" />
     <ClInclude Include="..\Source\VK\VulkanTypes.h" />
     <ClInclude Include="..\Source\VK\VulkanWrapper.hpp" />
-    <ClInclude Include="..\Source\GameInstance.h" />
     <ClInclude Include="..\ThirdParty\volk\volk.h" />
   </ItemGroup>
   <ItemGroup>
@@ -164,7 +171,7 @@
       <PreprocessorDefinitions>NOMINMAX;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>Core/Core.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>PCH.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(SolutionDir)..\Source;$(SolutionDir)..\Thirdparty\volk</AdditionalIncludeDirectories>
@@ -190,7 +197,7 @@
       <PreprocessorDefinitions>NOMINMAX;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>Core/Core.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>PCH.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(SolutionDir)..\Source;$(SolutionDir)..\Thirdparty\volk</AdditionalIncludeDirectories>

@@ -1,4 +1,4 @@
-#include <Core/Core.h>
+#include <PCH.h>
 #include <VK/DescriptorManager.h>
 #include <VK/FrameTracker.h>
 #include <VK/VulkanContext.h>
@@ -170,7 +170,7 @@ namespace sy
 
 		Descriptor DescriptorManager::RequestDescriptor(const vk::Buffer& buffer, const bool bIsDynamic)
 		{
-			const auto descriptorType = vk::BufferUsageToDescriptorType(buffer.GetUsage(), bIsDynamic);
+			const auto descriptorType = vk::BufferUsageToDescriptorType(buffer.GetUsageFlags(), bIsDynamic);
 			const auto descriptorBinding = ToUnderlying(descriptorType);
 			auto& offsetPoolPackage = descriptorPoolPackage.OffsetPoolPackages[descriptorBinding];
 

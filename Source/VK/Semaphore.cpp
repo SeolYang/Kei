@@ -1,4 +1,4 @@
-#include <Core/Core.h>
+#include <PCH.h>
 #include <VK/Semaphore.h>
 #include <Vk/VulkanContext.h>
 
@@ -19,7 +19,9 @@ namespace sy
 				.flags = 0
 			};
 
+			Native_t handle = VK_NULL_HANDLE;
 			vkCreateSemaphore(vulkanContext.GetDevice(), &createInfo, nullptr, &handle);
+			UpdateHandle(handle);
 		}
 	}
 }

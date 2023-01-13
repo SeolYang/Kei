@@ -1,4 +1,4 @@
-#include <Core/Core.h>
+#include <PCH.h>
 #include <Core/Window.h>
 #include <VK/VulkanContext.h>
 #include <VK/Swapchain.h>
@@ -32,8 +32,7 @@ namespace sy
 				.build()
 				.value();
 
-			handle = vkbSwapchain.swapchain;
-			SY_ASSERT(handle != VK_NULL_HANDLE, "Invalid swapchain.");
+			UpdateHandle(vkbSwapchain.swapchain);
 			images = vkbSwapchain.get_images().value();
 			imageViews = vkbSwapchain.get_image_views().value();
 			format = vkbSwapchain.image_format;
@@ -41,6 +40,7 @@ namespace sy
 
 		Swapchain::~Swapchain()
 		{
+			const auto& vulkanContext = GetContext();
 			const auto device = vulkanContext.GetDevice();
 			for (const auto imageView : imageViews)
 			{
@@ -50,6 +50,8 @@ namespace sy
 
 		void Swapchain::AcquireNext(const Semaphore& presentSemaphore)
 		{
+			const auto& vulkanContext = GetContext();
+			const auto handle = GetNativeHandle();
 			VK_ASSERT(vkAcquireNextImageKHR(vulkanContext.GetDevice(), handle, std::numeric_limits<uint64_t>::max(), presentSemaphore.GetNativeHandle(), VK_NULL_HANDLE, &currentImageIdx), "Failed to acquire next image view.");
 		}
 	}

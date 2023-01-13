@@ -1,4 +1,4 @@
-#include <Core/Core.h>
+#include <PCH.h>
 #include <Core/Window.h>
 #include <Render/Renderer.h>
 #include <Render/Vertex.h>
@@ -61,7 +61,7 @@ namespace sy
 
 			basicPipeline = std::make_unique<vk::Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
-			linearSampler = std::make_unique<vk::Sampler>("Linear Sampler", vulkanContext);
+			linearSampler = std::make_unique<vk::Sampler>("Linear Sampler", vulkanContext, vk::SamplerInfo{});
 			loadedTexture = asset::LoadTexture2DFromAsset("Assets/Textures/djmax_1st_anv.tex", vulkanContext, frameTracker, cmdPoolManager);
 			loadedTextureView = std::make_unique<vk::TextureView>("Loaded Texture View", vulkanContext, *loadedTexture, VK_IMAGE_VIEW_TYPE_2D);
 			loadedTextureDescriptor = descriptorManager.RequestDescriptor(*loadedTexture, *loadedTextureView, *linearSampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);

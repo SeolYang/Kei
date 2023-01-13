@@ -1,5 +1,5 @@
 #pragma once
-#include <Core/Core.h>
+#include <PCH.h>
 
 namespace sy
 {
@@ -7,6 +7,7 @@ namespace sy
 	namespace vk
 	{
 		class VulkanContext;
+		class Semaphore;
 		class Swapchain : public VulkanWrapper<VkSwapchainKHR>
 		{
 		public:

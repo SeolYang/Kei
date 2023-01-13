@@ -1,19 +1,21 @@
-#include <Core/Core.h>
+#include <PCH.h>
 #include <Core/Context.h>
 #include <Core/CommandLineParser.h>
 #include <Core/Window.h>
 #include <Core/Utils.h>
+#include <Core/ResourceCache.h>
 #include <VK/VulkanContext.h>
 #include <VK/FrameTracker.h>
 #include <VK/CommandPoolManager.h>
 #include <VK/DescriptorManager.h>
 #include <Render/Renderer.h>
 #include <Asset/AssetConverter.h>
-#include <GameInstance.h>
+#include <Game/World.h>
+#include <Game/GameContext.h>
 
 namespace sy
 {
-	Context::Context(int argc, char** argv)
+	Context::Context(const int argc, char** argv)
 	{
 		Startup(argc, argv);
 	}
@@ -23,39 +25,10 @@ namespace sy
 		Cleanup();
 	}
 
-	void Context::Startup(int argc, char** argv)
+	void Context::Startup(const int argc, char** argv)
 	{
-		const auto currentTime = std::chrono::system_clock::now();
-		const auto localTime = std::chrono::current_zone()->to_local(currentTime);
-		const std::string fileName = std::format("LOG_{:%F_%H_%M_%S}.log", localTime);
-
-		fs::path logFilePath = "Logs";
-		logFilePath /= fileName;
-		const auto consoleSink = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
-		const auto logFilePathAnsi = WStringToAnsi(logFilePath.c_str());
-		const auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFilePathAnsi, true);
-
-		const auto sinksInitList = 
-		{
-			std::static_pointer_cast<spdlog::sinks::sink>(consoleSink),
-			std::static_pointer_cast<spdlog::sinks::sink>(fileSink)
-		};
-
-		spdlog::set_default_logger(std::make_unique<spdlog::logger>("Core", sinksInitList));
-
-#if defined(_DEBUG) || defined(DEBUG)
-		spdlog::set_level(spdlog::level::trace);
-#else
-		spdlog::set_level(spdlog::level::warn);
-#endif
-
-		spdlog::info("Logger initialized: output : {}", logFilePathAnsi);
-		spdlog::info("Initializing Command Line Parser sub-context.");
-		cmdLineParser = std::make_unique<CommandLineParser>(argc, argv);
-		if (cmdLineParser->ShouldConvertAssets())
-		{
-			asset::ConvertAssets(cmdLineParser->GetAssetPath());
-		}
+		InitializeLogger();
+		InitializeCommandLineParser(argc, argv);
 
 		spdlog::info("Initializing SDL.");
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
@@ -77,6 +50,45 @@ namespace sy
 		descriptorManager = std::make_unique<vk::DescriptorManager>(*vulkanContext, *frameTracker);
 		spdlog::info("Initializing Renderer sub-context.");
 		renderer = std::make_unique<render::Renderer>(*window, *vulkanContext, *frameTracker, *cmdPoolManager, *descriptorManager);
+	}
+
+	void Context::InitializeLogger()
+	{
+		const auto currentTime = std::chrono::system_clock::now();
+		const auto localTime = std::chrono::current_zone()->to_local(currentTime);
+		const std::string fileName = std::format("LOG_{:%F_%H_%M_%S}.log", localTime);
+
+		fs::path logFilePath = "Logs";
+		logFilePath /= fileName;
+		const auto consoleSink = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
+		const auto logFilePathAnsi = WStringToAnsi(logFilePath.c_str());
+		const auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFilePathAnsi, true);
+
+		const auto sinksInitList =
+		{
+			std::static_pointer_cast<spdlog::sinks::sink>(consoleSink),
+			std::static_pointer_cast<spdlog::sinks::sink>(fileSink)
+		};
+
+		spdlog::set_default_logger(std::make_unique<spdlog::logger>("Core", sinksInitList));
+
+#if defined(_DEBUG) || defined(DEBUG)
+		spdlog::set_level(spdlog::level::trace);
+#else
+		spdlog::set_level(spdlog::level::warn);
+#endif
+
+		spdlog::info("Logger initialized: output : {}", logFilePathAnsi);
+	}
+
+	void Context::InitializeCommandLineParser(const int argc, char** argv)
+	{
+		spdlog::info("Initializing Command Line Parser sub-context.");
+		cmdLineParser = std::make_unique<CommandLineParser>(argc, argv);
+		if (cmdLineParser->ShouldConvertAssets())
+		{
+			asset::ConvertAssets(cmdLineParser->GetAssetPath());
+		}
 	}
 
 	void Context::Cleanup()

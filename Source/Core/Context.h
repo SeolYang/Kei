@@ -1,5 +1,5 @@
 #pragma once
-#include <Core/Core.h>
+#include <PCH.h>
 
 namespace sy
 {
@@ -16,9 +16,15 @@ namespace sy
 		class Renderer;
 	}
 
+	namespace game
+	{
+		class World;
+		class GameContext;
+	}
+
 	class CommandLineParser;
 	class Window;
-	class GameInstance;
+	class CacheRegistry;
 	class Context final : public NonCopyable
 	{
 	public:
@@ -29,18 +35,23 @@ namespace sy
 
 	private:
 		void Startup(int argc, char** argv);
+		void InitializeLogger();
+		void InitializeCommandLineParser(int argc, char** argv);
+
 		void Cleanup();
 
 	private:
 		std::unique_ptr<CommandLineParser> cmdLineParser;
 		std::unique_ptr<Timer> timer;
 		std::unique_ptr<Window> window;
+		std::unique_ptr<CacheRegistry> cacheRegistry;
 		std::unique_ptr<vk::VulkanContext> vulkanContext;
 		std::unique_ptr<vk::FrameTracker> frameTracker;
 		std::unique_ptr<vk::CommandPoolManager> cmdPoolManager;
 		std::unique_ptr<vk::DescriptorManager> descriptorManager;
 		std::unique_ptr<render::Renderer> renderer;
-		std::unique_ptr<GameInstance> gameInstance;
+		std::unique_ptr<game::World> world;
+		std::unique_ptr<game::GameContext> gameContext;
 
 	};
 }

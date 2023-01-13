@@ -1,12 +1,12 @@
 #pragma once
-#include <Core/Core.h>
+#include <PCH.h>
 
 namespace sy
 {
 	namespace vk
 	{
 		class VulkanContext;
-		class PipelineLayoutCache
+		class PipelineLayoutCache : public NonCopyable
 		{
 		public:
 			struct PipelineLayoutInfo
@@ -33,15 +33,9 @@ namespace sy
 
 		public:
 			explicit PipelineLayoutCache(const VulkanContext& vulkanContext);
-			PipelineLayoutCache(const PipelineLayoutCache&) = delete;
-			PipelineLayoutCache(PipelineLayoutCache&&) = delete;
+			~PipelineLayoutCache() override;
 
-			PipelineLayoutCache& operator=(const PipelineLayoutCache&) = delete;
-			PipelineLayoutCache& operator=(PipelineLayoutCache&&) = delete;
-
-			~PipelineLayoutCache();
-
-			VkPipelineLayout Request(const std::span<VkDescriptorSetLayout> descriptorSetLayouts, const std::span<VkPushConstantRange> pushConstantRanges, VkPipelineLayoutCreateFlags flags = 0);
+			VkPipelineLayout Request(const std::span<VkDescriptorSetLayout> descriptorSetLayouts, const std::span<VkPushConstantRange> pushConstantRanges);
 
 		private:
 			const VulkanContext& vulkanContext;

@@ -1,5 +1,5 @@
 #pragma once
-#include <Core/Core.h>
+#include <PCH.h>
 
 #if defined(_DEBUG) || defined(DEBUG)
 #define SY_ASSERT(CONDITION, FORMAT_STR, ...) \

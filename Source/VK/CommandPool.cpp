@@ -1,4 +1,4 @@
-#include <Core/Core.h>
+#include <PCH.h>
 #include <VK/CommandPool.h>
 #include <VK/CommandBuffer.h>
 #include <VK/VulkanContext.h>
@@ -42,7 +42,9 @@ namespace sy
 
 			const size_t threadId = std::hash<std::thread::id>{}(std::this_thread::get_id());
 			//spdlog::trace("Creating command pool for thread {} and queue family {}; Dependent on In-flight frames {}/{}.", threadId, queueFamilyIdx, (inFlightFrameIdx + 1), NumMaxInFlightFrames);
+			Native_t handle = VK_NULL_HANDLE;
 			VK_ASSERT(vkCreateCommandPool(vulkanContext.GetDevice(), &cmdPoolCreateInfo, nullptr, &handle), "Failed to create vulkan command queue from create info.");
+			UpdateHandle(handle);
 		}
 
 		ManagedCommandBuffer CommandPool::RequestCommandBuffer(std::string_view name)
@@ -55,7 +57,7 @@ namespace sy
 
 			if (allocatedSlot.Offset >= cmdBuffers.size())
 			{
-				cmdBuffers.emplace_back(std::make_unique<CommandBuffer>(name, vulkanContext, *this));
+				cmdBuffers.emplace_back(std::make_unique<CommandBuffer>(name, GetContext(), *this));
 			}
 
 			cmdBuffers[allocatedSlot.Offset]->Reset();
@@ -70,6 +72,8 @@ namespace sy
 
 		void CommandPool::Reset() const
 		{
+			const auto& vulkanContext = GetContext();
+			const auto handle = GetNativeHandle();
 			vkResetCommandPool(vulkanContext.GetDevice(), handle, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
 		}
 

@@ -1,4 +1,4 @@
-#include <Core/Core.h>
+#include <PCH.h>
 #include <VK/CommandBuffer.h>
 #include <VK/CommandPool.h>
 #include <VK/VulkanContext.h>
@@ -23,12 +23,14 @@ namespace sy
 				.commandBufferCount = 1
 			};
 
+			Native_t handle = VK_NULL_HANDLE;
 			VK_ASSERT(vkAllocateCommandBuffers(vulkanContext.GetDevice(), &allocInfo, &handle), "Failed to creating command buffer.");
+			UpdateHandle(handle);
 		}
 
 		void CommandBuffer::Reset() const
 		{
-			vkResetCommandBuffer(handle, 0);
+			vkResetCommandBuffer(GetNativeHandle(), 0);
 		}
 
 		void CommandBuffer::Begin() const
@@ -41,22 +43,22 @@ namespace sy
 				.pInheritanceInfo = nullptr
 			};
 
-			VK_ASSERT(vkBeginCommandBuffer(handle, &beginInfo), "Faeild to begin command buffer {}.", GetName());
+			VK_ASSERT(vkBeginCommandBuffer(GetNativeHandle(), &beginInfo), "Faeild to begin command buffer {}.", GetName());
 		}
 
 		void CommandBuffer::End() const
 		{
-			VK_ASSERT(vkEndCommandBuffer(handle), "Failed to end command buffer {}.", GetName());
+			VK_ASSERT(vkEndCommandBuffer(GetNativeHandle()), "Failed to end command buffer {}.", GetName());
 		}
 
 		void CommandBuffer::BeginRendering(const VkRenderingInfo& renderingInfo) const
 		{
-			vkCmdBeginRendering(handle, &renderingInfo);
+			vkCmdBeginRendering(GetNativeHandle(), &renderingInfo);
 		}
 
 		void CommandBuffer::EndRendering() const
 		{
-			vkCmdEndRendering(handle);
+			vkCmdEndRendering(GetNativeHandle());
 		}
 
 		void CommandBuffer::ChangeImageAccessPattern(const EAccessPattern srcAccessPattern, const EAccessPattern dstAccessPattern,
@@ -118,18 +120,18 @@ namespace sy
 				.pImageMemoryBarriers = imageMemoryBarriers.data()
 			};
 
-			vkCmdPipelineBarrier2(handle, &dependencyInfo);
+			vkCmdPipelineBarrier2(GetNativeHandle(), &dependencyInfo);
 		}
 
 		void CommandBuffer::BindPipeline(const Pipeline& pipeline) const
 		{
-			vkCmdBindPipeline(handle, pipeline.GetBindPoint(), pipeline.GetNativeHandle());
+			vkCmdBindPipeline(GetNativeHandle(), pipeline.GetBindPoint(), pipeline.GetNativeHandle());
 		}
 
 		void CommandBuffer::BindDescriptorSet(VkDescriptorSet descriptorSet, const Pipeline& pipeline) const
 		{
 			const VkDescriptorSet descriptorSets[] = { descriptorSet, };
-			vkCmdBindDescriptorSets(handle, pipeline.GetBindPoint(), pipeline.GetLayout(), 0, 1, descriptorSets, 0, nullptr);
+			vkCmdBindDescriptorSets(GetNativeHandle(), pipeline.GetBindPoint(), pipeline.GetLayout(), 0, 1, descriptorSets, 0, nullptr);
 		}
 
 		void CommandBuffer::BindVertexBuffers(const uint32_t firstBinding, const std::span<CRef<Buffer>> buffers, const std::span<size_t> offsets) const
@@ -148,7 +150,7 @@ namespace sy
 
 		void CommandBuffer::BindVertexBuffers(const uint32_t firstBinding, const std::span<VkBuffer> buffers, const std::span<size_t> offsets) const
 		{
-			vkCmdBindVertexBuffers(handle, firstBinding, static_cast<uint32_t>(buffers.size()), buffers.data(), offsets.data());
+			vkCmdBindVertexBuffers(GetNativeHandle(), firstBinding, static_cast<uint32_t>(buffers.size()), buffers.data(), offsets.data());
 		}
 
 		void CommandBuffer::BindIndexBuffer(const Buffer& indexBuffer, const size_t offset) const
@@ -158,29 +160,29 @@ namespace sy
 
 		void CommandBuffer::BindIndexBuffer(const VkBuffer indexBuffer, const size_t offset) const
 		{
-			vkCmdBindIndexBuffer(handle, indexBuffer, offset, VK_INDEX_TYPE_UINT32);
+			vkCmdBindIndexBuffer(GetNativeHandle(), indexBuffer, offset, VK_INDEX_TYPE_UINT32);
 		}
 
 		void CommandBuffer::PushConstants(const Pipeline& pipeline, const VkShaderStageFlags shaderStageFlags, const uint32_t offset,
 		                                  const uint32_t size, const void* values) const
 		{
-			vkCmdPushConstants(handle, pipeline.GetLayout(), shaderStageFlags, offset, size, values);
+			vkCmdPushConstants(GetNativeHandle(), pipeline.GetLayout(), shaderStageFlags, offset, size, values);
 		}
 
 		void CommandBuffer::Draw(const uint32_t vertexCount, const uint32_t instanceCount, const uint32_t firstVertex, const uint32_t firstInstance) const
 		{
-			vkCmdDraw(handle, vertexCount, instanceCount, firstVertex, firstInstance);
+			vkCmdDraw(GetNativeHandle(), vertexCount, instanceCount, firstVertex, firstInstance);
 		}
 
 		void CommandBuffer::DrawIndexed(const uint32_t indexCount, const uint32_t instanceCount, const uint32_t firstIndex,
 			const int32_t vertexOffset, const uint32_t firstInstance) const
 		{
-			vkCmdDrawIndexed(handle, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+			vkCmdDrawIndexed(GetNativeHandle(), indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 		}
 
 		void CommandBuffer::CopyBufferToImage(const Buffer& srcBuffer, const Texture& dstTexture, const std::span<VkBufferImageCopy> regions) const
 		{
-			vkCmdCopyBufferToImage(handle, srcBuffer.GetNativeHandle(), dstTexture.GetNativeHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, static_cast<uint32_t>(regions.size()), regions.data());
+			vkCmdCopyBufferToImage(GetNativeHandle(), srcBuffer.GetNativeHandle(), dstTexture.GetNativeHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, static_cast<uint32_t>(regions.size()), regions.data());
 		}
 
 		void CommandBuffer::CopyBufferToImageSimple(const Buffer& srcBuffer, const Texture& dstTexture) const
@@ -214,7 +216,7 @@ namespace sy
 				.size = sizeofData
 			};
 
-			vkCmdCopyBuffer(handle, srcBuffer.GetNativeHandle(), dstBuffer.GetNativeHandle(), 1, &bufferCopy);
+			vkCmdCopyBuffer(GetNativeHandle(), srcBuffer.GetNativeHandle(), dstBuffer.GetNativeHandle(), 1, &bufferCopy);
 		}
 	}
 }

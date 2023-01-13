@@ -62,6 +62,7 @@
 /** glm */
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 /** stbi */
 #include <stb_image.h>
@@ -91,6 +92,7 @@
 #include <Core/HitoriAssert.h>
 #include <Core/Pool.hpp>
 #include <Core/Timer.h>
+#include <Core/ECS.h>
 #include <Core/Utils.h>
 
 /** Internal - Vulkan */
@@ -103,3 +105,4 @@
 
 /** Internal - Render */
 #include <Render/Vertex.h>
+#include <Render/Mesh.h>

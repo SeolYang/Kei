@@ -1,28 +1,36 @@
 #pragma once
-#include <Core/Core.h>
+#include <PCH.h>
 
 namespace sy
 {
 	namespace vk
 	{
+		struct BufferInfo
+		{
+			size_t Size;
+			VkBufferUsageFlags UsageFlags;
+			VmaMemoryUsage MemoryUsage;
+		};
+
 		class VulkanContext;
 		class CommandPoolManager;
 		class FrameTracker;
 		class Buffer : public VulkanWrapper<VkBuffer>
 		{
 		public:
-			Buffer(std::string_view name, const VulkanContext& vulkanContext, size_t bufferSize, VkBufferCreateFlags bufferCreateFlags, VkBufferUsageFlags bufferUsageFlags, VmaMemoryUsage memoryUsage);
+			Buffer(std::string_view name, const VulkanContext& vulkanContext, BufferInfo info);
 			virtual ~Buffer() override;
 
-			[[nodiscard]] auto GetBufferSize() const { return bufferSize; }
-			[[nodiscard]] auto GetUsage() const { return bufferUsageFlags; }
-			[[nodiscard]] VkDescriptorBufferInfo GetDescriptorInfo() const { return { handle, 0, bufferSize }; }
-			[[nodiscard]] auto GetAllocation() const { return allocation; }
+			[[nodiscard]] auto GetInfo() const { return info; }
+			[[nodiscard]] auto GetSize() const { return info.Size; }
+			[[nodiscard]] auto GetUsageFlags() const { return info.UsageFlags; }
+			[[nodiscard]] auto GetMemoryUsage() const { return info.MemoryUsage; }
+			[[nodiscard]] VkDescriptorBufferInfo GetDescriptorInfo() const { return { GetNativeHandle(), 0, GetSize()}; }
+			[[nodiscard]] const VmaAllocation& GetAllocation() const { return allocation; }
 
 		private:
+			BufferInfo info;
 			VmaAllocation allocation;
-			size_t bufferSize;
-			const VkBufferUsageFlags bufferUsageFlags;
 
 		};
 
@@ -31,9 +39,9 @@ namespace sy
 		std::unique_ptr<Buffer> CreateStagingBuffer(std::string_view name, const VulkanContext& vulkanContext, size_t bufferSize);
 
 		template <typename BufferData>
-		auto CreateUniformBuffer(std::string_view name, const VulkanContext& vulkanContext, const VkBufferCreateFlags bufferCreateFlags = 0)
+		auto CreateUniformBuffer(std::string_view name, const VulkanContext& vulkanContext)
 		{
-			return std::make_unique<Buffer>(name, vulkanContext, sizeof(BufferData), bufferCreateFlags, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+			return std::make_unique<Buffer>(name, vulkanContext, BufferInfo{ sizeof(BufferData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU });
 		}
 
 		template <typename Vertex>

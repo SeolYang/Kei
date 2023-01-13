@@ -35,8 +35,17 @@ namespace sy
 			
 			[[nodiscard]] Native_t GetNativeHandle() const { return handle; }
 			[[nodiscard]] VkObjectType GetType() const { return type; }
+			[[nodiscard]] const VulkanContext& GetContext() const { return vulkanContext; }
 
 		protected:
+			void UpdateHandle(const Native_t newHandle)
+			{
+				SY_ASSERT(newHandle != VK_NULL_HANDLE, "Invalid new vulkan handle.");
+				SY_ASSERT(handle == VK_NULL_HANDLE, "Vulkan Handle Overwrite!");
+				handle = newHandle;
+			}
+
+		private:
 			const VulkanContext& vulkanContext;
 			const VulkanDestroyFunction_t destroyFunction;
 			const VkObjectType type;

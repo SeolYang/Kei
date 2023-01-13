@@ -1,8 +1,8 @@
-#include <Core/Core.h>
+#include <PCH.h>
 #include <VK/TextureView.h>
-
-#include "Texture.h"
-#include "VulkanContext.h"
+#include <VK/Texture.h>
+#include <VK/VulkanContext.h>
+#include <VK/Texture.h>
 
 namespace sy::vk
 {
@@ -39,7 +39,10 @@ namespace sy::vk
 				.layerCount = layerCount
 			}
 		};
+
+		Native_t handle = VK_NULL_HANDLE;
 		VK_ASSERT(vkCreateImageView(vulkanContext.GetDevice(), &viewCreateInfo, nullptr, &handle), "Failed to create image view {}.", name);
+		UpdateHandle(handle);
 	}
 
 	TextureView::TextureView(std::string_view name, const VulkanContext& vulkanContext, const Texture& texture, const VkImageViewType type, const uint32_t baseMipLevel, const uint32_t mipLevelCount, const uint32_t baseArrayLayer, const uint32_t layerCount) :

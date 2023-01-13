@@ -1,4 +1,4 @@
-#include <Core/Core.h>
+#include <PCH.h>
 #include <VK/Pipeline.h>
 #include <VK/PipelineBuilder.h>
 #include <VK/VulkanContext.h>
@@ -12,7 +12,9 @@ namespace sy
 			Pipeline(name, vulkanContext, EPipelineType::Graphics, builder.GetLayout())
 		{
 			const auto createInfo = builder.Build();
+			Native_t handle = VK_NULL_HANDLE;
 			VK_ASSERT(vkCreateGraphicsPipelines(vulkanContext.GetDevice(), VK_NULL_HANDLE, 1, &createInfo, nullptr, &handle), "Failed to create graphics pipeline {}.", name);
+			UpdateHandle(handle);
 		}
 
 		Pipeline::Pipeline(std::string_view name, const VulkanContext& vulkanContext,
@@ -20,7 +22,9 @@ namespace sy
 			Pipeline(name, vulkanContext, EPipelineType::Compute, builder.GetLayout())
 		{
 			const auto createInfo = builder.Build();
+			Native_t handle = VK_NULL_HANDLE;
 			VK_ASSERT(vkCreateComputePipelines(vulkanContext.GetDevice(), VK_NULL_HANDLE, 1, &createInfo, nullptr, &handle), "Failed to create compute pipeline {}.", name);
+			UpdateHandle(handle);
 		}
 
 		Pipeline::Pipeline(std::string_view name, const VulkanContext& vulkanContext, EPipelineType pipelineType, VkPipelineLayout layout) :
