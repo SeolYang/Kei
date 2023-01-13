@@ -20,6 +20,7 @@
 #include <VK/DescriptorManager.h>
 #include <VK/CommandPoolManager.h>
 #include <VK/FrameTracker.h>
+#include <VK/PushConstantBuilder.h>
 #include <Math/MathUtils.h>
 #include <Asset/TextureAsset.h>
 #include <Asset/MeshAsset.h>
@@ -45,9 +46,9 @@ namespace sy
 			triFrag = std::make_unique<vk::ShaderModule>("Triangle fragment shader", vulkanContext, "Assets/Shaders/bin/textured_tri_bindless.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
 			std::array descriptorSetLayouts = { descriptorManager.GetDescriptorSetLayout(), };
-			std::array pushConstantRanges = {
-				VkPushConstantRange{ VK_SHADER_STAGE_ALL_GRAPHICS, 0, sizeof(PushConstants) },
-			};
+
+			vk::PushConstantBuilder pushConstantBuilder;
+			pushConstantBuilder.Add<PushConstants>(VK_SHADER_STAGE_ALL_GRAPHICS);
 
 			const vk::VertexInputBuilder vertexInputLayout = BuildVertexInputLayout<VertexPTN>();
 			vk::GraphicsPipelineBuilder basicPipelineBuilder;
@@ -56,7 +57,7 @@ namespace sy
 				.AddShaderStage(*triFrag)
 				.AddViewport(0.f, 0.f, static_cast<float>(windowExtent.width), static_cast<float>(windowExtent.height), 0.0f, 1.0f)
 				.AddScissor(0, 0, windowExtent.width, windowExtent.height)
-				.SetPipelineLayout(pipelineLayoutCache->Request(descriptorSetLayouts, pushConstantRanges))
+				.SetPipelineLayout(pipelineLayoutCache->Request(descriptorSetLayouts, pushConstantBuilder))
 				.SetVertexInputLayout(vertexInputLayout);
 
 			basicPipeline = std::make_unique<vk::Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);

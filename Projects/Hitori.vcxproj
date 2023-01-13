@@ -95,6 +95,7 @@
     <ClInclude Include="..\Source\VK\Fence.h" />
     <ClInclude Include="..\Source\VK\FrameTracker.h" />
     <ClInclude Include="..\Source\VK\LayoutCache.h" />
+    <ClInclude Include="..\Source\VK\PushConstantBuilder.h" />
     <ClInclude Include="..\Source\VK\Sampler.h" />
     <ClInclude Include="..\Source\VK\Synchronization.h" />
     <ClInclude Include="..\Source\VK\Texture.h" />

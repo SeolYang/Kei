@@ -1,6 +1,7 @@
 #include <PCH.h>
 #include <VK/LayoutCache.h>
 #include <VK/VulkanContext.h>
+#include <VK/PushConstantBuilder.h>
 
 namespace sy
 {
@@ -70,13 +71,14 @@ namespace sy
 			}
 		}
 
-		VkPipelineLayout PipelineLayoutCache::Request(const std::span<VkDescriptorSetLayout> descriptorSetLayouts, const std::span<VkPushConstantRange> pushConstantRanges)
+		VkPipelineLayout PipelineLayoutCache::Request(const std::span<VkDescriptorSetLayout> descriptorSetLayouts, const PushConstantBuilder& pushConstantBuilder)
 		{
 			PipelineLayoutInfo pipelineLayoutInfo
 			{
 				.Flags = 0,
 			};
 
+			const auto pushConstantRanges = pushConstantBuilder.Build();
 			pipelineLayoutInfo.DescriptorSetLayouts.assign(descriptorSetLayouts.begin(), descriptorSetLayouts.end());
 			pipelineLayoutInfo.PushConstantRanges.assign(pushConstantRanges.begin(), pushConstantRanges.end());
 
