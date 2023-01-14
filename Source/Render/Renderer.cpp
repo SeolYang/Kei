@@ -72,7 +72,7 @@ namespace sy
 			auto proj = math::PerspectiveYFlipped(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
 			viewProjMat = proj * glm::lookAt(glm::vec3{ 1.5f, 2.f, -5.f }, { 0.f, 0.f ,0.f }, { 0.f ,1.f, 0.f });
 
-			renderPass = std::make_unique<SimpleRenderPass>("Simple Render Pass", vulkanContext, descriptorManager, frameTracker, *basicPipeline);
+			renderPass = std::make_unique<SimpleRenderPass>("Simple Render Pass", vulkanContext, descriptorManager, frameTracker, cmdPoolManager, *basicPipeline);
 		}
 
 		Renderer::~Renderer()
@@ -105,7 +105,7 @@ namespace sy
 				const auto model = glm::rotate(glm::mat4(1.f), elapsedTime, { 0.f, 1.f, 0.f });
 				renderPass->SetTransformData({ viewProjMat * model });
 				renderPass->UpdateBuffers();
-				const auto simpleRenderPassCmdBuffer = renderPass->Render(cmdPoolManager);
+				const auto simpleRenderPassCmdBuffer = renderPass->Render();
 
 				const auto& renderFence = frameTracker.GetCurrentInFlightRenderFence();
 				auto& presentSemaphore = frameTracker.GetCurrentInFlightPresentSemaphore();

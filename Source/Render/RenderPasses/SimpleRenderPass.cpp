@@ -8,13 +8,14 @@
 #include <VK/DescriptorManager.h>
 #include <VK/FrameTracker.h>
 #include <VK/Swapchain.h>
-
-#include "Render/Mesh.h"
+#include <VK/Semaphore.h>
+#include <VK/Fence.h>
+#include <Render/Mesh.h>
 
 namespace sy::render
 {
-	SimpleRenderPass::SimpleRenderPass(std::string_view name, const vk::VulkanContext& vulkanContext, vk::DescriptorManager& descriptorManager, const vk::FrameTracker& frameTracker, const vk::Pipeline& pipeline) :
-	RenderPass(name, vulkanContext, descriptorManager, frameTracker, pipeline),
+	SimpleRenderPass::SimpleRenderPass(const std::string_view name, const vk::VulkanContext& vulkanContext, vk::DescriptorManager& descriptorManager, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, const vk::Pipeline& pipeline) :
+	RenderPass(name, vulkanContext, descriptorManager, frameTracker, cmdPoolManager, pipeline),
 	vertexBuffer(VK_NULL_HANDLE),
 	indexBuffer(VK_NULL_HANDLE),
 	textureDescriptor(-1)
@@ -22,15 +23,28 @@ namespace sy::render
 		for (size_t idx = 0; idx < vk::NumMaxInFlightFrames; ++idx)
 		{
 			transformBuffers[idx] = vk::CreateUniformBuffer<TransformUniformBuffer>("TransformBuffer", vulkanContext);
+
+			auto& graphicsCmdPool = cmdPoolManager.RequestCommandPool(vk::EQueueType::Graphics);
+			auto graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Simple Render Pass Initial Sync");
+			graphicsCmdBuffer->Begin();
+			graphicsCmdBuffer->ChangeAccessPattern(vk::EBufferAccessPattern::None, vk::EBufferAccessPattern::VertexShaderReadUniformBuffer, *transformBuffers[idx]);
+			graphicsCmdBuffer->End();
+
+			const auto& uploadFence = frameTracker.GetCurrentInFlightUploadFence();
+			vulkanContext.SubmitTo(*graphicsCmdBuffer, uploadFence);
+			uploadFence.Wait();
+			uploadFence.Reset();
+
 			transformBufferIndices[idx] = descriptorManager.RequestDescriptor(*transformBuffers[idx]);
 		}
 	}
 
-	vk::ManagedCommandBuffer SimpleRenderPass::Render(vk::CommandPoolManager& cmdPoolManager)
+	vk::ManagedCommandBuffer SimpleRenderPass::Render()
 	{
 		const auto& frameTracker = GetFrameTracker();
 		const auto& descriptorManager = GetDescriptorManager();
 		const auto& pipeline = GetPipeline();
+		auto& cmdPoolManager = GetCommandPoolManager();
 
 		auto& graphicsCmdPool = cmdPoolManager.RequestCommandPool(vk::EQueueType::Graphics);
 		auto graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Render Cmd Buffer");

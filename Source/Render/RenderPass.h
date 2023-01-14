@@ -16,7 +16,7 @@ namespace sy::render
 	class RenderPass : public NamedType, public NonCopyable
 	{
 	public:
-		RenderPass(std::string_view name, const vk::VulkanContext& vulkanContext, vk::DescriptorManager& descriptorManager, const vk::FrameTracker& frameTracker, const vk::Pipeline& pipeline);
+		RenderPass(std::string_view name, const vk::VulkanContext& vulkanContext, vk::DescriptorManager& descriptorManager, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, const vk::Pipeline& pipeline);
 		virtual ~RenderPass() noexcept override = default;
 
 		RenderPass(const RenderPass&) = delete;
@@ -26,17 +26,19 @@ namespace sy::render
 		RenderPass& operator=(RenderPass&&) = delete;
 
 		virtual void UpdateBuffers() { }
-		virtual vk::ManagedCommandBuffer Render(vk::CommandPoolManager& cmdPoolManager) = 0;
+		virtual vk::ManagedCommandBuffer Render() = 0;
 
-		const auto& GetVulkanContext() const { return vulkanContext; }
-		auto& GetDescriptorManager() const { return descriptorManager; }
-		const auto& GetFrameTracker() const { return frameTracker; }
-		const auto& GetPipeline() const { return pipeline; }
+		[[nodiscard]] const auto& GetVulkanContext() const { return vulkanContext; }
+		[[nodiscard]] auto& GetDescriptorManager() const { return descriptorManager; }
+		[[nodiscard]] const auto& GetFrameTracker() const { return frameTracker; }
+		[[nodiscard]] const auto& GetPipeline() const { return pipeline; }
+		[[nodiscard]] auto& GetCommandPoolManager() const { return cmdPoolManager; }
 
 	private:
 		const vk::VulkanContext& vulkanContext;
 		vk::DescriptorManager& descriptorManager;
 		const vk::FrameTracker& frameTracker;
+		vk::CommandPoolManager& cmdPoolManager;
 		const vk::Pipeline& pipeline;
 
 	};
