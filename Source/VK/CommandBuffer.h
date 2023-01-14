@@ -26,8 +26,7 @@ namespace sy::vk
 
 			/** Synchronizations */
 			void ChangeAccessPattern(EBufferAccessPattern srcAccessPattern, EBufferAccessPattern dstAccessPattern, VkBuffer buffer, size_t offset, size_t size) const;
-			void ChangeAccessPattern(EBufferAccessPattern srcAccessPattern, EBufferAccessPattern dstAccessPattern, const Buffer& buffer);
-			void ChangeAccessPattern(ETextureAccessPattern srcAccessPattern, ETextureAccessPattern dstAccessPattern, VkImage image, VkImageAspectFlags aspectMask, uint32_t mipLevelCount = 1, uint32_t baseMipLevel = 0, uint32_t arrayLayerCount = 1, uint32_t baseArrayLayer = 0) const;
+			void ChangeAccessPattern(EBufferAccessPattern srcAccessPattern, EBufferAccessPattern dstAccessPattern, const Buffer& buffer) const;			void ChangeAccessPattern(ETextureAccessPattern srcAccessPattern, ETextureAccessPattern dstAccessPattern, VkImage image, VkImageAspectFlags aspectMask, uint32_t mipLevelCount = 1, uint32_t baseMipLevel = 0, uint32_t arrayLayerCount = 1, uint32_t baseArrayLayer = 0) const;
 			void ChangeAccessPattern(ETextureAccessPattern srcAccessPattern, ETextureAccessPattern dstAccessPattern, const Texture& texture) const;
 
 			/** Binding resources */
@@ -56,7 +55,7 @@ namespace sy::vk
 			void CopyBufferSimple(const Buffer& srcBuffer, size_t srcOffset, const Buffer& dstBuffer, size_t dstOffset, const size_t sizeofData) const;
 
 		private:
-			void BufferMemoryBarrier(VkPipelineStageFlags2 srcStage, VkPipelineStageFlags2 dstStage, VkAccessFlags2 srcAccess, VkAccessFlags2 dstAccess, VkBuffer buffer, size_t offset, size_t size);
+			void BufferMemoryBarrier(VkPipelineStageFlags2 srcStage, VkPipelineStageFlags2 dstStage, VkAccessFlags2 srcAccess, VkAccessFlags2 dstAccess, VkBuffer buffer, size_t offset, size_t size) const;
 			void ImageMemoryBarrier(VkPipelineStageFlags2 srcStage, VkPipelineStageFlags2 dstStage, VkAccessFlags2 srcAccess, VkAccessFlags2 dstAccess, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask, uint32_t mipLevelCount = 1, uint32_t baseMipLevel = 0, uint32_t arrayLayerCount = 1, uint32_t baseArrayLayer = 0) const;
 			void PipelineBarrier(std::span<VkMemoryBarrier2> memoryBarriers, std::span<VkBufferMemoryBarrier2> bufferMemoryBarriers, std::span<VkImageMemoryBarrier2> imageMemoryBarriers) const;
 

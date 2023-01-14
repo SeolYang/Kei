@@ -61,13 +61,24 @@ namespace sy
 			vkCmdEndRendering(GetNativeHandle());
 		}
 
-		void CommandBuffer::ChangeAccessPattern(const EBufferAccessPattern srcAccessPattern, const EBufferAccessPattern dstAccessPattern, VkBuffer buffer, size_t offset, size_t size) const
+		void CommandBuffer::ChangeAccessPattern(const EBufferAccessPattern srcAccessPattern, const EBufferAccessPattern dstAccessPattern, const VkBuffer buffer, const size_t offset, const size_t size) const
 		{
+			const AccessPattern srcAccess = QueryAccessPattern(srcAccessPattern);
+			const AccessPattern dstAccess = QueryAccessPattern(dstAccessPattern);
+			BufferMemoryBarrier(
+				srcAccess.PipelineStage, dstAccess.PipelineStage,
+				srcAccess.Access, dstAccess.Access,
+				buffer, offset, size);
+		}
+
+		void CommandBuffer::ChangeAccessPattern(const EBufferAccessPattern srcAccessPattern, const EBufferAccessPattern dstAccessPattern, const Buffer& buffer) const
+		{
+			ChangeAccessPattern(srcAccessPattern, dstAccessPattern, buffer.GetNativeHandle(), 0, buffer.GetSize());
 		}
 
 		void CommandBuffer::ChangeAccessPattern(const ETextureAccessPattern srcAccessPattern, const ETextureAccessPattern dstAccessPattern,
-		                                               const VkImage image, const VkImageAspectFlags aspectMask, const uint32_t mipLevelCount, const uint32_t baseMipLevel,
-		                                               const uint32_t arrayLayerCount, const uint32_t baseArrayLayer) const
+		                                        const VkImage image, const VkImageAspectFlags aspectMask, const uint32_t mipLevelCount, const uint32_t baseMipLevel,
+		                                        const uint32_t arrayLayerCount, const uint32_t baseArrayLayer) const
 		{
 			const AccessPattern srcAccess = QueryAccessPattern(srcAccessPattern);
 			const AccessPattern dstAccess = QueryAccessPattern(dstAccessPattern);
@@ -181,7 +192,6 @@ namespace sy
 			vkCmdCopyBuffer(GetNativeHandle(), srcBuffer.GetNativeHandle(), dstBuffer.GetNativeHandle(), 1, &bufferCopy);
 		}
 
-
 		void CommandBuffer::ImageMemoryBarrier(const VkPipelineStageFlags2 srcStage, const VkPipelineStageFlags2 dstStage,
 			const VkAccessFlags2 srcAccess, const VkAccessFlags2 dstAccess, const VkImage image, const VkImageLayout oldLayout,
 			const VkImageLayout newLayout, const VkImageAspectFlags aspectMask, const uint32_t mipLevelCount, const uint32_t baseMipLevel,
@@ -214,7 +224,7 @@ namespace sy
 		}
 
 		void CommandBuffer::BufferMemoryBarrier(const VkPipelineStageFlags2 srcStage, const VkPipelineStageFlags2 dstStage,
-			const VkAccessFlags2 srcAccess, const VkAccessFlags2 dstAccess, VkBuffer buffer, const size_t offset, const size_t size)
+			const VkAccessFlags2 srcAccess, const VkAccessFlags2 dstAccess, VkBuffer buffer, const size_t offset, const size_t size) const
 		{
 			const VkBufferMemoryBarrier2 barrier
 			{
