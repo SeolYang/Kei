@@ -317,6 +317,9 @@
     <ClInclude Include="..\Source\VK\PushConstantBuilder.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\VK\ResourceStateTracker.h">
+      <Filter>Source\Vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Assets\Shaders\tri.frag">

@@ -87,9 +87,9 @@ namespace sy
 
 			transferCmdBuffer->Begin();
 			{
-				transferCmdBuffer->ChangeImageAccessPattern(vk::EAccessPattern::None, vk::EAccessPattern::TransferWrite, newTexture->GetNativeHandle(), VK_IMAGE_ASPECT_COLOR_BIT);
+				transferCmdBuffer->ChangeAccessPattern(vk::ETextureAccessPattern::None, vk::ETextureAccessPattern::TransferWrite, *newTexture);
 				transferCmdBuffer->CopyBufferToImageSimple(*stagingBuffer, *newTexture);
-				transferCmdBuffer->ChangeImageAccessPattern(vk::EAccessPattern::TransferWrite, vk::EAccessPattern::FragmentShaderReadSampledImage, newTexture->GetNativeHandle(), VK_IMAGE_ASPECT_COLOR_BIT);
+				transferCmdBuffer->ChangeAccessPattern(vk::ETextureAccessPattern::TransferWrite, vk::ETextureAccessPattern::FragmentShaderReadSampledImage, *newTexture);
 			}
 			transferCmdBuffer->End();
 
@@ -137,7 +137,7 @@ namespace sy
 
 			transferCmdBuffer->Begin();
 			{
-				transferCmdBuffer->ChangeImageAccessPattern(vk::EAccessPattern::None, vk::EAccessPattern::DepthStencilAttachmentWrite, res->GetNativeHandle(), VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT);
+				transferCmdBuffer->ChangeAccessPattern(vk::ETextureAccessPattern::None, vk::ETextureAccessPattern::DepthStencilAttachmentWrite, *res);
 			}
 			transferCmdBuffer->End();
 

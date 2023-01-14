@@ -3,7 +3,7 @@
 
 namespace sy::vk
 {
-	enum class EAccessPattern
+	enum class EBufferAccessPattern
 	{
 		None,
 
@@ -14,37 +14,31 @@ namespace sy::vk
 
 		VertexShaderReadUniformBuffer,
 		VertexShaderReadStorageBuffer,
-		VertexShaderReadSampledImage,
 		VertexShaderReadUniformTexelBuffer,
 		VertexShaderReadGeneral,
 
 		TessellationControlShaderReadUniformBuffer,
 		TessellationControlShaderReadStorageBuffer,
-		TessellationControlShaderReadSampledImage,
 		TessellationControlShaderReadUniformTexelBuffer,
 		TessellationControlShaderReadGeneral,
 
 		TessellationEvaluationShaderReadUniformBuffer,
 		TessellationEvaluationShaderReadStorageBuffer,
-		TessellationEvaluationShaderReadSampledImage,
 		TessellationEvaluationShaderReadUniformTexelBuffer,
 		TessellationEvaluationShaderReadGeneral,
 
 		GeometryShaderReadUniformBuffer,
 		GeometryShaderReadStorageBuffer,
-		GeometryShaderReadSampledImage,
 		GeometryShaderReadUniformTexelBuffer,
 		GeometryShaderReadGeneral,
 
 		TaskShaderReadUniformBuffer,
 		TaskShaderReadStorageBuffer,
-		TaskShaderReadSampledImage,
 		TaskShaderReadUniformTexelBuffer,
 		TaskShaderReadGeneral,
 
 		MeshShaderReadUniformBuffer,
 		MeshShaderReadStorageBuffer,
-		MeshShaderReadSampledImage,
 		MeshShaderReadUniformTexelBuffer,
 		MeshShaderReadGeneral,
 
@@ -54,8 +48,77 @@ namespace sy::vk
 
 		FragmentShaderReadUniformBuffer,
 		FragmentShaderReadStorageBuffer,
-		FragmentShaderReadSampledImage,
 		FragmentShaderReadUniformTexelBuffer,
+		FragmentShaderReadGeneral,
+
+		ComputeShaderReadUniformBuffer,
+		ComputeShaderReadStorageBuffer,
+		ComputeShaderReadUniformTexelBuffer,
+		ComputeShaderReadGeneral,
+
+		AnyShaderReadUniformBuffer,
+		AnyShaderReadStorageBuffer,
+		AnyShaderReadUniformBufferOrVertexBuffer,
+		AnyShaderReadUniformTexelBuffer,
+		AnyShaderReadGeneral,
+
+		TransferRead,
+		HostRead,
+
+		ConditionalRenderingRead,
+		RayTracingShaderAccelerationStructureRead,
+		AccelerationStructureBuildRead,
+		EndOfRead,
+
+		CommandBufferWrite,
+		VertexShaderWrite,
+		TessellationControlShaderWrite,
+		TessellationEvaluationShaderWrite,
+		GeometryShaderWrite,
+		TaskShaderWrite,
+		MeshShaderWrite,
+		TransformFeedbackWrite,
+		TransformFeedbackCounterWrite,
+		FragmentShaderWrite,
+		ComputeShaderWrite,
+		AnyShaderWrite,
+		TransferWrite,
+
+		HostPreInitialized,
+		HostWrite,
+		AccelerationStructureBuildWrite,
+		ColorAttachmentReadWrite,
+
+		General
+	};
+
+	enum class ETextureAccessPattern
+	{
+		None,
+
+		VertexShaderReadSampledImage,
+		VertexShaderReadGeneral,
+
+		TessellationControlShaderReadSampledImage,
+		TessellationControlShaderReadGeneral,
+
+		TessellationEvaluationShaderReadSampledImage,
+		TessellationEvaluationShaderReadGeneral,
+
+		GeometryShaderReadSampledImage,
+		GeometryShaderReadGeneral,
+
+		TaskShaderReadSampledImage,
+		TaskShaderReadGeneral,
+
+		MeshShaderReadSampledImage,
+		MeshShaderReadGeneral,
+
+		TransformFeedbackCounterRead,
+		FragmentDensityMapRead,
+		ShadingRateRead,
+
+		FragmentShaderReadSampledImage,
 		FragmentShaderReadColorInputAttachment,
 		FragmentShaderReadDepthStencilInputAttachment,
 		FragmentShaderReadGeneral,
@@ -64,17 +127,10 @@ namespace sy::vk
 		ColorAttachmentAdvancedBlending,
 		DepthStencilAttachmentRead,
 
-		ComputeShaderReadUniformBuffer,
-		ComputeShaderReadStorageBuffer,
 		ComputeShaderReadSampledImage,
-		ComputeShaderReadUniformTexelBuffer,
 		ComputeShaderReadGeneral,
 
-		AnyShaderReadUniformBuffer,
-		AnyShaderReadStorageBuffer,
-		AnyShaderReadUniformBufferOrVertexBuffer,
 		AnyShaderReadSampledImage,
-		AnyShaderReadUniformTexelBuffer,
 		AnyShaderReadGeneral,
 
 		TransferRead,
@@ -119,266 +175,384 @@ namespace sy::vk
 		VkImageLayout ImageLayout;
 	};
 
-	static AccessPattern QueryAccessPattern(const EAccessPattern pattern)
+	static AccessPattern QueryAccessPattern(const ETextureAccessPattern pattern)
 	{
 		switch (pattern)
 		{
-		case EAccessPattern::None:
+		case ETextureAccessPattern::None:
 			return { 0, 0, VK_IMAGE_LAYOUT_UNDEFINED };
 
-		case EAccessPattern::CommandBufferRead:
-			return { VK_PIPELINE_STAGE_2_COMMAND_PREPROCESS_BIT_NV, VK_ACCESS_2_COMMAND_PREPROCESS_READ_BIT_NV, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::IndirectBuffer:
-			return { VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT, VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::IndexBuffer:
-			return { VK_PIPELINE_STAGE_2_VERTEX_INPUT_BIT, VK_ACCESS_2_INDEX_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::VertexBuffer:
-			return { VK_PIPELINE_STAGE_2_VERTEX_INPUT_BIT, VK_ACCESS_2_VERTEX_ATTRIBUTE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::VertexShaderReadUniformBuffer:
-			return { VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::VertexShaderReadStorageBuffer:
-			return { VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::VertexShaderReadSampledImage:
+		case ETextureAccessPattern::VertexShaderReadSampledImage:
 			return { VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
-		case EAccessPattern::VertexShaderReadUniformTexelBuffer:
-			return { VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-
-		case EAccessPattern::VertexShaderReadGeneral:
+		case ETextureAccessPattern::VertexShaderReadGeneral:
 			return { VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::TessellationControlShaderReadUniformBuffer:
-			return { VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::TessellationControlShaderReadStorageBuffer:
-			return { VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::TessellationControlShaderReadSampledImage:
+		case ETextureAccessPattern::TessellationControlShaderReadSampledImage:
 			return { VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
-		case EAccessPattern::TessellationControlShaderReadUniformTexelBuffer:
-			return { VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-
-		case EAccessPattern::TessellationControlShaderReadGeneral:
+		case ETextureAccessPattern::TessellationControlShaderReadGeneral:
 			return { VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::TessellationEvaluationShaderReadUniformBuffer:
-			return { VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::TessellationEvaluationShaderReadStorageBuffer:
-			return { VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::TessellationEvaluationShaderReadSampledImage:
+		case ETextureAccessPattern::TessellationEvaluationShaderReadSampledImage:
 			return { VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
-		case EAccessPattern::TessellationEvaluationShaderReadUniformTexelBuffer:
-			return { VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-
-		case EAccessPattern::TessellationEvaluationShaderReadGeneral:
+		case ETextureAccessPattern::TessellationEvaluationShaderReadGeneral:
 			return { VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::GeometryShaderReadUniformBuffer:
-			return { VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::GeometryShaderReadStorageBuffer:
-			return { VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::GeometryShaderReadSampledImage:
+		case ETextureAccessPattern::GeometryShaderReadSampledImage:
 			return { VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
-		case EAccessPattern::GeometryShaderReadUniformTexelBuffer:
-			return { VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-
-		case EAccessPattern::GeometryShaderReadGeneral:
+		case ETextureAccessPattern::GeometryShaderReadGeneral:
 			return { VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::TaskShaderReadUniformBuffer:
-			return { VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_NV, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::TaskShaderReadStorageBuffer:
-			return { VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_NV, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::TaskShaderReadSampledImage:
+		case ETextureAccessPattern::TaskShaderReadSampledImage:
 			return { VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_NV, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
-		case EAccessPattern::TaskShaderReadUniformTexelBuffer:
-			return { VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_NV, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-
-		case EAccessPattern::TaskShaderReadGeneral:
+		case ETextureAccessPattern::TaskShaderReadGeneral:
 			return { VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_NV, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::MeshShaderReadUniformBuffer:
-			return { VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_NV, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::MeshShaderReadStorageBuffer:
-			return { VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_NV, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::MeshShaderReadSampledImage:
+		case ETextureAccessPattern::MeshShaderReadSampledImage:
 			return { VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_NV, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
-		case EAccessPattern::MeshShaderReadUniformTexelBuffer:
-			return { VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_NV, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-
-		case EAccessPattern::MeshShaderReadGeneral:
+		case ETextureAccessPattern::MeshShaderReadGeneral:
 			return { VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_NV, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::TransformFeedbackCounterRead:
+		case ETextureAccessPattern::TransformFeedbackCounterRead:
 			return { VK_PIPELINE_STAGE_2_TRANSFORM_FEEDBACK_BIT_EXT, VK_ACCESS_2_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT, VK_IMAGE_LAYOUT_UNDEFINED };
 
-		case EAccessPattern::FragmentDensityMapRead:
+		case ETextureAccessPattern::FragmentDensityMapRead:
 			return { VK_PIPELINE_STAGE_2_FRAGMENT_DENSITY_PROCESS_BIT_EXT, VK_ACCESS_2_FRAGMENT_DENSITY_MAP_READ_BIT_EXT, VK_IMAGE_LAYOUT_FRAGMENT_DENSITY_MAP_OPTIMAL_EXT };
 
-		case EAccessPattern::ShadingRateRead:
+		case ETextureAccessPattern::ShadingRateRead:
 			return { VK_PIPELINE_STAGE_2_SHADING_RATE_IMAGE_BIT_NV, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADING_RATE_OPTIMAL_NV };
 
-		case EAccessPattern::FragmentShaderReadUniformBuffer:
-			return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::FragmentShaderReadStorageBuffer:
-			return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::FragmentShaderReadSampledImage:
+		case ETextureAccessPattern::FragmentShaderReadSampledImage:
 			return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT_KHR, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
-		case EAccessPattern::FragmentShaderReadUniformTexelBuffer:
-			return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-
-		case EAccessPattern::FragmentShaderReadColorInputAttachment:
+		case ETextureAccessPattern::FragmentShaderReadColorInputAttachment:
 			return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_INPUT_ATTACHMENT_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
-		case EAccessPattern::FragmentShaderReadDepthStencilInputAttachment:
+		case ETextureAccessPattern::FragmentShaderReadDepthStencilInputAttachment:
 			return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_INPUT_ATTACHMENT_READ_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL };
 
-		case EAccessPattern::FragmentShaderReadGeneral:
+		case ETextureAccessPattern::FragmentShaderReadGeneral:
 			return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::ColorAttachmentRead:
+		case ETextureAccessPattern::ColorAttachmentRead:
 			return { VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
 
-		case EAccessPattern::ColorAttachmentAdvancedBlending:
+		case ETextureAccessPattern::ColorAttachmentAdvancedBlending:
 			return { VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_READ_NONCOHERENT_BIT_EXT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
 
-		case EAccessPattern::DepthStencilAttachmentRead:
+		case ETextureAccessPattern::DepthStencilAttachmentRead:
 			return { VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT, VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL };
 
-		case EAccessPattern::ComputeShaderReadUniformBuffer:
-			return { VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::ComputeShaderReadStorageBuffer:
-			return { VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::ComputeShaderReadSampledImage:
+		case ETextureAccessPattern::ComputeShaderReadSampledImage:
 			return { VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
-		case EAccessPattern::ComputeShaderReadUniformTexelBuffer:
-			return { VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-
-		case EAccessPattern::ComputeShaderReadGeneral:
+		case ETextureAccessPattern::ComputeShaderReadGeneral:
 			return { VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::AnyShaderReadUniformBuffer:
-			return { VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
-
-		case EAccessPattern::AnyShaderReadSampledImage:
+		case ETextureAccessPattern::AnyShaderReadSampledImage:
 			return { VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
-		case EAccessPattern::AnyShaderReadUniformTexelBuffer:
-			return { VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-
-		case EAccessPattern::AnyShaderReadGeneral:
+		case ETextureAccessPattern::AnyShaderReadGeneral:
 			return { VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::TransferRead:
+		case ETextureAccessPattern::TransferRead:
 			return { VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL };
 
-		case EAccessPattern::HostRead:
+		case ETextureAccessPattern::HostRead:
 			return { VK_PIPELINE_STAGE_2_HOST_BIT, VK_ACCESS_2_HOST_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::Present:
+		case ETextureAccessPattern::Present:
 			return { 0, 0, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR };
 
-		case EAccessPattern::ConditionalRenderingRead:
+		case ETextureAccessPattern::ConditionalRenderingRead:
 			return { VK_PIPELINE_STAGE_2_CONDITIONAL_RENDERING_BIT_EXT, VK_ACCESS_2_CONDITIONAL_RENDERING_READ_BIT_EXT, VK_IMAGE_LAYOUT_UNDEFINED };
 
-		case EAccessPattern::RayTracingShaderAccelerationStructureRead:
+		case ETextureAccessPattern::RayTracingShaderAccelerationStructureRead:
 			return { VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR, VK_ACCESS_2_ACCELERATION_STRUCTURE_READ_BIT_KHR, VK_IMAGE_LAYOUT_UNDEFINED };
 
-		case EAccessPattern::AccelerationStructureBuildRead:
+		case ETextureAccessPattern::AccelerationStructureBuildRead:
 			return { VK_PIPELINE_STAGE_2_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, VK_ACCESS_2_ACCELERATION_STRUCTURE_READ_BIT_KHR, VK_IMAGE_LAYOUT_UNDEFINED };
 
-		case EAccessPattern::EndOfRead:
+		case ETextureAccessPattern::EndOfRead:
 			return { 0, 0, VK_IMAGE_LAYOUT_UNDEFINED };
 
-		case EAccessPattern::CommandBufferWrite:
+		case ETextureAccessPattern::CommandBufferWrite:
 			return { VK_PIPELINE_STAGE_2_COMMAND_PREPROCESS_BIT_NV, VK_ACCESS_2_COMMAND_PREPROCESS_WRITE_BIT_NV, VK_IMAGE_LAYOUT_UNDEFINED };
 
-		case EAccessPattern::VertexShaderWrite:
+		case ETextureAccessPattern::VertexShaderWrite:
 			return { VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::TessellationControlShaderWrite:
+		case ETextureAccessPattern::TessellationControlShaderWrite:
 			return { VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::TessellationEvaluationShaderWrite:
+		case ETextureAccessPattern::TessellationEvaluationShaderWrite:
 			return { VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::GeometryShaderWrite:
+		case ETextureAccessPattern::GeometryShaderWrite:
 			return { VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::TaskShaderWrite:
+		case ETextureAccessPattern::TaskShaderWrite:
 			return { VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_NV, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::MeshShaderWrite:
+		case ETextureAccessPattern::MeshShaderWrite:
 			return { VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_NV, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::TransformFeedbackWrite:
+		case ETextureAccessPattern::TransformFeedbackWrite:
 			return { VK_PIPELINE_STAGE_2_TRANSFORM_FEEDBACK_BIT_EXT, VK_ACCESS_2_TRANSFORM_FEEDBACK_WRITE_BIT_EXT, VK_IMAGE_LAYOUT_UNDEFINED };
 
-		case EAccessPattern::TransformFeedbackCounterWrite:
+		case ETextureAccessPattern::TransformFeedbackCounterWrite:
 			return { VK_PIPELINE_STAGE_2_TRANSFORM_FEEDBACK_BIT_EXT, VK_ACCESS_2_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT, VK_IMAGE_LAYOUT_UNDEFINED };
 
-		case EAccessPattern::FragmentShaderWrite:
+		case ETextureAccessPattern::FragmentShaderWrite:
 			return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::ColorAttachmentWrite:
+		case ETextureAccessPattern::ColorAttachmentWrite:
 			return { VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
 
-		case EAccessPattern::DepthStencilAttachmentWrite:
+		case ETextureAccessPattern::DepthStencilAttachmentWrite:
 			return { VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT, VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
 
-		case EAccessPattern::DepthAttachmentWriteStencilReadOnly:
+		case ETextureAccessPattern::DepthAttachmentWriteStencilReadOnly:
 			return { VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT, VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL_KHR };
 
-		case EAccessPattern::StencilAttachmentWriteDepthReadOnly:
+		case ETextureAccessPattern::StencilAttachmentWriteDepthReadOnly:
 			return { VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT, VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL_KHR };
 
-		case EAccessPattern::ComputeShaderWrite:
+		case ETextureAccessPattern::ComputeShaderWrite:
 			return { VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::AnyShaderWrite:
+		case ETextureAccessPattern::AnyShaderWrite:
 			return { VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::TransferWrite:
+		case ETextureAccessPattern::TransferWrite:
 			return { VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL };
 
-		case EAccessPattern::HostPreInitialized:
+		case ETextureAccessPattern::HostPreInitialized:
 			return { VK_PIPELINE_STAGE_2_HOST_BIT, VK_ACCESS_2_HOST_WRITE_BIT, VK_IMAGE_LAYOUT_PREINITIALIZED };
 
-		case EAccessPattern::HostWrite:
+		case ETextureAccessPattern::HostWrite:
 			return { VK_PIPELINE_STAGE_2_HOST_BIT, VK_ACCESS_2_HOST_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
 
-		case EAccessPattern::AccelerationStructureBuildWrite:
+		case ETextureAccessPattern::AccelerationStructureBuildWrite:
 			return { VK_PIPELINE_STAGE_2_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, VK_ACCESS_2_ACCELERATION_STRUCTURE_WRITE_BIT_KHR, VK_IMAGE_LAYOUT_UNDEFINED };
 
-		case EAccessPattern::ColorAttachmentReadWrite:
+		case ETextureAccessPattern::ColorAttachmentReadWrite:
 			return { VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
 
-		case EAccessPattern::General:
+		case ETextureAccessPattern::General:
+		default:
+			return { VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
+		}
+	}
+
+	static AccessPattern QueryAccessPattern(const EBufferAccessPattern pattern)
+	{
+		switch (pattern)
+		{
+		case EBufferAccessPattern::None:
+			return { 0, 0, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::CommandBufferRead:
+			return { VK_PIPELINE_STAGE_2_COMMAND_PREPROCESS_BIT_NV, VK_ACCESS_2_COMMAND_PREPROCESS_READ_BIT_NV, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::IndirectBuffer:
+			return { VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT, VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::IndexBuffer:
+			return { VK_PIPELINE_STAGE_2_VERTEX_INPUT_BIT, VK_ACCESS_2_INDEX_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::VertexBuffer:
+			return { VK_PIPELINE_STAGE_2_VERTEX_INPUT_BIT, VK_ACCESS_2_VERTEX_ATTRIBUTE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::VertexShaderReadUniformBuffer:
+			return { VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::VertexShaderReadStorageBuffer:
+			return { VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::VertexShaderReadUniformTexelBuffer:
+			return { VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
+		case EBufferAccessPattern::VertexShaderReadGeneral:
+			return { VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::TessellationControlShaderReadUniformBuffer:
+			return { VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::TessellationControlShaderReadStorageBuffer:
+			return { VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::TessellationControlShaderReadUniformTexelBuffer:
+			return { VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
+		case EBufferAccessPattern::TessellationControlShaderReadGeneral:
+			return { VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::TessellationEvaluationShaderReadUniformBuffer:
+			return { VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::TessellationEvaluationShaderReadStorageBuffer:
+			return { VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::TessellationEvaluationShaderReadUniformTexelBuffer:
+			return { VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
+		case EBufferAccessPattern::TessellationEvaluationShaderReadGeneral:
+			return { VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::GeometryShaderReadUniformBuffer:
+			return { VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::GeometryShaderReadStorageBuffer:
+			return { VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::GeometryShaderReadUniformTexelBuffer:
+			return { VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
+		case EBufferAccessPattern::GeometryShaderReadGeneral:
+			return { VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::TaskShaderReadUniformBuffer:
+			return { VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_NV, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::TaskShaderReadStorageBuffer:
+			return { VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_NV, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::TaskShaderReadUniformTexelBuffer:
+			return { VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_NV, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
+		case EBufferAccessPattern::TaskShaderReadGeneral:
+			return { VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_NV, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::MeshShaderReadUniformBuffer:
+			return { VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_NV, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::MeshShaderReadStorageBuffer:
+			return { VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_NV, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::MeshShaderReadUniformTexelBuffer:
+			return { VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_NV, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
+		case EBufferAccessPattern::MeshShaderReadGeneral:
+			return { VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_NV, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::TransformFeedbackCounterRead:
+			return { VK_PIPELINE_STAGE_2_TRANSFORM_FEEDBACK_BIT_EXT, VK_ACCESS_2_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::FragmentDensityMapRead:
+			return { VK_PIPELINE_STAGE_2_FRAGMENT_DENSITY_PROCESS_BIT_EXT, VK_ACCESS_2_FRAGMENT_DENSITY_MAP_READ_BIT_EXT, VK_IMAGE_LAYOUT_FRAGMENT_DENSITY_MAP_OPTIMAL_EXT };
+
+		case EBufferAccessPattern::ShadingRateRead:
+			return { VK_PIPELINE_STAGE_2_SHADING_RATE_IMAGE_BIT_NV, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADING_RATE_OPTIMAL_NV };
+
+		case EBufferAccessPattern::FragmentShaderReadUniformBuffer:
+			return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::FragmentShaderReadStorageBuffer:
+			return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::FragmentShaderReadUniformTexelBuffer:
+			return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
+		case EBufferAccessPattern::FragmentShaderReadGeneral:
+			return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::ComputeShaderReadUniformBuffer:
+			return { VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::ComputeShaderReadStorageBuffer:
+			return { VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::ComputeShaderReadUniformTexelBuffer:
+			return { VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
+		case EBufferAccessPattern::ComputeShaderReadGeneral:
+			return { VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::AnyShaderReadUniformBuffer:
+			return { VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, VK_ACCESS_2_UNIFORM_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::AnyShaderReadUniformTexelBuffer:
+			return { VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
+		case EBufferAccessPattern::AnyShaderReadGeneral:
+			return { VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::TransferRead:
+			return { VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL };
+
+		case EBufferAccessPattern::HostRead:
+			return { VK_PIPELINE_STAGE_2_HOST_BIT, VK_ACCESS_2_HOST_READ_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::ConditionalRenderingRead:
+			return { VK_PIPELINE_STAGE_2_CONDITIONAL_RENDERING_BIT_EXT, VK_ACCESS_2_CONDITIONAL_RENDERING_READ_BIT_EXT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::RayTracingShaderAccelerationStructureRead:
+			return { VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR, VK_ACCESS_2_ACCELERATION_STRUCTURE_READ_BIT_KHR, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::AccelerationStructureBuildRead:
+			return { VK_PIPELINE_STAGE_2_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, VK_ACCESS_2_ACCELERATION_STRUCTURE_READ_BIT_KHR, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::EndOfRead:
+			return { 0, 0, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::CommandBufferWrite:
+			return { VK_PIPELINE_STAGE_2_COMMAND_PREPROCESS_BIT_NV, VK_ACCESS_2_COMMAND_PREPROCESS_WRITE_BIT_NV, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::VertexShaderWrite:
+			return { VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::TessellationControlShaderWrite:
+			return { VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::TessellationEvaluationShaderWrite:
+			return { VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::GeometryShaderWrite:
+			return { VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::TaskShaderWrite:
+			return { VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_NV, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::MeshShaderWrite:
+			return { VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_NV, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::TransformFeedbackWrite:
+			return { VK_PIPELINE_STAGE_2_TRANSFORM_FEEDBACK_BIT_EXT, VK_ACCESS_2_TRANSFORM_FEEDBACK_WRITE_BIT_EXT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::TransformFeedbackCounterWrite:
+			return { VK_PIPELINE_STAGE_2_TRANSFORM_FEEDBACK_BIT_EXT, VK_ACCESS_2_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::FragmentShaderWrite:
+			return { VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::ComputeShaderWrite:
+			return { VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::AnyShaderWrite:
+			return { VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, VK_ACCESS_2_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::TransferWrite:
+			return { VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL };
+
+		case EBufferAccessPattern::HostPreInitialized:
+			return { VK_PIPELINE_STAGE_2_HOST_BIT, VK_ACCESS_2_HOST_WRITE_BIT, VK_IMAGE_LAYOUT_PREINITIALIZED };
+
+		case EBufferAccessPattern::HostWrite:
+			return { VK_PIPELINE_STAGE_2_HOST_BIT, VK_ACCESS_2_HOST_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
+
+		case EBufferAccessPattern::AccelerationStructureBuildWrite:
+			return { VK_PIPELINE_STAGE_2_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, VK_ACCESS_2_ACCELERATION_STRUCTURE_WRITE_BIT_KHR, VK_IMAGE_LAYOUT_UNDEFINED };
+
+		case EBufferAccessPattern::ColorAttachmentReadWrite:
+			return { VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
+
+		case EBufferAccessPattern::General:
 		default:
 			return { VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
 		}

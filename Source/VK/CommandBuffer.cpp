@@ -61,9 +61,13 @@ namespace sy
 			vkCmdEndRendering(GetNativeHandle());
 		}
 
-		void CommandBuffer::ChangeImageAccessPattern(const EAccessPattern srcAccessPattern, const EAccessPattern dstAccessPattern,
-			const VkImage image, const VkImageAspectFlags aspectMask, const uint32_t mipLevelCount, const uint32_t baseMipLevel,
-			const uint32_t arrayLayerCount, const uint32_t baseArrayLayer) const
+		void CommandBuffer::ChangeAccessPattern(const EBufferAccessPattern srcAccessPattern, const EBufferAccessPattern dstAccessPattern, VkBuffer buffer, size_t offset, size_t size) const
+		{
+		}
+
+		void CommandBuffer::ChangeAccessPattern(const ETextureAccessPattern srcAccessPattern, const ETextureAccessPattern dstAccessPattern,
+		                                               const VkImage image, const VkImageAspectFlags aspectMask, const uint32_t mipLevelCount, const uint32_t baseMipLevel,
+		                                               const uint32_t arrayLayerCount, const uint32_t baseArrayLayer) const
 		{
 			const AccessPattern srcAccess = QueryAccessPattern(srcAccessPattern);
 			const AccessPattern dstAccess = QueryAccessPattern(dstAccessPattern);
@@ -75,53 +79,11 @@ namespace sy
 				aspectMask, mipLevelCount, baseMipLevel, arrayLayerCount, baseArrayLayer);
 		}
 
-		void CommandBuffer::ImageMemoryBarrier(const VkPipelineStageFlags2 srcStage, const VkPipelineStageFlags2 dstStage,
-			const VkAccessFlags2 srcAccess, const VkAccessFlags2 dstAccess, const VkImage image, const VkImageLayout oldLayout,
-			const VkImageLayout newLayout, const VkImageAspectFlags aspectMask, const uint32_t mipLevelCount, const uint32_t baseMipLevel,
-			const uint32_t arrayLayerCount, const uint32_t baseArrayLayer) const
+		void CommandBuffer::ChangeAccessPattern(const ETextureAccessPattern srcAccessPattern, const ETextureAccessPattern dstAccessPattern, const Texture& texture) const
 		{
-			const VkImageMemoryBarrier2 barrier
-			{
-				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-				.pNext = nullptr,
-				.srcStageMask = srcStage,
-				.srcAccessMask = srcAccess,
-				.dstStageMask = dstStage,
-				.dstAccessMask = dstAccess,
-				.oldLayout = oldLayout,
-				.newLayout = newLayout,
-				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-				.image = image,
-				.subresourceRange = {
-					.aspectMask = aspectMask,
-					.baseMipLevel = baseMipLevel,
-					.levelCount = mipLevelCount,
-					.baseArrayLayer = baseArrayLayer,
-					.layerCount = arrayLayerCount,
-				}
-			};
-
-			VkImageMemoryBarrier2 barriers[] = { barrier };
-			PipelineBarrier({}, {}, barriers);
+			ChangeAccessPattern(srcAccessPattern, dstAccessPattern, texture.GetNativeHandle(), FormatToImageAspect(texture.GetFormat()), texture.GetMipLevels(), 0, 1, 0);
 		}
 
-		void CommandBuffer::PipelineBarrier(std::span<VkMemoryBarrier2> memoryBarriers, std::span<VkBufferMemoryBarrier2> bufferMemoryBarriers, std::span<VkImageMemoryBarrier2> imageMemoryBarriers) const
-		{
-			const VkDependencyInfo dependencyInfo
-			{
-				.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-				.pNext = nullptr,
-				.memoryBarrierCount = static_cast<uint32_t>(memoryBarriers.size()),
-				.pMemoryBarriers = memoryBarriers.data(),
-				.bufferMemoryBarrierCount = static_cast<uint32_t>(bufferMemoryBarriers.size()),
-				.pBufferMemoryBarriers = bufferMemoryBarriers.data(),
-				.imageMemoryBarrierCount = static_cast<uint32_t>(imageMemoryBarriers.size()),
-				.pImageMemoryBarriers = imageMemoryBarriers.data()
-			};
-
-			vkCmdPipelineBarrier2(GetNativeHandle(), &dependencyInfo);
-		}
 
 		void CommandBuffer::BindPipeline(const Pipeline& pipeline) const
 		{
@@ -217,6 +179,76 @@ namespace sy
 			};
 
 			vkCmdCopyBuffer(GetNativeHandle(), srcBuffer.GetNativeHandle(), dstBuffer.GetNativeHandle(), 1, &bufferCopy);
+		}
+
+
+		void CommandBuffer::ImageMemoryBarrier(const VkPipelineStageFlags2 srcStage, const VkPipelineStageFlags2 dstStage,
+			const VkAccessFlags2 srcAccess, const VkAccessFlags2 dstAccess, const VkImage image, const VkImageLayout oldLayout,
+			const VkImageLayout newLayout, const VkImageAspectFlags aspectMask, const uint32_t mipLevelCount, const uint32_t baseMipLevel,
+			const uint32_t arrayLayerCount, const uint32_t baseArrayLayer) const
+		{
+			const VkImageMemoryBarrier2 barrier
+			{
+				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+				.pNext = nullptr,
+				.srcStageMask = srcStage,
+				.srcAccessMask = srcAccess,
+				.dstStageMask = dstStage,
+				.dstAccessMask = dstAccess,
+				.oldLayout = oldLayout,
+				.newLayout = newLayout,
+				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+				.image = image,
+				.subresourceRange = {
+					.aspectMask = aspectMask,
+					.baseMipLevel = baseMipLevel,
+					.levelCount = mipLevelCount,
+					.baseArrayLayer = baseArrayLayer,
+					.layerCount = arrayLayerCount,
+				}
+			};
+
+			VkImageMemoryBarrier2 barriers[] = { barrier };
+			PipelineBarrier({}, {}, barriers);
+		}
+
+		void CommandBuffer::BufferMemoryBarrier(const VkPipelineStageFlags2 srcStage, const VkPipelineStageFlags2 dstStage,
+			const VkAccessFlags2 srcAccess, const VkAccessFlags2 dstAccess, VkBuffer buffer, const size_t offset, const size_t size)
+		{
+			const VkBufferMemoryBarrier2 barrier
+			{
+				VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2,
+				nullptr,
+				srcStage,
+				srcAccess,
+				dstStage,
+				dstAccess,
+				VK_QUEUE_FAMILY_IGNORED,
+				VK_QUEUE_FAMILY_IGNORED,
+				buffer,
+				offset, size
+			};
+
+			VkBufferMemoryBarrier2 barriers[] = { barrier };
+			PipelineBarrier({}, barriers, {});
+		}
+
+		void CommandBuffer::PipelineBarrier(std::span<VkMemoryBarrier2> memoryBarriers, std::span<VkBufferMemoryBarrier2> bufferMemoryBarriers, std::span<VkImageMemoryBarrier2> imageMemoryBarriers) const
+		{
+			const VkDependencyInfo dependencyInfo
+			{
+				.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+				.pNext = nullptr,
+				.memoryBarrierCount = static_cast<uint32_t>(memoryBarriers.size()),
+				.pMemoryBarriers = memoryBarriers.data(),
+				.bufferMemoryBarrierCount = static_cast<uint32_t>(bufferMemoryBarriers.size()),
+				.pBufferMemoryBarriers = bufferMemoryBarriers.data(),
+				.imageMemoryBarrierCount = static_cast<uint32_t>(imageMemoryBarriers.size()),
+				.pImageMemoryBarriers = imageMemoryBarriers.data()
+			};
+
+			vkCmdPipelineBarrier2(GetNativeHandle(), &dependencyInfo);
 		}
 	}
 }

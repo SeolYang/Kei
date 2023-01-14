@@ -36,7 +36,7 @@ namespace sy::render
 		auto graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Render Cmd Buffer");
 		graphicsCmdBuffer->Begin();
 		{
-			graphicsCmdBuffer->ChangeImageAccessPattern(vk::EAccessPattern::None, vk::EAccessPattern::ColorAttachmentWrite, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
+			graphicsCmdBuffer->ChangeAccessPattern(vk::ETextureAccessPattern::None, vk::ETextureAccessPattern::ColorAttachmentWrite, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
 
 			std::array colorAttachmentInfos = { swapchainAttachmentInfo };
 			std::array depthAttachmentInfos = { depthAttachmentInfo };
@@ -79,7 +79,7 @@ namespace sy::render
 				graphicsCmdBuffer->DrawIndexed(numIndices, 1, 0, 0, 0);
 			}
 			graphicsCmdBuffer->EndRendering();
-			graphicsCmdBuffer->ChangeImageAccessPattern(vk::EAccessPattern::ColorAttachmentWrite, vk::EAccessPattern::Present, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
+			graphicsCmdBuffer->ChangeAccessPattern(vk::ETextureAccessPattern::ColorAttachmentWrite, vk::ETextureAccessPattern::Present, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
 		}
 		graphicsCmdBuffer->End();
 
