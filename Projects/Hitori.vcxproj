@@ -13,7 +13,7 @@
   <ItemGroup>
     <ClCompile Include="..\Source\Asset\AssetConverter.cpp" />
     <ClCompile Include="..\Source\Asset\AssetCore.cpp" />
-    <ClCompile Include="..\Source\Asset\MeshAsset.cpp" />
+    <ClCompile Include="..\Source\Asset\ModelAsset.cpp" />
     <ClCompile Include="..\Source\Asset\TextureAsset.cpp" />
     <ClCompile Include="..\Source\Audio\AudioContext.cpp" />
     <ClCompile Include="..\Source\Core\CommandLineParser.cpp" />
@@ -59,11 +59,11 @@
   <ItemGroup>
     <ClInclude Include="..\Source\Asset\AssetConverter.h" />
     <ClInclude Include="..\Source\Asset\AssetCore.h" />
-    <ClInclude Include="..\Source\Asset\MeshAsset.h" />
+    <ClInclude Include="..\Source\Asset\ModelAsset.h" />
     <ClInclude Include="..\Source\Asset\TextureAsset.h" />
     <ClInclude Include="..\Source\Audio\AudioContext.h" />
-    <ClInclude Include="..\Source\Component\StaticMesh.h" />
-    <ClInclude Include="..\Source\Component\Transform.h" />
+    <ClInclude Include="..\Source\Component\StaticMeshComponent.h" />
+    <ClInclude Include="..\Source\Component\TransformComponent.h" />
     <ClInclude Include="..\Source\Core\CommandLineParser.h" />
     <ClInclude Include="..\Source\Core\Context.h" />
     <ClInclude Include="..\Source\Core\PCH.h" />
@@ -170,11 +170,11 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NOMINMAX;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS;NOMINMAX;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>PCH.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(SolutionDir)..\Source;$(SolutionDir)..\Thirdparty\volk</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -196,11 +196,11 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NOMINMAX;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS;NOMINMAX;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>PCH.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(SolutionDir)..\Source;$(SolutionDir)..\Thirdparty\volk</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>

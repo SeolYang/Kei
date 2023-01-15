@@ -23,18 +23,19 @@
 #include <VK/PushConstantBuilder.h>
 #include <Math/MathUtils.h>
 #include <Asset/TextureAsset.h>
-#include <Asset/MeshAsset.h>
+#include <Asset/ModelAsset.h>
 
 namespace sy
 {
 	namespace render
 	{
-		Renderer::Renderer(const Window& window, vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager) :
+		Renderer::Renderer(const Window& window, vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager, CacheRegistry& cacheRegistry) :
 			window(window),
 			vulkanContext(vulkanContext),
 			frameTracker(frameTracker),
 			cmdPoolManager(cmdPoolManager),
 			descriptorManager(descriptorManager),
+			cacheRegistry(cacheRegistry),
 			pipelineLayoutCache(std::make_unique<vk::PipelineLayoutCache>(vulkanContext))
 		{
 			const auto windowExtent = window.GetExtent();
@@ -63,14 +64,24 @@ namespace sy
 			basicPipeline = std::make_unique<vk::Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
 			linearSampler = std::make_unique<vk::Sampler>("Linear Sampler", vulkanContext, vk::SamplerInfo{});
-			loadedTexture = asset::LoadTexture2DFromAsset("Assets/Textures/djmax_1st_anv.tex", vulkanContext, frameTracker, cmdPoolManager);
-			loadedTextureView = std::make_unique<vk::TextureView>("Loaded Texture View", vulkanContext, *loadedTexture, VK_IMAGE_VIEW_TYPE_2D);
-			loadedTextureDescriptor = descriptorManager.RequestDescriptor(*loadedTexture, *loadedTextureView, *linearSampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-			cube = asset::LoadMeshFromAsset("Assets/Models/box_textured/BoxTextured.mesh", vulkanContext, cmdPoolManager, frameTracker);
+			/* Test Textures */
+			bodyTexture = asset::LoadTexture2DFromAsset("Assets/Textures/Body.TEX", vulkanContext, frameTracker, cmdPoolManager);
+			bodyTextureView = std::make_unique<vk::TextureView>("BodyTextureView", vulkanContext, *bodyTexture, VK_IMAGE_VIEW_TYPE_2D, bodyTexture->GetFormat(), vk::FormatToImageAspect(bodyTexture->GetFormat()));
+			bodyTextureDescriptor = descriptorManager.RequestDescriptor(*bodyTexture, *bodyTextureView, *linearSampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+			hairTexture = asset::LoadTexture2DFromAsset("Assets/Textures/Hair.TEX", vulkanContext, frameTracker, cmdPoolManager);
+			hairTextureView = std::make_unique<vk::TextureView>("HairTextureView", vulkanContext, *hairTexture, VK_IMAGE_VIEW_TYPE_2D, hairTexture->GetFormat(), vk::FormatToImageAspect(hairTexture->GetFormat()));
+			hairTextureDescriptor = descriptorManager.RequestDescriptor(*hairTexture, *hairTextureView, *linearSampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+			costumeTexture = asset::LoadTexture2DFromAsset("Assets/Textures/Costume.TEX", vulkanContext, frameTracker, cmdPoolManager);
+			costumeTextureView = std::make_unique<vk::TextureView>("CostumeTextureView", vulkanContext, *costumeTexture, VK_IMAGE_VIEW_TYPE_2D, costumeTexture->GetFormat(), vk::FormatToImageAspect(costumeTexture->GetFormat()));
+			costumeTextureDescriptor = descriptorManager.RequestDescriptor(*costumeTexture, *costumeTextureView, *linearSampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+			meshes = asset::LoadMeshesFromModelAsset("Assets/Models/homura/homura.model", vulkanContext, cmdPoolManager, frameTracker);
 
 			auto proj = math::PerspectiveYFlipped(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
-			viewProjMat = proj * glm::lookAt(glm::vec3{ 1.5f, 2.f, -5.f }, { 0.f, 0.f ,0.f }, { 0.f ,1.f, 0.f });
+			viewProjMat = proj * glm::lookAt(glm::vec3{ 1.5f, 160.f, -150.f }, { 0.f, 70.f ,0.f }, { 0.f ,1.f, 0.f });
 
 			renderPass = std::make_unique<SimpleRenderPass>("Simple Render Pass", vulkanContext, descriptorManager, frameTracker, cmdPoolManager, *basicPipeline);
 		}
@@ -96,16 +107,38 @@ namespace sy
 				clearColorValue.float32[2] = std::cos(static_cast<float>(currentFrameIdx) / 90.f) * 0.5f + 1.f;
 				clearColorValue.float32[3] = 1.f;
 
-				renderPass->SetMesh(*cube);
-				renderPass->SetTextureDescriptor(loadedTextureDescriptor);
 				renderPass->SetWindowExtent(window.GetExtent());
 				renderPass->SetSwapchain(swapchain, clearColorValue);
 				renderPass->SetDepthStencilView(*depthStencilView);
 
-				const auto model = glm::rotate(glm::mat4(1.f), elapsedTime, { 0.f, 1.f, 0.f });
+				const auto model = glm::rotate(glm::rotate(glm::mat4(1.f), glm::radians(-90.f), { 1.f, 0.f, 0.f }), elapsedTime, {0.f, 0.f, 1.f});
 				renderPass->SetTransformData({ viewProjMat * model });
 				renderPass->UpdateBuffers();
-				const auto simpleRenderPassCmdBuffer = renderPass->Render();
+
+				CRefVec<vk::CommandBuffer> batchedCmdBuffers;
+
+				renderPass->Begin(vk::EQueueType::Graphics);
+				for (const auto& mesh : meshes)
+				{
+					if (mesh->GetName().contains("Hair") || mesh->GetName().contains("Kemono") || mesh->GetName().contains("Twin"))
+					{
+						renderPass->SetTextureDescriptor(hairTextureDescriptor);
+					}
+					else if (mesh->GetName().contains("Body"))
+					{
+						renderPass->SetTextureDescriptor(bodyTextureDescriptor);
+					}
+					else
+					{
+						renderPass->SetTextureDescriptor(costumeTextureDescriptor);
+					}
+
+					renderPass->SetMesh(*mesh);
+					renderPass->Render();
+				}
+				renderPass->End();
+
+				batchedCmdBuffers.emplace_back(renderPass->GetCommandBuffer());
 
 				const auto& renderFence = frameTracker.GetCurrentInFlightRenderFence();
 				auto& presentSemaphore = frameTracker.GetCurrentInFlightPresentSemaphore();
@@ -114,8 +147,6 @@ namespace sy
 				waitSemaphores.emplace_back(presentSemaphore);
 				CRefVec<vk::Semaphore> signalSemaphores;
 				signalSemaphores.emplace_back(renderSemaphore);
-
-				CRefVec<vk::CommandBuffer> batchedCmdBuffers = { *simpleRenderPassCmdBuffer };
 
 				vulkanContext.SubmitTo(
 					vk::EQueueType::Graphics,

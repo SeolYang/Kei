@@ -2,7 +2,7 @@
 #include <Asset/AssetConverter.h>
 #include <Asset/AssetCore.h>
 #include <Asset/TextureAsset.h>
-#include <Asset/MeshAsset.h>
+#include <Asset/ModelAsset.h>
 
 namespace sy::asset
 {
@@ -30,9 +30,9 @@ namespace sy::asset
 					ConvertTexture2D(filePath);
 					break;
 
-				case EAssetType::Mesh:
+				case EAssetType::Model:
 					spdlog::info("Converting mesh resource {}.", filePath.string());
-					ConvertMesh(filePath);
+					ConvertModel(filePath);
 					break;
 				}
 			}

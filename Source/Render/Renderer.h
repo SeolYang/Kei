@@ -21,6 +21,7 @@ namespace sy
 	}
 
 	class Window;
+	class CacheRegistry;
 	namespace render
 	{
 		class Mesh;
@@ -28,7 +29,7 @@ namespace sy
 		class Renderer final : public NonCopyable
 		{
 		public:
-			Renderer(const Window& window, vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager);
+			Renderer(const Window& window, vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager, CacheRegistry& cacheRegistry);
 			~Renderer();
 
 			void Render();
@@ -43,6 +44,7 @@ namespace sy
 			const vk::FrameTracker& frameTracker;
 			vk::CommandPoolManager& cmdPoolManager;
 			vk::DescriptorManager& descriptorManager;
+			CacheRegistry& cacheRegistry;
 
 			std::unique_ptr<vk::PipelineLayoutCache> pipelineLayoutCache;
 
@@ -54,11 +56,20 @@ namespace sy
 			std::unique_ptr<vk::TextureView> depthStencilView;
 
 			std::unique_ptr<vk::Sampler> linearSampler;
-			std::unique_ptr<vk::Texture> loadedTexture;
-			std::unique_ptr<vk::TextureView> loadedTextureView;
-			vk::Descriptor loadedTextureDescriptor;
 
-			std::unique_ptr<Mesh> cube;
+			std::unique_ptr<vk::Texture> bodyTexture;
+			std::unique_ptr<vk::TextureView> bodyTextureView;
+			vk::Descriptor bodyTextureDescriptor;
+
+			std::unique_ptr<vk::Texture> hairTexture;
+			std::unique_ptr<vk::TextureView> hairTextureView;
+			vk::Descriptor hairTextureDescriptor;
+
+			std::unique_ptr<vk::Texture> costumeTexture;
+			std::unique_ptr<vk::TextureView> costumeTextureView;
+			vk::Descriptor costumeTextureDescriptor;
+
+			std::vector<std::unique_ptr<Mesh>> meshes;
 
 			std::unique_ptr<SimpleRenderPass> renderPass;
 

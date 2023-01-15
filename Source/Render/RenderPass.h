@@ -26,13 +26,19 @@ namespace sy::render
 		RenderPass& operator=(RenderPass&&) = delete;
 
 		virtual void UpdateBuffers() { }
-		virtual vk::ManagedCommandBuffer Render() = 0;
+
+		void Begin(vk::EQueueType queueType);
+		virtual void OnBegin() {}
+		virtual void Render() = 0;
+		void End();
+		virtual void OnEnd() {}
 
 		[[nodiscard]] const auto& GetVulkanContext() const { return vulkanContext; }
 		[[nodiscard]] auto& GetDescriptorManager() const { return descriptorManager; }
 		[[nodiscard]] const auto& GetFrameTracker() const { return frameTracker; }
 		[[nodiscard]] const auto& GetPipeline() const { return pipeline; }
 		[[nodiscard]] auto& GetCommandPoolManager() const { return cmdPoolManager; }
+		[[nodiscard]] auto& GetCommandBuffer() const { return *currentCmdBuffer; }
 
 	private:
 		const vk::VulkanContext& vulkanContext;
@@ -40,6 +46,8 @@ namespace sy::render
 		const vk::FrameTracker& frameTracker;
 		vk::CommandPoolManager& cmdPoolManager;
 		const vk::Pipeline& pipeline;
+
+		vk::ManagedCommandBuffer currentCmdBuffer;
 
 	};
 }

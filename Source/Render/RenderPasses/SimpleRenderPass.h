@@ -26,7 +26,9 @@ namespace sy::render
 	public:
 		SimpleRenderPass(std::string_view name, const vk::VulkanContext& vulkanContext, vk::DescriptorManager& descriptorManager, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, const vk::Pipeline& pipeline);
 
-		virtual vk::ManagedCommandBuffer Render() override;
+		virtual void OnBegin() override;
+		virtual void Render() override;
+		virtual void OnEnd() override;
 		virtual void UpdateBuffers() override;
 
 		void SetMesh(const Mesh& mesh);

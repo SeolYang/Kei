@@ -1,4 +1,5 @@
 #pragma once
+
 /** Standard Library */
 #include <vector>
 #include <array>
@@ -99,7 +100,6 @@
 #include <VK/VulkanTypes.h>
 #include <VK/VulkanWrapper.hpp>
 #include <VK/Synchronization.h>
-#include <VK/VulkanMediator.h>
 
 /** Internal - Math */
 #include <Math/MathUtils.h>

@@ -13,7 +13,7 @@ namespace sy::vk
 
 namespace sy::component
 {
-	struct StaticMesh : ecs::Component
+	struct StaticMeshComponent : ecs::Component
 	{
 		Handle<render::Mesh> Mesh;
 		Handle<vk::Texture> Texture;

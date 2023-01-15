@@ -39,65 +39,64 @@ namespace sy::render
 		}
 	}
 
-	vk::ManagedCommandBuffer SimpleRenderPass::Render()
+	void SimpleRenderPass::OnBegin()
 	{
-		const auto& frameTracker = GetFrameTracker();
+		const auto& graphicsCmdBuffer = GetCommandBuffer();
+		graphicsCmdBuffer.ChangeAccessPattern(vk::ETextureAccessPattern::None, vk::ETextureAccessPattern::ColorAttachmentWrite, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
+
+		std::array colorAttachmentInfos = { swapchainAttachmentInfo };
+		std::array depthAttachmentInfos = { depthAttachmentInfo };
+
+		const VkRenderingInfo renderingInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR,
+			.pNext = nullptr,
+			.renderArea = VkRect2D
+			{
+				.offset = VkOffset2D{0, 0},
+				.extent = VkExtent2D{windowExtent.width, windowExtent.height},
+			},
+			.layerCount = 1,
+			.colorAttachmentCount = static_cast<uint32_t>(colorAttachmentInfos.size()),
+			.pColorAttachments = colorAttachmentInfos.data(),
+			.pDepthAttachment = depthAttachmentInfos.data(),
+			.pStencilAttachment = depthAttachmentInfos.data()
+		};
+
 		const auto& descriptorManager = GetDescriptorManager();
 		const auto& pipeline = GetPipeline();
-		auto& cmdPoolManager = GetCommandPoolManager();
+		graphicsCmdBuffer.BeginRendering(renderingInfo);
+		graphicsCmdBuffer.BindPipeline(pipeline);
+		graphicsCmdBuffer.BindDescriptorSet(descriptorManager.GetDescriptorSet(), pipeline);
 
-		auto& graphicsCmdPool = cmdPoolManager.RequestCommandPool(vk::EQueueType::Graphics);
-		auto graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Render Cmd Buffer");
-		graphicsCmdBuffer->Begin();
+	}
+
+	void SimpleRenderPass::Render()
+	{
+		const auto& frameTracker = GetFrameTracker();
+		const auto& graphicsCmdBuffer = GetCommandBuffer();
+		const auto& pipeline = GetPipeline();
+
+		const PushConstants pushConstants
 		{
-			graphicsCmdBuffer->ChangeAccessPattern(vk::ETextureAccessPattern::None, vk::ETextureAccessPattern::ColorAttachmentWrite, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
+			.textureIndex = static_cast<int>(textureDescriptor),
+			.transformDataIndex = static_cast<int>(transformBufferIndices[frameTracker.GetCurrentInFlightFrameIndex()]->Offset)
+		};
 
-			std::array colorAttachmentInfos = { swapchainAttachmentInfo };
-			std::array depthAttachmentInfos = { depthAttachmentInfo };
+		std::array vertexBuffers = { vertexBuffer };
+		std::array offsets = { uint64_t() };
+		graphicsCmdBuffer.BindVertexBuffers(0, vertexBuffers, offsets);
+		graphicsCmdBuffer.BindIndexBuffer(indexBuffer);
+		graphicsCmdBuffer.PushConstants(pipeline, VK_SHADER_STAGE_ALL_GRAPHICS, pushConstants);
 
-			const VkRenderingInfo renderingInfo
-			{
-				.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR,
-				.pNext = nullptr,
-				.renderArea = VkRect2D
-				{
-					.offset = VkOffset2D{0, 0},
-					.extent = VkExtent2D{windowExtent.width, windowExtent.height},
-				},
-				.layerCount = 1,
-				.colorAttachmentCount = static_cast<uint32_t>(colorAttachmentInfos.size()),
-				.pColorAttachments = colorAttachmentInfos.data(),
-				.pDepthAttachment = depthAttachmentInfos.data(),
-				.pStencilAttachment = depthAttachmentInfos.data()
-			};
+		graphicsCmdBuffer.DrawIndexed(numIndices, 1, 0, 0, 0);
+	}
 
-			graphicsCmdBuffer->BeginRendering(renderingInfo);
-			{
-				// Rendering something here
-				graphicsCmdBuffer->BindPipeline(pipeline);
-				graphicsCmdBuffer->BindDescriptorSet(descriptorManager.GetDescriptorSet(), pipeline);
-
-				const auto& transformBuffer = *transformBuffers[frameTracker.GetCurrentInFlightFrameIndex()];
-				const PushConstants pushConstants
-				{
-					.textureIndex = static_cast<int>(textureDescriptor),
-					.transformDataIndex = static_cast<int>(transformBufferIndices[frameTracker.GetCurrentInFlightFrameIndex()]->Offset)
-				};
-
-				std::array vertexBuffers = { vertexBuffer };
-				std::array offsets = { uint64_t() };
-				graphicsCmdBuffer->BindVertexBuffers(0, vertexBuffers, offsets);
-				graphicsCmdBuffer->BindIndexBuffer(indexBuffer);
-				graphicsCmdBuffer->PushConstants(pipeline, VK_SHADER_STAGE_ALL_GRAPHICS, pushConstants);
-
-				graphicsCmdBuffer->DrawIndexed(numIndices, 1, 0, 0, 0);
-			}
-			graphicsCmdBuffer->EndRendering();
-			graphicsCmdBuffer->ChangeAccessPattern(vk::ETextureAccessPattern::ColorAttachmentWrite, vk::ETextureAccessPattern::Present, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
-		}
-		graphicsCmdBuffer->End();
-
-		return graphicsCmdBuffer;
+	void SimpleRenderPass::OnEnd()
+	{
+		const auto& graphicsCmdBuffer = GetCommandBuffer();
+		graphicsCmdBuffer.EndRendering();
+		graphicsCmdBuffer.ChangeAccessPattern(vk::ETextureAccessPattern::ColorAttachmentWrite, vk::ETextureAccessPattern::Present, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
 	}
 
 	void SimpleRenderPass::UpdateBuffers()

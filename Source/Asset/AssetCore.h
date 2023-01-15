@@ -6,7 +6,7 @@ namespace sy::asset
 	constexpr auto UNKNOWN_ASSET_IDENTIFIER = "UKUN";
 	constexpr auto TEXTURE_ASSET_IDENTIFIER = "TEX_";
 	constexpr auto AUDIO_ASSET_IDENTIFIER = "AUDI";
-	constexpr auto MESH_ASSET_IDENTIFIER = "MESH";
+	constexpr auto MODEL_ASSET_IDENTIFIER = "MODL";
 
 	enum class ECompressionMode : uint32_t
 	{
@@ -20,14 +20,14 @@ namespace sy::asset
 	enum class EAssetExtension
 	{
 		TEX,
-		MESH,
+		MODEL,
 	};
 
 	enum class EAssetType
 	{
 		Unknown,
 		Texture,
-		Mesh,
+		Model,
 		Audio,
 		Shader,
 		ShaderBinary,
@@ -41,7 +41,7 @@ namespace sy::asset
 		HDR,
 	};
 
-	enum class EMeshExtension
+	enum class EModelExtension
 	{
 		FBX,
 		OBJ,
@@ -91,10 +91,10 @@ namespace sy::asset
 					ExtensionTable[nameStr] = EAssetType::Texture;
 				}
 
-				for (const std::string_view name : magic_enum::enum_names<EMeshExtension>())
+				for (const std::string_view name : magic_enum::enum_names<EModelExtension>())
 				{
 					std::string nameStr{ name };
-					ExtensionTable[nameStr] = EAssetType::Mesh;
+					ExtensionTable[nameStr] = EAssetType::Model;
 				}
 
 				for (const std::string_view name : magic_enum::enum_names<EAudioExtension>())

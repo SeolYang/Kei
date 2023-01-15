@@ -49,7 +49,7 @@ namespace sy
 		spdlog::info("Initializing Bind-less Descriptor Manager sub-context.");
 		descriptorManager = std::make_unique<vk::DescriptorManager>(*vulkanContext, *frameTracker);
 		spdlog::info("Initializing Renderer sub-context.");
-		renderer = std::make_unique<render::Renderer>(*window, *vulkanContext, *frameTracker, *cmdPoolManager, *descriptorManager);
+		renderer = std::make_unique<render::Renderer>(*window, *vulkanContext, *frameTracker, *cmdPoolManager, *descriptorManager, *cacheRegistry);
 	}
 
 	void Context::InitializeLogger()

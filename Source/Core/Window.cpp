@@ -21,7 +21,7 @@ namespace sy
 
 		constexpr SDL_WindowFlags windowFlags = SDL_WINDOW_VULKAN;
 		window = SDL_CreateWindow(
-			"Tellus",
+			"Hitori",
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
 			extent.width,
