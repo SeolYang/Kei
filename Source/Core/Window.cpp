@@ -3,7 +3,7 @@
 
 namespace sy
 {
-	Window::Window(std::string_view title, Extent2D<uint32_t> extent) :
+	Window::Window(const std::string_view title, const Extent2D<uint32_t> extent) :
 		title(title),
 		extent(extent)
 	{

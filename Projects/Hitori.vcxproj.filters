@@ -320,6 +320,9 @@
     <ClInclude Include="..\Source\VK\ResourceStateTracker.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Component\HierarchyComponent.h">
+      <Filter>Source\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Assets\Shaders\tri.frag">

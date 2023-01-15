@@ -62,6 +62,7 @@
     <ClInclude Include="..\Source\Asset\ModelAsset.h" />
     <ClInclude Include="..\Source\Asset\TextureAsset.h" />
     <ClInclude Include="..\Source\Audio\AudioContext.h" />
+    <ClInclude Include="..\Source\Component\HierarchyComponent.h" />
     <ClInclude Include="..\Source\Component\StaticMeshComponent.h" />
     <ClInclude Include="..\Source\Component\TransformComponent.h" />
     <ClInclude Include="..\Source\Core\CommandLineParser.h" />
