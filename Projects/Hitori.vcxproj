@@ -40,6 +40,7 @@
     <ClCompile Include="..\Source\VK\Fence.cpp" />
     <ClCompile Include="..\Source\VK\FrameTracker.cpp" />
     <ClCompile Include="..\Source\VK\LayoutCache.cpp" />
+    <ClCompile Include="..\Source\VK\ResourceStateTracker.cpp" />
     <ClCompile Include="..\Source\VK\Sampler.cpp" />
     <ClCompile Include="..\Source\VK\Texture.cpp" />
     <ClCompile Include="..\Source\VK\Pipeline.cpp" />

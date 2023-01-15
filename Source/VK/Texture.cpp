@@ -12,16 +12,19 @@ namespace sy
 {
 	namespace vk
 	{
-		Texture::Texture(std::string_view name, const VulkanContext& vulkanContext, VkImageType type, VkFormat format, Extent3D<uint32_t> extent, uint32_t mipLevels, uint32_t arrayLayers, VkSampleCountFlags samples, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memoryUsage, VkMemoryPropertyFlags memoryProperties) :
+		Texture::Texture(const std::string_view name, const VulkanContext& vulkanContext, const VkImageType type, const VkFormat format, const Extent3D<uint32_t> extent, const uint32_t mipLevels, uint32_t arrayLayers, const VkSampleCountFlagBits samples, const VkImageTiling tiling, VkImageUsageFlags usage, const VmaMemoryUsage memoryUsage, const VkMemoryPropertyFlags memoryProperties, const ETextureState initialState) :
 			VulkanWrapper(name, vulkanContext, VK_OBJECT_TYPE_IMAGE, VK_DESTROY_LAMBDA_SIGNATURE(VkImage)
 			{
-			}),
+		}),
 			extent(extent),
+			type(type),
 			format(format),
 			mipLevels(mipLevels),
+			arrayLayers(arrayLayers),
 			imageUsage(usage),
 			memoryUsage(memoryUsage),
-			memoryProperties(memoryProperties)
+			memoryProperties(memoryProperties),
+			initialState(initialState)
 		{
 			const auto allocator = vulkanContext.GetAllocator();
 			const VkImageCreateInfo imageCreateInfo
@@ -33,9 +36,9 @@ namespace sy
 				.format = format,
 				.extent = VkExtent3D{extent.width, extent.height, 1},
 				.mipLevels = mipLevels,
-				.arrayLayers = 1,
-				.samples = VK_SAMPLE_COUNT_1_BIT,
-				.tiling = VK_IMAGE_TILING_OPTIMAL,
+				.arrayLayers = arrayLayers,
+				.samples = samples,
+				.tiling = tiling,
 				.usage = usage,
 				.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
 				.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
@@ -64,15 +67,15 @@ namespace sy
 
 		std::unique_ptr<Texture> CreateTexture2D(std::string_view name, const VulkanContext& vulkanContext,
 			Extent2D<uint32_t> extent, uint32_t mipLevels, VkFormat format, VkImageUsageFlags usages,
-			VmaMemoryUsage memoryUsage, VkMemoryPropertyFlags memoryProperties)
+			VmaMemoryUsage memoryUsage, VkMemoryPropertyFlags memoryProperties, const ETextureState initialState)
 		{
-			return std::make_unique<Texture>(name, vulkanContext, VK_IMAGE_TYPE_2D, format, Extent3D<uint32_t>{extent.width, extent.height, 1}, mipLevels, 1, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_TILING_OPTIMAL, usages, memoryUsage, memoryProperties);
+			return std::make_unique<Texture>(name, vulkanContext, VK_IMAGE_TYPE_2D, format, Extent3D<uint32_t>{extent.width, extent.height, 1}, mipLevels, 1, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_TILING_OPTIMAL, usages, memoryUsage, memoryProperties, initialState);
 		}
 
 		std::unique_ptr<Texture> CreateTexture2DFromMemory(std::string_view name, const VulkanContext& vulkanContext,
 			const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager,
 			std::span<const char> data,
-			Extent2D<uint32_t> extent, VkFormat format, VkImageUsageFlags usageFlags, VkImageLayout layout)
+			Extent2D<uint32_t> extent, VkFormat format)
 		{
 			const auto stagingBuffer = CreateStagingBuffer(std::format("2D Texture {} staging buffer", name), vulkanContext, data.size());
 			void* mappedData = vulkanContext.Map(*stagingBuffer);
@@ -83,13 +86,13 @@ namespace sy
 			// @todo: Use of Transfer Queue ; need more practicing and knowledge about pipeline barriers!
 			auto& transferCmdPool = cmdPoolManager.RequestCommandPool(EQueueType::Graphics);
 			const auto transferCmdBuffer = transferCmdPool.RequestCommandBuffer(std::format("Texture {} transfer cmd buffer", name));
-			auto newTexture = CreateTexture2D(name, vulkanContext, extent, 1, format, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY);
+			auto newTexture = CreateTexture2D(name, vulkanContext, extent, 1, format, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY, 0, vk::ETextureState::AnyShaderReadSampledImage);
 
 			transferCmdBuffer->Begin();
 			{
-				transferCmdBuffer->ChangeAccessPattern(vk::ETextureAccessPattern::None, vk::ETextureAccessPattern::TransferWrite, *newTexture);
+				transferCmdBuffer->ChangeState(vk::ETextureState::None, vk::ETextureState::TransferWrite, *newTexture);
 				transferCmdBuffer->CopyBufferToImageSimple(*stagingBuffer, *newTexture);
-				transferCmdBuffer->ChangeAccessPattern(vk::ETextureAccessPattern::TransferWrite, vk::ETextureAccessPattern::FragmentShaderReadSampledImage, *newTexture);
+				transferCmdBuffer->ChangeState(vk::ETextureState::TransferWrite, vk::ETextureState::AnyShaderReadSampledImage, *newTexture);
 			}
 			transferCmdBuffer->End();
 
@@ -103,7 +106,7 @@ namespace sy
 
 		std::unique_ptr<Texture> CreateTexture2DFromFile(std::string_view filePath,
 			const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager,
-			VkFormat format, VkImageUsageFlags usageFlags, VkImageLayout layout)
+			VkFormat format)
 		{
 			int texWidth, texHeight;
 			int texChannels;
@@ -121,7 +124,7 @@ namespace sy
 				vulkanContext, frameTracker, cmdPoolManager,
 				std::span{ pixelsData, sizeOfData },
 				Extent2D<uint32_t>{static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight)},
-				format, usageFlags, layout);
+				format);
 
 			stbi_image_free(pixels);
 			return result;
@@ -131,13 +134,13 @@ namespace sy
 			const VulkanContext& vulkanContext, const FrameTracker& frameTracker, CommandPoolManager& cmdPoolManager,
 			Extent2D<uint32_t> extent)
 		{
-			auto res = CreateTexture2D(name, vulkanContext, extent, 1, VK_FORMAT_D24_UNORM_S8_UINT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VMA_MEMORY_USAGE_GPU_ONLY, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+			auto res = CreateTexture2D(name, vulkanContext, extent, 1, VK_FORMAT_D24_UNORM_S8_UINT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VMA_MEMORY_USAGE_GPU_ONLY, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, ETextureState::DepthStencilAttachmentWrite);
 			auto& transferCmdPool = cmdPoolManager.RequestCommandPool(EQueueType::Graphics);
 			const auto transferCmdBuffer = transferCmdPool.RequestCommandBuffer(std::format("Depth-stencil buffer {} memory barrier cmd buffer", res->GetName()));
 
 			transferCmdBuffer->Begin();
 			{
-				transferCmdBuffer->ChangeAccessPattern(vk::ETextureAccessPattern::None, vk::ETextureAccessPattern::DepthStencilAttachmentWrite, *res);
+				transferCmdBuffer->ChangeState(vk::ETextureState::None, vk::ETextureState::DepthStencilAttachmentWrite, *res);
 			}
 			transferCmdBuffer->End();
 

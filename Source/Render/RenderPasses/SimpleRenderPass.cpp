@@ -27,7 +27,7 @@ namespace sy::render
 			auto& graphicsCmdPool = cmdPoolManager.RequestCommandPool(vk::EQueueType::Graphics);
 			auto graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Simple Render Pass Initial Sync");
 			graphicsCmdBuffer->Begin();
-			graphicsCmdBuffer->ChangeAccessPattern(vk::EBufferAccessPattern::None, vk::EBufferAccessPattern::VertexShaderReadUniformBuffer, *transformBuffers[idx]);
+			graphicsCmdBuffer->ChangeState(vk::EBufferState::None, vk::EBufferState::VertexShaderReadUniformBuffer, *transformBuffers[idx]);
 			graphicsCmdBuffer->End();
 
 			const auto& uploadFence = frameTracker.GetCurrentInFlightUploadFence();
@@ -42,7 +42,7 @@ namespace sy::render
 	void SimpleRenderPass::OnBegin()
 	{
 		const auto& graphicsCmdBuffer = GetCommandBuffer();
-		graphicsCmdBuffer.ChangeAccessPattern(vk::ETextureAccessPattern::None, vk::ETextureAccessPattern::ColorAttachmentWrite, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
+		graphicsCmdBuffer.ChangeState(vk::ETextureState::None, vk::ETextureState::ColorAttachmentWrite, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
 
 		std::array colorAttachmentInfos = { swapchainAttachmentInfo };
 		std::array depthAttachmentInfos = { depthAttachmentInfo };
@@ -96,7 +96,7 @@ namespace sy::render
 	{
 		const auto& graphicsCmdBuffer = GetCommandBuffer();
 		graphicsCmdBuffer.EndRendering();
-		graphicsCmdBuffer.ChangeAccessPattern(vk::ETextureAccessPattern::ColorAttachmentWrite, vk::ETextureAccessPattern::Present, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
+		graphicsCmdBuffer.ChangeState(vk::ETextureState::ColorAttachmentWrite, vk::ETextureState::Present, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
 	}
 
 	void SimpleRenderPass::UpdateBuffers()

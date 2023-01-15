@@ -3,15 +3,17 @@
 
 namespace sy
 {
+	using HandleUnderType = size_t;
+
 	template<typename T>
 	struct Handle
 	{
 	public:
-		size_t Value = InvalidValue;
+		HandleUnderType Value = InvalidValue;
 
 		[[nodiscard]] operator bool() const { return Value != InvalidValue; }
 
 	private:
-		constexpr static size_t InvalidValue = std::numeric_limits<size_t>::max();
+		constexpr static HandleUnderType InvalidValue = std::numeric_limits<HandleUnderType>::max();
 	};
 }

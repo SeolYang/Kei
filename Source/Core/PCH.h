@@ -33,6 +33,7 @@
 #include <tuple>
 #include <fstream>
 #include <concurrent_queue.h>
+#include <execution>
 
 /** Vulkan Headers */
 #define VK_USE_PLATFORM_WIN32_KHR

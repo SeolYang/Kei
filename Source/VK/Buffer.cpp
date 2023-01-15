@@ -11,8 +11,9 @@ namespace sy
 {
 	namespace vk
 	{
-		Buffer::Buffer(std::string_view name, const VulkanContext& vulkanContext, const BufferInfo info) :
-			VulkanWrapper(name, vulkanContext, VK_OBJECT_TYPE_BUFFER)
+		Buffer::Buffer(const std::string_view name, const VulkanContext& vulkanContext, const BufferInfo info, const EBufferState initialState) :
+			VulkanWrapper(name, vulkanContext, VK_OBJECT_TYPE_BUFFER),
+			initialState(initialState)
 		{
 			size_t alignedBufferSize = info.Size;
 			switch (info.UsageFlags)
@@ -58,9 +59,9 @@ namespace sy
 
 		std::unique_ptr<Buffer> CreateBufferWithData(std::string_view name, const VulkanContext& vulkanContext,
 			CommandPoolManager& cmdPoolManager, const FrameTracker& frameTracker, VkBufferUsageFlags bufferUsage,
-			size_t sizeOfData, const void* data)
+			size_t sizeOfData, const void* data, const EBufferState initialState)
 		{
-			auto newBuffer = std::make_unique<Buffer>(name, vulkanContext, BufferInfo{ sizeOfData, bufferUsage | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY });
+			auto newBuffer = std::make_unique<Buffer>(name, vulkanContext, BufferInfo{ sizeOfData, bufferUsage | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY }, initialState);
 			const auto stagingBuffer = CreateStagingBuffer(std::format("Staging buffer for {}", name), vulkanContext, sizeOfData);
 			void* mappedData = vulkanContext.Map(*stagingBuffer);
 			memcpy(mappedData, data, sizeOfData);

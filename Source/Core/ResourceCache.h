@@ -53,7 +53,7 @@ namespace sy
 				return std::nullopt;
 			}
 
-			return CRef(*found);
+			return CRef(*(found->second));
 		}
 
 		std::optional<Ref<R>> Load(const Handle<R> handle)
@@ -78,7 +78,8 @@ namespace sy
 		template <Named R>
 		Cache<R>& Acquire()
 		{
-			const auto& key = typeid(R);
+			const auto& type = typeid(R);
+			const size_t key = type.hash_code();
 			const auto found = caches.find(key);
 			if (found == caches.end())
 			{
@@ -86,11 +87,11 @@ namespace sy
 				caches[key] = std::move(newCache);
 			}
 
-			return *caches[key];
+			return reinterpret_cast<Cache<R>&>(*caches[key]);
 		}
 
 	private:
-		robin_hood::unordered_map<std::type_info, std::unique_ptr<CacheBase>> caches;
+		robin_hood::unordered_map<size_t, std::unique_ptr<CacheBase>> caches;
 
 	};
 }

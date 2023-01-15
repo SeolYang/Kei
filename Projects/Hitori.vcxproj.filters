@@ -156,6 +156,9 @@
     <ClCompile Include="..\Source\Core\PCH.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\VK\ResourceStateTracker.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ThirdParty\volk\volk.h">
