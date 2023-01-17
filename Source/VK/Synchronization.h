@@ -557,22 +557,4 @@ namespace sy::vk
 			return { VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL };
 		}
 	}
-
-	struct TextureStateTransition
-	{
-		CRef<class Texture> Texture;
-		ETextureState Before;
-		ETextureState After;
-		uint32_t BaseMipLevel = 0;
-		uint32_t MipLevelCount = 1;
-		uint32_t BaseArrayLayer = 0;
-		uint32_t ArrayLayerCount = 1;
-	};
-
-	struct BufferStateTransition
-	{
-		CRef<class Buffer> Buffer;
-		EBufferState Before;
-		EBufferState After;
-	};
 }

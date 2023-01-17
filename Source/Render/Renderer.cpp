@@ -25,17 +25,20 @@
 #include <Asset/TextureAsset.h>
 #include <Asset/ModelAsset.h>
 
+#include "Core/ResourceCache.h"
+
 namespace sy
 {
 	namespace render
 	{
-		Renderer::Renderer(const Window& window, vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager, CacheRegistry& cacheRegistry) :
+		Renderer::Renderer(const Window& window, vk::VulkanContext& vulkanContext, vk::ResourceStateTracker& resStateTracker, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager, ResourceCache& resourceCache) :
 			window(window),
 			vulkanContext(vulkanContext),
+			resStateTracker(resStateTracker),
 			frameTracker(frameTracker),
 			cmdPoolManager(cmdPoolManager),
 			descriptorManager(descriptorManager),
-			cacheRegistry(cacheRegistry),
+			resourceCache(resourceCache),
 			pipelineLayoutCache(std::make_unique<vk::PipelineLayoutCache>(vulkanContext))
 		{
 			const auto windowExtent = window.GetExtent();
@@ -63,27 +66,36 @@ namespace sy
 
 			basicPipeline = std::make_unique<vk::Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
-			linearSampler = std::make_unique<vk::Sampler>("Linear Sampler", vulkanContext, vk::SamplerInfo{});
+			linearSampler = resourceCache.Add(std::make_unique<vk::Sampler>("Linear Sampler", vulkanContext, vk::SamplerInfo{}));
+			auto& linearSamplerRef = Unwrap(resourceCache.Load(linearSampler));
 
-			/* Test Textures */
-			bodyTexture = asset::LoadTexture2DFromAsset("Assets/Textures/Body.TEX", vulkanContext, frameTracker, cmdPoolManager);
-			bodyTextureView = std::make_unique<vk::TextureView>("BodyTextureView", vulkanContext, *bodyTexture, VK_IMAGE_VIEW_TYPE_2D, bodyTexture->GetFormat(), vk::FormatToImageAspect(bodyTexture->GetFormat()));
-			bodyTextureDescriptor = descriptorManager.RequestDescriptor(*bodyTexture, *bodyTextureView, *linearSampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			Handle<vk::Texture> bodyTex = resourceCache.Add(asset::LoadTexture2DFromAsset("Assets/Textures/Body.TEX", vulkanContext, frameTracker, cmdPoolManager));
+			auto& bodyTexRef = Unwrap(resourceCache.Load(bodyTex));
+			/** @todo texture view constructor ∞£º“»≠ */
+			Handle<vk::TextureView> bodyTexView = resourceCache.Add(std::make_unique<vk::TextureView>("BodyTextureView", vulkanContext, bodyTexRef, VK_IMAGE_VIEW_TYPE_2D, bodyTexRef.GetFormat(), vk::FormatToImageAspect(bodyTexRef.GetFormat())));
+			bodyTexDescriptor = resourceCache.Add(std::make_unique<vk::Descriptor>(descriptorManager.RequestDescriptor(bodyTexRef, Unwrap(resourceCache.Load(bodyTexView)), linearSamplerRef, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)));
 
-			hairTexture = asset::LoadTexture2DFromAsset("Assets/Textures/Hair.TEX", vulkanContext, frameTracker, cmdPoolManager);
-			hairTextureView = std::make_unique<vk::TextureView>("HairTextureView", vulkanContext, *hairTexture, VK_IMAGE_VIEW_TYPE_2D, hairTexture->GetFormat(), vk::FormatToImageAspect(hairTexture->GetFormat()));
-			hairTextureDescriptor = descriptorManager.RequestDescriptor(*hairTexture, *hairTextureView, *linearSampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			Handle<vk::Texture> hairTex = resourceCache.Add(asset::LoadTexture2DFromAsset("Assets/Textures/Hair.TEX", vulkanContext, frameTracker, cmdPoolManager));
+			auto& hairTexRef = Unwrap(resourceCache.Load(hairTex));
+			Handle<vk::TextureView> hairTexView = resourceCache.Add(std::make_unique<vk::TextureView>("HairTextureView", vulkanContext, hairTexRef, VK_IMAGE_VIEW_TYPE_2D, hairTexRef.GetFormat(), vk::FormatToImageAspect(hairTexRef.GetFormat())));
+			hairTexDescriptor = resourceCache.Add(std::make_unique<vk::Descriptor>(descriptorManager.RequestDescriptor(hairTexRef, Unwrap(resourceCache.Load(hairTexView)), linearSamplerRef, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)));
 
-			costumeTexture = asset::LoadTexture2DFromAsset("Assets/Textures/Costume.TEX", vulkanContext, frameTracker, cmdPoolManager);
-			costumeTextureView = std::make_unique<vk::TextureView>("CostumeTextureView", vulkanContext, *costumeTexture, VK_IMAGE_VIEW_TYPE_2D, costumeTexture->GetFormat(), vk::FormatToImageAspect(costumeTexture->GetFormat()));
-			costumeTextureDescriptor = descriptorManager.RequestDescriptor(*costumeTexture, *costumeTextureView, *linearSampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			Handle<vk::Texture> costumeTex = resourceCache.Add(asset::LoadTexture2DFromAsset("Assets/Textures/Costume.TEX", vulkanContext, frameTracker, cmdPoolManager));
+			auto& costumeTexRef = Unwrap(resourceCache.Load(costumeTex));
+			Handle<vk::TextureView> costumeTexView = resourceCache.Add(std::make_unique<vk::TextureView>("CostumeTextureView", vulkanContext, costumeTexRef, VK_IMAGE_VIEW_TYPE_2D, costumeTexRef.GetFormat(), vk::FormatToImageAspect(costumeTexRef.GetFormat())));
+			costumeTexDescriptor = resourceCache.Add(std::make_unique<vk::Descriptor>(descriptorManager.RequestDescriptor(costumeTexRef, Unwrap(resourceCache.Load(costumeTexView)), linearSamplerRef, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)));
 
-			meshes = asset::LoadMeshesFromModelAsset("Assets/Models/homura/homura.model", vulkanContext, cmdPoolManager, frameTracker);
+			auto loadedMeshes = asset::LoadMeshesFromModelAsset("Assets/Models/homura/homura.model", vulkanContext, cmdPoolManager, frameTracker);
+			for (auto& mesh : loadedMeshes)
+			{
+				meshHandles.emplace_back(resourceCache.Add(std::move(mesh)));
+			}
+			loadedMeshes.clear();
 
 			auto proj = math::PerspectiveYFlipped(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
 			viewProjMat = proj * glm::lookAt(glm::vec3{ 1.5f, 160.f, -150.f }, { 0.f, 70.f ,0.f }, { 0.f ,1.f, 0.f });
 
-			renderPass = std::make_unique<SimpleRenderPass>("Simple Render Pass", vulkanContext, descriptorManager, frameTracker, cmdPoolManager, *basicPipeline);
+			renderPass = std::make_unique<SimpleRenderPass>("Simple Render Pass", resourceCache, vulkanContext, descriptorManager, frameTracker, cmdPoolManager, *basicPipeline);
 		}
 
 		Renderer::~Renderer()
@@ -118,22 +130,24 @@ namespace sy
 				CRefVec<vk::CommandBuffer> batchedCmdBuffers;
 
 				renderPass->Begin(vk::EQueueType::Graphics);
-				for (const auto& mesh : meshes)
+
+				for (const auto& mesh : meshHandles)
 				{
-					if (mesh->GetName().contains("Hair") || mesh->GetName().contains("Kemono") || mesh->GetName().contains("Twin"))
+					const auto& meshRef = Unwrap(resourceCache.Load(mesh));
+					if (meshRef.GetName().contains("Hair") || meshRef.GetName().contains("Kemono") || meshRef.GetName().contains("Twin"))
 					{
-						renderPass->SetTextureDescriptor(hairTextureDescriptor);
+						renderPass->SetTextureDescriptor(hairTexDescriptor);
 					}
-					else if (mesh->GetName().contains("Body"))
+					else if (meshRef.GetName().contains("Body"))
 					{
-						renderPass->SetTextureDescriptor(bodyTextureDescriptor);
+						renderPass->SetTextureDescriptor(bodyTexDescriptor);
 					}
 					else
 					{
-						renderPass->SetTextureDescriptor(costumeTextureDescriptor);
+						renderPass->SetTextureDescriptor(costumeTexDescriptor);
 					}
 
-					renderPass->SetMesh(*mesh);
+					renderPass->SetMesh(mesh);
 					renderPass->Render();
 				}
 				renderPass->End();

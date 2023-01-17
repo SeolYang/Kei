@@ -21,6 +21,22 @@ namespace sy
 	using RefArray = std::array<Ref<T>, C>;
 	template <typename T, size_t C>
 	using CRefArray = std::array<CRef<T>, C>;
+	template <typename T>
+	using RefOptional = std::optional<Ref<T>>;
+	template <typename T>
+	using CRefOptional = std::optional<CRef<T>>;
+
+	template <typename T>
+	T& Unwrap(const RefOptional<T>& optional)
+	{
+		return optional.value().get();
+	}
+
+	template <typename T>
+	const T& Unwrap(const CRefOptional<T>& optional)
+	{
+		return optional.value().get();
+	}
 
 	using RWLock = std::unique_lock<std::shared_mutex>;
 	using ReadOnlyLock = std::shared_lock<std::shared_mutex>;

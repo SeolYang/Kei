@@ -5,20 +5,22 @@
 #include <VK/CommandPoolManager.h>
 #include <VK/VulkanContext.h>
 #include <VK/Buffer.h>
+#include <VK/Texture.h>
+#include <VK/TextureView.h>
 #include <VK/DescriptorManager.h>
 #include <VK/FrameTracker.h>
 #include <VK/Swapchain.h>
 #include <VK/Semaphore.h>
+#include <VK/Sampler.h>
 #include <VK/Fence.h>
 #include <Render/Mesh.h>
+#include <Core/ResourceCache.h>
 
 namespace sy::render
 {
-	SimpleRenderPass::SimpleRenderPass(const std::string_view name, const vk::VulkanContext& vulkanContext, vk::DescriptorManager& descriptorManager, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, const vk::Pipeline& pipeline) :
+	SimpleRenderPass::SimpleRenderPass(const std::string_view name, ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext, vk::DescriptorManager& descriptorManager, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, const vk::Pipeline& pipeline) :
 	RenderPass(name, vulkanContext, descriptorManager, frameTracker, cmdPoolManager, pipeline),
-	vertexBuffer(VK_NULL_HANDLE),
-	indexBuffer(VK_NULL_HANDLE),
-	textureDescriptor(-1)
+	resourceCache(resourceCache)
 	{
 		for (size_t idx = 0; idx < vk::NumMaxInFlightFrames; ++idx)
 		{
@@ -68,7 +70,6 @@ namespace sy::render
 		graphicsCmdBuffer.BeginRendering(renderingInfo);
 		graphicsCmdBuffer.BindPipeline(pipeline);
 		graphicsCmdBuffer.BindDescriptorSet(descriptorManager.GetDescriptorSet(), pipeline);
-
 	}
 
 	void SimpleRenderPass::Render()
@@ -76,20 +77,24 @@ namespace sy::render
 		const auto& frameTracker = GetFrameTracker();
 		const auto& graphicsCmdBuffer = GetCommandBuffer();
 		const auto& pipeline = GetPipeline();
+		const auto& descriptorRef = Unwrap(resourceCache.Load<vk::Descriptor>(descriptor));
 
 		const PushConstants pushConstants
 		{
-			.textureIndex = static_cast<int>(textureDescriptor),
+			.textureIndex = static_cast<int>(descriptorRef->Offset),
 			.transformDataIndex = static_cast<int>(transformBufferIndices[frameTracker.GetCurrentInFlightFrameIndex()]->Offset)
 		};
 
-		std::array vertexBuffers = { vertexBuffer };
+		const auto& meshRef = Unwrap(resourceCache.Load(mesh));
+
+		std::array vertexBuffers = { CRef(meshRef.GetVertexBuffer())};
 		std::array offsets = { uint64_t() };
+
 		graphicsCmdBuffer.BindVertexBuffers(0, vertexBuffers, offsets);
-		graphicsCmdBuffer.BindIndexBuffer(indexBuffer);
+		graphicsCmdBuffer.BindIndexBuffer(meshRef.GetIndexBuffer());
 		graphicsCmdBuffer.PushConstants(pipeline, VK_SHADER_STAGE_ALL_GRAPHICS, pushConstants);
 
-		graphicsCmdBuffer.DrawIndexed(numIndices, 1, 0, 0, 0);
+		graphicsCmdBuffer.DrawIndexed(meshRef.GetNumIndices(), 1, 0, 0, 0);
 	}
 
 	void SimpleRenderPass::OnEnd()
@@ -109,19 +114,14 @@ namespace sy::render
 		vulkanContext.Unmap(transformBuffer);
 	}
 
-	void SimpleRenderPass::SetMesh(const Mesh& mesh)
+	void SimpleRenderPass::SetMesh(Handle<Mesh> mesh)
 	{
-		const auto& vertexBuffer = mesh.GetVertexBuffer();
-		const auto& indexBuffer = mesh.GetIndexBuffer();
-		this->vertexBuffer = vertexBuffer.GetNativeHandle();
-		this->indexBuffer = indexBuffer.GetNativeHandle();
-		this->numVertices = mesh.GetNumVertices();
-		this->numIndices = mesh.GetNumIndices();
+		this->mesh = mesh;
 	}
 
-	void SimpleRenderPass::SetTextureDescriptor(const vk::Descriptor& descriptor)
+	void SimpleRenderPass::SetTextureDescriptor(const Handle<vk::Descriptor> descriptor)
 	{
-		this->textureDescriptor = descriptor->Offset;
+		this->descriptor = descriptor;
 	}
 
 	void SimpleRenderPass::SetWindowExtent(Extent2D<uint32_t> extent)

@@ -6,6 +6,7 @@ namespace sy
 	namespace vk
 	{
 		class VulkanContext;
+		class ResourceStateTracker;
 		class FrameTracker;
 		class CommandPoolManager;
 		class DescriptorManager;
@@ -24,7 +25,7 @@ namespace sy
 
 	class CommandLineParser;
 	class Window;
-	class CacheRegistry;
+	class ResourceCache;
 	class Context final : public NonCopyable
 	{
 	public:
@@ -44,8 +45,9 @@ namespace sy
 		std::unique_ptr<CommandLineParser> cmdLineParser;
 		std::unique_ptr<Timer> timer;
 		std::unique_ptr<Window> window;
-		std::unique_ptr<CacheRegistry> cacheRegistry;
+		std::unique_ptr<ResourceCache> resourceCache;
 		std::unique_ptr<vk::VulkanContext> vulkanContext;
+		std::unique_ptr<vk::ResourceStateTracker> resourceStateTracker;
 		std::unique_ptr<vk::FrameTracker> frameTracker;
 		std::unique_ptr<vk::CommandPoolManager> cmdPoolManager;
 		std::unique_ptr<vk::DescriptorManager> descriptorManager;

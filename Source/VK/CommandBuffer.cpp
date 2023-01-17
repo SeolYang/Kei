@@ -99,6 +99,8 @@ namespace sy
 
 		void CommandBuffer::FlushStateTransitions(ResourceStateTracker& resourceStateTracker) const
 		{
+			using TextureStateTransition = ResourceStateTracker::TextureStateTransition;
+			using BufferStateTransition = ResourceStateTracker::BufferStateTransition;
 			const std::vector<TextureStateTransition> textureStateTransitions = resourceStateTracker.FlushTextureTransitions();
 			std::vector<VkImageMemoryBarrier2> imageBarriers;
 			imageBarriers.reserve(textureStateTransitions.size());

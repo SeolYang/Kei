@@ -6,8 +6,8 @@
 
 namespace sy::vk
 {
-	ResourceStateTracker::ResourceStateTracker(CacheRegistry& cacheRegistry) :
-	cacheRegistry(cacheRegistry)
+	ResourceStateTracker::ResourceStateTracker(ResourceCache& resourceCache) :
+	resourceCache(resourceCache)
 	{
 	}
 
@@ -15,8 +15,7 @@ namespace sy::vk
 	{
 		if (textureStates.find(handle.Value) == textureStates.end())
 		{
-			const auto& cache = cacheRegistry.Acquire<Texture>();
-			if (const auto resourceRef = cache.Load(handle); resourceRef)
+			if (const auto resourceRef = resourceCache.Load(handle); resourceRef)
 			{
 				const auto& resource = resourceRef.value().get();
 
@@ -38,8 +37,7 @@ namespace sy::vk
 	{
 		if (bufferStates.find(handle.Value) == bufferStates.end())
 		{
-			const auto& cache = cacheRegistry.Acquire<Buffer>();
-			if (const auto resourceRef = cache.Load(handle); resourceRef)
+			if (const auto resourceRef = resourceCache.Load(handle); resourceRef)
 			{
 				const auto& resource = resourceRef.value().get();
 				bufferStates[handle.Value] = { handle, resource.GetInitialState() };
@@ -57,8 +55,7 @@ namespace sy::vk
 		auto foundItr = textureStates.find(handle.Value);
 		if (foundItr != textureStates.end())
 		{
-			const auto& cache = cacheRegistry.Acquire<Texture>();
-			if (const auto resourceRef = cache.Load(handle); resourceRef)
+			if (const auto resourceRef = resourceCache.Load(handle); resourceRef)
 			{
 				const auto& resource = resourceRef.value().get();
 				TextureState& state = foundItr->second;
@@ -111,8 +108,7 @@ namespace sy::vk
 
 	void ResourceStateTracker::PendingTransition(const ETextureState dstState, const Handle<Texture> handle)
 	{
-		const auto& cache = cacheRegistry.Acquire<Texture>();
-		if (const auto resourceRef = cache.Load(handle); resourceRef)
+		if (const auto resourceRef = resourceCache.Load(handle); resourceRef)
 		{
 			const auto& resource = resourceRef.value().get();
 			/** @TODO Handle texture arrays */
@@ -125,8 +121,7 @@ namespace sy::vk
 		auto foundItr = bufferStates.find(handle.Value);
 		if (foundItr != bufferStates.end())
 		{
-			const auto& cache = cacheRegistry.Acquire<Buffer>();
-			if (const auto resourceRef = cache.Load(handle); resourceRef)
+			if (const auto resourceRef = resourceCache.Load(handle); resourceRef)
 			{
 				const auto& resource = resourceRef.value().get();
 				BufferState& state = foundItr->second;
@@ -141,8 +136,7 @@ namespace sy::vk
 
 	void ResourceStateTracker::PendingTransition(const EBufferState dstState, const Handle<Buffer> handle)
 	{
-		const auto& cache = cacheRegistry.Acquire<Buffer>();
-		if (const auto resourceRef = cache.Load(handle); resourceRef)
+		if (const auto resourceRef = resourceCache.Load(handle); resourceRef)
 		{
 			const auto& resource = resourceRef.value().get();
 			PendingTransition(dstState, handle, 0, resource.GetSize());

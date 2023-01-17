@@ -3,7 +3,7 @@
 
 namespace sy
 {
-	class CacheRegistry;
+	class ResourceCache;
 }
 
 namespace sy::vk
@@ -39,8 +39,26 @@ namespace sy::vk
 			EBufferState State = EBufferState::None;
 		};
 
+		struct TextureStateTransition
+		{
+			CRef<class Texture> Texture;
+			ETextureState Before;
+			ETextureState After;
+			uint32_t BaseMipLevel = 0;
+			uint32_t MipLevelCount = 1;
+			uint32_t BaseArrayLayer = 0;
+			uint32_t ArrayLayerCount = 1;
+		};
+
+		struct BufferStateTransition
+		{
+			CRef<class Buffer> Buffer;
+			EBufferState Before;
+			EBufferState After;
+		};
+
 	public:
-		ResourceStateTracker(CacheRegistry& cacheRegistry);
+		ResourceStateTracker(ResourceCache& resourceCache);
 		~ResourceStateTracker() override = default;
 
 		void Register(Handle<Texture> handle);
@@ -58,7 +76,7 @@ namespace sy::vk
 
 	private:
 		//mutable std::mutex mutex;
-		CacheRegistry& cacheRegistry;
+		ResourceCache& resourceCache;
 		robin_hood::unordered_map<HandleUnderType, TextureState> textureStates;
 		robin_hood::unordered_map<HandleUnderType, BufferState> bufferStates;
 

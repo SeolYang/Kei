@@ -15,13 +15,14 @@ namespace sy
 		class Sampler;
 		class Fence;
 		class PipelineLayoutCache;
+		class ResourceStateTracker;
 		class FrameTracker;
 		class CommandPoolManager;
 		class DescriptorManager;
 	}
 
 	class Window;
-	class CacheRegistry;
+	class ResourceCache;
 	namespace render
 	{
 		class Mesh;
@@ -29,8 +30,8 @@ namespace sy
 		class Renderer final : public NonCopyable
 		{
 		public:
-			Renderer(const Window& window, vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager, CacheRegistry& cacheRegistry);
-			~Renderer();
+			Renderer(const Window& window, vk::VulkanContext& vulkanContext, vk::ResourceStateTracker& resStateTracker, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager, ResourceCache& resourceCache);
+			~Renderer() override;
 
 			void Render();
 
@@ -41,10 +42,11 @@ namespace sy
 		private:
 			const Window& window;
 			vk::VulkanContext& vulkanContext;
+			vk::ResourceStateTracker& resStateTracker;
 			const vk::FrameTracker& frameTracker;
 			vk::CommandPoolManager& cmdPoolManager;
 			vk::DescriptorManager& descriptorManager;
-			CacheRegistry& cacheRegistry;
+			ResourceCache& resourceCache;
 
 			std::unique_ptr<vk::PipelineLayoutCache> pipelineLayoutCache;
 
@@ -55,22 +57,14 @@ namespace sy
 			std::unique_ptr<vk::Texture> depthStencil;
 			std::unique_ptr<vk::TextureView> depthStencilView;
 
-			std::unique_ptr<vk::Sampler> linearSampler;
+			Handle<vk::Sampler> linearSampler;
 
-			std::unique_ptr<vk::Texture> bodyTexture;
-			std::unique_ptr<vk::TextureView> bodyTextureView;
-			vk::Descriptor bodyTextureDescriptor;
+			Handle<vk::Descriptor> bodyTexDescriptor;
+			Handle<vk::Descriptor> hairTexDescriptor;
+			Handle<vk::Descriptor> costumeTexDescriptor;
 
-			std::unique_ptr<vk::Texture> hairTexture;
-			std::unique_ptr<vk::TextureView> hairTextureView;
-			vk::Descriptor hairTextureDescriptor;
-
-			std::unique_ptr<vk::Texture> costumeTexture;
-			std::unique_ptr<vk::TextureView> costumeTextureView;
-			vk::Descriptor costumeTextureDescriptor;
-
-			std::vector<std::unique_ptr<Mesh>> meshes;
-
+			std::vector<Handle<Mesh>> meshHandles;
+			
 			std::unique_ptr<SimpleRenderPass> renderPass;
 
 			glm::mat4 viewProjMat;

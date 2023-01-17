@@ -5,6 +5,7 @@
 #include <Core/Utils.h>
 #include <Core/ResourceCache.h>
 #include <VK/VulkanContext.h>
+#include <VK/ResourceStateTracker.h>
 #include <VK/FrameTracker.h>
 #include <VK/CommandPoolManager.h>
 #include <VK/DescriptorManager.h>
@@ -40,8 +41,12 @@ namespace sy
 		timer = std::make_unique<Timer>();
 		spdlog::info("Initializing Window sub-context.");
 		window = std::make_unique<Window>("Test", Extent2D<uint32_t>{ 1280, 720 });
+		spdlog::info("Initializing Resource Cache.");
+		resourceCache = std::make_unique<ResourceCache>();
 		spdlog::info("Initializing Vulkan context.");
 		vulkanContext = std::make_unique<vk::VulkanContext>(*window);
+		spdlog::info("Initializing Resource State Tracker.");
+		resourceStateTracker = std::make_unique<vk::ResourceStateTracker>(*resourceCache);
 		spdlog::info("Initializing frame tracker sub-context.");
 		frameTracker = std::make_unique<vk::FrameTracker>(*vulkanContext);
 		spdlog::info("Initializing Command Pool Manager sub-context.");
@@ -49,7 +54,7 @@ namespace sy
 		spdlog::info("Initializing Bind-less Descriptor Manager sub-context.");
 		descriptorManager = std::make_unique<vk::DescriptorManager>(*vulkanContext, *frameTracker);
 		spdlog::info("Initializing Renderer sub-context.");
-		renderer = std::make_unique<render::Renderer>(*window, *vulkanContext, *frameTracker, *cmdPoolManager, *descriptorManager, *cacheRegistry);
+		renderer = std::make_unique<render::Renderer>(*window, *vulkanContext, *resourceStateTracker, *frameTracker, *cmdPoolManager, *descriptorManager, *resourceCache);
 	}
 
 	void Context::InitializeLogger()
@@ -95,14 +100,20 @@ namespace sy
 	{
 		vulkanContext->WaitForDeviceIdle();
 		{
+			spdlog::info("Clean-up Resource Cache.");
+			resourceCache->Clear();
+
 			spdlog::info("Clean-up Renderer sub-context.");
 			renderer.reset();
+
 			spdlog::info("Clean-up Bind-less Descriptor Manager sub-context.");
 			descriptorManager.reset();
 			spdlog::info("Clean-up Command Pool Manager sub-context.");
 			cmdPoolManager.reset();
 			spdlog::info("Clean-up frame tracker sub-context.");
 			frameTracker.reset();
+			spdlog::info("Clean-up Resource State Tracker.");
+			resourceStateTracker.reset();
 			spdlog::info("Clean-up Vulkan context.");
 			vulkanContext.reset();
 		}
