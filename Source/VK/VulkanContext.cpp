@@ -63,6 +63,13 @@ namespace sy
 			return graphicsQueue;
 		}
 
+		void VulkanContext::SubmitImmediateTo(const CommandBuffer& cmdBuffer) const
+		{
+			SubmitTo(cmdBuffer, *immediateFence);
+			immediateFence->Wait();
+			immediateFence->Reset();
+		}
+
 		void VulkanContext::SubmitTo(const EQueueType queueType, const VkSubmitInfo& submitInfo, const Fence& fence) const
 		{
 			const auto queue = GetQueue(queueType);
@@ -324,12 +331,15 @@ namespace sy
 			spdlog::trace("VMA instance successfully created.");
 
 			InitQueues(vkbDevice);
+
+			immediateFence = std::make_unique<Fence>("Immediate Fence", *this, false);
 		}
 
 		void VulkanContext::Cleanup()
 		{
 			WaitAllQueuesForIdle();
 			{
+				immediateFence.reset();
 				vmaDestroyAllocator(allocator);
 				allocator = VK_NULL_HANDLE;
 				spdlog::trace("Cleanup swap chain...");

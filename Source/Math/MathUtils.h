@@ -11,5 +11,10 @@ namespace sy
 			perspective[1][1] *= -1.f;
 			return perspective;
 		}
+
+		constexpr bool IsPowOfTwo(const size_t value)
+		{
+			return (value != 0) && ((value & (value - 1)) == 0);
+		}
 	}
 }

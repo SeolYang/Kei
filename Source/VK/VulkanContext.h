@@ -33,6 +33,8 @@ namespace sy
 			[[nodiscard]] Swapchain& GetSwapchain() const { return *swapchain; }
 			[[nodiscard]] VmaAllocator GetAllocator() const { return allocator; }
 
+			void SubmitImmediateTo(const CommandBuffer& cmdBuffer) const;
+
 			void SubmitTo(EQueueType queueType, const VkSubmitInfo& submitInfo, const Fence& fence) const;
 			void SubmitTo(const CommandBuffer& cmdBuffer, const Fence& fence) const;
 			void SubmitTo(EQueueType queueType, const FrameTracker& frameTracker, std::span<CRef<CommandBuffer>> cmdBuffers);
@@ -93,6 +95,8 @@ namespace sy
 			uint32_t computeQueueFamilyIdx;
 			uint32_t transferQueueFamilyIdx;
 			uint32_t presentQueueFamilyIdx;
+
+			std::unique_ptr<Fence> immediateFence;
 
 		};
 	}

@@ -24,8 +24,7 @@
 #include <Math/MathUtils.h>
 #include <Asset/TextureAsset.h>
 #include <Asset/ModelAsset.h>
-
-#include "Core/ResourceCache.h"
+#include <Core/ResourceCache.h>
 
 namespace sy
 {
@@ -43,7 +42,7 @@ namespace sy
 		{
 			const auto windowExtent = window.GetExtent();
 
-			depthStencil = vk::CreateDepthStencil("Depth-Stencil buffer", vulkanContext, frameTracker, cmdPoolManager, windowExtent);
+			depthStencil = vk::CreateDepthStencil("Depth-Stencil buffer", vulkanContext, cmdPoolManager, windowExtent, VK_FORMAT_D24_UNORM_S8_UINT);
 			depthStencilView = std::make_unique<vk::TextureView>("DepthStencil view", vulkanContext, *depthStencil, VK_IMAGE_VIEW_TYPE_2D);
 
 			triVert = std::make_unique<vk::ShaderModule>("Triangle vertex shader", vulkanContext, "Assets/Shaders/bin/textured_tri_bindless.vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");

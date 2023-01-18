@@ -5,13 +5,6 @@ namespace sy
 {
 	namespace vk
 	{
-		struct BufferInfo
-		{
-			size_t Size;
-			VkBufferUsageFlags UsageFlags;
-			VmaMemoryUsage MemoryUsage;
-		};
-
 		class VulkanContext;
 		class CommandPoolManager;
 		class FrameTracker;

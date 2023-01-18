@@ -218,7 +218,7 @@ namespace sy
 
 		Descriptor DescriptorManager::RequestDescriptor(const vk::Texture& texture, const TextureView& view, const Sampler& sampler, const VkImageLayout currentLayout, const bool bIsCombinedSampler)
 		{
-			const auto descriptorType = vk::ImageUsageToDescriptorType(texture.GetUsage(), bIsCombinedSampler);
+			const auto descriptorType = vk::ImageUsageToDescriptorType(texture.GetUsageFlags(), bIsCombinedSampler);
 			const auto descriptorBinding = ToUnderlying(descriptorType);
 			auto& offsetPoolPackage = descriptorPoolPackage.OffsetPoolPackages[descriptorBinding];
 
