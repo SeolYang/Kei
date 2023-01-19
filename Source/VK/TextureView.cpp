@@ -2,25 +2,17 @@
 #include <VK/TextureView.h>
 #include <VK/Texture.h>
 #include <VK/VulkanContext.h>
-#include <VK/Texture.h>
 
 namespace sy::vk
 {
-	TextureView::TextureView(std::string_view name, const VulkanContext& vulkanContext, const Texture& texture, const VkImageViewType type,
-		const VkFormat format, const VkImageAspectFlags aspects, const uint32_t baseMipLevel, const uint32_t mipLevelCount,
-		const uint32_t baseArrayLayer, const uint32_t layerCount) :
+	TextureView::TextureView(const std::string_view name, const VulkanContext& vulkanContext, const Texture& texture,
+		const VkImageViewType viewType, const TextureSubResource subResource) :
 		VulkanWrapper<VkImageView>(name, vulkanContext, VK_OBJECT_TYPE_IMAGE_VIEW, VK_DESTROY_LAMBDA_SIGNATURE(VkImageView)
-		{
-			vkDestroyImageView(vulkanContext.GetDevice(), handle, nullptr);
-		}),
-		texture(texture),
-		viewType(type),
-		format(format),
-		aspects(aspects),
-		baseMipLevel(baseMipLevel),
-		mipLevelCount(mipLevelCount),
-		baseArrayLayer(baseArrayLayer),
-		layerCount(layerCount)
+	{
+		vkDestroyImageView(vulkanContext.GetDevice(), handle, nullptr);
+	}),
+		viewType(viewType),
+		subResource(subResource)
 	{
 		const VkImageViewCreateInfo viewCreateInfo
 		{
@@ -28,15 +20,15 @@ namespace sy::vk
 			.pNext = nullptr,
 			.flags = 0,
 			.image = texture.GetNativeHandle(),
-			.viewType = type,
-			.format = format,
+			.viewType = viewType,
+			.format = subResource.Format,
 			.subresourceRange = VkImageSubresourceRange
 			{
-				.aspectMask = aspects,
-				.baseMipLevel = baseMipLevel,
-				.levelCount = mipLevelCount,
-				.baseArrayLayer = baseArrayLayer,
-				.layerCount = layerCount
+				.aspectMask = FormatToImageAspect(subResource.Format),
+				.baseMipLevel = subResource.MipLevel,
+				.levelCount = subResource.MipLevelCount,
+				.baseArrayLayer = subResource.ArrayLayer,
+				.layerCount = subResource.ArrayLayerCount
 			}
 		};
 
@@ -45,9 +37,9 @@ namespace sy::vk
 		UpdateHandle(handle);
 	}
 
-	TextureView::TextureView(std::string_view name, const VulkanContext& vulkanContext, const Texture& texture, const VkImageViewType type, const uint32_t baseMipLevel, const uint32_t mipLevelCount, const uint32_t baseArrayLayer, const uint32_t layerCount) :
-		TextureView(name, vulkanContext, texture, type, texture.GetFormat(), IsDepthStencilFormat(texture.GetFormat()) ? VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT : VK_IMAGE_ASPECT_COLOR_BIT,
-			baseMipLevel, mipLevelCount, baseArrayLayer, layerCount)
+	TextureView::TextureView(const std::string_view name, const VulkanContext& vulkanContext, const Texture& texture,
+		const VkImageViewType viewType) :
+		TextureView(name, vulkanContext, texture, viewType, texture.GetFullSubResource())
 	{
 	}
 }

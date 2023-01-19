@@ -36,7 +36,9 @@ namespace sy
 		{
 			VkFormat Format;
 			uint32_t MipLevel = 0;
+			uint32_t MipLevelCount = 1;
 			uint32_t ArrayLayer = 0;
+			uint32_t ArrayLayerCount = 1;
 		};
 
 		struct BufferInfo
