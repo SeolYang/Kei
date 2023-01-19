@@ -3,6 +3,7 @@
 
 namespace sy
 {
+	class ResourceCache;
 	namespace vk
 	{
 		class VulkanContext;
@@ -111,7 +112,9 @@ namespace sy
 			[[nodiscard]] VkDescriptorSet GetDescriptorSet() const { return descriptorPoolPackage.DescriptorSet; }
 
 			Descriptor RequestDescriptor(const Buffer& buffer, bool bIsDynamic = false);
-			Descriptor RequestDescriptor(const Texture& texture, const TextureView& view, const Sampler& sampler, VkImageLayout currentLayout, bool bIsCombinedSampler = true);
+			Descriptor RequestDescriptor(ResourceCache& resourceCache, Handle<Buffer> handle, bool bIsDynamic = false);
+			Descriptor RequestDescriptor(const Texture& texture, const TextureView& view, const Sampler& sampler, ETextureState expectedState, bool bIsCombinedSampler = true);
+			Descriptor RequestDescriptor(ResourceCache& resourceCache, Handle<Texture> texture, Handle<TextureView> view, Handle<Sampler> sampler, ETextureState expectedState, bool bIsCombinedSampler = true);
 
 		private:
 			const VulkanContext& vulkanContext;

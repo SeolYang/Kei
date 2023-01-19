@@ -8,7 +8,7 @@ namespace sy
 
 namespace sy::vk
 {
-	inline auto ResolveTextureSubResourceIndex(const size_t mipLevel, const size_t arrayLayer, const size_t numMipLevels)
+	inline auto ResolveTextureSubResourceRangeIndex(const size_t mipLevel, const size_t arrayLayer, const size_t numMipLevels)
 	{
 		return (arrayLayer * numMipLevels) + mipLevel;
 	}
@@ -26,13 +26,6 @@ namespace sy::vk
 			bool bTrackingPerSubResource = false;
 		};
 
-		struct TextureSubResource
-		{
-			uint32_t MipLevel = 0;
-			uint32_t NumMips = 1;
-			uint32_t ArrayLayer = 0;
-		};
-
 		struct BufferState
 		{
 			Handle<Buffer> Handle = {};
@@ -41,18 +34,15 @@ namespace sy::vk
 
 		struct TextureStateTransition
 		{
-			CRef<class Texture> Texture;
+			const Texture& Target;
 			ETextureState Before;
 			ETextureState After;
-			uint32_t BaseMipLevel = 0;
-			uint32_t MipLevelCount = 1;
-			uint32_t BaseArrayLayer = 0;
-			uint32_t ArrayLayerCount = 1;
+			TextureSubResourceRange SubResourceRange;
 		};
 
 		struct BufferStateTransition
 		{
-			CRef<class Buffer> Buffer;
+			const Buffer& Target;
 			EBufferState Before;
 			EBufferState After;
 		};

@@ -29,7 +29,7 @@ namespace sy
 			[[nodiscard]] auto GetNumSubResources() const { return IsTextureArray() ? GetExtent().depth * GetMipLevels() : GetMipLevels(); }
 			[[nodiscard]] auto GetInitialState() const { return initialState; }
 
-			[[nodiscard]] TextureSubResource GetFullSubResource() const { return { GetFormat(), 0, GetMipLevels(), 0, GetArrayLayers() }; }
+			[[nodiscard]] TextureSubResourceRange GetFullSubResourceRange() const { return { 0, GetMipLevels(), 0, GetArrayLayers() }; }
 
 		private:
 			TextureInfo info;

@@ -94,7 +94,7 @@ namespace sy::render
 		graphicsCmdBuffer.BindIndexBuffer(meshRef.GetIndexBuffer());
 		graphicsCmdBuffer.PushConstants(pipeline, VK_SHADER_STAGE_ALL_GRAPHICS, pushConstants);
 
-		graphicsCmdBuffer.DrawIndexed(meshRef.GetNumIndices(), 1, 0, 0, 0);
+		graphicsCmdBuffer.DrawIndexed(static_cast<uint32_t>(meshRef.GetNumIndices()), 1, 0, 0, 0);
 	}
 
 	void SimpleRenderPass::OnEnd()

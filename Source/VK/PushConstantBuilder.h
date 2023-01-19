@@ -12,12 +12,12 @@ namespace sy::vk
 		template <typename T>
 		PushConstantBuilder& Add(const VkShaderStageFlags shaderStage)
 		{
-			ranges.emplace_back(shaderStage, offset, sizeof(T));
+			ranges.emplace_back(shaderStage, static_cast<uint32_t>(offset), static_cast<uint32_t>(sizeof(T)));
 			offset += sizeof(T);
 			return *this;
 		}
 
-		std::span<const VkPushConstantRange> Build() const
+		[[nodiscard]] std::span<const VkPushConstantRange> Build() const
 		{
 			return ranges;
 		}

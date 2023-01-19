@@ -6,14 +6,16 @@
 namespace sy::vk
 {
 	TextureView::TextureView(const std::string_view name, const VulkanContext& vulkanContext, const Texture& texture,
-		const VkImageViewType viewType, const TextureSubResource subResource) :
+		const VkImageViewType viewType, const TextureSubResourceRange subResourceRange) :
 		VulkanWrapper<VkImageView>(name, vulkanContext, VK_OBJECT_TYPE_IMAGE_VIEW, VK_DESTROY_LAMBDA_SIGNATURE(VkImageView)
 	{
 		vkDestroyImageView(vulkanContext.GetDevice(), handle, nullptr);
 	}),
 		viewType(viewType),
-		subResource(subResource)
+		subResourceRange(subResourceRange)
 	{
+		/** @todo should custom format for texture view? */
+		const auto format = texture.GetFormat();
 		const VkImageViewCreateInfo viewCreateInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -21,14 +23,14 @@ namespace sy::vk
 			.flags = 0,
 			.image = texture.GetNativeHandle(),
 			.viewType = viewType,
-			.format = subResource.Format,
+			.format = format,
 			.subresourceRange = VkImageSubresourceRange
 			{
-				.aspectMask = FormatToImageAspect(subResource.Format),
-				.baseMipLevel = subResource.MipLevel,
-				.levelCount = subResource.MipLevelCount,
-				.baseArrayLayer = subResource.ArrayLayer,
-				.layerCount = subResource.ArrayLayerCount
+				.aspectMask = FormatToImageAspect(format),
+				.baseMipLevel = subResourceRange.MipLevel,
+				.levelCount = subResourceRange.MipLevelCount,
+				.baseArrayLayer = subResourceRange.ArrayLayer,
+				.layerCount = subResourceRange.ArrayLayerCount
 			}
 		};
 
@@ -39,7 +41,7 @@ namespace sy::vk
 
 	TextureView::TextureView(const std::string_view name, const VulkanContext& vulkanContext, const Texture& texture,
 		const VkImageViewType viewType) :
-		TextureView(name, vulkanContext, texture, viewType, texture.GetFullSubResource())
+		TextureView(name, vulkanContext, texture, viewType, texture.GetFullSubResourceRange())
 	{
 	}
 }

@@ -106,7 +106,7 @@ namespace sy
 			imageBarriers.reserve(textureStateTransitions.size());
 			for (const TextureStateTransition& transition : textureStateTransitions)
 			{
-				const Texture& texture = transition.Texture.get();
+				const Texture& texture = transition.Target;
 				const AccessPattern srcAccess = QueryAccessPattern(transition.Before);
 				const AccessPattern dstAccess = QueryAccessPattern(transition.After);
 				imageBarriers.emplace_back(VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2, nullptr,
@@ -114,7 +114,7 @@ namespace sy
 					dstAccess.PipelineStage, dstAccess.Access,
 					srcAccess.ImageLayout, dstAccess.ImageLayout,
 					VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED,
-					texture.GetNativeHandle(), VkImageSubresourceRange{FormatToImageAspect(texture.GetFormat()), transition.BaseMipLevel, transition.MipLevelCount, transition.BaseArrayLayer, transition.ArrayLayerCount});
+					texture.GetNativeHandle(), VkImageSubresourceRange{FormatToImageAspect(texture.GetFormat()), transition.SubResourceRange.MipLevel, transition.SubResourceRange.MipLevelCount, transition.SubResourceRange.ArrayLayer, transition.SubResourceRange.ArrayLayerCount});
 			}
 
 			const std::vector<BufferStateTransition> bufferStateTransitions = resourceStateTracker.FlushBufferTransitions();
@@ -122,7 +122,7 @@ namespace sy
 			bufferBarriers.reserve(bufferStateTransitions.size());
 			for (const BufferStateTransition& transition : bufferStateTransitions)
 			{
-				const Buffer& buffer = transition.Buffer.get();
+				const Buffer& buffer = transition.Target;
 				const AccessPattern srcAccess = QueryAccessPattern(transition.Before);
 				const AccessPattern dstAccess = QueryAccessPattern(transition.After);
 				bufferBarriers.emplace_back(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2,

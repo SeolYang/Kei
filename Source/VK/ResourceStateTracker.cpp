@@ -55,9 +55,9 @@ namespace sy::vk
 		auto foundItr = textureStates.find(handle.Value);
 		if (foundItr != textureStates.end())
 		{
-			if (const auto resourceRef = resourceCache.Load(handle); resourceRef)
+			if (const auto resourceOpt = resourceCache.Load(handle); resourceOpt)
 			{
-				const auto& resource = resourceRef.value().get();
+				const auto& resource = Unwrap(resourceOpt);
 				TextureState& state = foundItr->second;
 				if (!subResources.empty())
 				{
@@ -68,27 +68,26 @@ namespace sy::vk
 
 					for (const auto& subResource : subResources)
 					{
-						const size_t subResourceIndex = ResolveTextureSubResourceIndex(subResource.MipLevel, subResource.ArrayLayer, subResource.NumMips);
+						const size_t subResourceIndex = ResolveTextureSubResourceRangeIndex(subResource.MipLevel, subResource.ArrayLayer, resource.GetMipLevels());
 						if (state.SubResourceStates[subResourceIndex] != dstState)
 						{
 							state.SubResourceStates[subResourceIndex] = dstState;
-							pendingTextureTransitions.emplace_back(resource, state.State, dstState, subResource.MipLevel, 1, subResource.ArrayLayer, 1);
+							pendingTextureTransitions.emplace_back(resource, state.State, dstState, TextureSubResourceRange{ .MipLevel = subResource.MipLevel, .ArrayLayer = subResource.ArrayLayer });
 						}
 					}
 				}
 				else
 				{
-					const size_t arrayLayerCount = (resource.IsTextureArray() ? resource.GetExtent().depth : 1);
 					if (state.bTrackingPerSubResource)
 					{
-						for (size_t arrayLayer = 0; arrayLayer < arrayLayerCount; ++arrayLayer)
+						for (uint32_t arrayLayer = 0; arrayLayer < resource.GetArrayLayers(); ++arrayLayer)
 						{
-							for (size_t mipLevel = 0; mipLevel < resource.GetMipLevels(); ++mipLevel)
+							for (uint32_t mipLevel = 0; mipLevel < resource.GetMipLevels(); ++mipLevel)
 							{
-								const size_t subResourceIndex = ResolveTextureSubResourceIndex(mipLevel, arrayLayer, resource.GetMipLevels());
+								const size_t subResourceIndex = ResolveTextureSubResourceRangeIndex(mipLevel, arrayLayer, resource.GetMipLevels());
 								if (state.SubResourceStates[subResourceIndex] != dstState)
 								{
-									pendingTextureTransitions.emplace_back(resource, state.SubResourceStates[subResourceIndex], dstState, mipLevel, 1, arrayLayer, 1);
+									pendingTextureTransitions.emplace_back(resource, state.SubResourceStates[subResourceIndex], dstState, TextureSubResourceRange{ .MipLevel = mipLevel, .ArrayLayer = arrayLayer });
 									state.SubResourceStates[subResourceIndex] = dstState;
 								}
 							}
@@ -96,7 +95,7 @@ namespace sy::vk
 					}
 					else
 					{
-						pendingTextureTransitions.emplace_back(resource, state.State, dstState, 0, resource.GetMipLevels(), 0, arrayLayerCount);
+						pendingTextureTransitions.emplace_back(resource, state.State, dstState, resource.GetFullSubResourceRange());
 					}
 
 					state.State = dstState;

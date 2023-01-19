@@ -20,11 +20,11 @@ namespace sy
 		{
 		};
 
-		template <typename R>
+		template <typename T>
 		class Cache : public CacheBase
 		{
 		public:
-			Handle<R> Add(std::unique_ptr<R> resource)
+			Handle<T> Add(std::unique_ptr<T> resource)
 			{
 				if (const auto key = reinterpret_cast<size_t>(resource.get()); cachedFlag.contains(key))
 				{
@@ -32,12 +32,12 @@ namespace sy
 					return { };
 				}
 
-				const auto newHandle = Handle<R>{ ++handleOffset };
+				const auto newHandle = Handle<T>{ ++handleOffset };
 				cached[newHandle.Value] = std::move(resource);
 				return newHandle;
 			}
 
-			CRefOptional<R> Load(const Handle<R> handle) const
+			CRefOptional<T> Load(const Handle<T> handle) const
 			{
 				if (!handle)
 				{
@@ -53,7 +53,7 @@ namespace sy
 				return CRef(*(found->second));
 			}
 
-			RefOptional<R> Load(const Handle<R> handle)
+			RefOptional<T> Load(const Handle<T> handle)
 			{
 				if (!handle)
 				{
@@ -72,36 +72,42 @@ namespace sy
 		private:
 			size_t handleOffset = 0;
 			robin_hood::unordered_set<size_t> cachedFlag;
-			robin_hood::unordered_map<size_t, std::unique_ptr<R>> cached;
+			robin_hood::unordered_map<size_t, std::unique_ptr<T>> cached;
 
 		};
 
 	public:
-		template <typename R>
-		RefOptional<R> Load(const Handle<R> handle)
+		template <typename T>
+		RefOptional<T> Load(const Handle<T> handle)
 		{
-			Cache<R>& cache = AcquireOrCreate<R>();
+			Cache<T>& cache = AcquireOrCreate<T>();
 			return cache.Load(handle);
 		}
 
-		template <typename R>
-		CRefOptional<R> Load(const Handle<R> handle) const
+		template <typename T>
+		CRefOptional<T> Load(const Handle<T> handle) const
 		{
-			CRefOptional<Cache<R>> cacheOpt = Acquire<R>();
+			CRefOptional<Cache<T>> cacheOpt = Acquire<T>();
 			if (!cacheOpt)
 			{
 				return std::nullopt;
 			}
 
-			const Cache<R>& cache = Unwrap(cacheOpt);
+			const Cache<T>& cache = Unwrap(cacheOpt);
 			return cache.Load(handle);
 		}
 
-		template <typename R>
-		Handle<R> Add(std::unique_ptr<R> ptr)
+		template <typename T>
+		Handle<T> Add(std::unique_ptr<T> ptr)
 		{
-			Cache<R>& cache = AcquireOrCreate<R>();
+			Cache<T>& cache = AcquireOrCreate<T>();
 			return cache.Add(std::move(ptr));
+		}
+
+		template <typename T, typename... Args>
+		Handle<T> Add(Args&&... args)
+		{
+			return Add(std::make_unique<T>(std::forward<Args>(args)...));
 		}
 
 		void Clear()
@@ -110,45 +116,45 @@ namespace sy
 		}
 
 	private:
-		template <typename R>
-		RefOptional<Cache<R>> Acquire()
+		template <typename T>
+		RefOptional<Cache<T>> Acquire()
 		{
-			const auto& type = typeid(R);
+			const auto& type = typeid(T);
 			const auto key = type.hash_code();
 			if (!caches.contains(key))
 			{
 				return std::nullopt;
 			}
 
-			return static_cast<Cache<R>&>(*caches[key]);
+			return static_cast<Cache<T>&>(*caches[key]);
 		}
 
-		template <typename R>
-		CRefOptional<Cache<R>> Acquire() const
+		template <typename T>
+		CRefOptional<Cache<T>> Acquire() const
 		{
-			const auto& type = typeid(R);
+			const auto& type = typeid(T);
 			const auto key = type.hash_code();
 			if (!caches.contains(key))
 			{
 				return std::nullopt;
 			}
 
-			return static_cast<const Cache<R>&>(*caches[key]);
+			return static_cast<const Cache<T>&>(*caches[key]);
 		}
 
-		template <typename R>
-		Cache<R>& AcquireOrCreate()
+		template <typename T>
+		Cache<T>& AcquireOrCreate()
 		{
-			if (const auto cacheOpt = Acquire<R>(); cacheOpt)
+			if (const auto cacheOpt = Acquire<T>(); cacheOpt)
 			{
 				return Unwrap(cacheOpt);
 			}
 
-			const auto& type = typeid(R);
+			const auto& type = typeid(T);
 			const auto key = type.hash_code();
-			caches[key] = std::make_unique<Cache<R>>();
+			caches[key] = std::make_unique<Cache<T>>();
 
-			return static_cast<Cache<R>&>(*caches[key]);
+			return static_cast<Cache<T>&>(*caches[key]);
 		}
 
 	private:
