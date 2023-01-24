@@ -76,4 +76,24 @@ namespace sy
     {
         return static_cast<std::underlying_type_t<T>>(val);
     }
+
+    inline size_t QuerySizeOfStream(std::ifstream& stream)
+    {
+	    if (!stream.is_open())
+	    {
+            return 0;
+	    }
+
+        stream.seekg(0, std::ios::end);
+        const size_t result = stream.tellg();
+        stream.seekg(0, std::ios::beg);
+        return result;
+    }
+
+    inline std::string InputFileStreamToString(const std::ifstream& stream)
+    {
+        std::stringstream ss;
+        ss << stream.rdbuf();
+        return ss.str();
+    }
 }

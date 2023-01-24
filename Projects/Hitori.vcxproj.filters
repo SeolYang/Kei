@@ -117,7 +117,7 @@
     <ClCompile Include="..\Source\Asset\AssetConverter.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Asset\AssetCore.cpp">
+    <ClCompile Include="..\Source\Asset\Asset.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\VK\VertexInputBuilder.cpp">
@@ -158,6 +158,12 @@
     </ClCompile>
     <ClCompile Include="..\Source\VK\ResourceStateTracker.cpp">
       <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Render\Material.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\MaterialAsset.cpp">
+      <Filter>Source\Asset</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -248,7 +254,7 @@
     <ClInclude Include="..\Source\Core\Types.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Asset\AssetCore.h">
+    <ClInclude Include="..\Source\Asset\Asset.h">
       <Filter>Source\Asset</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Asset\ModelAsset.h">
@@ -325,6 +331,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\Component\HierarchyComponent.h">
       <Filter>Source\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\MaterialAsset.h">
+      <Filter>Source\Asset</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

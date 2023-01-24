@@ -1,147 +1,155 @@
 #include <PCH.h>
 #include <Asset/ModelAsset.h>
+#include <Asset/MaterialAsset.h>
 #include <VK/Buffer.h>
+#include <Core/ResourceCache.h>
+#include <Component/StaticMeshComponent.h>
+#include <Render/Material.h>
 
 namespace sy::asset
 {
-	constexpr std::string_view MODEL_METADATA_COMPRESSION_MODE = "Compression";
-	constexpr std::string_view MODEL_METADATA_MESH_METADATA_LIST = "MeshMetas";
-	constexpr std::string_view MODEL_METADATA_MESH_VERTEX_DATA_SIZE = "VertexDataSize";
-	constexpr std::string_view MODEL_METADATA_MESH_INDEX_DATA_SIZE = "IndexDataSize";
+	struct MeshMetadata
+	{
+		std::string Name;
+		size_t VerticesOffset;
+		size_t NumVertices;
+		size_t IndicesOffset;
+		size_t NumIndices;
+		std::string Material;
+		std::string MaterialName;
+	};
+
+	struct ModelMetadata
+	{
+		std::vector<MeshMetadata> Meshes;
+		size_t NumVertices;
+		size_t NumIndices;
+	};
+
+	constexpr std::string_view MODEL_METADATA_MESHES = "Meshes";
+	constexpr std::string_view MODEL_METADATA_NUM_VERTICES = "NumVertices";
+	constexpr std::string_view MODEL_METADATA_NUM_INDICES = "NumIndices";
 	constexpr std::string_view MESH_METADATA_NAME = "Name";
-	constexpr std::string_view MESH_METADATA_VERTEX_OFFSET = "VertexOffset";
-	constexpr std::string_view MESH_METADATA_VERTEX_SIZE = "VertexSize";
-	constexpr std::string_view MESH_METADATA_INDEX_OFFSET = "IndexOffset";
-	constexpr std::string_view MESH_METADATA_INDEX_SIZE = "IndexSize";
-	constexpr uint32_t MODEL_ASSET_VERSION = 0;
+	constexpr std::string_view MESH_METADATA_VERTICES_OFFSET = "VerticesOffset";
+	constexpr std::string_view MESH_METADATA_NUM_VERTICES = "NumVertices";
+	constexpr std::string_view MESH_METADATA_INDICES_OFFSET = "IndicesOffset";
+	constexpr std::string_view MESH_METADATA_NUM_INDICES = "NumIndices";
+	constexpr std::string_view MESH_METADATA_MATERIAL = "Material";
+	constexpr std::string_view MESH_METADATA_MATERIAL_NAME = "MaterialName";
 
-	std::vector<nlohmann::json> SerializeMeshMeatadataList(const std::span<const MeshMetadata> metadataList)
+	using ModelVertex = render::VertexPTN;
+	using ModelIndex = render::IndexType;
+
+	constexpr size_t SizeOfVertex = sizeof(ModelVertex);
+	constexpr size_t SizeOfIndex = sizeof(ModelIndex);
+
+	std::vector<MeshMetadata> QueryMeshes(const nlohmann::json& json)
 	{
-		std::vector<nlohmann::json> result;
-		result.reserve(metadataList.size());
-		for (const auto& metadata : metadataList)
-		{
-			nlohmann::json metadataJson;
-			metadataJson[MESH_METADATA_NAME] = metadata.Name;
-			metadataJson[MESH_METADATA_VERTEX_OFFSET] = metadata.VertexOffset;
-			metadataJson[MESH_METADATA_VERTEX_SIZE] = metadata.VertexSize;
-			metadataJson[MESH_METADATA_INDEX_OFFSET] = metadata.IndexOffset;
-			metadataJson[MESH_METADATA_INDEX_SIZE] = metadata.IndexSize;
-			result.emplace_back(metadataJson);
-		}
-
-		return result;
-	}
-
-	std::vector<MeshMetadata> DeSerializeMeshMetadataList(nlohmann::json metadataList)
-	{
-		SY_ASSERT(metadataList.is_array(), "Invalid json object to deserialize mesh metadata list.");
-
+		const nlohmann::json& meshes = json[MODEL_METADATA_MESHES];
 		std::vector<MeshMetadata> result;
-		result.reserve(metadataList.size());
-		for (const auto& metadata : metadataList)
+		result.reserve(meshes.size());
+		for (const auto& mesh : meshes)
 		{
 			result.emplace_back(
-				metadata[MESH_METADATA_NAME],
-				metadata[MESH_METADATA_VERTEX_OFFSET], metadata[MESH_METADATA_VERTEX_SIZE],
-				metadata[MESH_METADATA_INDEX_OFFSET], metadata[MESH_METADATA_INDEX_SIZE]);
+				mesh[MESH_METADATA_NAME],
+				mesh[MESH_METADATA_VERTICES_OFFSET], mesh[MESH_METADATA_NUM_VERTICES],
+				mesh[MESH_METADATA_INDICES_OFFSET], mesh[MESH_METADATA_NUM_INDICES],
+				mesh[MESH_METADATA_MATERIAL]);
 		}
 
 		return result;
 	}
 
-	std::optional<ModelMetadata> ParseModelMetadata(const Asset& asset)
+	ModelMetadata QueryMetadata(const AssetData<render::Model>& assetData)
 	{
-		ModelMetadata metadata;
-		const auto metadataJson = nlohmann::json::parse(asset.Metadata);
-
-		const std::string compressionStr = metadataJson[MODEL_METADATA_COMPRESSION_MODE];
-		const auto compression = magic_enum::enum_cast<ECompressionMode>(compressionStr);
-		if (!compression)
-		{
-			SY_ASSERT(false, "Invalid model compression mode from asset metadata.");
-			return std::nullopt;
-		}
-		metadata.CompressionMode = compression.value();
-		metadata.MeshMetadataList = DeSerializeMeshMetadataList(metadataJson[MODEL_METADATA_MESH_METADATA_LIST]);
-		metadata.VertexDataSize = metadataJson[MODEL_METADATA_MESH_VERTEX_DATA_SIZE];
-		metadata.IndexDataSize = metadataJson[MODEL_METADATA_MESH_INDEX_DATA_SIZE];
-
-		return metadata;
+		const nlohmann::json& metadataJson = assetData.GetMetadata();
+		return {
+			QueryMeshes(metadataJson),
+			metadataJson[MODEL_METADATA_NUM_VERTICES],
+			metadataJson[MODEL_METADATA_NUM_INDICES] };
 	}
 
-	std::optional<Asset> Pack(const ModelMetadata& metadata, const void* vertices, const uint32_t* indices)
+	std::vector<component::StaticMeshComponent> LoadModel(const std::string& name, const fs::path& path,
+		ResourceCache& resourceCache,
+		const vk::VulkanContext& vulkanContext, vk::CommandPoolManager& cmdPoolManager,
+		const vk::FrameTracker& frameTracker, vk::DescriptorManager& descriptorManager)
 	{
-		/** @todo mesh optimization options */
-		if (vertices == nullptr)
+		const auto pathStr = path.string();
+		const auto assetDataHandle = LoadOrCreateAssetData<render::Model>(path, resourceCache);
+		if (!assetDataHandle)
 		{
-			SY_ASSERT(false, "Invalid vertices data.");
-			return std::nullopt;
+			SY_ASSERT(false, " Failed to load model asset from {}.", pathStr);
+			return {};
 		}
 
-		if (indices == nullptr)
+		const auto& assetData = Unwrap(resourceCache.Load(assetDataHandle));
+		const auto metadata = QueryMetadata(assetData);
+		const auto& blob = assetData.GetBlob();
+
+		std::vector<ModelVertex> vertices;
+		std::vector<ModelIndex> indices;
+		vertices.resize(metadata.NumVertices);
+		indices.resize(metadata.NumIndices);
+
+		const size_t sizeOfVerticesBytes = SizeOfVertex * metadata.NumVertices;
+		const size_t sizeOfIndicesBytes = SizeOfIndex * metadata.NumIndices;
+		std::memcpy(vertices.data(), blob.data(), sizeOfVerticesBytes);
+		std::memcpy(indices.data(), blob.data() + sizeOfVerticesBytes, sizeOfIndicesBytes);
+
+		std::vector<component::StaticMeshComponent> components;
+		for (const auto& mesh : metadata.Meshes)
 		{
-			SY_ASSERT(false, "Invalid indices data.");
+			/** @todo material load first! */
+			const std::span verticesSpan{ vertices.data() + mesh.VerticesOffset, mesh.NumVertices };
+			const std::span indicesSpan{ indices.data() + mesh.IndicesOffset, mesh.NumIndices };
+			const Handle<render::Mesh> meshHandle = resourceCache.Add(render::Mesh::Create<ModelVertex, ModelIndex>(
+				std::format("{}_{}", path.string(), mesh.Name),
+				vulkanContext, cmdPoolManager, frameTracker,
+				verticesSpan, indicesSpan));
+			const Handle<render::Material> materialHandle = LoadMaterialFromAsset(mesh.Material, resourceCache, vulkanContext, frameTracker, cmdPoolManager, descriptorManager);
+			component::StaticMeshComponent component;
+			component.Mesh = meshHandle;
+			component.Material = materialHandle;
+			components.emplace_back(component);
 		}
 
-		nlohmann::json metadataJson;
+		return components;
+	}
 
-		if (!CheckModelCompressionSupport(metadata.CompressionMode))
+	auto PackMeshesToJson(const ModelMetadata& metadata)
+	{
+		nlohmann::json result;
+		for (const auto& mesh : metadata.Meshes)
 		{
-			SY_ASSERT(false, "Unsupported compression mode for model asset.");
-			return std::nullopt;
+			nlohmann::json meshJson;
+			meshJson[MESH_METADATA_NAME] = mesh.Name;
+			meshJson[MESH_METADATA_VERTICES_OFFSET] = mesh.VerticesOffset;
+			meshJson[MESH_METADATA_NUM_VERTICES] = mesh.NumVertices;
+			meshJson[MESH_METADATA_INDICES_OFFSET] = mesh.IndicesOffset;
+			meshJson[MESH_METADATA_NUM_INDICES] = mesh.NumIndices;
+			meshJson[MESH_METADATA_MATERIAL] = mesh.Material;
+			meshJson[MESH_METADATA_MATERIAL_NAME] = mesh.MaterialName;
+			result.push_back(meshJson);
 		}
-		metadataJson[MODEL_METADATA_COMPRESSION_MODE] = magic_enum::enum_name<ECompressionMode>(metadata.CompressionMode);
-		metadataJson[MODEL_METADATA_MESH_METADATA_LIST] = SerializeMeshMeatadataList(metadata.MeshMetadataList);
 
-		metadataJson[MODEL_METADATA_MESH_VERTEX_DATA_SIZE] = metadata.VertexDataSize;
-		metadataJson[MODEL_METADATA_MESH_INDEX_DATA_SIZE] = metadata.IndexDataSize;
-
-		Asset asset;
-		memcpy_s(asset.Identifier, IDENTIFIER_LENGTH, MODEL_ASSET_IDENTIFIER, IDENTIFIER_LENGTH);
-		asset.Version = MODEL_ASSET_VERSION;
-
-		const size_t packedSize = metadata.VertexDataSize + metadata.IndexDataSize;
-		std::vector<char> packedData;
-		packedData.resize(packedSize);
-
-		memcpy_s(packedData.data(), metadata.VertexDataSize, vertices, metadata.VertexDataSize);
-		memcpy_s(packedData.data() + metadata.VertexDataSize, metadata.IndexDataSize, indices, metadata.IndexDataSize);
-
-		asset.Blob = CompressData(metadata.CompressionMode, { packedData.data(), packedData.size()});
-		asset.Metadata = metadataJson.dump();
-		return asset;
+		return result;
 	}
 
-	std::vector<char> UnpackVertex(const MeshMetadata& metadata, const std::span<const char> uncompressedData)
+	auto PackMetadataToJson(const ModelMetadata& metadata)
 	{
-		std::vector<char> vertices;
-		vertices.resize(metadata.VertexSize);
-		memcpy(vertices.data(), uncompressedData.data() + metadata.VertexOffset, metadata.VertexSize);
-		return vertices;
+		nlohmann::json result;
+		result[MODEL_METADATA_MESHES] = PackMeshesToJson(metadata);
+		result[MODEL_METADATA_NUM_VERTICES] = metadata.NumVertices;
+		result[MODEL_METADATA_NUM_INDICES] = metadata.NumIndices;
+		return result;
 	}
 
-	std::vector<ModelIndexType> UnpackIndex(const ModelMetadata& modelMetadata, const MeshMetadata& metadata, std::span<const char> uncompressedData)
-	{
-		std::vector<ModelIndexType> indices;
-		indices.resize(metadata.IndexSize);
-		memcpy(indices.data(), uncompressedData.data() + modelMetadata.VertexDataSize + metadata.IndexOffset, metadata.IndexSize);
-		return indices;
-	}
-
-	bool ConvertModel(const fs::path& input)
-	{
-		fs::path newOutputPath = input;
-		newOutputPath.replace_extension(magic_enum::enum_name<EAssetExtension>(EAssetExtension::MODEL));
-		return ConvertModel(input, newOutputPath);
-	}
-
-	MeshMetadata ProcessStaticMesh(const aiScene& scene, const aiMesh& mesh, std::vector<ModelVertexType>& vertices, std::vector<ModelIndexType>& indices)
+	MeshMetadata ProcessStaticMesh(const aiScene& scene, const aiMesh& mesh, std::vector<ModelVertex>& vertices, std::vector<ModelIndex>& indices)
 	{
 		MeshMetadata metadata;
 
-		const size_t vertexOffset = SizeOfVertices(vertices.size());
-		const size_t indexOffset = SizeOfIndices(indices.size());
+		const size_t vertexOffset = vertices.size();
+		const size_t indexOffset = indices.size();
 		for (unsigned int idx = 0; idx < mesh.mNumVertices; ++idx)
 		{
 			const aiVector3D v = mesh.mVertices[idx];
@@ -158,10 +166,18 @@ namespace sy::asset
 			}
 		}
 
-		return { mesh.mName.C_Str(), vertexOffset, mesh.mNumVertices * sizeof(ModelVertexType), indexOffset, mesh.mNumFaces * 3 * sizeof(ModelIndexType) };
+		std::string materialName{};
+		if (scene.HasMaterials())
+		{
+			const auto& material = *scene.mMaterials[mesh.mMaterialIndex];
+			materialName = material.GetName().C_Str();
+		}
+
+		const std::string defaultMaterial = render::DefaultMaterial.data();
+		return { mesh.mName.C_Str(), vertexOffset, mesh.mNumVertices, indexOffset, mesh.mNumFaces * 3, defaultMaterial, materialName };
 	}
 
-	std::vector<MeshMetadata> ProcessScene(const aiScene& scene, std::vector<ModelVertexType>& vertices, std::vector<ModelIndexType>& indices)
+	std::vector<MeshMetadata> ProcessScene(const aiScene& scene, std::vector<ModelVertex>& vertices, std::vector<ModelIndex>& indices)
 	{
 		std::vector<MeshMetadata> result;
 		result.reserve(scene.mNumMeshes);
@@ -176,6 +192,13 @@ namespace sy::asset
 		vertices.reserve(numOfVertices);
 		indices.reserve(numOfIndices);
 
+		/** @todo process materials */
+		for (size_t materialIdx = 0; materialIdx < scene.mNumMaterials; ++materialIdx)
+		{
+			aiMaterial& material = *scene.mMaterials[materialIdx];
+			spdlog::trace("Material Idx: {}, Name: {}, Texture Count: {}", materialIdx, material.GetName().C_Str(), material.GetTextureCount(aiTextureType_DIFFUSE));
+		}
+
 		for (size_t meshIdx = 0; meshIdx < scene.mNumMeshes; ++meshIdx)
 		{
 			result.emplace_back(ProcessStaticMesh(scene, *scene.mMeshes[meshIdx], vertices, indices));
@@ -184,91 +207,39 @@ namespace sy::asset
 		return result;
 	}
 
-	bool ConvertModel(const fs::path& input, const fs::path& output)
+	bool ConvertModel(const fs::path& path)
 	{
-		const auto inputPathStr = input.string();
-		auto inputExtension = input.extension().string();
-		if (inputExtension.size() < 2)
-		{
-			SY_ASSERT(false, "Invalid input extension length.");
-			return false;
-		}
+		fs::path outputPath = path;
+		outputPath.replace_extension(magic_enum::enum_name(EAsset::Model));
 
-		inputExtension = inputExtension.substr(1);
-		std::transform(inputExtension.begin(), inputExtension.end(), inputExtension.begin(), ::toupper);
-
-		const auto srcExtension = magic_enum::enum_cast<EModelExtension>(inputExtension);
-		if (!srcExtension.has_value())
-		{
-			SY_ASSERT(false, "Invalid input mesh extension {}.", inputExtension);
-			return false;
-		}
-
-		/** @TODO Impl convert mesh */
+		const std::string pathStr = path.string();
 		constexpr unsigned int importFlags = aiProcess_GenNormals | aiProcess_GenUVCoords | aiProcess_GenBoundingBoxes | aiProcess_Triangulate | aiProcess_PreTransformVertices | aiProcess_FlipWindingOrder | aiProcess_FlipUVs;
 		//constexpr unsigned int importFlags = aiProcess_GenNormals | aiProcess_GenUVCoords | aiProcess_GenBoundingBoxes | aiProcess_Triangulate | aiProcess_PreTransformVertices | aiProcess_FlipWindingOrder;
-		const aiScene* scene = aiImportFile(input.string().c_str(), importFlags);
+		const aiScene* scene = aiImportFile(pathStr.c_str(), importFlags);
 		if (scene == nullptr || !scene->HasMeshes())
 		{
-			SY_ASSERT(false, "Unable to load scene from {}.", input.string());
+			SY_ASSERT(false, "Unable to load scene from {}.", pathStr);
 			return false;
 		}
 
 		ModelMetadata metadata;
 		/** @todo: material import */
-		std::vector<ModelVertexType> vertices;
-		std::vector<ModelIndexType> indices;
-		metadata.MeshMetadataList = ProcessScene(*scene, vertices, indices);
-		metadata.VertexDataSize = SizeOfVertices(vertices.size());
-		metadata.IndexDataSize = SizeOfIndices(indices.size());
+		std::vector<ModelVertex> vertices;
+		std::vector<ModelIndex> indices;
+		metadata.Meshes = ProcessScene(*scene, vertices, indices);
+		metadata.NumVertices = vertices.size();
+		metadata.NumIndices = indices.size();
 
-		const auto newAssetOpt = Pack(metadata, vertices.data(), indices.data());
-		if (!newAssetOpt.has_value())
-		{
-			SY_ASSERT(false, "Failed to packing mesh {}.", inputPathStr);
-			return false;
-		}
+		const size_t sizeOfVerticesBytes = metadata.NumVertices * SizeOfVertex;
+		const size_t sizeOfIndicesBytes = metadata.NumIndices * SizeOfIndex;
+		std::vector<char> blob;
+		blob.resize(sizeOfVerticesBytes + sizeOfIndicesBytes);
+		memcpy(blob.data(), vertices.data(), sizeOfVerticesBytes);
+		memcpy(blob.data() + sizeOfVerticesBytes, indices.data(), sizeOfIndicesBytes);
 
-		aiReleaseImport(scene);
-		SaveBinary(output.string(), newAssetOpt.value());
+		const auto newAssetData = AssetData<render::Model>(outputPath, PackMetadataToJson(metadata), std::move(blob));
+		newAssetData.SaveBlob();
+		newAssetData.SaveMetadata();
 		return true;
-	}
-
-	std::vector<std::unique_ptr<render::Mesh>> LoadMeshesFromModelAsset(const std::string_view assetPath,
-		const vk::VulkanContext& vulkanContext, vk::CommandPoolManager& cmdPoolManager,
-		const vk::FrameTracker& frameTracker)
-	{
-		auto loadedAssetOpt = LoadBinary(assetPath, MODEL_ASSET_VERSION);
-		if (!loadedAssetOpt.has_value())
-		{
-			SY_ASSERT(false, "Failed to load model asset from {}.", assetPath);
-			return {};
-		}
-
-		auto& loadedAsset = loadedAssetOpt.value();
-		const auto metadataOpt = ParseModelMetadata(loadedAsset);
-		if (!metadataOpt.has_value())
-		{
-			SY_ASSERT(false, "Failed to parse metadata from {}.", assetPath);
-			return {};
-		}
-
-		const auto& metadata = metadataOpt.value();
-		const std::vector<char> uncompressedData = Uncompress(metadata.CompressionMode, metadata.VertexDataSize + metadata.IndexDataSize, loadedAsset.Blob);
-
-		std::vector<std::unique_ptr<render::Mesh>> meshes;
-		for (const auto& meshMetadata : metadata.MeshMetadataList)
-		{
-			const std::vector<char> verticesBytes = UnpackVertex(meshMetadata, uncompressedData);
-			const std::vector<ModelIndexType> indices = UnpackIndex(metadata, meshMetadata, uncompressedData);
-
-			meshes.emplace_back(render::Mesh::Create<ModelVertexType, ModelIndexType>(
-				std::format("{}_{}", assetPath, meshMetadata.Name),
-				vulkanContext, cmdPoolManager, frameTracker,
-				std::span{ reinterpret_cast<const ModelVertexType*>(verticesBytes.data()), verticesBytes.size() / sizeof(ModelVertexType) },
-				indices));
-		}
-
-		return meshes;
 	}
 }

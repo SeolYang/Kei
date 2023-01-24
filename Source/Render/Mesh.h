@@ -12,6 +12,7 @@ namespace sy::vk
 
 namespace sy::render
 {
+	class Material;
 	class Mesh : public NamedType
 	{
 	public:

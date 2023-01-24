@@ -26,6 +26,8 @@
 #include <Asset/ModelAsset.h>
 #include <Core/ResourceCache.h>
 
+#include "Material.h"
+
 namespace sy
 {
 	namespace render
@@ -40,6 +42,7 @@ namespace sy
 			resourceCache(resourceCache),
 			pipelineLayoutCache(std::make_unique<vk::PipelineLayoutCache>(vulkanContext))
 		{
+
 			const auto windowExtent = window.GetExtent();
 
 			depthStencil = vk::CreateDepthStencil("Depth-Stencil buffer", vulkanContext, cmdPoolManager, windowExtent, VK_FORMAT_D24_UNORM_S8_UINT);
@@ -65,32 +68,8 @@ namespace sy
 
 			basicPipeline = std::make_unique<vk::Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
-			linearSampler = resourceCache.Add(std::make_unique<vk::Sampler>("Linear Sampler", vulkanContext, vk::SamplerInfo{}));
-			auto& linearSamplerRef = Unwrap(resourceCache.Load(linearSampler));
-
-			Handle<vk::Texture> bodyTex = resourceCache.Add(asset::LoadTexture2DFromAsset("Assets/Textures/Body.TEX", vulkanContext, frameTracker, cmdPoolManager));
-			auto& bodyTexRef = Unwrap(resourceCache.Load(bodyTex));
-			Handle<vk::TextureView> bodyTexView = resourceCache.Add<vk::TextureView>("BodyTextureView", vulkanContext, bodyTexRef, VK_IMAGE_VIEW_TYPE_2D);
-			bodyTexDescriptor = resourceCache.Add<vk::Descriptor>(descriptorManager.RequestDescriptor(resourceCache, bodyTex, bodyTexView, linearSampler, vk::ETextureState::AnyShaderReadSampledImage));
-
-			Handle<vk::Texture> hairTex = resourceCache.Add(asset::LoadTexture2DFromAsset("Assets/Textures/Hair.TEX", vulkanContext, frameTracker, cmdPoolManager));
-			auto& hairTexRef = Unwrap(resourceCache.Load(hairTex));
-			Handle<vk::TextureView> hairTexView = resourceCache.Add<vk::TextureView>("HairTextureView", vulkanContext, hairTexRef, VK_IMAGE_VIEW_TYPE_2D);
-			hairTexDescriptor = resourceCache.Add<vk::Descriptor>(descriptorManager.RequestDescriptor(resourceCache, hairTex, hairTexView, linearSampler, vk::ETextureState::AnyShaderReadSampledImage));
-
-			Handle<vk::Texture> costumeTex = resourceCache.Add(asset::LoadTexture2DFromAsset("Assets/Textures/Costume.TEX", vulkanContext, frameTracker, cmdPoolManager));
-			auto& costumeTexRef = Unwrap(resourceCache.Load(costumeTex));
-			Handle<vk::TextureView> costumeTexView = resourceCache.Add(std::make_unique<vk::TextureView>("CostumeTextureView", vulkanContext, costumeTexRef, VK_IMAGE_VIEW_TYPE_2D));
-			costumeTexDescriptor = resourceCache.Add<vk::Descriptor>(descriptorManager.RequestDescriptor(resourceCache, costumeTex, costumeTexView, linearSampler, vk::ETextureState::AnyShaderReadSampledImage));
-
-			auto loadedMeshes = asset::LoadMeshesFromModelAsset("Assets/Models/homura/homura.model", vulkanContext, cmdPoolManager, frameTracker);
-			for (auto& mesh : loadedMeshes)
-			{
-				meshHandles.emplace_back(resourceCache.Add(std::move(mesh)));
-			}
-			loadedMeshes.clear();
-
-			auto proj = math::PerspectiveYFlipped(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
+			staticMeshes = asset::LoadModel("Homura", "Assets/Models/homura/homura_v1.MODEL", resourceCache, vulkanContext, cmdPoolManager, frameTracker, descriptorManager);
+			const auto proj = math::PerspectiveYFlipped(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
 			viewProjMat = proj * glm::lookAt(glm::vec3{ 1.5f, 160.f, -150.f }, { 0.f, 70.f ,0.f }, { 0.f ,1.f, 0.f });
 
 			renderPass = std::make_unique<SimpleRenderPass>("Simple Render Pass", resourceCache, vulkanContext, descriptorManager, frameTracker, cmdPoolManager, *basicPipeline);
@@ -128,24 +107,11 @@ namespace sy
 				CRefVec<vk::CommandBuffer> batchedCmdBuffers;
 
 				renderPass->Begin(vk::EQueueType::Graphics);
-
-				for (const auto& mesh : meshHandles)
+				for (const auto& mesh : staticMeshes)
 				{
-					const auto& meshRef = Unwrap(resourceCache.Load(mesh));
-					if (meshRef.GetName().contains("Hair") || meshRef.GetName().contains("Kemono") || meshRef.GetName().contains("Twin"))
-					{
-						renderPass->SetTextureDescriptor(hairTexDescriptor);
-					}
-					else if (meshRef.GetName().contains("Body"))
-					{
-						renderPass->SetTextureDescriptor(bodyTexDescriptor);
-					}
-					else
-					{
-						renderPass->SetTextureDescriptor(costumeTexDescriptor);
-					}
-
-					renderPass->SetMesh(mesh);
+					const auto& materialRef = Unwrap(resourceCache.Load(mesh.Material));
+					renderPass->SetMesh(mesh.Mesh);
+					renderPass->SetTextureDescriptor(materialRef.BaseTexture);
 					renderPass->Render();
 				}
 				renderPass->End();

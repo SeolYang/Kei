@@ -1,5 +1,6 @@
 #pragma once
 #include <PCH.h>
+#include <Component/StaticMeshComponent.h>
 
 namespace sy
 {
@@ -56,19 +57,13 @@ namespace sy
 
 			std::unique_ptr<vk::Texture> depthStencil;
 			std::unique_ptr<vk::TextureView> depthStencilView;
-
-			Handle<vk::Sampler> linearSampler;
-
-			Handle<vk::Descriptor> bodyTexDescriptor;
-			Handle<vk::Descriptor> hairTexDescriptor;
-			Handle<vk::Descriptor> costumeTexDescriptor;
-
-			std::vector<Handle<Mesh>> meshHandles;
 			
 			std::unique_ptr<SimpleRenderPass> renderPass;
 
 			glm::mat4 viewProjMat;
 			float elapsedTime;
+
+			std::vector<component::StaticMeshComponent> staticMeshes;
 
 		};
 	}

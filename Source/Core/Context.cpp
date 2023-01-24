@@ -9,7 +9,10 @@
 #include <VK/FrameTracker.h>
 #include <VK/CommandPoolManager.h>
 #include <VK/DescriptorManager.h>
+#include <VK/Texture.h>
+#include <VK/Sampler.h>
 #include <Render/Renderer.h>
+#include <Render/Material.h>
 #include <Asset/AssetConverter.h>
 #include <Game/World.h>
 #include <Game/GameContext.h>
@@ -53,6 +56,8 @@ namespace sy
 		cmdPoolManager = std::make_unique<vk::CommandPoolManager>(*vulkanContext, *frameTracker);
 		spdlog::info("Initializing Bind-less Descriptor Manager sub-context.");
 		descriptorManager = std::make_unique<vk::DescriptorManager>(*vulkanContext, *frameTracker);
+		spdlog::info("Initializing Default engine resources.");
+		InitDefaultEngineResources();
 		spdlog::info("Initializing Renderer sub-context.");
 		renderer = std::make_unique<render::Renderer>(*window, *vulkanContext, *resourceStateTracker, *frameTracker, *cmdPoolManager, *descriptorManager, *resourceCache);
 	}
@@ -94,6 +99,29 @@ namespace sy
 		{
 			asset::ConvertAssets(cmdLineParser->GetAssetPath());
 		}
+	}
+
+	void Context::InitDefaultEngineResources()
+	{
+		const vk::TextureInfo defaultTexInfo
+		{
+			.Extent = {2,2,1},
+			.Type = VK_IMAGE_TYPE_2D,
+			.UsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT,
+			.Format = VK_FORMAT_R8G8B8A8_SRGB,
+		};
+
+		const glm::vec4 white = { 1.f, 1.f, 1.f, 1.f };
+		const auto defaultWhiteTex = resourceCache->Add(vk::CreateShaderResourceTexture2D(vk::DefaultWhiteTexture, *vulkanContext, *cmdPoolManager, defaultTexInfo, false, std::span{ reinterpret_cast<const char*>(&white), sizeof(white) }));
+		resourceCache->SetAlias(vk::DefaultWhiteTexture, defaultWhiteTex);
+		const glm::vec4 black = { 1.f, 1.f, 1.f, 1.f };
+		const auto defaultBlackTex = resourceCache->Add(vk::CreateShaderResourceTexture2D(vk::DefaultBlackTexture, *vulkanContext, *cmdPoolManager, defaultTexInfo, false, std::span{ reinterpret_cast<const char*>(&black), sizeof(black) }));
+		resourceCache->SetAlias(vk::DefaultBlackTexture, defaultBlackTex);
+		const auto defaultMaterial = resourceCache->Add<render::Material>(render::Material{ defaultWhiteTex });
+		resourceCache->SetAlias(render::DefaultMaterial, defaultMaterial);
+
+		const auto linearSampler = resourceCache->Add<vk::Sampler>(vk::LinearSamplerRepeat, *vulkanContext, vk::SamplerInfo{});
+		resourceCache->SetAlias(vk::LinearSamplerRepeat, linearSampler);
 	}
 
 	void Context::Cleanup()

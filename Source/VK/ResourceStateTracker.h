@@ -56,8 +56,7 @@ namespace sy::vk
 		void Register(Handle<Buffer> handle);
 		void UnRegister(Handle<Buffer> handle);
 
-		void PendingTransition(ETextureState dstState, Handle<Texture> handle, std::span<const TextureSubResource> subResources);
-		void PendingTransition(ETextureState dstState, Handle<Texture> handle);
+		void PendingTransition(ETextureState dstState, Handle<Texture> handle, std::span<const TextureSubResource> subResources = {});
 		void PendingTransition(EBufferState dstState, Handle<Buffer> handle, size_t offset, size_t size);
 		void PendingTransition(EBufferState dstState, Handle<Buffer> handle);
 		

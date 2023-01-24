@@ -4,11 +4,7 @@
 namespace sy::render
 {
 	class Mesh;
-}
-
-namespace sy::vk
-{
-	class Texture;
+	class Material;
 }
 
 namespace sy::component
@@ -16,6 +12,6 @@ namespace sy::component
 	struct StaticMeshComponent : ecs::Component
 	{
 		Handle<render::Mesh> Mesh;
-		Handle<vk::Texture> Texture;
+		Handle<render::Material> Material;
 	};
 }

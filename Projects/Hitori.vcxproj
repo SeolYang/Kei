@@ -12,7 +12,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Asset\AssetConverter.cpp" />
-    <ClCompile Include="..\Source\Asset\AssetCore.cpp" />
+    <ClCompile Include="..\Source\Asset\Asset.cpp" />
+    <ClCompile Include="..\Source\Asset\MaterialAsset.cpp" />
     <ClCompile Include="..\Source\Asset\ModelAsset.cpp" />
     <ClCompile Include="..\Source\Asset\TextureAsset.cpp" />
     <ClCompile Include="..\Source\Audio\AudioContext.cpp" />
@@ -27,6 +28,7 @@
     <ClCompile Include="..\Source\Game\GameContext.cpp" />
     <ClCompile Include="..\Source\Game\World.cpp" />
     <ClCompile Include="..\Source\main.cpp" />
+    <ClCompile Include="..\Source\Render\Material.cpp" />
     <ClCompile Include="..\Source\Render\Mesh.cpp" />
     <ClCompile Include="..\Source\Render\Model.cpp" />
     <ClCompile Include="..\Source\Render\Renderer.cpp" />
@@ -59,7 +61,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Asset\AssetConverter.h" />
-    <ClInclude Include="..\Source\Asset\AssetCore.h" />
+    <ClInclude Include="..\Source\Asset\Asset.h" />
+    <ClInclude Include="..\Source\Asset\MaterialAsset.h" />
     <ClInclude Include="..\Source\Asset\ModelAsset.h" />
     <ClInclude Include="..\Source\Asset\TextureAsset.h" />
     <ClInclude Include="..\Source\Audio\AudioContext.h" />

@@ -105,16 +105,6 @@ namespace sy::vk
 		}
 	}
 
-	void ResourceStateTracker::PendingTransition(const ETextureState dstState, const Handle<Texture> handle)
-	{
-		if (const auto resourceRef = resourceCache.Load(handle); resourceRef)
-		{
-			const auto& resource = resourceRef.value().get();
-			/** @TODO Handle texture arrays */
-			PendingTransition(dstState, handle, {});
-		}
-	}
-
 	void ResourceStateTracker::PendingTransition(const EBufferState dstState, const Handle<Buffer> handle, const size_t offset, const size_t size) 
 	{
 		auto foundItr = bufferStates.find(handle.Value);

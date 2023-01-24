@@ -39,7 +39,7 @@ namespace sy::render
 		glm::vec3 Normal;
 	};
 
-	inline size_t SizeOfVertex(const EVertexType type)
+	constexpr size_t SizeOfVertex(const EVertexType type)
 	{
 		switch (type)
 		{

@@ -3,6 +3,7 @@
 
 namespace sy::vk
 {
+	constexpr std::string_view LinearSamplerRepeat = "LinearSamplerRepeat";
 	struct SamplerInfo
 	{
 		VkFilter MinificationFilter = VK_FILTER_LINEAR;

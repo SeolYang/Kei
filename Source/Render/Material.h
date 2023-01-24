@@ -1,14 +1,18 @@
 #pragma once
 #include <PCH.h>
 
+namespace sy::vk
+{
+	class Pipeline;
+}
+
 namespace sy::render
 {
-	struct Material
+	constexpr std::string_view DefaultMaterial = "DefaultMaterial";
+	class Material
 	{
-		// Material infos
-
-		// pipeline
-		// texture descriptors
-		// buffer descriptors
+	public:
+		Handle<vk::Descriptor> BaseTexture;
+		//Handle<vk::Descriptor> SpecularTexture;
 	};
 }

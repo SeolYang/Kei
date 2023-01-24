@@ -38,6 +38,7 @@ namespace sy
 		void Startup(int argc, char** argv);
 		void InitializeLogger();
 		void InitializeCommandLineParser(int argc, char** argv);
+		void InitDefaultEngineResources();
 
 		void Cleanup();
 

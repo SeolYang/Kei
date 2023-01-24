@@ -5,6 +5,9 @@ namespace sy
 {
 	namespace vk
 	{
+		constexpr std::string_view DefaultWhiteTexture = "Default_White_Tex";
+		constexpr std::string_view DefaultBlackTexture = "Default_Black_Tex";
+
 		class VulkanContext;
 		class CommandPoolManager;
 		class FrameTracker;
