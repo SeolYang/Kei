@@ -213,8 +213,7 @@ namespace sy::asset
 		outputPath.replace_extension(magic_enum::enum_name(EAsset::Model));
 
 		const std::string pathStr = path.string();
-		constexpr unsigned int importFlags = aiProcess_GenNormals | aiProcess_GenUVCoords | aiProcess_GenBoundingBoxes | aiProcess_Triangulate | aiProcess_PreTransformVertices | aiProcess_FlipWindingOrder | aiProcess_FlipUVs;
-		//constexpr unsigned int importFlags = aiProcess_GenNormals | aiProcess_GenUVCoords | aiProcess_GenBoundingBoxes | aiProcess_Triangulate | aiProcess_PreTransformVertices | aiProcess_FlipWindingOrder;
+		constexpr unsigned int importFlags = aiProcess_GenNormals | aiProcess_GenUVCoords | aiProcess_GenBoundingBoxes | aiProcess_Triangulate | aiProcess_PreTransformVertices | aiProcess_MakeLeftHanded;
 		const aiScene* scene = aiImportFile(pathStr.c_str(), importFlags);
 		if (scene == nullptr || !scene->HasMeshes())
 		{

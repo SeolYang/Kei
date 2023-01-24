@@ -286,7 +286,7 @@ namespace sy
 			};
 		}
 
-		Descriptor DescriptorManager::RequestDescriptor(ResourceCache& resourceCache, const Handle<Texture> texture, Handle<TextureView> view,
+		Descriptor DescriptorManager::RequestDescriptor(ResourceCache& resourceCache, const Handle<Texture> texture, const Handle<TextureView> view,
 			const Handle<Sampler> sampler, const ETextureState expectedState, const bool bIsCombinedSampler)
 		{
 			SY_ASSERT(texture, "Invalid Texture Handle.");

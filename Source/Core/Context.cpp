@@ -10,6 +10,7 @@
 #include <VK/CommandPoolManager.h>
 #include <VK/DescriptorManager.h>
 #include <VK/Texture.h>
+#include <VK/TextureView.h>
 #include <VK/Sampler.h>
 #include <Render/Renderer.h>
 #include <Render/Material.h>
@@ -111,17 +112,20 @@ namespace sy
 			.Format = VK_FORMAT_R8G8B8A8_SRGB,
 		};
 
-		const glm::vec4 white = { 1.f, 1.f, 1.f, 1.f };
-		const auto defaultWhiteTex = resourceCache->Add(vk::CreateShaderResourceTexture2D(vk::DefaultWhiteTexture, *vulkanContext, *cmdPoolManager, defaultTexInfo, false, std::span{ reinterpret_cast<const char*>(&white), sizeof(white) }));
+		constexpr std::array<uint32_t, 4> white = { 0xffffffff , 0xffffffff , 0xffffffff , 0xffffffff };
+		const auto defaultWhiteTex = resourceCache->Add(vk::CreateShaderResourceTexture2D(vk::DefaultWhiteTexture, *vulkanContext, *cmdPoolManager, defaultTexInfo, false, std::span{ reinterpret_cast<const char*>(white.data()), sizeof(white) }));
 		resourceCache->SetAlias(vk::DefaultWhiteTexture, defaultWhiteTex);
-		const glm::vec4 black = { 1.f, 1.f, 1.f, 1.f };
-		const auto defaultBlackTex = resourceCache->Add(vk::CreateShaderResourceTexture2D(vk::DefaultBlackTexture, *vulkanContext, *cmdPoolManager, defaultTexInfo, false, std::span{ reinterpret_cast<const char*>(&black), sizeof(black) }));
+		constexpr std::array<uint32_t, 4> black = { 0x000000ff , 0x000000ff , 0x000000ff , 0x000000ff };
+		const auto defaultBlackTex = resourceCache->Add(vk::CreateShaderResourceTexture2D(vk::DefaultBlackTexture, *vulkanContext, *cmdPoolManager, defaultTexInfo, false, std::span{ reinterpret_cast<const char*>(black.data()), sizeof(black) }));
 		resourceCache->SetAlias(vk::DefaultBlackTexture, defaultBlackTex);
-		const auto defaultMaterial = resourceCache->Add<render::Material>(render::Material{ defaultWhiteTex });
-		resourceCache->SetAlias(render::DefaultMaterial, defaultMaterial);
 
 		const auto linearSampler = resourceCache->Add<vk::Sampler>(vk::LinearSamplerRepeat, *vulkanContext, vk::SamplerInfo{});
 		resourceCache->SetAlias(vk::LinearSamplerRepeat, linearSampler);
+
+		auto& defaultWhiteTexRef = Unwrap(resourceCache->Load(defaultWhiteTex));
+		const auto defaultWhiteTexView = resourceCache->Add<vk::TextureView>(std::format("{}_View", vk::DefaultWhiteTexture), *vulkanContext, defaultWhiteTexRef, VK_IMAGE_VIEW_TYPE_2D);
+		const auto defaultMaterial = resourceCache->Add<render::Material>(resourceCache->Add<vk::Descriptor>(descriptorManager->RequestDescriptor(*resourceCache, defaultWhiteTex, defaultWhiteTexView, linearSampler, vk::ETextureState::AnyShaderReadSampledImage)));
+		resourceCache->SetAlias(render::DefaultMaterial, defaultMaterial);
 	}
 
 	void Context::Cleanup()

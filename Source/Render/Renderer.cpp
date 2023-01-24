@@ -68,7 +68,7 @@ namespace sy
 
 			basicPipeline = std::make_unique<vk::Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
-			staticMeshes = asset::LoadModel("Homura", "Assets/Models/homura/homura_v1.MODEL", resourceCache, vulkanContext, cmdPoolManager, frameTracker, descriptorManager);
+			staticMeshes = asset::LoadModel("Homura", "Assets/Models/homura/homura.MODEL", resourceCache, vulkanContext, cmdPoolManager, frameTracker, descriptorManager);
 			const auto proj = math::PerspectiveYFlipped(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
 			viewProjMat = proj * glm::lookAt(glm::vec3{ 1.5f, 160.f, -150.f }, { 0.f, 70.f ,0.f }, { 0.f ,1.f, 0.f });
 
