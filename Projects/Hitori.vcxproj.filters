@@ -40,6 +40,12 @@
     <Filter Include="Source\Component">
       <UniqueIdentifier>{bbbf03be-e372-4413-bf34-317c34395dff}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Window">
+      <UniqueIdentifier>{4394f2ec-fcb0-433f-9117-ec035e7bcf8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application">
+      <UniqueIdentifier>{a06e425c-e4ca-425f-9d3f-607e66df88fe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\main.cpp">
@@ -86,12 +92,6 @@
     </ClCompile>
     <ClCompile Include="..\Source\VK\VulkanTypes.cpp">
       <Filter>Source\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Core\Context.cpp">
-      <Filter>Source\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Core\Window.cpp">
-      <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Audio\AudioContext.cpp">
       <Filter>Source\Audio</Filter>
@@ -165,6 +165,12 @@
     <ClCompile Include="..\Source\Asset\MaterialAsset.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Window\Window.cpp">
+      <Filter>Source\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Application\Context.cpp">
+      <Filter>Source\Application</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ThirdParty\volk\volk.h">
@@ -212,9 +218,6 @@
     <ClInclude Include="..\Source\VK\LayoutCache.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Core\Context.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Core\Extent.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
@@ -228,9 +231,6 @@
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Core\Utils.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Core\Window.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Audio\AudioContext.h">
@@ -334,6 +334,12 @@
     </ClInclude>
     <ClInclude Include="..\Source\Asset\MaterialAsset.h">
       <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Window\Window.h">
+      <Filter>Source\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Application\Context.h">
+      <Filter>Source\Application</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

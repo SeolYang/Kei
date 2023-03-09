@@ -1,21 +1,18 @@
 #pragma once
 #include <PCH.h>
 
-namespace sy
+namespace sy::vk
 {
-	namespace vk
+	class VulkanContext;
+	class Fence : public VulkanWrapper<VkFence>
 	{
-		class VulkanContext;
-		class Fence : public VulkanWrapper<VkFence>
-		{
-		public:
-			Fence(std::string_view name, const VulkanContext& vulkanContext, bool bIsSignaled = true);
-			virtual ~Fence() override = default;
+	public:
+		Fence(std::string_view name, const VulkanContext& vulkanContext, bool bIsSignaled = true);
+		virtual ~Fence() override = default;
 
-			void Wait() const;
-			void Reset() const;
-			[[nodiscard]] bool IsSignaled() const;
+		void Wait() const;
+		void Reset() const;
+		[[nodiscard]] bool IsSignaled() const;
 
-		};
-	}
+	};
 }

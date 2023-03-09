@@ -1,5 +1,5 @@
 #include <PCH.h>
-#include <Core/Window.h>
+#include <Window/Window.h>
 #include <Render/Renderer.h>
 #include <Render/Vertex.h>
 #include <Render/RenderPasses/SimpleRenderPass.h>
@@ -32,7 +32,7 @@ namespace sy
 {
 	namespace render
 	{
-		Renderer::Renderer(const Window& window, vk::VulkanContext& vulkanContext, vk::ResourceStateTracker& resStateTracker, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager, ResourceCache& resourceCache) :
+		Renderer::Renderer(const window::Window& window, vk::VulkanContext& vulkanContext, vk::ResourceStateTracker& resStateTracker, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager, ResourceCache& resourceCache) :
 			window(window),
 			vulkanContext(vulkanContext),
 			resStateTracker(resStateTracker),

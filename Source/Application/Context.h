@@ -3,29 +3,37 @@
 
 namespace sy
 {
-	namespace vk
-	{
-		class VulkanContext;
-		class ResourceStateTracker;
-		class FrameTracker;
-		class CommandPoolManager;
-		class DescriptorManager;
-	}
-
-	namespace render
-	{
-		class Renderer;
-	}
-
-	namespace game
-	{
-		class World;
-		class GameContext;
-	}
-
 	class CommandLineParser;
-	class Window;
 	class ResourceCache;
+}
+
+namespace sy::vk
+{
+	class VulkanContext;
+	class ResourceStateTracker;
+	class FrameTracker;
+	class CommandPoolManager;
+	class DescriptorManager;
+}
+
+namespace sy::render
+{
+	class Renderer;
+}
+
+namespace sy::game
+{
+	class World;
+	class GameContext;
+}
+
+namespace sy::window
+{
+	class Window;
+}
+
+namespace sy::app
+{
 	class Context final : public NonCopyable
 	{
 	public:
@@ -45,7 +53,7 @@ namespace sy
 	private:
 		std::unique_ptr<CommandLineParser> cmdLineParser;
 		std::unique_ptr<Timer> timer;
-		std::unique_ptr<Window> window;
+		std::unique_ptr<window::Window> window;
 		std::unique_ptr<ResourceCache> resourceCache;
 		std::unique_ptr<vk::VulkanContext> vulkanContext;
 		std::unique_ptr<vk::ResourceStateTracker> resourceStateTracker;

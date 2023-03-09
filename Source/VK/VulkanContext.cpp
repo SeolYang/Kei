@@ -1,5 +1,5 @@
 #include <PCH.h>
-#include <Core/Window.h>
+#include <Window/Window.h>
 #include <VK/VulkanContext.h>
 #include <VK/Swapchain.h>
 #include <VK/CommandBuffer.h>
@@ -13,7 +13,7 @@ namespace sy
 {
 	namespace vk
 	{
-		VulkanContext::VulkanContext(const Window& window) :
+		VulkanContext::VulkanContext(const window::Window& window) :
 			window(window),
 			instance(VK_NULL_HANDLE),
 			surface(VK_NULL_HANDLE),

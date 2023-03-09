@@ -1,5 +1,5 @@
 #include <PCH.h>
-#include <Core/Window.h>
+#include <Window/Window.h>
 #include <VK/VulkanContext.h>
 #include <VK/Swapchain.h>
 #include <Vk/Semaphore.h>
@@ -8,7 +8,7 @@ namespace sy
 {
 	namespace vk
 	{
-		Swapchain::Swapchain(const Window& window, const VulkanContext& vulkanContext) :
+		Swapchain::Swapchain(const window::Window& window, const VulkanContext& vulkanContext) :
 			VulkanWrapper<VkSwapchainKHR>("Swapchain", vulkanContext, VK_OBJECT_TYPE_SWAPCHAIN_KHR, VK_DESTROY_LAMBDA_SIGNATURE(VkSwapchainKHR)
 		{
 			vkDestroySwapchainKHR(vulkanContext.GetDevice(), handle, nullptr);

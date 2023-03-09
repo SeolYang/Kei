@@ -1,83 +1,80 @@
 #pragma once
 #define VK_DESTROY_LAMBDA_SIGNATURE(HANDLE_TYPE) [](const VulkanContext& vulkanContext, HANDLE_TYPE handle)
 
-namespace sy
+namespace sy::vk
 {
-	namespace vk
+	class VulkanContext;
+
+	template <typename VulkanHandleType>
+	class VulkanWrapper : public NamedType, public NonCopyable
 	{
-		class VulkanContext;
+	public:
+		using VulkanDestroyFunction_t = std::function<void(const VulkanContext& VulkanContext, VulkanHandleType)>;
+		using Native_t = VulkanHandleType;
 
-		template <typename VulkanHandleType>
-		class VulkanWrapper : public NamedType, public NonCopyable
+	public:
+		VulkanWrapper(const std::string_view name, const VulkanContext& vulkanContext, const VkObjectType type) :
+			VulkanWrapper(name, vulkanContext, type, VK_DESTROY_LAMBDA_SIGNATURE(Native_t){})
 		{
-		public:
-			using VulkanDestroyFunction_t = std::function<void(const VulkanContext& VulkanContext, VulkanHandleType)>;
-			using Native_t = VulkanHandleType;
-
-		public:
-			VulkanWrapper(const std::string_view name, const VulkanContext& vulkanContext, const VkObjectType type) :
-				VulkanWrapper(name, vulkanContext, type, VK_DESTROY_LAMBDA_SIGNATURE(Native_t){})
-			{
-			}
-
-			VulkanWrapper(const std::string_view name, const VulkanContext& vulkanContext, const VkObjectType type, const VulkanDestroyFunction_t destroyFunction) :
-				NamedType(name),
-				vulkanContext(vulkanContext),
-				type(type),
-				destroyFunction(destroyFunction)
-			{
-			}
-
-			virtual ~VulkanWrapper()
-			{
-				destroyFunction(vulkanContext, handle);
-			}
-			
-			[[nodiscard]] Native_t GetNativeHandle() const { return handle; }
-			[[nodiscard]] VkObjectType GetType() const { return type; }
-			[[nodiscard]] const VulkanContext& GetContext() const { return vulkanContext; }
-
-		protected:
-			void UpdateHandle(const Native_t newHandle)
-			{
-				SY_ASSERT(newHandle != VK_NULL_HANDLE, "Invalid new vulkan handle.");
-				SY_ASSERT(handle == VK_NULL_HANDLE, "Vulkan Handle Overwrite!");
-				handle = newHandle;
-			}
-
-		private:
-			const VulkanContext& vulkanContext;
-			const VulkanDestroyFunction_t destroyFunction;
-			const VkObjectType type;
-			Native_t handle = VK_NULL_HANDLE;
-
-		};
-
-		template <typename VulkanWrapperType>
-		std::vector<typename VulkanWrapperType::Native_t> TransformVulkanWrappersToNativesWithValidation(const CRefSpan<VulkanWrapperType> wrappers, const std::function<bool(const CRef<VulkanWrapperType> wrapper)> validation)
-		{
-			std::vector<typename VulkanWrapperType::Native_t> natives;
-			natives.resize(wrappers.size());
-			std::transform(wrappers.begin(), wrappers.end(),
-				natives.begin(),
-				[&validation](const CRef<VulkanWrapperType> wrapper) -> VulkanWrapperType::Native_t
-				{
-					const bool bIsValid = validation(wrapper);
-					SY_ASSERT(bIsValid, "Invalid wrapper transformation.");
-					return wrapper.get().GetNativeHandle();
-				});
-
-			return natives;
 		}
 
-		template <typename VulkanWrapperType>
-		std::vector<typename VulkanWrapperType::Native_t> TransformVulkanWrappersToNatives(const CRefSpan<VulkanWrapperType> wrappers)
+		VulkanWrapper(const std::string_view name, const VulkanContext& vulkanContext, const VkObjectType type, const VulkanDestroyFunction_t destroyFunction) :
+			NamedType(name),
+			vulkanContext(vulkanContext),
+			type(type),
+			destroyFunction(destroyFunction)
 		{
-			return TransformVulkanWrappersToNativesWithValidation<VulkanWrapperType>(wrappers,
-				[](const CRef<VulkanWrapperType>)
-				{
-					return true;
-				});
 		}
+
+		virtual ~VulkanWrapper()
+		{
+			destroyFunction(vulkanContext, handle);
+		}
+
+		[[nodiscard]] Native_t GetNativeHandle() const { return handle; }
+		[[nodiscard]] VkObjectType GetType() const { return type; }
+		[[nodiscard]] const VulkanContext& GetContext() const { return vulkanContext; }
+
+	protected:
+		void UpdateHandle(const Native_t newHandle)
+		{
+			SY_ASSERT(newHandle != VK_NULL_HANDLE, "Invalid new vulkan handle.");
+			SY_ASSERT(handle == VK_NULL_HANDLE, "Vulkan Handle Overwrite!");
+			handle = newHandle;
+		}
+
+	private:
+		const VulkanContext& vulkanContext;
+		const VulkanDestroyFunction_t destroyFunction;
+		const VkObjectType type;
+		Native_t handle = VK_NULL_HANDLE;
+
+	};
+
+	template <typename VulkanWrapperType>
+	std::vector<typename VulkanWrapperType::Native_t> TransformVulkanWrappersToNativesWithValidation(const CRefSpan<VulkanWrapperType> wrappers, const std::function<bool(const CRef<VulkanWrapperType> wrapper)> validation)
+	{
+		std::vector<typename VulkanWrapperType::Native_t> natives;
+		natives.resize(wrappers.size());
+		std::transform(wrappers.begin(), wrappers.end(),
+			natives.begin(),
+			[&validation](const CRef<VulkanWrapperType> wrapper) -> VulkanWrapperType::Native_t
+			{
+				const bool bIsValid = validation(wrapper);
+				SY_ASSERT(bIsValid, "Invalid wrapper transformation.");
+				return wrapper.get().GetNativeHandle();
+			});
+
+		return natives;
+	}
+
+	template <typename VulkanWrapperType>
+	std::vector<typename VulkanWrapperType::Native_t> TransformVulkanWrappersToNatives(const CRefSpan<VulkanWrapperType> wrappers)
+	{
+		return TransformVulkanWrappersToNativesWithValidation<VulkanWrapperType>(wrappers,
+			[](const CRef<VulkanWrapperType>)
+			{
+				return true;
+			});
 	}
 }

@@ -1,7 +1,7 @@
 #pragma once
 #include <PCH.h>
 
-namespace sy
+namespace sy::window
 {
 	class Window
 	{
@@ -9,11 +9,11 @@ namespace sy
 		Window(std::string_view title, Extent2D<uint32_t> extent);
 		~Window();
 
-		Window(const Window&) = delete;
-		Window(Window&&) = default;
+		Window(const window::Window&) = delete;
+		Window(window::Window&&) = default;
 
-		Window& operator=(const Window&) = delete;
-		Window& operator=(Window&&) = default;
+		window::Window& operator=(const window::Window&) = delete;
+		window::Window& operator=(window::Window&&) = default;
 
 		[[nodiscard]] std::string_view GetTitle() const { return title; }
 		[[nodiscard]] SDL_Window& GetSDLWindow() const { return *window; }

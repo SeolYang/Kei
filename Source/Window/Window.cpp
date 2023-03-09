@@ -1,7 +1,7 @@
 #include <PCH.h>
-#include <Core/Window.h>
+#include <Window/Window.h>
 
-namespace sy
+namespace sy::window
 {
 	Window::Window(const std::string_view title, const Extent2D<uint32_t> extent) :
 		title(title),

@@ -1,47 +1,44 @@
 #pragma once
 #include <PCH.h>
 
-namespace sy
+namespace sy::vk
 {
-	namespace vk
+	class VulkanContext;
+	class PushConstantBuilder;
+	class PipelineLayoutCache : public NonCopyable
 	{
-		class VulkanContext;
-		class PushConstantBuilder;
-		class PipelineLayoutCache : public NonCopyable
+	public:
+		struct PipelineLayoutInfo
 		{
 		public:
-			struct PipelineLayoutInfo
-			{
-			public:
-				bool operator==(const PipelineLayoutInfo& rhs) const;
-				size_t hash() const noexcept;
-
-			public:
-				VkPipelineLayoutCreateFlags Flags;
-				std::vector<VkDescriptorSetLayout> DescriptorSetLayouts;
-				std::vector<VkPushConstantRange> PushConstantRanges;
-
-			};
-
-			struct PipelineLayoutHash
-			{
-			public:
-				size_t operator()(const PipelineLayoutInfo& info) const noexcept
-				{
-					return info.hash();
-				}
-			};
+			bool operator==(const PipelineLayoutInfo& rhs) const;
+			size_t hash() const noexcept;
 
 		public:
-			explicit PipelineLayoutCache(const VulkanContext& vulkanContext);
-			~PipelineLayoutCache() override;
-
-			VkPipelineLayout Request(std::span<VkDescriptorSetLayout> descriptorSetLayouts, const PushConstantBuilder& pushConstantBuilder);
-
-		private:
-			const VulkanContext& vulkanContext;
-			robin_hood::unordered_map<PipelineLayoutInfo, VkPipelineLayout, PipelineLayoutHash> cache;
+			VkPipelineLayoutCreateFlags Flags;
+			std::vector<VkDescriptorSetLayout> DescriptorSetLayouts;
+			std::vector<VkPushConstantRange> PushConstantRanges;
 
 		};
-	}
+
+		struct PipelineLayoutHash
+		{
+		public:
+			size_t operator()(const PipelineLayoutInfo& info) const noexcept
+			{
+				return info.hash();
+			}
+		};
+
+	public:
+		explicit PipelineLayoutCache(const VulkanContext& vulkanContext);
+		~PipelineLayoutCache() override;
+
+		VkPipelineLayout Request(std::span<VkDescriptorSetLayout> descriptorSetLayouts, const PushConstantBuilder& pushConstantBuilder);
+
+	private:
+		const VulkanContext& vulkanContext;
+		robin_hood::unordered_map<PipelineLayoutInfo, VkPipelineLayout, PipelineLayoutHash> cache;
+
+	};
 }

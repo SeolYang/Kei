@@ -1,7 +1,7 @@
 #include <PCH.h>
-#include <Core/Context.h>
+#include <Application/Context.h>
 #include <Core/CommandLineParser.h>
-#include <Core/Window.h>
+#include <Window/Window.h>
 #include <Core/Utils.h>
 #include <Core/ResourceCache.h>
 #include <VK/VulkanContext.h>
@@ -18,7 +18,7 @@
 #include <Game/World.h>
 #include <Game/GameContext.h>
 
-namespace sy
+namespace sy::app
 {
 	Context::Context(const int argc, char** argv)
 	{
@@ -44,7 +44,7 @@ namespace sy
 		spdlog::info("Initializing Timer sub-context.");
 		timer = std::make_unique<Timer>();
 		spdlog::info("Initializing Window sub-context.");
-		window = std::make_unique<Window>("Test", Extent2D<uint32_t>{ 1280, 720 });
+		window = std::make_unique<window::Window>("Test", Extent2D<uint32_t>{ 1280, 720 });
 		spdlog::info("Initializing Resource Cache.");
 		resourceCache = std::make_unique<ResourceCache>();
 		spdlog::info("Initializing Vulkan context.");

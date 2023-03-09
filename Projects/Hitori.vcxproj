@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\Application\Context.cpp" />
     <ClCompile Include="..\Source\Asset\AssetConverter.cpp" />
     <ClCompile Include="..\Source\Asset\Asset.cpp" />
     <ClCompile Include="..\Source\Asset\MaterialAsset.cpp" />
@@ -18,13 +19,11 @@
     <ClCompile Include="..\Source\Asset\TextureAsset.cpp" />
     <ClCompile Include="..\Source\Audio\AudioContext.cpp" />
     <ClCompile Include="..\Source\Core\CommandLineParser.cpp" />
-    <ClCompile Include="..\Source\Core\Context.cpp" />
     <ClCompile Include="..\Source\Core\PCH.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\Source\Core\ResourceCache.cpp" />
-    <ClCompile Include="..\Source\Core\Window.cpp" />
     <ClCompile Include="..\Source\Game\GameContext.cpp" />
     <ClCompile Include="..\Source\Game\World.cpp" />
     <ClCompile Include="..\Source\main.cpp" />
@@ -54,12 +53,14 @@
     <ClCompile Include="..\Source\VK\VertexInputBuilder.cpp" />
     <ClCompile Include="..\Source\VK\VulkanContext.cpp" />
     <ClCompile Include="..\Source\VK\VulkanTypes.cpp" />
+    <ClCompile Include="..\Source\Window\Window.cpp" />
     <ClCompile Include="..\ThirdParty\volk\volk.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Source\Application\Context.h" />
     <ClInclude Include="..\Source\Asset\AssetConverter.h" />
     <ClInclude Include="..\Source\Asset\Asset.h" />
     <ClInclude Include="..\Source\Asset\MaterialAsset.h" />
@@ -70,7 +71,6 @@
     <ClInclude Include="..\Source\Component\StaticMeshComponent.h" />
     <ClInclude Include="..\Source\Component\TransformComponent.h" />
     <ClInclude Include="..\Source\Core\CommandLineParser.h" />
-    <ClInclude Include="..\Source\Core\Context.h" />
     <ClInclude Include="..\Source\Core\PCH.h" />
     <ClInclude Include="..\Source\Core\ECS.h" />
     <ClInclude Include="..\Source\Core\Extent.h" />
@@ -81,7 +81,6 @@
     <ClInclude Include="..\Source\Core\Types.h" />
     <ClInclude Include="..\Source\Core\Handle.h" />
     <ClInclude Include="..\Source\Core\Utils.h" />
-    <ClInclude Include="..\Source\Core\Window.h" />
     <ClInclude Include="..\Source\Game\GameContext.h" />
     <ClInclude Include="..\Source\Game\World.h" />
     <ClInclude Include="..\Source\Math\MathUtils.h" />
@@ -115,6 +114,7 @@
     <ClInclude Include="..\Source\VK\VulkanContext.h" />
     <ClInclude Include="..\Source\VK\VulkanTypes.h" />
     <ClInclude Include="..\Source\VK\VulkanWrapper.hpp" />
+    <ClInclude Include="..\Source\Window\Window.h" />
     <ClInclude Include="..\ThirdParty\volk\volk.h" />
   </ItemGroup>
   <ItemGroup>

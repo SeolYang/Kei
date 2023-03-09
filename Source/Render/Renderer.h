@@ -31,7 +31,7 @@ namespace sy
 		class Renderer final : public NonCopyable
 		{
 		public:
-			Renderer(const Window& window, vk::VulkanContext& vulkanContext, vk::ResourceStateTracker& resStateTracker, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager, ResourceCache& resourceCache);
+			Renderer(const window::Window& window, vk::VulkanContext& vulkanContext, vk::ResourceStateTracker& resStateTracker, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager, ResourceCache& resourceCache);
 			~Renderer() override;
 
 			void Render();
@@ -41,7 +41,7 @@ namespace sy
 			void EndFrame();
 
 		private:
-			const Window& window;
+			const window::Window& window;
 			vk::VulkanContext& vulkanContext;
 			vk::ResourceStateTracker& resStateTracker;
 			const vk::FrameTracker& frameTracker;
