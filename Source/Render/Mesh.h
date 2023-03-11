@@ -6,8 +6,6 @@ namespace sy::vk
 {
 	class Buffer;
 	class VulkanContext;
-	class CommandPoolManager;
-	class FrameTracker;
 }
 
 namespace sy::render
@@ -17,11 +15,11 @@ namespace sy::render
 	{
 	public:
 		template <typename VertexType, typename IndexType = render::IndexType>
-		static std::unique_ptr<Mesh> Create(const std::string_view name, const vk::VulkanContext& vulkanContext, vk::CommandPoolManager& cmdPoolManager, const vk::FrameTracker& frameTracker, const std::span<const VertexType> vertices, const std::span<const IndexType> indices)
+		static std::unique_ptr<Mesh> Create(const std::string_view name, const vk::VulkanContext& vulkanContext, const std::span<const VertexType> vertices, const std::span<const IndexType> indices)
 		{
 			return std::unique_ptr<Mesh>(new Mesh(name,
-				vertices.size(), vk::CreateVertexBuffer(name, vulkanContext, cmdPoolManager, frameTracker, vertices),
-				indices.size(), vk::CreateIndexBuffer(name, vulkanContext, cmdPoolManager, frameTracker, indices)));
+				vertices.size(), vk::CreateVertexBuffer(name, vulkanContext, vertices),
+				indices.size(), vk::CreateIndexBuffer(name, vulkanContext, indices)));
 		}
 
 		[[nodiscard]] const vk::Buffer& GetVertexBuffer() const { return *vertexBuffer; }

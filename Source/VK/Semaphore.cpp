@@ -1,15 +1,15 @@
 #include <PCH.h>
 #include <VK/Semaphore.h>
-#include <Vk/VulkanContext.h>
+#include <Vk/VulkanRHI.h>
 
 namespace sy
 {
 	namespace vk
 	{
-		Semaphore::Semaphore(const std::string_view name, const VulkanContext& vulkanContext) :
-			VulkanWrapper<VkSemaphore>(name, vulkanContext, VK_OBJECT_TYPE_SEMAPHORE, VK_DESTROY_LAMBDA_SIGNATURE(VkSemaphore)
+		Semaphore::Semaphore(const std::string_view name, const VulkanRHI& vulkanRHI) :
+			VulkanWrapper<VkSemaphore>(name, vulkanRHI, VK_OBJECT_TYPE_SEMAPHORE, VK_DESTROY_LAMBDA_SIGNATURE(VkSemaphore)
 		{
-			vkDestroySemaphore(vulkanContext.GetDevice(), handle, nullptr);
+			vkDestroySemaphore(vulkanRHI.GetDevice(), handle, nullptr);
 		})
 		{
 			const VkSemaphoreCreateInfo createInfo
@@ -20,7 +20,7 @@ namespace sy
 			};
 
 			Native_t handle = VK_NULL_HANDLE;
-			vkCreateSemaphore(vulkanContext.GetDevice(), &createInfo, nullptr, &handle);
+			vkCreateSemaphore(vulkanRHI.GetDevice(), &createInfo, nullptr, &handle);
 			UpdateHandle(handle);
 		}
 	}

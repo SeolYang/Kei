@@ -1,6 +1,6 @@
 #include <PCH.h>
 #include <Window/Window.h>
-#include <VK/VulkanContext.h>
+#include <VK/VulkanRHI.h>
 #include <VK/Swapchain.h>
 #include <Vk/Semaphore.h>
 
@@ -8,19 +8,19 @@ namespace sy
 {
 	namespace vk
 	{
-		Swapchain::Swapchain(const window::Window& window, const VulkanContext& vulkanContext) :
-			VulkanWrapper<VkSwapchainKHR>("Swapchain", vulkanContext, VK_OBJECT_TYPE_SWAPCHAIN_KHR, VK_DESTROY_LAMBDA_SIGNATURE(VkSwapchainKHR)
+		Swapchain::Swapchain(const window::Window& window, const VulkanRHI& vulkanRHI) :
+			VulkanWrapper<VkSwapchainKHR>("Swapchain", vulkanRHI, VK_OBJECT_TYPE_SWAPCHAIN_KHR, VK_DESTROY_LAMBDA_SIGNATURE(VkSwapchainKHR)
 		{
-			vkDestroySwapchainKHR(vulkanContext.GetDevice(), handle, nullptr);
+			vkDestroySwapchainKHR(vulkanRHI.GetDevice(), handle, nullptr);
 		}),
 			window(window),
 			currentImageIdx(0)
 		{
 			vkb::SwapchainBuilder swapchainBuilder
 			{
-				vulkanContext.GetPhysicalDevice(),
-				vulkanContext.GetDevice(),
-				vulkanContext.GetSurface()
+				vulkanRHI.GetPhysicalDevice(),
+				vulkanRHI.GetDevice(),
+				vulkanRHI.GetSurface()
 			};
 
 			spdlog::trace("Creating swapchain..");
@@ -40,8 +40,8 @@ namespace sy
 
 		Swapchain::~Swapchain()
 		{
-			const auto& vulkanContext = GetContext();
-			const auto device = vulkanContext.GetDevice();
+			const auto& vulkanRHI = GetContext();
+			const auto device = vulkanRHI.GetDevice();
 			for (const auto imageView : imageViews)
 			{
 				vkDestroyImageView(device, imageView, nullptr);
@@ -50,9 +50,9 @@ namespace sy
 
 		void Swapchain::AcquireNext(const Semaphore& presentSemaphore)
 		{
-			const auto& vulkanContext = GetContext();
+			const auto& vulkanRHI = GetContext();
 			const auto handle = GetNativeHandle();
-			VK_ASSERT(vkAcquireNextImageKHR(vulkanContext.GetDevice(), handle, std::numeric_limits<uint64_t>::max(), presentSemaphore.GetNativeHandle(), VK_NULL_HANDLE, &currentImageIdx), "Failed to acquire next image view.");
+			VK_ASSERT(vkAcquireNextImageKHR(vulkanRHI.GetDevice(), handle, std::numeric_limits<uint64_t>::max(), presentSemaphore.GetNativeHandle(), VK_NULL_HANDLE, &currentImageIdx), "Failed to acquire next image view.");
 		}
 	}
 }

@@ -1,6 +1,6 @@
 #include <PCH.h>
 #include <VK/LayoutCache.h>
-#include <VK/VulkanContext.h>
+#include <VK/VulkanRHI.h>
 #include <VK/PushConstantBuilder.h>
 
 namespace sy
@@ -58,8 +58,8 @@ namespace sy
 			return result;
 		}
 
-		PipelineLayoutCache::PipelineLayoutCache(const VulkanContext& vulkanContext) :
-			vulkanContext(vulkanContext)
+		PipelineLayoutCache::PipelineLayoutCache(const VulkanRHI& vulkanRHI) :
+			vulkanRHI(vulkanRHI)
 		{
 		}
 
@@ -67,7 +67,7 @@ namespace sy
 		{
 			for (auto& cacheInfo : cache)
 			{
-				vkDestroyPipelineLayout(vulkanContext.GetDevice(), cacheInfo.second, nullptr);
+				vkDestroyPipelineLayout(vulkanRHI.GetDevice(), cacheInfo.second, nullptr);
 			}
 		}
 
@@ -96,7 +96,7 @@ namespace sy
 				};
 
 				VkPipelineLayout newPipelineLayout = VK_NULL_HANDLE;
-				VK_ASSERT(vkCreatePipelineLayout(vulkanContext.GetDevice(), &createInfo, nullptr, &newPipelineLayout), "Failed to create new pipeline layout.");
+				VK_ASSERT(vkCreatePipelineLayout(vulkanRHI.GetDevice(), &createInfo, nullptr, &newPipelineLayout), "Failed to create new pipeline layout.");
 				cache[pipelineLayoutInfo] = newPipelineLayout;
 			}
 

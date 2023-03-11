@@ -5,6 +5,7 @@
 #include <VK/Texture.h>
 #include <VK/TextureView.h>
 #include <VK/Sampler.h>
+#include <VK/VulkanContext.h>
 #include <VK/DescriptorManager.h>
 
 namespace sy::asset
@@ -28,7 +29,7 @@ namespace sy::asset
 
 	Handle<render::Material> LoadMaterialFromAsset(
 		const fs::path& path,
-		ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager)
+		ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext)
 	{
 		std::string pathStr = path.string();
 		if (const auto handle = resourceCache.QueryAlias<render::Material>(pathStr); handle)
@@ -43,12 +44,14 @@ namespace sy::asset
 			return {};
 		}
 
+		const auto& vulkanRHI = vulkanContext.GetVulkanRHI();
+		auto& descriptorManager = vulkanContext.GetDescriptorManager();
 		const auto& assetData = Unwrap(resourceCache.Load(assetDataHandle));
 		const auto metadata = QueryMetadata(assetData);
 
-		const auto baseTexHandle = LoadTexture2DFromAsset(metadata.BaseTexture, resourceCache, vulkanContext, frameTracker, cmdPoolManager);
+		const auto baseTexHandle = LoadTexture2DFromAsset(metadata.BaseTexture, resourceCache, vulkanContext);
 		auto& baseTexRef = Unwrap(resourceCache.Load(baseTexHandle));
-		const auto baseTexViewHandle = resourceCache.Add<vk::TextureView>(std::format("{}_View", metadata.BaseTexture), vulkanContext, baseTexRef, VK_IMAGE_VIEW_TYPE_2D);
+		const auto baseTexViewHandle = resourceCache.Add<vk::TextureView>(std::format("{}_View", metadata.BaseTexture), vulkanRHI, baseTexRef, VK_IMAGE_VIEW_TYPE_2D);
 		const auto linearSampler = resourceCache.QueryAlias<vk::Sampler>(vk::LinearSamplerRepeat);
 		const auto newHandle = resourceCache.Add<render::Material>(render::Material{ resourceCache.Add<vk::Descriptor>(descriptorManager.RequestDescriptor(resourceCache, baseTexHandle, baseTexViewHandle, linearSampler, vk::ETextureState::AnyShaderReadSampledImage)) });
 		resourceCache.SetAlias(pathStr, newHandle);

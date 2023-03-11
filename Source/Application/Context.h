@@ -11,9 +11,6 @@ namespace sy::vk
 {
 	class VulkanContext;
 	class ResourceStateTracker;
-	class FrameTracker;
-	class CommandPoolManager;
-	class DescriptorManager;
 }
 
 namespace sy::render
@@ -57,9 +54,6 @@ namespace sy::app
 		std::unique_ptr<ResourceCache> resourceCache;
 		std::unique_ptr<vk::VulkanContext> vulkanContext;
 		std::unique_ptr<vk::ResourceStateTracker> resourceStateTracker;
-		std::unique_ptr<vk::FrameTracker> frameTracker;
-		std::unique_ptr<vk::CommandPoolManager> cmdPoolManager;
-		std::unique_ptr<vk::DescriptorManager> descriptorManager;
 		std::unique_ptr<render::Renderer> renderer;
 		std::unique_ptr<game::World> world;
 		std::unique_ptr<game::GameContext> gameContext;

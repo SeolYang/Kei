@@ -1,13 +1,13 @@
 #include <PCH.h>
 #include <VK/Sampler.h>
-#include <VK/VulkanContext.h>
+#include <VK/VulkanRHI.h>
 
 namespace sy::vk
 {
-	Sampler::Sampler(std::string_view name, const VulkanContext& vulkanContext, const SamplerInfo info) :
-		VulkanWrapper<VkSampler>(name, vulkanContext, VK_OBJECT_TYPE_SAMPLER, VK_DESTROY_LAMBDA_SIGNATURE(VkSampler)
+	Sampler::Sampler(std::string_view name, const VulkanRHI& vulkanRHI, const SamplerInfo info) :
+		VulkanWrapper<VkSampler>(name, vulkanRHI, VK_OBJECT_TYPE_SAMPLER, VK_DESTROY_LAMBDA_SIGNATURE(VkSampler)
 		{
-			vkDestroySampler(vulkanContext.GetDevice(), handle, nullptr);
+			vkDestroySampler(vulkanRHI.GetDevice(), handle, nullptr);
 		})
 	{
 		const VkSamplerCreateInfo samplerCreateInfo
@@ -23,7 +23,7 @@ namespace sy::vk
 		};
 
 		Native_t handle = VK_NULL_HANDLE;
-		VK_ASSERT(vkCreateSampler(vulkanContext.GetDevice(), &samplerCreateInfo, nullptr, &handle), "Failed to create sampler {}.", name);
+		VK_ASSERT(vkCreateSampler(vulkanRHI.GetDevice(), &samplerCreateInfo, nullptr, &handle), "Failed to create sampler {}.", name);
 		UpdateHandle(handle);
 	}
 }

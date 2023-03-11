@@ -1,7 +1,7 @@
 #include <PCH.h>
 #include <VK/DescriptorManager.h>
 #include <VK/FrameTracker.h>
-#include <VK/VulkanContext.h>
+#include <VK/VulkanRHI.h>
 #include <VK/Buffer.h>
 #include <VK/Texture.h>
 #include <VK/TextureView.h>
@@ -12,8 +12,8 @@ namespace sy
 {
 	namespace vk
 	{
-		DescriptorManager::DescriptorManager(const vk::VulkanContext& vulkanContext, const FrameTracker& frameTracker) :
-			vulkanContext(vulkanContext),
+		DescriptorManager::DescriptorManager(const vk::VulkanRHI& vulkanRHI, const FrameTracker& frameTracker) :
+			vulkanRHI(vulkanRHI),
 			frameTracker(frameTracker)
 		{
 			DescriptorPoolSizeBuilder poolSizeBuilder;
@@ -86,11 +86,11 @@ namespace sy
 			};
 
 			spdlog::trace("Creating Bindless descriptor set layout...");
-			VK_ASSERT(vkCreateDescriptorSetLayout(vulkanContext.GetDevice(), &bindlessLayoutInfo, nullptr, &bindlessLayout), "Failed to create bindless descriptor set layout.");
+			VK_ASSERT(vkCreateDescriptorSetLayout(vulkanRHI.GetDevice(), &bindlessLayoutInfo, nullptr, &bindlessLayout), "Failed to create bindless descriptor set layout.");
 
 
 			spdlog::trace("Creating pool package...");
-			VK_ASSERT(vkCreateDescriptorPool(vulkanContext.GetDevice(), &poolCreateInfo, nullptr, &descriptorPoolPackage.DescriptorPool), "Failed to create descriptor pool.");
+			VK_ASSERT(vkCreateDescriptorPool(vulkanRHI.GetDevice(), &poolCreateInfo, nullptr, &descriptorPoolPackage.DescriptorPool), "Failed to create descriptor pool.");
 
 			const VkDescriptorSetVariableDescriptorCountAllocateInfoEXT descriptorSetVariableDescriptorCountAllocateInfo
 			{
@@ -109,7 +109,7 @@ namespace sy
 				.pSetLayouts = &bindlessLayout
 			};
 
-			VK_ASSERT(vkAllocateDescriptorSets(vulkanContext.GetDevice(), &setAllocateInfo, &descriptorPoolPackage.DescriptorSet), "Failed to allocate descriptor set.");
+			VK_ASSERT(vkAllocateDescriptorSets(vulkanRHI.GetDevice(), &setAllocateInfo, &descriptorPoolPackage.DescriptorSet), "Failed to allocate descriptor set.");
 
 			for (const auto& poolSize : poolSizes)
 			{
@@ -121,8 +121,8 @@ namespace sy
 
 		DescriptorManager::~DescriptorManager()
 		{
-			vkDestroyDescriptorPool(vulkanContext.GetDevice(), descriptorPoolPackage.DescriptorPool, nullptr);
-			vkDestroyDescriptorSetLayout(vulkanContext.GetDevice(), bindlessLayout, nullptr);
+			vkDestroyDescriptorPool(vulkanRHI.GetDevice(), descriptorPoolPackage.DescriptorPool, nullptr);
+			vkDestroyDescriptorSetLayout(vulkanRHI.GetDevice(), bindlessLayout, nullptr);
 		}
 
 		void DescriptorManager::BeginFrame()
@@ -137,35 +137,40 @@ namespace sy
 
 		void DescriptorManager::EndFrame()
 		{
-			combinedWriteDescriptorSets.reserve(bufferWriteDescriptors.size() + imageWriteDescriptors.size());
-			if (!bufferWriteDescriptors.empty())
+			const bool bHasBufferDescriptorToUpdate = !bufferWriteDescriptors.empty();
+			const bool bHasImageDescriptorToUpdate = !imageWriteDescriptors.empty();
+			if (bHasBufferDescriptorToUpdate || bHasImageDescriptorToUpdate)
 			{
-				for (size_t idx = 0; idx < bufferWriteDescriptors.size(); ++idx)
+				combinedWriteDescriptorSets.reserve(bufferWriteDescriptors.size() + imageWriteDescriptors.size());
+				if (bHasBufferDescriptorToUpdate)
 				{
-					bufferWriteDescriptors[idx].pBufferInfo = &bufferInfos[idx];
+					for (size_t idx = 0; idx < bufferWriteDescriptors.size(); ++idx)
+					{
+						bufferWriteDescriptors[idx].pBufferInfo = &bufferInfos[idx];
+					}
+
+					combinedWriteDescriptorSets.assign(bufferWriteDescriptors.begin(), bufferWriteDescriptors.end());
 				}
 
-				combinedWriteDescriptorSets.assign(bufferWriteDescriptors.begin(), bufferWriteDescriptors.end());
-			}
-
-			if (!imageWriteDescriptors.empty())
-			{
-				for (size_t idx = 0; idx < imageWriteDescriptors.size(); ++idx)
+				if (bHasImageDescriptorToUpdate)
 				{
-					imageWriteDescriptors[idx].pImageInfo = &imageInfos[idx];
+					for (size_t idx = 0; idx < imageWriteDescriptors.size(); ++idx)
+					{
+						imageWriteDescriptors[idx].pImageInfo = &imageInfos[idx];
+					}
+
+					combinedWriteDescriptorSets.insert(combinedWriteDescriptorSets.end(), imageWriteDescriptors.begin(), imageWriteDescriptors.end());
 				}
 
-				combinedWriteDescriptorSets.insert(combinedWriteDescriptorSets.end(), imageWriteDescriptors.begin(), imageWriteDescriptors.end());
-			}
-
-			if (!combinedWriteDescriptorSets.empty())
-			{
-				vkUpdateDescriptorSets(vulkanContext.GetDevice(), static_cast<uint32_t>(combinedWriteDescriptorSets.size()), combinedWriteDescriptorSets.data(), 0, nullptr);
-				bufferWriteDescriptors.clear();
-				bufferInfos.clear();
-				imageWriteDescriptors.clear();
-				imageInfos.clear();
-				combinedWriteDescriptorSets.clear();
+				if (!combinedWriteDescriptorSets.empty())
+				{
+					vkUpdateDescriptorSets(vulkanRHI.GetDevice(), static_cast<uint32_t>(combinedWriteDescriptorSets.size()), combinedWriteDescriptorSets.data(), 0, nullptr);
+					bufferWriteDescriptors.clear();
+					bufferInfos.clear();
+					imageWriteDescriptors.clear();
+					imageInfos.clear();
+					combinedWriteDescriptorSets.clear();
+				}
 			}
 		}
 

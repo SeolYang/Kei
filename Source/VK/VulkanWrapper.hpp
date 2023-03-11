@@ -1,26 +1,26 @@
 #pragma once
-#define VK_DESTROY_LAMBDA_SIGNATURE(HANDLE_TYPE) [](const VulkanContext& vulkanContext, HANDLE_TYPE handle)
+#define VK_DESTROY_LAMBDA_SIGNATURE(HANDLE_TYPE) [](const VulkanRHI& vulkanRHI, HANDLE_TYPE handle)
 
 namespace sy::vk
 {
-	class VulkanContext;
+	class VulkanRHI;
 
 	template <typename VulkanHandleType>
 	class VulkanWrapper : public NamedType, public NonCopyable
 	{
 	public:
-		using VulkanDestroyFunction_t = std::function<void(const VulkanContext& VulkanContext, VulkanHandleType)>;
+		using VulkanDestroyFunction_t = std::function<void(const VulkanRHI& VulkanRHI, VulkanHandleType)>;
 		using Native_t = VulkanHandleType;
 
 	public:
-		VulkanWrapper(const std::string_view name, const VulkanContext& vulkanContext, const VkObjectType type) :
-			VulkanWrapper(name, vulkanContext, type, VK_DESTROY_LAMBDA_SIGNATURE(Native_t){})
+		VulkanWrapper(const std::string_view name, const VulkanRHI& vulkanRHI, const VkObjectType type) :
+			VulkanWrapper(name, vulkanRHI, type, VK_DESTROY_LAMBDA_SIGNATURE(Native_t){})
 		{
 		}
 
-		VulkanWrapper(const std::string_view name, const VulkanContext& vulkanContext, const VkObjectType type, const VulkanDestroyFunction_t destroyFunction) :
+		VulkanWrapper(const std::string_view name, const VulkanRHI& vulkanRHI, const VkObjectType type, const VulkanDestroyFunction_t destroyFunction) :
 			NamedType(name),
-			vulkanContext(vulkanContext),
+			vulkanRHI(vulkanRHI),
 			type(type),
 			destroyFunction(destroyFunction)
 		{
@@ -28,12 +28,12 @@ namespace sy::vk
 
 		virtual ~VulkanWrapper()
 		{
-			destroyFunction(vulkanContext, handle);
+			destroyFunction(vulkanRHI, handle);
 		}
 
 		[[nodiscard]] Native_t GetNativeHandle() const { return handle; }
 		[[nodiscard]] VkObjectType GetType() const { return type; }
-		[[nodiscard]] const VulkanContext& GetContext() const { return vulkanContext; }
+		[[nodiscard]] const VulkanRHI& GetContext() const { return vulkanRHI; }
 
 	protected:
 		void UpdateHandle(const Native_t newHandle)
@@ -44,7 +44,7 @@ namespace sy::vk
 		}
 
 	private:
-		const VulkanContext& vulkanContext;
+		const VulkanRHI& vulkanRHI;
 		const VulkanDestroyFunction_t destroyFunction;
 		const VkObjectType type;
 		Native_t handle = VK_NULL_HANDLE;

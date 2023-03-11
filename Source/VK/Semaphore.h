@@ -3,11 +3,11 @@
 
 namespace sy::vk
 {
-	class VulkanContext;
+	class VulkanRHI;
 	class Semaphore : public VulkanWrapper<VkSemaphore>
 	{
 	public:
-		Semaphore(std::string_view name, const VulkanContext& vulkanContext);
+		Semaphore(std::string_view name, const VulkanRHI& vulkanRHI);
 		virtual ~Semaphore() = default;
 
 	};

@@ -1,7 +1,7 @@
 #include <PCH.h>
 #include <VK/CommandBuffer.h>
 #include <VK/CommandPool.h>
-#include <VK/VulkanContext.h>
+#include <VK/VulkanRHI.h>
 #include <VK/Pipeline.h>
 #include <VK/Buffer.h>
 #include <VK/Texture.h>
@@ -12,8 +12,8 @@ namespace sy
 {
 	namespace vk
 	{
-		CommandBuffer::CommandBuffer(std::string_view name, const VulkanContext& vulkanContext, const CommandPool& cmdPool) :
-			VulkanWrapper<VkCommandBuffer>(name, vulkanContext, VK_OBJECT_TYPE_COMMAND_BUFFER, VK_DESTROY_LAMBDA_SIGNATURE(VkCommandBuffer){ }),
+		CommandBuffer::CommandBuffer(std::string_view name, const VulkanRHI& vulkanRHI, const CommandPool& cmdPool) :
+			VulkanWrapper<VkCommandBuffer>(name, vulkanRHI, VK_OBJECT_TYPE_COMMAND_BUFFER, VK_DESTROY_LAMBDA_SIGNATURE(VkCommandBuffer){ }),
 			queueType(cmdPool.GetQueueType())
 		{
 			const VkCommandBufferAllocateInfo allocInfo
@@ -26,7 +26,7 @@ namespace sy
 			};
 
 			Native_t handle = VK_NULL_HANDLE;
-			VK_ASSERT(vkAllocateCommandBuffers(vulkanContext.GetDevice(), &allocInfo, &handle), "Failed to creating command buffer.");
+			VK_ASSERT(vkAllocateCommandBuffers(vulkanRHI.GetDevice(), &allocInfo, &handle), "Failed to creating command buffer.");
 			UpdateHandle(handle);
 		}
 

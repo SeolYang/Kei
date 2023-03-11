@@ -7,19 +7,19 @@ namespace sy
 {
 	namespace vk
 	{
-		FrameTracker::FrameTracker(const VulkanContext& vulkanContext) :
-			vulkanContext(vulkanContext)
+		FrameTracker::FrameTracker(const VulkanRHI& vulkanRHI) :
+			vulkanRHI(vulkanRHI)
 		{
 			for (size_t frameIdx = 0; frameIdx < NumMaxInFlightFrames; ++frameIdx)
 			{
 				frames[frameIdx] =
 				{
 					.InFlightFrameIndex = frameIdx,
-					.RenderFence = std::make_unique<Fence>(std::format("Render Fence {}", frameIdx), vulkanContext),
-					.UploadFence = std::make_unique<Fence>(std::format("Upload Fence {}", frameIdx), vulkanContext, false),
-					.RenderSemaphore = std::make_unique<Semaphore>(std::format("Render Semaphore {}", frameIdx), vulkanContext),
-					.PresentSemaphore = std::make_unique<Semaphore>(std::format("Present Semaphore {}", frameIdx), vulkanContext),
-					.UploadSemaphore = std::make_unique<Semaphore>(std::format("Upload Semaphore {}", frameIdx), vulkanContext),
+					.RenderFence = std::make_unique<Fence>(std::format("Render Fence {}", frameIdx), vulkanRHI),
+					.UploadFence = std::make_unique<Fence>(std::format("Upload Fence {}", frameIdx), vulkanRHI, false),
+					.RenderSemaphore = std::make_unique<Semaphore>(std::format("Render Semaphore {}", frameIdx), vulkanRHI),
+					.PresentSemaphore = std::make_unique<Semaphore>(std::format("Present Semaphore {}", frameIdx), vulkanRHI),
+					.UploadSemaphore = std::make_unique<Semaphore>(std::format("Upload Semaphore {}", frameIdx), vulkanRHI),
 				};
 			}
 		}

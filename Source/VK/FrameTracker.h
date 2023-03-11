@@ -5,7 +5,7 @@ namespace sy::vk
 {
 	class Fence;
 	class Semaphore;
-	class VulkanContext;
+	class VulkanRHI;
 	class FrameTracker : public NonCopyable
 	{
 	private:
@@ -20,7 +20,7 @@ namespace sy::vk
 		};
 
 	public:
-		explicit FrameTracker(const VulkanContext& vulkanContext);
+		explicit FrameTracker(const VulkanRHI& vulkanRHI);
 		~FrameTracker();
 
 		void BeginFrame();
@@ -40,7 +40,7 @@ namespace sy::vk
 		[[nodiscard]] size_t GetCurrentInFlightFrameIndex() const { return currentFrameIdx % NumMaxInFlightFrames; }
 
 	private:
-		const VulkanContext& vulkanContext;
+		const VulkanRHI& vulkanRHI;
 		std::array<Frame, NumMaxInFlightFrames> frames;
 		size_t currentFrameIdx = 0;
 

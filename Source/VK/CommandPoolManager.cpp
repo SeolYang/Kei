@@ -1,15 +1,15 @@
 #include <PCH.h>
 #include <VK/CommandPoolManager.h>
 #include <VK/FrameTracker.h>
-#include <VK/VulkanContext.h>
+#include <VK/VulkanRHI.h>
 #include <VK/CommandPool.h>
 
 namespace sy
 {
 	namespace vk
 	{
-		CommandPoolManager::CommandPoolManager(const VulkanContext& vulkanContext, const FrameTracker& frameTracker) :
-			vulkanContext(vulkanContext),
+		CommandPoolManager::CommandPoolManager(const VulkanRHI& vulkanRHI, const FrameTracker& frameTracker) :
+			vulkanRHI(vulkanRHI),
 			frameTracker(frameTracker)
 		{
 		}
@@ -32,7 +32,7 @@ namespace sy
 				RWLock lock(cmdPoolMutex);
 				for (size_t inFlightFrameIdx = 0; inFlightFrameIdx < NumMaxInFlightFrames; ++inFlightFrameIdx)
 				{
-					auto* newCmdPool = new CommandPool(vulkanContext, queueType);
+					auto* newCmdPool = new CommandPool(vulkanRHI, queueType);
 					localCmdPools[queueType][inFlightFrameIdx] = newCmdPool;
 					cmdPools[inFlightFrameIdx].emplace_back(newCmdPool);
 				}

@@ -14,11 +14,11 @@ namespace sy::vk
 		VkSamplerAddressMode AddressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 	};
 
-	class VulkanContext;
+	class VulkanRHI;
 	class Sampler : public VulkanWrapper<VkSampler>
 	{
 	public:
-		Sampler(std::string_view name, const VulkanContext& vulkanContext, SamplerInfo info);
+		Sampler(std::string_view name, const VulkanRHI& vulkanRHI, SamplerInfo info);
 		virtual ~Sampler() override = default;
 
 	private:

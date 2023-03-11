@@ -3,11 +3,11 @@
 
 namespace sy::vk
 {
-	class VulkanContext;
+	class VulkanRHI;
 	class ShaderModule : public VulkanWrapper<VkShaderModule>
 	{
 	public:
-		ShaderModule(std::string_view name, const VulkanContext& vulkanContext, std::string_view filePath, VkShaderStageFlagBits shaderType, std::string_view entryPoint);
+		ShaderModule(std::string_view name, const VulkanRHI& vulkanRHI, std::string_view filePath, VkShaderStageFlagBits shaderType, std::string_view entryPoint);
 		virtual ~ShaderModule() override = default;
 
 		[[nodiscard]] auto GetShaderType() const { return shaderType; }

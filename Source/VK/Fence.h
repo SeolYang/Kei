@@ -3,11 +3,11 @@
 
 namespace sy::vk
 {
-	class VulkanContext;
+	class VulkanRHI;
 	class Fence : public VulkanWrapper<VkFence>
 	{
 	public:
-		Fence(std::string_view name, const VulkanContext& vulkanContext, bool bIsSignaled = true);
+		Fence(std::string_view name, const VulkanRHI& vulkanRHI, bool bIsSignaled = true);
 		virtual ~Fence() override = default;
 
 		void Wait() const;

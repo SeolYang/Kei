@@ -15,10 +15,8 @@ namespace sy
 
 namespace sy::vk
 {
-	class VulkanContext;
 	class Texture;
-	class CommandPoolManager;
-	class FrameTracker;
+	class VulkanContext;
 }
 
 namespace sy::asset
@@ -43,6 +41,6 @@ namespace sy::asset
 		return Table.find(extension)->second;
 	}
 
-	Handle<vk::Texture> LoadTexture2DFromAsset(const fs::path& path, ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager);
+	Handle<vk::Texture> LoadTexture2DFromAsset(const fs::path& path, ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext);
 	bool ConvertTexture2D(const fs::path& input);
 }

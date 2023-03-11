@@ -4,67 +4,70 @@
 
 namespace sy
 {
-	namespace vk
-	{
-		class VulkanContext;
-		class Semaphore;
-		class ShaderModule;
-		class Pipeline;
-		class Buffer;
-		class Texture;
-		class TextureView;
-		class Sampler;
-		class Fence;
-		class PipelineLayoutCache;
-		class ResourceStateTracker;
-		class FrameTracker;
-		class CommandPoolManager;
-		class DescriptorManager;
-	}
-
-	class Window;
 	class ResourceCache;
-	namespace render
+}
+
+namespace sy::vk
+{
+	class VulkanContext;
+	class Semaphore;
+	class ShaderModule;
+	class Pipeline;
+	class Buffer;
+	class Texture;
+	class TextureView;
+	class Sampler;
+	class Fence;
+	class PipelineLayoutCache;
+	class ResourceStateTracker;
+	class FrameTracker;
+	class CommandPoolManager;
+	class DescriptorManager;
+}
+
+namespace sy::window
+{
+	class Window;
+}
+
+namespace sy::render
+{
+	class Mesh;
+	class SimpleRenderPass;
+	/** @todo Renderer to RenderContext? */
+	class Renderer final : public NonCopyable
 	{
-		class Mesh;
-		class SimpleRenderPass;
-		class Renderer final : public NonCopyable
-		{
-		public:
-			Renderer(const window::Window& window, vk::VulkanContext& vulkanContext, vk::ResourceStateTracker& resStateTracker, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, vk::DescriptorManager& descriptorManager, ResourceCache& resourceCache);
-			~Renderer() override;
+	public:
+		Renderer(const window::Window& window, vk::VulkanContext& vulkanContext, vk::ResourceStateTracker& resStateTracker, ResourceCache& resourceCache);
+		~Renderer() override;
 
-			void Render();
+		void Render();
 
-		private:
-			void BeginFrame();
-			void EndFrame();
+	private:
+		void BeginFrame();
+		void EndFrame();
 
-		private:
-			const window::Window& window;
-			vk::VulkanContext& vulkanContext;
-			vk::ResourceStateTracker& resStateTracker;
-			const vk::FrameTracker& frameTracker;
-			vk::CommandPoolManager& cmdPoolManager;
-			vk::DescriptorManager& descriptorManager;
-			ResourceCache& resourceCache;
+	private:
+		const window::Window& window;
+		vk::VulkanContext& vulkanContext;
+		ResourceCache& resourceCache;
 
-			std::unique_ptr<vk::PipelineLayoutCache> pipelineLayoutCache;
+		vk::ResourceStateTracker& resStateTracker;
+		//std::unique_ptr<vk::ResourceStateTracker> resourceStateTracker;
 
-			std::unique_ptr<vk::ShaderModule> triVert;
-			std::unique_ptr<vk::ShaderModule> triFrag;
-			std::unique_ptr<vk::Pipeline> basicPipeline;
+		std::unique_ptr<vk::ShaderModule> triVert;
+		std::unique_ptr<vk::ShaderModule> triFrag;
+		std::unique_ptr<vk::Pipeline> basicPipeline;
 
-			std::unique_ptr<vk::Texture> depthStencil;
-			std::unique_ptr<vk::TextureView> depthStencilView;
-			
-			std::unique_ptr<SimpleRenderPass> renderPass;
+		std::unique_ptr<vk::Texture> depthStencil;
+		std::unique_ptr<vk::TextureView> depthStencilView;
 
-			glm::mat4 viewProjMat;
-			float elapsedTime;
+		std::unique_ptr<SimpleRenderPass> renderPass;
 
-			std::vector<component::StaticMeshComponent> staticMeshes;
+		glm::mat4 viewProjMat;
+		float elapsedTime;
 
-		};
-	}
+		std::vector<component::StaticMeshComponent> staticMeshes;
+
+	};
 }

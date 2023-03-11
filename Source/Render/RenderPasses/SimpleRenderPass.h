@@ -27,10 +27,10 @@ namespace sy::render
 	};
 
 	class Mesh;
-	class SimpleRenderPass final : public RenderPass
+	class SimpleRenderPass : public RenderPass
 	{
 	public:
-		SimpleRenderPass(std::string_view name, ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext, vk::DescriptorManager& descriptorManager, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, const vk::Pipeline& pipeline);
+		SimpleRenderPass(std::string_view name, ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext, const vk::Pipeline& pipeline);
 
 		virtual void OnBegin() override;
 		virtual void Render() override;

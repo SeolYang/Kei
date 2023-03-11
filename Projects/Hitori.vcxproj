@@ -51,6 +51,7 @@
     <ClCompile Include="..\Source\VK\Swapchain.cpp" />
     <ClCompile Include="..\Source\VK\TextureView.cpp" />
     <ClCompile Include="..\Source\VK\VertexInputBuilder.cpp" />
+    <ClCompile Include="..\Source\VK\VulkanRHI.cpp" />
     <ClCompile Include="..\Source\VK\VulkanContext.cpp" />
     <ClCompile Include="..\Source\VK\VulkanTypes.cpp" />
     <ClCompile Include="..\Source\Window\Window.cpp" />
@@ -111,6 +112,7 @@
     <ClInclude Include="..\Source\VK\Swapchain.h" />
     <ClInclude Include="..\Source\VK\TextureView.h" />
     <ClInclude Include="..\Source\VK\VertexInputBuilder.h" />
+    <ClInclude Include="..\Source\VK\VulkanRHI.h" />
     <ClInclude Include="..\Source\VK\VulkanContext.h" />
     <ClInclude Include="..\Source\VK\VulkanTypes.h" />
     <ClInclude Include="..\Source\VK\VulkanWrapper.hpp" />

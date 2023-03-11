@@ -70,9 +70,7 @@ namespace sy::asset
 	}
 
 	std::vector<component::StaticMeshComponent> LoadModel(const std::string& name, const fs::path& path,
-		ResourceCache& resourceCache,
-		const vk::VulkanContext& vulkanContext, vk::CommandPoolManager& cmdPoolManager,
-		const vk::FrameTracker& frameTracker, vk::DescriptorManager& descriptorManager)
+		ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext)
 	{
 		const auto pathStr = path.string();
 		const auto assetDataHandle = LoadOrCreateAssetData<render::Model>(path, resourceCache);
@@ -104,9 +102,9 @@ namespace sy::asset
 			const std::span indicesSpan{ indices.data() + mesh.IndicesOffset, mesh.NumIndices };
 			const Handle<render::Mesh> meshHandle = resourceCache.Add(render::Mesh::Create<ModelVertex, ModelIndex>(
 				std::format("{}_{}", path.string(), mesh.Name),
-				vulkanContext, cmdPoolManager, frameTracker,
+				vulkanContext,
 				verticesSpan, indicesSpan));
-			const Handle<render::Material> materialHandle = LoadMaterialFromAsset(mesh.Material, resourceCache, vulkanContext, frameTracker, cmdPoolManager, descriptorManager);
+			const Handle<render::Material> materialHandle = LoadMaterialFromAsset(mesh.Material, resourceCache, vulkanContext);
 			component::StaticMeshComponent component;
 			component.Mesh = meshHandle;
 			component.Material = materialHandle;

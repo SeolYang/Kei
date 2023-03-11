@@ -1,5 +1,5 @@
 #include <PCH.h>
-#include <VK/VulkanContext.h>
+#include <VK/VulkanRHI.h>
 #include <VK/Fence.h>
 #include <VK/Texture.h>
 #include <VK/Buffer.h>
@@ -8,11 +8,13 @@
 #include <VK/CommandPoolManager.h>
 #include <VK/FrameTracker.h>
 
+#include "VulkanContext.h"
+
 namespace sy
 {
 	namespace vk
 	{
-		Texture::Texture(std::string_view name, const VulkanContext& vulkanContext, const TextureInfo& info, const bool bReserveMips, const ETextureState initialState) : VulkanWrapper(name, vulkanContext, VK_OBJECT_TYPE_IMAGE, 
+		Texture::Texture(std::string_view name, const VulkanRHI& vulkanRHI, const TextureInfo& info, const bool bReserveMips, const ETextureState initialState) : VulkanWrapper(name, vulkanRHI, VK_OBJECT_TYPE_IMAGE, 
 			VK_DESTROY_LAMBDA_SIGNATURE(VkImage)
 		{
 		}),
@@ -25,7 +27,7 @@ namespace sy
 				this->info.MipLevels = static_cast<uint32_t>(std::log2(info.Extent.width));
 			}
 
-			const auto allocator = vulkanContext.GetAllocator();
+			const auto allocator = vulkanRHI.GetAllocator();
 			const auto extent = GetExtent();
 			const VkImageCreateInfo imageCreateInfo
 			{
@@ -59,13 +61,13 @@ namespace sy
 		{
 			if (allocation != VK_NULL_HANDLE)
 			{
-				const auto& vulkanContext = GetContext();
+				const auto& vulkanRHI = GetContext();
 				const auto handle = GetNativeHandle();
-				vmaDestroyImage(vulkanContext.GetAllocator(), handle, allocation);
+				vmaDestroyImage(vulkanRHI.GetAllocator(), handle, allocation);
 			}
 		}
 
-		std::unique_ptr<Texture> CreateTexture2D(const std::string_view name, const VulkanContext& vulkanContext, TextureInfo info, const bool bReserveMips, const ETextureState initialState)
+		std::unique_ptr<Texture> CreateTexture2D(const std::string_view name, const VulkanRHI& vulkanRHI, TextureInfo info, const bool bReserveMips, const ETextureState initialState)
 		{
 			info.Type = VK_IMAGE_TYPE_2D;
 			info.Extent.depth = 1;
@@ -73,26 +75,27 @@ namespace sy
 
 			return std::make_unique<Texture>(
 				name,
-				vulkanContext,
+				vulkanRHI,
 				info,
 				bReserveMips, initialState);
 		}
 
-		std::unique_ptr<Texture> CreateShaderResourceTexture2D(const std::string_view name,
-			const VulkanContext& vulkanContext, CommandPoolManager& cmdPoolManager, TextureInfo info, const bool bReserveMips,
+		std::unique_ptr<Texture> CreateShaderResourceTexture2D(const std::string_view name, const VulkanContext& vulkanContext, TextureInfo info, const bool bReserveMips,
 			const std::span<const char> textureData)
 		{
+			const auto& vulkanRHI = vulkanContext.GetVulkanRHI();
+			auto& cmdPoolManager = vulkanContext.GetCommandPoolManager();
 			constexpr auto InitialState = ETextureState::AnyShaderReadSampledImage;
 
 			const auto stagingBuffer = CreateStagingBuffer(std::format("{}_Staging", name), vulkanContext, textureData.size());
-			void* mappedStagingBuffer = vulkanContext.Map(*stagingBuffer);
+			void* mappedStagingBuffer = vulkanRHI.Map(*stagingBuffer);
 			memcpy(mappedStagingBuffer, textureData.data(), textureData.size());
-			vulkanContext.Unmap(*stagingBuffer);
+			vulkanRHI.Unmap(*stagingBuffer);
 
 			info.UsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 			info.MemoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 			info.MemoryUsage = VMA_MEMORY_USAGE_GPU_ONLY;
-			auto newTexture = CreateTexture2D(name, vulkanContext, info, bReserveMips, InitialState);
+			auto newTexture = CreateTexture2D(name, vulkanRHI, info, bReserveMips, InitialState);
 
 			auto& cmdPool = cmdPoolManager.RequestCommandPool(EQueueType::Graphics);
 			const auto cmdBuffer = cmdPool.RequestCommandBuffer(std::format("{}_Upload Command Buffer", name));
@@ -104,13 +107,16 @@ namespace sy
 			}
 			cmdBuffer->End();
 
-			vulkanContext.SubmitImmediateTo(*cmdBuffer);
+			vulkanRHI.SubmitImmediateTo(*cmdBuffer);
 			return newTexture;
 		}
 
 		std::unique_ptr<Texture> LoadShaderResourceTexture2DFromFile(const std::string_view filePath, const std::string_view name,
-			const VulkanContext& vulkanContext, CommandPoolManager& cmdPoolManager, const VkFormat format, const bool bReserveMips)
+			const VulkanContext& vulkanContext, const VkFormat format, const bool bReserveMips)
 		{
+			const auto& vulkanRHI = vulkanContext.GetVulkanRHI();
+			auto& cmdPoolManager = vulkanContext.GetCommandPoolManager();
+
 			int texWidth, texHeight;
 			int texChannels;
 			stbi_uc* pixels = stbi_load(filePath.data(), &texWidth, &texHeight, &texChannels, static_cast<int>(ToNumberOfComponents(format)));
@@ -131,7 +137,7 @@ namespace sy
 
 			auto result = CreateShaderResourceTexture2D(
 				name,
-				vulkanContext, cmdPoolManager,
+				vulkanContext,
 				info, bReserveMips,
 				std::span{ pixelsData, sizeOfData });
 
@@ -139,9 +145,10 @@ namespace sy
 			return result;
 		}
 
-		std::unique_ptr<Texture> CreateDepthStencil(const std::string_view name, const VulkanContext& vulkanContext,
-			CommandPoolManager& cmdPoolManager, const Extent2D<uint32_t> extent, const VkFormat format)
+		std::unique_ptr<Texture> CreateDepthStencil(const std::string_view name, const VulkanContext& vulkanContext, const Extent2D<uint32_t> extent, const VkFormat format)
 		{
+			const auto& vulkanRHI = vulkanContext.GetVulkanRHI();
+			auto& cmdPoolManager = vulkanContext.GetCommandPoolManager();
 			const TextureInfo info
 			{
 				.Extent = {extent.width, extent.height, 1},
@@ -153,7 +160,7 @@ namespace sy
 
 			auto newDepthStencil = CreateTexture2D(
 				name, 
-				vulkanContext, 
+				vulkanRHI, 
 				info, false, 
 				ETextureState::DepthStencilAttachmentWrite);
 
@@ -165,7 +172,7 @@ namespace sy
 			}
 			cmdBuffer->End();
 
-			vulkanContext.SubmitImmediateTo(*cmdBuffer);
+			vulkanRHI.SubmitImmediateTo(*cmdBuffer);
 			return newDepthStencil;
 		}
 	}

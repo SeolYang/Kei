@@ -12,7 +12,7 @@ namespace sy::vk
 	class Texture : public VulkanWrapper<VkImage>
 	{
 	public:
-		Texture(std::string_view name, const VulkanContext& vulkanContext, const TextureInfo& info, bool bReserveMips, ETextureState initialState);
+		Texture(std::string_view name, const VulkanRHI& vulkanRHI, const TextureInfo& info, bool bReserveMips, ETextureState initialState);
 		~Texture() override;
 
 		[[nodiscard]] auto GetExtent() const { return info.Extent; }
@@ -42,13 +42,13 @@ namespace sy::vk
 	/**
 	 * @ignored_params TextureInfo::Extent::depth, TextureInfo::Type, TextureInfo::ArrayLayers
 	 */
-	std::unique_ptr<Texture> CreateTexture2D(std::string_view name, const VulkanContext& vulkanContext, TextureInfo info, bool bReserveMips, ETextureState initialState);
+	std::unique_ptr<Texture> CreateTexture2D(std::string_view name, const VulkanRHI& vulkanRHI, TextureInfo info, bool bReserveMips, ETextureState initialState);
 
 	/**
 	 * @ignored_params TextureInfo::Extent::depth, TextureInfo::Type, TextureInfo::UsageFlags, TextureInfo::MemoryPropertyFlags, TextureInfo::MemoryUsage, TextureInfo::ArrayLayers
 	 */
-	std::unique_ptr<Texture> CreateShaderResourceTexture2D(std::string_view name, const VulkanContext& vulkanContext, CommandPoolManager& cmdPoolManager, TextureInfo info, bool bReserveMips, std::span<const char> textureData);
+	std::unique_ptr<Texture> CreateShaderResourceTexture2D(std::string_view name, const VulkanContext& vulkanContext, TextureInfo info, bool bReserveMips, std::span<const char> textureData);
 
 	std::unique_ptr<Texture> LoadShaderResourceTexture2DFromFile(std::string_view filePath, std::string_view name, const VulkanContext& vulkanContext, CommandPoolManager& cmdPoolManager, VkFormat format, bool bReserveMips);
-	std::unique_ptr<Texture> CreateDepthStencil(std::string_view name, const VulkanContext& vulkanContext, CommandPoolManager& cmdPoolManager, Extent2D<uint32_t> extent, const VkFormat format);
+	std::unique_ptr<Texture> CreateDepthStencil(std::string_view name, const VulkanContext& vulkanContext, Extent2D<uint32_t> extent, const VkFormat format);
 }

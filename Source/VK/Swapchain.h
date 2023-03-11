@@ -8,12 +8,12 @@ namespace sy::window
 
 namespace sy::vk
 {
-	class VulkanContext;
+	class VulkanRHI;
 	class Semaphore;
 	class Swapchain : public VulkanWrapper<VkSwapchainKHR>
 	{
 	public:
-		Swapchain(const window::Window& window, const VulkanContext& vulkanContext);
+		Swapchain(const window::Window& window, const VulkanRHI& vulkanRHI);
 		virtual ~Swapchain() override;
 
 		void AcquireNext(const Semaphore& presentSemaphore);

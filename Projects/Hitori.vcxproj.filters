@@ -63,7 +63,7 @@
     <ClCompile Include="..\Source\VK\Swapchain.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\VK\VulkanContext.cpp">
+    <ClCompile Include="..\Source\VK\VulkanRHI.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\VK\Semaphore.cpp">
@@ -171,6 +171,9 @@
     <ClCompile Include="..\Source\Application\Context.cpp">
       <Filter>Source\Application</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\VK\VulkanContext.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ThirdParty\volk\volk.h">
@@ -188,7 +191,7 @@
     <ClInclude Include="..\Source\VK\Swapchain.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\VK\VulkanContext.h">
+    <ClInclude Include="..\Source\VK\VulkanRHI.h">
       <Filter>Source\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\VK\VulkanTypes.h">
@@ -340,6 +343,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\Application\Context.h">
       <Filter>Source\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\VulkanContext.h">
+      <Filter>Source\Vulkan</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

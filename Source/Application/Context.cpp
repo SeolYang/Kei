@@ -6,12 +6,11 @@
 #include <Core/ResourceCache.h>
 #include <VK/VulkanContext.h>
 #include <VK/ResourceStateTracker.h>
-#include <VK/FrameTracker.h>
-#include <VK/CommandPoolManager.h>
-#include <VK/DescriptorManager.h>
 #include <VK/Texture.h>
 #include <VK/TextureView.h>
 #include <VK/Sampler.h>
+#include <VK/DescriptorManager.h>
+#include <VK/VulkanRHI.h>
 #include <Render/Renderer.h>
 #include <Render/Material.h>
 #include <Asset/AssetConverter.h>
@@ -51,16 +50,10 @@ namespace sy::app
 		vulkanContext = std::make_unique<vk::VulkanContext>(*window);
 		spdlog::info("Initializing Resource State Tracker.");
 		resourceStateTracker = std::make_unique<vk::ResourceStateTracker>(*resourceCache);
-		spdlog::info("Initializing frame tracker sub-context.");
-		frameTracker = std::make_unique<vk::FrameTracker>(*vulkanContext);
-		spdlog::info("Initializing Command Pool Manager sub-context.");
-		cmdPoolManager = std::make_unique<vk::CommandPoolManager>(*vulkanContext, *frameTracker);
-		spdlog::info("Initializing Bind-less Descriptor Manager sub-context.");
-		descriptorManager = std::make_unique<vk::DescriptorManager>(*vulkanContext, *frameTracker);
 		spdlog::info("Initializing Default engine resources.");
 		InitDefaultEngineResources();
 		spdlog::info("Initializing Renderer sub-context.");
-		renderer = std::make_unique<render::Renderer>(*window, *vulkanContext, *resourceStateTracker, *frameTracker, *cmdPoolManager, *descriptorManager, *resourceCache);
+		renderer = std::make_unique<render::Renderer>(*window, *vulkanContext, *resourceStateTracker, *resourceCache);
 	}
 
 	void Context::InitializeLogger()
@@ -113,42 +106,35 @@ namespace sy::app
 		};
 
 		constexpr std::array<uint32_t, 4> white = { 0xffffffff , 0xffffffff , 0xffffffff , 0xffffffff };
-		const auto defaultWhiteTex = resourceCache->Add(vk::CreateShaderResourceTexture2D(vk::DefaultWhiteTexture, *vulkanContext, *cmdPoolManager, defaultTexInfo, false, std::span{ reinterpret_cast<const char*>(white.data()), sizeof(white) }));
+		const auto defaultWhiteTex = resourceCache->Add(vk::CreateShaderResourceTexture2D(vk::DefaultWhiteTexture, *vulkanContext, defaultTexInfo, false, std::span{ reinterpret_cast<const char*>(white.data()), sizeof(white) }));
 		resourceCache->SetAlias(vk::DefaultWhiteTexture, defaultWhiteTex);
 		constexpr std::array<uint32_t, 4> black = { 0x000000ff , 0x000000ff , 0x000000ff , 0x000000ff };
-		const auto defaultBlackTex = resourceCache->Add(vk::CreateShaderResourceTexture2D(vk::DefaultBlackTexture, *vulkanContext, *cmdPoolManager, defaultTexInfo, false, std::span{ reinterpret_cast<const char*>(black.data()), sizeof(black) }));
+		const auto defaultBlackTex = resourceCache->Add(vk::CreateShaderResourceTexture2D(vk::DefaultBlackTexture, *vulkanContext, defaultTexInfo, false, std::span{ reinterpret_cast<const char*>(black.data()), sizeof(black) }));
 		resourceCache->SetAlias(vk::DefaultBlackTexture, defaultBlackTex);
 
-		const auto linearSampler = resourceCache->Add<vk::Sampler>(vk::LinearSamplerRepeat, *vulkanContext, vk::SamplerInfo{});
+		const auto linearSampler = resourceCache->Add<vk::Sampler>(vk::LinearSamplerRepeat, vulkanContext->GetVulkanRHI(), vk::SamplerInfo{});
 		resourceCache->SetAlias(vk::LinearSamplerRepeat, linearSampler);
 
 		auto& defaultWhiteTexRef = Unwrap(resourceCache->Load(defaultWhiteTex));
-		const auto defaultWhiteTexView = resourceCache->Add<vk::TextureView>(std::format("{}_View", vk::DefaultWhiteTexture), *vulkanContext, defaultWhiteTexRef, VK_IMAGE_VIEW_TYPE_2D);
-		const auto defaultMaterial = resourceCache->Add<render::Material>(resourceCache->Add<vk::Descriptor>(descriptorManager->RequestDescriptor(*resourceCache, defaultWhiteTex, defaultWhiteTexView, linearSampler, vk::ETextureState::AnyShaderReadSampledImage)));
+		const auto defaultWhiteTexView = resourceCache->Add<vk::TextureView>(std::format("{}_View", vk::DefaultWhiteTexture), vulkanContext->GetVulkanRHI(), defaultWhiteTexRef, VK_IMAGE_VIEW_TYPE_2D);
+
+		auto& descriptorManager = vulkanContext->GetDescriptorManager();
+		const auto defaultMaterial = resourceCache->Add<render::Material>(resourceCache->Add<vk::Descriptor>(descriptorManager.RequestDescriptor(*resourceCache, defaultWhiteTex, defaultWhiteTexView, linearSampler, vk::ETextureState::AnyShaderReadSampledImage)));
 		resourceCache->SetAlias(render::DefaultMaterial, defaultMaterial);
 	}
 
 	void Context::Cleanup()
 	{
-		vulkanContext->WaitForDeviceIdle();
-		{
-			spdlog::info("Clean-up Resource Cache.");
-			resourceCache->Clear();
+		spdlog::info("Clean-up Resource Cache.");
+		resourceCache->Clear();
 
-			spdlog::info("Clean-up Renderer sub-context.");
-			renderer.reset();
+		spdlog::info("Clean-up Renderer sub-context.");
+		renderer.reset();
 
-			spdlog::info("Clean-up Bind-less Descriptor Manager sub-context.");
-			descriptorManager.reset();
-			spdlog::info("Clean-up Command Pool Manager sub-context.");
-			cmdPoolManager.reset();
-			spdlog::info("Clean-up frame tracker sub-context.");
-			frameTracker.reset();
-			spdlog::info("Clean-up Resource State Tracker.");
-			resourceStateTracker.reset();
-			spdlog::info("Clean-up Vulkan context.");
-			vulkanContext.reset();
-		}
+		spdlog::info("Clean-up Resource State Tracker.");
+		resourceStateTracker.reset();
+		spdlog::info("Clean-up Vulkan context.");
+		vulkanContext.reset();
 
 		spdlog::info("Clean-up Window sub-context");
 		window.reset();
@@ -166,7 +152,7 @@ namespace sy::app
         while (!bExit)
         {
 			timer->Begin();
-			frameTracker->BeginFrame();
+			vulkanContext->BeginFrame();
 
             while (SDL_PollEvent(&ev) != 0)
             {
@@ -176,14 +162,11 @@ namespace sy::app
                 }
             }
 
-			frameTracker->WaitForInFlightRenderFence();
-			cmdPoolManager->BeginFrame();
-			descriptorManager->BeginFrame();
+			vulkanContext->BeginRender();
 			renderer->Render();
-			descriptorManager->EndFrame();
-			cmdPoolManager->EndFrame();
+			vulkanContext->EndRender();
 
-			frameTracker->EndFrame();
+			vulkanContext->EndFrame();
 			timer->End();
         }
 		spdlog::info("Main loop finished.");

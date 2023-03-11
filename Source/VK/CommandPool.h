@@ -3,7 +3,7 @@
 
 namespace sy::vk
 {
-	class VulkanContext;
+	class VulkanRHI;
 	class CommandBuffer;
 	class Fence;
 	class CommandPool : public VulkanWrapper<VkCommandPool>
@@ -15,7 +15,7 @@ namespace sy::vk
 		};
 
 	public:
-		CommandPool(const VulkanContext& vulkanContext, EQueueType queueType);
+		CommandPool(const VulkanRHI& vulkanRHI, EQueueType queueType);
 		virtual ~CommandPool() override = default;
 
 		ManagedCommandBuffer RequestCommandBuffer(std::string_view name);

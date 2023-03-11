@@ -3,7 +3,7 @@
 
 namespace sy::vk
 {
-	class VulkanContext;
+	class VulkanRHI;
 	class CommandPool;
 	class ResourceStateTracker;
 	class Fence;
@@ -13,7 +13,7 @@ namespace sy::vk
 	class CommandBuffer : public VulkanWrapper<VkCommandBuffer>
 	{
 	public:
-		CommandBuffer(std::string_view name, const VulkanContext& vulkanContext, const CommandPool& cmdPool);
+		CommandBuffer(std::string_view name, const VulkanRHI& vulkanRHI, const CommandPool& cmdPool);
 		virtual ~CommandBuffer() override = default;
 
 		[[nodiscard]] EQueueType GetQueueType() const { return queueType; }

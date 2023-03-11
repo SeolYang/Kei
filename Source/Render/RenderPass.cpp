@@ -1,20 +1,14 @@
 #include <PCH.h>
 #include <Render/RenderPass.h>
-#include <VK/VulkanContext.h>
 #include <VK/CommandPoolManager.h>
 #include <VK/CommandPool.h>
 #include <VK/CommandBuffer.h>
 
 namespace sy::render
 {
-	RenderPass::RenderPass(std::string_view name, const vk::VulkanContext& vulkanContext,
-		vk::DescriptorManager& descriptorManager, const vk::FrameTracker& frameTracker, 
-		vk::CommandPoolManager& cmdPoolManager, const vk::Pipeline& pipeline) :
+	RenderPass::RenderPass(std::string_view name, const vk::VulkanContext& vulkanContext, const vk::Pipeline& pipeline) :
 	NamedType(name),
 	vulkanContext(vulkanContext),
-	descriptorManager(descriptorManager),
-	frameTracker(frameTracker),
-	cmdPoolManager(cmdPoolManager),
 	pipeline(pipeline)
 	{
 	}

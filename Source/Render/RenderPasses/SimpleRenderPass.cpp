@@ -3,7 +3,7 @@
 #include <VK/CommandBuffer.h>
 #include <VK/CommandPool.h>
 #include <VK/CommandPoolManager.h>
-#include <VK/VulkanContext.h>
+#include <VK/VulkanRHI.h>
 #include <VK/Buffer.h>
 #include <VK/Texture.h>
 #include <VK/TextureView.h>
@@ -18,26 +18,26 @@
 
 namespace sy::render
 {
-	SimpleRenderPass::SimpleRenderPass(const std::string_view name, ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext, vk::DescriptorManager& descriptorManager, const vk::FrameTracker& frameTracker, vk::CommandPoolManager& cmdPoolManager, const vk::Pipeline& pipeline) :
-	RenderPass(name, vulkanContext, descriptorManager, frameTracker, cmdPoolManager, pipeline),
+	SimpleRenderPass::SimpleRenderPass(const std::string_view name, ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext, const vk::Pipeline& pipeline) :
+	RenderPass(name, vulkanContext, pipeline),
 	resourceCache(resourceCache)
 	{
 		for (size_t idx = 0; idx < vk::NumMaxInFlightFrames; ++idx)
 		{
 			transformBuffers[idx] = vk::CreateUniformBuffer<TransformUniformBuffer>("TransformBuffer", vulkanContext);
 
-			auto& graphicsCmdPool = cmdPoolManager.RequestCommandPool(vk::EQueueType::Graphics);
+			auto& graphicsCmdPool = GetCommandPoolManager().RequestCommandPool(vk::EQueueType::Graphics);
 			auto graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Simple Render Pass Initial Sync");
 			graphicsCmdBuffer->Begin();
 			graphicsCmdBuffer->ChangeState(vk::EBufferState::None, vk::EBufferState::VertexShaderReadUniformBuffer, *transformBuffers[idx]);
 			graphicsCmdBuffer->End();
 
-			const auto& uploadFence = frameTracker.GetCurrentInFlightUploadFence();
-			vulkanContext.SubmitTo(*graphicsCmdBuffer, uploadFence);
+			const auto& uploadFence = GetFrameTracker().GetCurrentInFlightUploadFence();
+			vulkanContext.GetVulkanRHI().SubmitTo(*graphicsCmdBuffer, uploadFence);
 			uploadFence.Wait();
 			uploadFence.Reset();
 
-			transformBufferIndices[idx] = descriptorManager.RequestDescriptor(*transformBuffers[idx]);
+			transformBufferIndices[idx] = GetDescriptorManager().RequestDescriptor(*transformBuffers[idx]);
 		}
 	}
 
@@ -106,12 +106,12 @@ namespace sy::render
 
 	void SimpleRenderPass::UpdateBuffers()
 	{
-		const auto& vulkanContext = GetVulkanContext();
+		const auto& vulkanRHI = GetVulkanRHI();
 		const auto& frameTracker = GetFrameTracker();
 		const auto& transformBuffer = *transformBuffers[frameTracker.GetCurrentInFlightFrameIndex()];
-		void* transformBufferMappedPtr = vulkanContext.Map(transformBuffer);
+		void* transformBufferMappedPtr = vulkanRHI.Map(transformBuffer);
 		memcpy(transformBufferMappedPtr, &transformData, sizeof(TransformUniformBuffer));
-		vulkanContext.Unmap(transformBuffer);
+		vulkanRHI.Unmap(transformBuffer);
 	}
 
 	void SimpleRenderPass::SetMesh(Handle<Mesh> mesh)

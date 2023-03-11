@@ -3,7 +3,7 @@
 
 namespace sy::vk
 {
-	class VulkanContext;
+	class VulkanRHI;
 	class PushConstantBuilder;
 	class PipelineLayoutCache : public NonCopyable
 	{
@@ -31,13 +31,13 @@ namespace sy::vk
 		};
 
 	public:
-		explicit PipelineLayoutCache(const VulkanContext& vulkanContext);
+		explicit PipelineLayoutCache(const VulkanRHI& vulkanRHI);
 		~PipelineLayoutCache() override;
 
 		VkPipelineLayout Request(std::span<VkDescriptorSetLayout> descriptorSetLayouts, const PushConstantBuilder& pushConstantBuilder);
 
 	private:
-		const VulkanContext& vulkanContext;
+		const VulkanRHI& vulkanRHI;
 		robin_hood::unordered_map<PipelineLayoutInfo, VkPipelineLayout, PipelineLayoutHash> cache;
 
 	};

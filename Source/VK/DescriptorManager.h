@@ -8,7 +8,7 @@ namespace sy
 
 namespace sy::vk
 {
-	class VulkanContext;
+	class VulkanRHI;
 	class Buffer;
 	class Texture;
 	class TextureView;
@@ -104,7 +104,7 @@ namespace sy::vk
 		};
 
 	public:
-		DescriptorManager(const VulkanContext& vulkanContext, const FrameTracker& frameTracker);
+		DescriptorManager(const VulkanRHI& vulkanRHI, const FrameTracker& frameTracker);
 		virtual ~DescriptorManager() override;
 
 		void BeginFrame();
@@ -119,7 +119,7 @@ namespace sy::vk
 		Descriptor RequestDescriptor(ResourceCache& resourceCache, Handle<Texture> texture, Handle<TextureView> view, Handle<Sampler> sampler, ETextureState expectedState, bool bIsCombinedSampler = true);
 
 	private:
-		const VulkanContext& vulkanContext;
+		const VulkanRHI& vulkanRHI;
 		const FrameTracker& frameTracker;
 		VkDescriptorSetLayout bindlessLayout = VK_NULL_HANDLE;
 		PoolPackage descriptorPoolPackage;
