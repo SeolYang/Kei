@@ -44,7 +44,7 @@ namespace sy::render
 			graphicsCmdBuffer->End();
 
 			const auto& uploadFence = frameTracker.GetCurrentInFlightUploadFence();
-			vulkanContext.GetVulkanRHI().SubmitTo(*graphicsCmdBuffer, uploadFence);
+			vulkanContext.GetRHI().SubmitTo(*graphicsCmdBuffer, uploadFence);
 			uploadFence.Wait();
 			uploadFence.Reset();
 
@@ -120,7 +120,7 @@ namespace sy::render
 	void SimpleRenderPass::UpdateBuffers()
 	{
 		const auto& vulkanContext = GetVulkanContext();
-		const auto& vulkanRHI = vulkanContext.GetVulkanRHI();
+		const auto& vulkanRHI = vulkanContext.GetRHI();
 		const auto& frameTracker = vulkanContext.GetFrameTracker();
 		const auto& transformBuffer = *transformBuffers[frameTracker.GetCurrentInFlightFrameIndex()];
 		void* transformBufferMappedPtr = vulkanRHI.Map(transformBuffer);

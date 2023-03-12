@@ -32,7 +32,7 @@ namespace sy::vk
 		return *descriptorManager;
 	}
 
-	VulkanRHI& VulkanContext::GetVulkanRHI() const
+	VulkanRHI& VulkanContext::GetRHI() const
 	{
 		return *vulkanRHI;
 	}

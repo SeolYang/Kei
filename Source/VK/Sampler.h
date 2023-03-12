@@ -4,25 +4,21 @@
 namespace sy::vk
 {
 	constexpr std::string_view LinearSamplerRepeat = "LinearSamplerRepeat";
-	struct SamplerInfo
-	{
-		VkFilter MinificationFilter = VK_FILTER_LINEAR;
-		VkFilter MagnificationFilter = VK_FILTER_LINEAR;
-		VkSamplerMipmapMode MipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-		VkSamplerAddressMode AddressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		VkSamplerAddressMode AddressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		VkSamplerAddressMode AddressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	};
 
-	class VulkanRHI;
+	class SamplerBuilder;
 	class Sampler : public VulkanWrapper<VkSampler>
 	{
 	public:
-		Sampler(std::string_view name, const VulkanRHI& vulkanRHI, SamplerInfo info);
-		virtual ~Sampler() override = default;
+		explicit Sampler(const SamplerBuilder& builder);
+		~Sampler() override = default;
 
 	private:
-		SamplerInfo info;
+		const VkFilter minFilter;
+		const VkFilter magFilter;
+		const VkSamplerMipmapMode mipmapMode;
+		const VkSamplerAddressMode addressModeU;
+		const VkSamplerAddressMode addressModeV;
+		const VkSamplerAddressMode addressModeW;
 
 	};
 }

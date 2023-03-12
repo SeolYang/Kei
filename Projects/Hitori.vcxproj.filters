@@ -183,6 +183,9 @@
     <ClCompile Include="..\Source\VK\TextureBuilder.cpp">
       <Filter>Source\Vulkan\Builders</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\VK\SamplerBuilder.cpp">
+      <Filter>Source\Vulkan\Builders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ThirdParty\volk\volk.h">
@@ -360,6 +363,9 @@
       <Filter>Source\Vulkan\Builders</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\VK\TextureBuilder.h">
+      <Filter>Source\Vulkan\Builders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\SamplerBuilder.h">
       <Filter>Source\Vulkan\Builders</Filter>
     </ClInclude>
   </ItemGroup>

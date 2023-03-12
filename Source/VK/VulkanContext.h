@@ -19,7 +19,7 @@ namespace sy::vk
 		VulkanContext(const window::Window& window);
 		~VulkanContext();
 
-		[[nodiscard]] VulkanRHI& GetVulkanRHI() const;
+		[[nodiscard]] VulkanRHI& GetRHI() const;
 		[[nodiscard]] FrameTracker& GetFrameTracker() const;
 		[[nodiscard]] CommandPoolManager& GetCommandPoolManager() const;
 		[[nodiscard]] DescriptorManager& GetDescriptorManager() const;

@@ -57,7 +57,7 @@ namespace sy
 
 			if (allocatedSlot.Offset >= cmdBuffers.size())
 			{
-				cmdBuffers.emplace_back(std::make_unique<CommandBuffer>(name, GetContext(), *this));
+				cmdBuffers.emplace_back(std::make_unique<CommandBuffer>(name, GetRHI(), *this));
 			}
 
 			cmdBuffers[allocatedSlot.Offset]->Reset();
@@ -72,7 +72,7 @@ namespace sy
 
 		void CommandPool::Reset() const
 		{
-			const auto& vulkanRHI = GetContext();
+			const auto& vulkanRHI = GetRHI();
 			const auto handle = GetNativeHandle();
 			vkResetCommandPool(vulkanRHI.GetDevice(), handle, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
 		}

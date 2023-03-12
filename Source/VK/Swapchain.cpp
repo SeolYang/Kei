@@ -40,7 +40,7 @@ namespace sy
 
 		Swapchain::~Swapchain()
 		{
-			const auto& vulkanRHI = GetContext();
+			const auto& vulkanRHI = GetRHI();
 			const auto device = vulkanRHI.GetDevice();
 			for (const auto imageView : imageViews)
 			{
@@ -50,7 +50,7 @@ namespace sy
 
 		void Swapchain::AcquireNext(const Semaphore& presentSemaphore)
 		{
-			const auto& vulkanRHI = GetContext();
+			const auto& vulkanRHI = GetRHI();
 			const auto handle = GetNativeHandle();
 			VK_ASSERT(vkAcquireNextImageKHR(vulkanRHI.GetDevice(), handle, std::numeric_limits<uint64_t>::max(), presentSemaphore.GetNativeHandle(), VK_NULL_HANDLE, &currentImageIdx), "Failed to acquire next image view.");
 		}

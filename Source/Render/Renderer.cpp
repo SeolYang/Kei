@@ -40,7 +40,7 @@ namespace sy::render
 	{
 		const auto windowExtent = window.GetExtent();
 		const auto& frameTracker = vulkanContext.GetFrameTracker();
-		const auto& vulkanRHI = vulkanContext.GetVulkanRHI();
+		const auto& vulkanRHI = vulkanContext.GetRHI();
 		auto& cmdPoolManager = vulkanContext.GetCommandPoolManager();
 		auto& descriptorManager = vulkanContext.GetDescriptorManager();
 		auto& pipelineLayoutCache = vulkanContext.GetPipelineLayoutCache();
@@ -87,7 +87,7 @@ namespace sy::render
 	void Renderer::Render()
 	{
 		const auto& frameTracker = vulkanContext.GetFrameTracker();
-		const auto& vulkanRHI = vulkanContext.GetVulkanRHI();
+		const auto& vulkanRHI = vulkanContext.GetRHI();
 		BeginFrame();
 		{
 			elapsedTime += 0.00833333f; // hard-coded delta time
@@ -144,7 +144,7 @@ namespace sy::render
 
 	void Renderer::BeginFrame()
 	{
-		const auto& vulkanRHI = vulkanContext.GetVulkanRHI();
+		const auto& vulkanRHI = vulkanContext.GetRHI();
 		const auto& frameTracker = vulkanContext.GetFrameTracker();
 		auto& swapchain = vulkanRHI.GetSwapchain();
 		swapchain.AcquireNext(frameTracker.GetCurrentInFlightPresentSemaphore());

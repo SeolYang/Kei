@@ -9,6 +9,7 @@
 #include <VK/Texture.h>
 #include <VK/TextureView.h>
 #include <VK/Sampler.h>
+#include <VK/SamplerBuilder.h>
 #include <VK/DescriptorManager.h>
 #include <VK/VulkanRHI.h>
 #include <Render/Renderer.h>
@@ -112,11 +113,11 @@ namespace sy::app
 		const auto defaultBlackTex = resourceCache->Add(defaultTexBuilder.SetName("DefaultBlack").SetDataToTransfer(std::span{white.data(), white.size()}).Build());
 		resourceCache->SetAlias(vk::DefaultBlackTexture, defaultBlackTex);
 
-		const auto linearSampler = resourceCache->Add<vk::Sampler>(vk::LinearSamplerRepeat, vulkanContext->GetVulkanRHI(), vk::SamplerInfo{});
+		const auto linearSampler = resourceCache->Add<vk::Sampler>(vk::SamplerBuilder{*vulkanContext}.SetName(vk::LinearSamplerRepeat).Build());
 		resourceCache->SetAlias(vk::LinearSamplerRepeat, linearSampler);
 
 		auto& defaultWhiteTexRef = Unwrap(resourceCache->Load(defaultWhiteTex));
-		const auto defaultWhiteTexView = resourceCache->Add<vk::TextureView>(std::format("{}_View", vk::DefaultWhiteTexture), vulkanContext->GetVulkanRHI(), defaultWhiteTexRef, VK_IMAGE_VIEW_TYPE_2D);
+		const auto defaultWhiteTexView = resourceCache->Add<vk::TextureView>(std::format("{}_View", vk::DefaultWhiteTexture), vulkanContext->GetRHI(), defaultWhiteTexRef, VK_IMAGE_VIEW_TYPE_2D);
 
 		auto& descriptorManager = vulkanContext->GetDescriptorManager();
 		const auto defaultMaterial = resourceCache->Add<render::Material>(resourceCache->Add<vk::Descriptor>(descriptorManager.RequestDescriptor(*resourceCache, defaultWhiteTex, defaultWhiteTexView, linearSampler, vk::ETextureState::AnyShaderReadSampledImage)));
@@ -125,7 +126,7 @@ namespace sy::app
 
 	void Context::Cleanup()
 	{
-		vulkanContext->GetVulkanRHI().WaitForDeviceIdle();
+		vulkanContext->GetRHI().WaitForDeviceIdle();
 
 		spdlog::info("Clean-up Resource Cache.");
 		resourceCache->Clear();

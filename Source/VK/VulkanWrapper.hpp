@@ -33,7 +33,7 @@ namespace sy::vk
 
 		[[nodiscard]] Native_t GetNativeHandle() const { return handle; }
 		[[nodiscard]] VkObjectType GetType() const { return type; }
-		[[nodiscard]] const VulkanRHI& GetContext() const { return vulkanRHI; }
+		[[nodiscard]] const VulkanRHI& GetRHI() const { return vulkanRHI; }
 
 	protected:
 		void UpdateHandle(const Native_t newHandle)

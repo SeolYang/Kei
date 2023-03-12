@@ -44,6 +44,7 @@
     <ClCompile Include="..\Source\VK\LayoutCache.cpp" />
     <ClCompile Include="..\Source\VK\ResourceStateTracker.cpp" />
     <ClCompile Include="..\Source\VK\Sampler.cpp" />
+    <ClCompile Include="..\Source\VK\SamplerBuilder.cpp" />
     <ClCompile Include="..\Source\VK\Texture.cpp" />
     <ClCompile Include="..\Source\VK\Pipeline.cpp" />
     <ClCompile Include="..\Source\VK\PipelineBuilder.cpp" />
@@ -106,6 +107,7 @@
     <ClInclude Include="..\Source\VK\PushConstantBuilder.h" />
     <ClInclude Include="..\Source\VK\ResourceStateTracker.h" />
     <ClInclude Include="..\Source\VK\Sampler.h" />
+    <ClInclude Include="..\Source\VK\SamplerBuilder.h" />
     <ClInclude Include="..\Source\VK\Synchronization.h" />
     <ClInclude Include="..\Source\VK\Texture.h" />
     <ClInclude Include="..\Source\VK\Pipeline.h" />

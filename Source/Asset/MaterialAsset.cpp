@@ -44,7 +44,7 @@ namespace sy::asset
 			return {};
 		}
 
-		const auto& vulkanRHI = vulkanContext.GetVulkanRHI();
+		const auto& vulkanRHI = vulkanContext.GetRHI();
 		auto& descriptorManager = vulkanContext.GetDescriptorManager();
 		const auto& assetData = Unwrap(resourceCache.Load(assetDataHandle));
 		const auto metadata = QueryMetadata(assetData);
