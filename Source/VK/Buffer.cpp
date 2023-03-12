@@ -70,12 +70,11 @@ namespace sy
 				{
 					if (bRequiredDataTransfer)
 					{
-						BufferBuilder stagingBufferBuilder{ builder.vulkanContext };
-						stagingBufferBuilder.SetName("Staging Buffer")
-							.SetUsage(VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
+						const auto stagingBuffer = BufferBuilder::StagingBufferTemplate(builder.vulkanContext)
+							.SetName("Staging Buffer")
 							.SetSize(builder.size)
-							.SetMemoryUsage(VMA_MEMORY_USAGE_CPU_ONLY);
-						const auto stagingBuffer = stagingBufferBuilder.Build();
+							.Build();
+
 						void* mappedStagingBuffer = vulkanRHI.Map(*stagingBuffer);
 						std::memcpy(mappedStagingBuffer, builder.dataToTransfer->data(), builder.dataToTransfer->size());
 						vulkanRHI.Unmap(*stagingBuffer);
