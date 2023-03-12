@@ -107,4 +107,3 @@
 
 /** Internal - Render */
 #include <Render/Vertex.h>
-#include <Render/Mesh.h>

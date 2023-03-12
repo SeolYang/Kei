@@ -44,13 +44,6 @@ namespace sy::vk
 		uint32_t ArrayLayer = 0;
 	};
 
-	struct BufferInfo
-	{
-		size_t Size;
-		VkBufferUsageFlags UsageFlags;
-		VmaMemoryUsage MemoryUsage;
-	};
-
 	enum class EQueueType
 	{
 		Graphics,

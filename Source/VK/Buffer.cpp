@@ -1,5 +1,7 @@
 #include <PCH.h>
 #include <VK/Buffer.h>
+#include <VK/BufferBuilder.h>
+#include <VK/VulkanContext.h>
 #include <VK/VulkanRHI.h>
 #include <VK/CommandBuffer.h>
 #include <VK/CommandPool.h>
@@ -11,85 +13,91 @@ namespace sy
 {
 	namespace vk
 	{
-		Buffer::Buffer(const std::string_view name, const VulkanRHI& vulkanRHI, const BufferInfo info, const EBufferState initialState) :
-			VulkanWrapper(name, vulkanRHI, VK_OBJECT_TYPE_BUFFER),
-			initialState(initialState)
+		size_t CalculateAlignedBufferSize(const VulkanContext& vulkanContext, const size_t originSize, const VkBufferUsageFlags bufferUsage)
 		{
-			size_t alignedBufferSize = info.Size;
-			switch (info.UsageFlags)
+			const auto& vulkanRHI = vulkanContext.GetVulkanRHI();
+			size_t alignedSize = originSize;
+			switch (bufferUsage)
 			{
-			case VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT:
-				alignedBufferSize = vulkanRHI.PadUniformBufferSize(alignedBufferSize);
-				break;
-
-			case VK_BUFFER_USAGE_STORAGE_BUFFER_BIT:
-				alignedBufferSize = vulkanRHI.PadStorageBufferSize(alignedBufferSize);
-				break;
-
-			default:
-				break;
+				case VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT:
+					alignedSize = vulkanRHI.PadUniformBufferSize(alignedSize);
+					break;
+				case VK_BUFFER_USAGE_STORAGE_BUFFER_BIT:
+					alignedSize = vulkanRHI.PadStorageBufferSize(alignedSize);
+					break;
 			}
 
+			return alignedSize;
+		}
+
+		Buffer::Buffer(const BufferBuilder& builder) :
+			VulkanWrapper(builder.name, builder.vulkanContext.GetVulkanRHI(), VK_OBJECT_TYPE_BUFFER),
+			alignedSize(CalculateAlignedBufferSize(builder.vulkanContext, builder.size, *builder.usage)),
+			usage(*builder.usage | (builder.dataToTransfer.has_value() ? VK_BUFFER_USAGE_TRANSFER_DST_BIT : 0)),
+			memoryUsage(*builder.memoryUsage),
+			initialState(builder.targetInitialState)
+		{
 			const VkBufferCreateInfo createInfo
 			{
 				.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
 				.pNext = nullptr,
 				.flags = 0,
-				.size = alignedBufferSize,
-				.usage = info.UsageFlags,
+				.size = this->alignedSize,
+				.usage = this->usage,
 				.sharingMode = VK_SHARING_MODE_EXCLUSIVE
 			};
 
 			const VmaAllocationCreateInfo allocationCreateInfo
 			{
-				.usage = info.MemoryUsage
+				.usage = this->memoryUsage
 			};
 
+			const auto& vulkanContext = builder.vulkanContext;
+			const auto& vulkanRHI = vulkanContext.GetVulkanRHI();
 			Native_t handle = VK_NULL_HANDLE;
-			VK_ASSERT(vmaCreateBuffer(vulkanRHI.GetAllocator(), &createInfo, &allocationCreateInfo, &handle, &allocation, nullptr), "Failed to create buffer {}.", name);
+			VK_ASSERT(vmaCreateBuffer(vulkanRHI.GetAllocator(), &createInfo, &allocationCreateInfo, &handle, &allocation, nullptr), "Failed to create buffer {}.", builder.name);
 			UpdateHandle(handle);
-			this->info = { alignedBufferSize, info.UsageFlags, info.MemoryUsage };
+
+			const bool bRequiredStateTransfer = initialState != EBufferState::None;
+			const bool bRequiredDataTransfer = builder.dataToTransfer.has_value();
+			if (bRequiredStateTransfer || bRequiredDataTransfer)
+			{
+				auto& cmdPoolManager = vulkanContext.GetCommandPoolManager();
+				auto& cmdPool = cmdPoolManager.RequestCommandPool(EQueueType::Graphics);
+				const auto cmdBuffer = cmdPool.RequestCommandBuffer("Buffer Transfer Command Buffer");
+
+				cmdBuffer->Begin();
+				{
+					if (bRequiredDataTransfer)
+					{
+						BufferBuilder stagingBufferBuilder{ builder.vulkanContext };
+						stagingBufferBuilder.SetName("Staging Buffer")
+							.SetUsage(VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
+							.SetSize(builder.size)
+							.SetMemoryUsage(VMA_MEMORY_USAGE_CPU_ONLY);
+						const auto stagingBuffer = stagingBufferBuilder.Build();
+						void* mappedStagingBuffer = vulkanRHI.Map(*stagingBuffer);
+						std::memcpy(mappedStagingBuffer, builder.dataToTransfer->data(), builder.dataToTransfer->size());
+						vulkanRHI.Unmap(*stagingBuffer);
+
+						cmdBuffer->CopyBufferSimple(*stagingBuffer, 0, *this, 0, builder.size);
+					}
+
+					if (bRequiredStateTransfer)
+					{
+						cmdBuffer->ChangeState(EBufferState::None, initialState, *this);
+					}
+				}
+				cmdBuffer->End();
+
+				vulkanRHI.SubmitImmediateTo(*cmdBuffer);
+			}
 		}
 
 		Buffer::~Buffer()
 		{
 			const VulkanRHI& context = GetContext();
 			vmaDestroyBuffer(context.GetAllocator(), GetNativeHandle(), allocation);
-		}
-
-		std::unique_ptr<Buffer> CreateBufferWithData(std::string_view name, const VulkanContext& vulkanContext, VkBufferUsageFlags bufferUsage,
-			size_t sizeOfData, const void* data, const EBufferState initialState)
-		{
-			const auto& vulkanRHI = vulkanContext.GetVulkanRHI();
-			auto& cmdPoolManager = vulkanContext.GetCommandPoolManager();
-			const auto& frameTracker = vulkanContext.GetFrameTracker();
-			auto newBuffer = std::make_unique<Buffer>(name, vulkanRHI, BufferInfo{ sizeOfData, bufferUsage | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY }, initialState);
-			const auto stagingBuffer = CreateStagingBuffer(std::format("Staging buffer for {}", name), vulkanContext, sizeOfData);
-			void* mappedData = vulkanRHI.Map(*stagingBuffer);
-			memcpy(mappedData, data, sizeOfData);
-			vulkanRHI.Unmap(*stagingBuffer);
-
-			// @todo: Batched upload data
-			// @todo: Use of Transfer Queue ; need more practicing and knowledge about pipeline barriers!
-			auto& transferCmdPool = cmdPoolManager.RequestCommandPool(EQueueType::Transfer);
-			const auto transferCmdBuffer = transferCmdPool.RequestCommandBuffer(std::format("Vertex buffer {} transfer cmd buffer", name));
-			transferCmdBuffer->Begin();
-			{
-				transferCmdBuffer->CopyBufferSimple(*stagingBuffer, 0, *newBuffer, 0, sizeOfData);
-			}
-			transferCmdBuffer->End();
-
-			const auto& uploadFence = frameTracker.GetCurrentInFlightUploadFence();
-			vulkanRHI.SubmitTo(*transferCmdBuffer, uploadFence);
-			uploadFence.Wait();
-			uploadFence.Reset();
-			return newBuffer;
-		}
-
-		std::unique_ptr<Buffer> CreateStagingBuffer(std::string_view name, const VulkanContext& vulkanContext,
-		                                            const size_t bufferSize)
-		{
-			return std::make_unique<Buffer>(name, vulkanContext.GetVulkanRHI(), BufferInfo{bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY});
 		}
 	}
 }

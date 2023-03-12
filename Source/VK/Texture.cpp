@@ -87,7 +87,12 @@ namespace sy
 			auto& cmdPoolManager = vulkanContext.GetCommandPoolManager();
 			constexpr auto InitialState = ETextureState::AnyShaderReadSampledImage;
 
-			const auto stagingBuffer = CreateStagingBuffer(std::format("{}_Staging", name), vulkanContext, textureData.size());
+			auto stagingBufferBuilder = BufferBuilder{ vulkanContext };
+			stagingBufferBuilder.SetName(std::format("{}_Staging", name))
+				.SetUsage(VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
+				.SetMemoryUsage(VMA_MEMORY_USAGE_CPU_ONLY)
+				.SetSize(textureData.size());
+			const auto stagingBuffer = stagingBufferBuilder.Build();
 			void* mappedStagingBuffer = vulkanRHI.Map(*stagingBuffer);
 			memcpy(mappedStagingBuffer, textureData.data(), textureData.size());
 			vulkanRHI.Unmap(*stagingBuffer);

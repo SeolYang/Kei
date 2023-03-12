@@ -128,7 +128,7 @@ namespace sy::vk
 		if (const auto resourceRef = resourceCache.Load(handle); resourceRef)
 		{
 			const auto& resource = resourceRef.value().get();
-			PendingTransition(dstState, handle, 0, resource.GetSize());
+			PendingTransition(dstState, handle, 0, resource.GetAlignedSize());
 		}
 	}
 }

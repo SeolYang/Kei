@@ -1,6 +1,6 @@
 #pragma once
 #include <PCH.h>
-#include <VK/Buffer.h>
+#include <VK/BufferBuilder.h>
 
 namespace sy::vk
 {
@@ -17,9 +17,23 @@ namespace sy::render
 		template <typename VertexType, typename IndexType = render::IndexType>
 		static std::unique_ptr<Mesh> Create(const std::string_view name, const vk::VulkanContext& vulkanContext, const std::span<const VertexType> vertices, const std::span<const IndexType> indices)
 		{
+			vk::BufferBuilder vertexBufferBuilder{ vulkanContext };
+			vertexBufferBuilder.SetName(std::format("{}_Vertex_Buffer", name))
+			.SetUsage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)
+			.SetMemoryUsage(VMA_MEMORY_USAGE_GPU_ONLY)
+			.SetDataToTransferWithSize(vertices)
+			.SetTargetInitialState(vk::EBufferState::VertexBuffer);
+
+			vk::BufferBuilder indexBufferBuilder{ vulkanContext };
+			indexBufferBuilder.SetName(std::format("{}_Index_Buffer", name))
+				.SetUsage(VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
+				.SetMemoryUsage(VMA_MEMORY_USAGE_GPU_ONLY)
+				.SetDataToTransferWithSize(indices)
+				.SetTargetInitialState(vk::EBufferState::IndexBuffer);
+
 			return std::unique_ptr<Mesh>(new Mesh(name,
-				vertices.size(), vk::CreateVertexBuffer(name, vulkanContext, vertices),
-				indices.size(), vk::CreateIndexBuffer(name, vulkanContext, indices)));
+				vertices.size(), vertexBufferBuilder.Build(),
+				indices.size(), indexBufferBuilder.Build()));
 		}
 
 		[[nodiscard]] const vk::Buffer& GetVertexBuffer() const { return *vertexBuffer; }
@@ -27,6 +41,8 @@ namespace sy::render
 
 		[[nodiscard]] size_t GetNumVertices() const { return numVertices; }
 		[[nodiscard]] size_t GetNumIndices() const { return numIndices; }
+
+		~Mesh();
 
 	private:
 		Mesh(std::string_view name, size_t numVertices, std::unique_ptr<vk::Buffer> vertexBuffer, size_t numIndices, std::unique_ptr<vk::Buffer> indexBuffer);

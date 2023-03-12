@@ -35,11 +35,7 @@ namespace sy::render
 		virtual void OnEnd() {}
 
 		[[nodiscard]] const auto& GetVulkanContext() const { return vulkanContext; }
-		[[nodiscard]] const auto& GetVulkanRHI() const { return GetVulkanContext().GetVulkanRHI(); }
-		[[nodiscard]] auto& GetDescriptorManager() const { return GetVulkanContext().GetDescriptorManager(); }
-		[[nodiscard]] const auto& GetFrameTracker() const { return GetVulkanContext().GetFrameTracker(); }
 		[[nodiscard]] const auto& GetPipeline() const { return pipeline; }
-		[[nodiscard]] auto& GetCommandPoolManager() const { return GetVulkanContext().GetCommandPoolManager(); }
 		[[nodiscard]] auto& GetCommandBuffer() const { return *currentCmdBuffer; }
 
 	private:

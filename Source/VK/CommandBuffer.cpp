@@ -75,7 +75,7 @@ namespace sy
 
 		void CommandBuffer::ChangeState(const EBufferState srcState, const EBufferState dstState, const Buffer& buffer) const
 		{
-			ChangeState(srcState, dstState, buffer.GetNativeHandle(), 0, buffer.GetSize());
+			ChangeState(srcState, dstState, buffer.GetNativeHandle(), 0, buffer.GetAlignedSize());
 		}
 
 		void CommandBuffer::ChangeState(const ETextureState srcState, const ETextureState dstState,
@@ -130,7 +130,7 @@ namespace sy
 					srcAccess.PipelineStage, srcAccess.Access,
 					dstAccess.PipelineStage, dstAccess.Access,
 					VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED,
-					buffer.GetNativeHandle(), 0, buffer.GetSize());
+					buffer.GetNativeHandle(), 0, buffer.GetAlignedSize());
 			}
 
 			PipelineBarrier({}, bufferBarriers, imageBarriers);
