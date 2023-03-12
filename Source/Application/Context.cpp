@@ -125,6 +125,8 @@ namespace sy::app
 
 	void Context::Cleanup()
 	{
+		vulkanContext->GetVulkanRHI().WaitForDeviceIdle();
+
 		spdlog::info("Clean-up Resource Cache.");
 		resourceCache->Clear();
 
@@ -133,6 +135,7 @@ namespace sy::app
 
 		spdlog::info("Clean-up Resource State Tracker.");
 		resourceStateTracker.reset();
+
 		spdlog::info("Clean-up Vulkan context.");
 		vulkanContext.reset();
 
