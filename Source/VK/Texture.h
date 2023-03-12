@@ -16,16 +16,18 @@ namespace sy::vk
 		explicit Texture(const TextureBuilder& builder);
 		~Texture() override;
 
-		[[nodiscard]] auto GetExtent() const { return extent; }
-		[[nodiscard]] auto GetMipLevels() const { return mips; }
-		[[nodiscard]] auto GetArrayLayers() const { return layers; }
+		[[nodiscard]] auto GetImageType() const { return type; }
+		[[nodiscard]] auto GetUsage() const { return usage; }
 		[[nodiscard]] auto GetFormat() const { return format; }
 		[[nodiscard]] auto GetMemoryUsage() const { return memoryUsage; }
-		[[nodiscard]] auto GetUsageFlags() const { return usage; }
-		[[nodiscard]] auto GetMemoryPropertyFlags() const { return memoryProperty; }
-		[[nodiscard]] auto GetImageType() const { return type; }
+		[[nodiscard]] auto GetMemoryProperty() const { return memoryProperty; }
+		[[nodiscard]] auto GetExtent() const { return extent; }
+		[[nodiscard]] auto GetArrayLayers() const { return layers; }
 		[[nodiscard]] auto GetSamples() const { return samples; }
 		[[nodiscard]] auto GetTiling() const { return tiling; }
+		[[nodiscard]] auto IsGenerateMips() const { return bGenerateMips; }
+		[[nodiscard]] auto GetMipLevels() const { return mips; }
+
 		/** @warning Assume Texture Array = 2D Textures array */
 		[[nodiscard]] auto IsTextureArray() const { return GetImageType() == VK_IMAGE_TYPE_2D && GetExtent().depth > 1; }
 		[[nodiscard]] auto GetNumSubResources() const { return IsTextureArray() ? GetExtent().depth * GetMipLevels() : GetMipLevels(); }

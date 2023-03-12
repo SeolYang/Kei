@@ -90,16 +90,16 @@ namespace sy::render
 		const auto& vulkanRHI = vulkanContext.GetVulkanRHI();
 		BeginFrame();
 		{
-			elapsedTime += 0.01633333f; // hard-coded delta time
+			elapsedTime += 0.00833333f; // hard-coded delta time
 			const auto& renderSemaphore = frameTracker.GetCurrentInFlightRenderSemaphore();
 			const size_t currentFrameIdx = frameTracker.GetCurrentFrameIndex();
 
 			const auto& swapchain = vulkanRHI.GetSwapchain();
 
 			VkClearColorValue clearColorValue;
-			clearColorValue.float32[0] = std::cos(static_cast<float>(currentFrameIdx) / 180.f) * 0.5f + 1.f;
-			clearColorValue.float32[1] = std::sin(static_cast<float>(currentFrameIdx) / 270.f) * 0.5f + 1.f;
-			clearColorValue.float32[2] = std::cos(static_cast<float>(currentFrameIdx) / 90.f) * 0.5f + 1.f;
+			clearColorValue.float32[0] = 0.f;
+			clearColorValue.float32[1] = 0.f;
+			clearColorValue.float32[2] = 0.f;
 			clearColorValue.float32[3] = 1.f;
 
 			renderPass->SetWindowExtent(window.GetExtent());
