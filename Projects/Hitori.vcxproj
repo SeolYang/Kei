@@ -50,6 +50,7 @@
     <ClCompile Include="..\Source\VK\Semaphore.cpp" />
     <ClCompile Include="..\Source\VK\ShaderModule.cpp" />
     <ClCompile Include="..\Source\VK\Swapchain.cpp" />
+    <ClCompile Include="..\Source\VK\TextureBuilder.cpp" />
     <ClCompile Include="..\Source\VK\TextureView.cpp" />
     <ClCompile Include="..\Source\VK\VertexInputBuilder.cpp" />
     <ClCompile Include="..\Source\VK\VulkanRHI.cpp" />
@@ -112,6 +113,7 @@
     <ClInclude Include="..\Source\VK\Semaphore.h" />
     <ClInclude Include="..\Source\VK\ShaderModule.h" />
     <ClInclude Include="..\Source\VK\Swapchain.h" />
+    <ClInclude Include="..\Source\VK\TextureBuilder.h" />
     <ClInclude Include="..\Source\VK\TextureView.h" />
     <ClInclude Include="..\Source\VK\VertexInputBuilder.h" />
     <ClInclude Include="..\Source\VK\VulkanRHI.h" />

@@ -15,8 +15,6 @@ namespace sy::vk
 		{
 		}
 
-		~BufferBuilder() = default;
-
 		BufferBuilder& SetName(const std::string& name)
 		{
 			this->name = name;
@@ -82,6 +80,14 @@ namespace sy::vk
 		[[nodiscard]] bool IsValidToBuild() const { return (size > 0) && (usage.has_value()) && (memoryUsage.has_value()); }
 
 		[[nodiscard]] std::unique_ptr<Buffer> Build() const;
+
+	public:
+		/** Template builders for less verbose. */
+		static BufferBuilder UniformBufferTemplate(const VulkanContext& vulkanContext);
+		static BufferBuilder StorageBufferTemplate(const VulkanContext& vulkanContext);
+		static BufferBuilder StagingBufferTemplate(const VulkanContext& vulkanContext);
+		static BufferBuilder VertexBufferTemplate(const VulkanContext& vulkanContext);
+		static BufferBuilder IndexBufferTemplate(const VulkanContext& vulkanContext);
 
 	private:
 		const VulkanContext& vulkanContext;
