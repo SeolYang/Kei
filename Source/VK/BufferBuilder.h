@@ -7,10 +7,8 @@ namespace sy::vk
 	class Buffer;
 	class BufferBuilder
 	{
-		friend Buffer;
-
 	public:
-		BufferBuilder(const VulkanContext& vulkanContext) :
+		explicit BufferBuilder(const VulkanContext& vulkanContext) :
 			vulkanContext(vulkanContext)
 		{
 		}
@@ -53,6 +51,12 @@ namespace sy::vk
 			return *this;
 		}
 
+		BufferBuilder& SetMemoryProperty(const VkMemoryPropertyFlags memoryProperty)
+		{
+			this->memoryProperty = memoryProperty;
+			return *this;
+		}
+
 		template <typename T>
 		BufferBuilder& SetDataToTransfer(const std::span<const T> typedData)
 		{
@@ -90,6 +94,7 @@ namespace sy::vk
 		static BufferBuilder IndexBufferTemplate(const VulkanContext& vulkanContext);
 
 	private:
+		friend Buffer;
 		const VulkanContext& vulkanContext;
 		std::string name = "Buffer";
 		size_t size = 1;
@@ -98,6 +103,7 @@ namespace sy::vk
 		std::optional<std::span<const uint8_t>> dataToTransfer = std::nullopt; 
 		std::optional<VkBufferUsageFlags> usage = std::nullopt;
 		std::optional<VmaMemoryUsage> memoryUsage = std::nullopt;
+		VkMemoryPropertyFlags memoryProperty = 0;
 
 	};
 

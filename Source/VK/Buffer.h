@@ -7,7 +7,7 @@ namespace sy::vk
 	class Buffer : public VulkanWrapper<VkBuffer>
 	{
 	public:
-		Buffer(const BufferBuilder& builder);
+		explicit Buffer(const BufferBuilder& builder);
 		virtual ~Buffer() override;
 
 		[[nodiscard]] auto GetAlignedSize() const { return this->alignedSize; }
@@ -18,7 +18,7 @@ namespace sy::vk
 		[[nodiscard]] const VmaAllocation& GetAllocation() const { return allocation; }
 
 	private:
-		VmaAllocation allocation = nullptr;
+		VmaAllocation allocation = VK_NULL_HANDLE;
 		/** It can be extend its size later maybe? */
 		const size_t alignedSize;
 		const VkBufferUsageFlags usage;

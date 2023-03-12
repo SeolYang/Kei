@@ -14,22 +14,6 @@ namespace sy::vk
 	constexpr uint32_t MaxBindlessResourcesPerDescriptor = 2048;
 	constexpr size_t NumMaxInFlightFrames = 2;
 
-	struct TextureInfo
-	{
-		Extent3D<uint32_t> Extent;
-		VkImageType Type;
-		VkImageUsageFlags UsageFlags;
-		VkFormat Format;
-		VkMemoryPropertyFlags MemoryPropertyFlags;
-		VmaMemoryUsage MemoryUsage;
-
-		uint32_t MipLevels = 1;
-		uint32_t ArrayLayers = 1;
-
-		VkSampleCountFlagBits Samples = VK_SAMPLE_COUNT_1_BIT;
-		VkImageTiling Tiling = VK_IMAGE_TILING_OPTIMAL;
-	};
-
 	struct TextureSubResourceRange
 	{
 		uint32_t MipLevel = 0;

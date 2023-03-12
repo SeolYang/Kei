@@ -9,22 +9,23 @@ namespace sy::vk
 	class VulkanContext;
 	class CommandPoolManager;
 	class FrameTracker;
+	class TextureBuilder;
 	class Texture : public VulkanWrapper<VkImage>
 	{
 	public:
-		Texture(std::string_view name, const VulkanRHI& vulkanRHI, const TextureInfo& info, bool bReserveMips, ETextureState initialState);
+		explicit Texture(const TextureBuilder& builder);
 		~Texture() override;
 
-		[[nodiscard]] auto GetExtent() const { return info.Extent; }
-		[[nodiscard]] auto GetMipLevels() const { return info.MipLevels; }
-		[[nodiscard]] auto GetArrayLayers() const { return info.ArrayLayers; }
-		[[nodiscard]] auto GetFormat() const { return info.Format; }
-		[[nodiscard]] auto GetMemoryUsage() const { return info.MemoryUsage; }
-		[[nodiscard]] auto GetUsageFlags() const { return info.UsageFlags; }
-		[[nodiscard]] auto GetMemoryPropertyFlags() const { return info.MemoryPropertyFlags; }
-		[[nodiscard]] auto GetImageType() const { return info.Type; }
-		[[nodiscard]] auto GetSamples() const { return info.Samples; }
-		[[nodiscard]] auto GetTiling() const { return info.Tiling; }
+		[[nodiscard]] auto GetExtent() const { return extent; }
+		[[nodiscard]] auto GetMipLevels() const { return mips; }
+		[[nodiscard]] auto GetArrayLayers() const { return layers; }
+		[[nodiscard]] auto GetFormat() const { return format; }
+		[[nodiscard]] auto GetMemoryUsage() const { return memoryUsage; }
+		[[nodiscard]] auto GetUsageFlags() const { return usage; }
+		[[nodiscard]] auto GetMemoryPropertyFlags() const { return memoryProperty; }
+		[[nodiscard]] auto GetImageType() const { return type; }
+		[[nodiscard]] auto GetSamples() const { return samples; }
+		[[nodiscard]] auto GetTiling() const { return tiling; }
 		/** @warning Assume Texture Array = 2D Textures array */
 		[[nodiscard]] auto IsTextureArray() const { return GetImageType() == VK_IMAGE_TYPE_2D && GetExtent().depth > 1; }
 		[[nodiscard]] auto GetNumSubResources() const { return IsTextureArray() ? GetExtent().depth * GetMipLevels() : GetMipLevels(); }
@@ -33,22 +34,19 @@ namespace sy::vk
 		[[nodiscard]] TextureSubResourceRange GetFullSubResourceRange() const { return { 0, GetMipLevels(), 0, GetArrayLayers() }; }
 
 	private:
-		TextureInfo info;
-		const ETextureState initialState;
 		VmaAllocation allocation = VK_NULL_HANDLE;
+		const VkImageType type;
+		const VkImageUsageFlags usage;
+		const VkFormat format;
+		const VmaMemoryUsage memoryUsage;
+		const VkMemoryPropertyFlags memoryProperty;
+		const Extent3D<uint32_t> extent;
+		const uint32_t layers;
+		const VkSampleCountFlagBits samples;
+		const VkImageTiling tiling;
+		const ETextureState initialState;
+		const bool bGenerateMips;
+		const uint32_t mips;
 
 	};
-
-	/**
-	 * @ignored_params TextureInfo::Extent::depth, TextureInfo::Type, TextureInfo::ArrayLayers
-	 */
-	std::unique_ptr<Texture> CreateTexture2D(std::string_view name, const VulkanRHI& vulkanRHI, TextureInfo info, bool bReserveMips, ETextureState initialState);
-
-	/**
-	 * @ignored_params TextureInfo::Extent::depth, TextureInfo::Type, TextureInfo::UsageFlags, TextureInfo::MemoryPropertyFlags, TextureInfo::MemoryUsage, TextureInfo::ArrayLayers
-	 */
-	std::unique_ptr<Texture> CreateShaderResourceTexture2D(std::string_view name, const VulkanContext& vulkanContext, TextureInfo info, bool bReserveMips, std::span<const char> textureData);
-
-	std::unique_ptr<Texture> LoadShaderResourceTexture2DFromFile(std::string_view filePath, std::string_view name, const VulkanContext& vulkanContext, CommandPoolManager& cmdPoolManager, VkFormat format, bool bReserveMips);
-	std::unique_ptr<Texture> CreateDepthStencil(std::string_view name, const VulkanContext& vulkanContext, Extent2D<uint32_t> extent, const VkFormat format);
 }

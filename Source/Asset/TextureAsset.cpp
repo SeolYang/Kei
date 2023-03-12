@@ -4,6 +4,8 @@
 #include <VK/VulkanContext.h>
 #include <Core/ResourceCache.h>
 
+#include "VK/TextureBuilder.h"
+
 namespace sy::asset
 {
 	struct TextureMetadata
@@ -37,18 +39,12 @@ namespace sy::asset
 		const auto& blob = assetData.GetBlob();
 		const auto metadata = QueryMetadata(assetData);
 
-		const vk::TextureInfo info
-		{
-			.Extent = metadata.Extent,
-			.Format = metadata.Format,
-		};
-
-		return vk::CreateShaderResourceTexture2D(
-			name,
-			vulkanContext,
-			info,
-			true,
-			blob);
+		return vk::TextureBuilder::Texture2DShaderResourceTemplate(vulkanContext)
+			.SetName(name)
+			.SetExtent(metadata.Extent)
+			.SetFormat(metadata.Format)
+			.SetDataToTransfer(std::span{ blob })
+			.Build();
 	}
 
 	Handle<vk::Texture> LoadTexture2DFromAsset(

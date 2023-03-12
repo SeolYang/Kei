@@ -14,4 +14,9 @@ namespace sy::math
 	{
 		return (value != 0) && ((value & (value - 1)) == 0);
 	}
+
+	constexpr bool IsPowOfTwo(const Extent3D<uint32_t> extent)
+	{
+		return IsPowOfTwo(extent.width) && (extent.width == extent.height) && (extent.height == extent.depth);
+	}
 }

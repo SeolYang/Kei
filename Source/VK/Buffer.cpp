@@ -58,20 +58,21 @@ namespace sy
 			VK_ASSERT(vmaCreateBuffer(vulkanRHI.GetAllocator(), &createInfo, &allocationCreateInfo, &handle, &allocation, nullptr), "Failed to create buffer {}.", builder.name);
 			UpdateHandle(handle);
 
-			const bool bRequiredStateTransfer = initialState != EBufferState::None;
 			const bool bRequiredDataTransfer = builder.dataToTransfer.has_value();
-			if (bRequiredStateTransfer || bRequiredDataTransfer)
+			const bool bRequiredStateChange = initialState != EBufferState::None;
+			if (bRequiredDataTransfer || bRequiredStateChange)
 			{
 				auto& cmdPoolManager = vulkanContext.GetCommandPoolManager();
 				auto& cmdPool = cmdPoolManager.RequestCommandPool(EQueueType::Graphics);
 				const auto cmdBuffer = cmdPool.RequestCommandBuffer("Buffer Transfer Command Buffer");
 
+				std::unique_ptr<Buffer> stagingBuffer = nullptr;
 				cmdBuffer->Begin();
 				{
 					if (bRequiredDataTransfer)
 					{
-						const auto stagingBuffer = BufferBuilder::StagingBufferTemplate(builder.vulkanContext)
-							.SetName("Staging Buffer")
+						stagingBuffer = BufferBuilder::StagingBufferTemplate(builder.vulkanContext)
+							.SetName("Staging Buffer-To Buffer")
 							.SetSize(builder.size)
 							.Build();
 
@@ -82,7 +83,7 @@ namespace sy
 						cmdBuffer->CopyBufferSimple(*stagingBuffer, 0, *this, 0, builder.size);
 					}
 
-					if (bRequiredStateTransfer)
+					if (bRequiredStateChange)
 					{
 						cmdBuffer->ChangeState(EBufferState::None, initialState, *this);
 					}

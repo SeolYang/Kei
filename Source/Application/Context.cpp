@@ -17,6 +17,8 @@
 #include <Game/World.h>
 #include <Game/GameContext.h>
 
+#include "VK/TextureBuilder.h"
+
 namespace sy::app
 {
 	Context::Context(const int argc, char** argv)
@@ -97,19 +99,17 @@ namespace sy::app
 
 	void Context::InitDefaultEngineResources()
 	{
-		const vk::TextureInfo defaultTexInfo
-		{
-			.Extent = {2,2,1},
-			.Type = VK_IMAGE_TYPE_2D,
-			.UsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT,
-			.Format = VK_FORMAT_R8G8B8A8_SRGB,
-		};
+		const std::array white{ 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
+		auto defaultTexBuilder = vk::TextureBuilder::Texture2DShaderResourceTemplate(*vulkanContext)
+			.SetName("DefaultWhite")
+			.SetExtent(Extent2D<uint32_t>{ 2, 2 })
+			.SetFormat(VK_FORMAT_R8G8B8A8_SRGB);
 
-		constexpr std::array<uint32_t, 4> white = { 0xffffffff , 0xffffffff , 0xffffffff , 0xffffffff };
-		const auto defaultWhiteTex = resourceCache->Add(vk::CreateShaderResourceTexture2D(vk::DefaultWhiteTexture, *vulkanContext, defaultTexInfo, false, std::span{ reinterpret_cast<const char*>(white.data()), sizeof(white) }));
+		const auto defaultWhiteTex = resourceCache->Add(defaultTexBuilder.SetDataToTransfer(std::span{ white.data(), white.size() }).Build());
 		resourceCache->SetAlias(vk::DefaultWhiteTexture, defaultWhiteTex);
+
 		constexpr std::array<uint32_t, 4> black = { 0x000000ff , 0x000000ff , 0x000000ff , 0x000000ff };
-		const auto defaultBlackTex = resourceCache->Add(vk::CreateShaderResourceTexture2D(vk::DefaultBlackTexture, *vulkanContext, defaultTexInfo, false, std::span{ reinterpret_cast<const char*>(black.data()), sizeof(black) }));
+		const auto defaultBlackTex = resourceCache->Add(defaultTexBuilder.SetName("DefaultBlack").SetDataToTransfer(std::span{white.data(), white.size()}).Build());
 		resourceCache->SetAlias(vk::DefaultBlackTexture, defaultBlackTex);
 
 		const auto linearSampler = resourceCache->Add<vk::Sampler>(vk::LinearSamplerRepeat, vulkanContext->GetVulkanRHI(), vk::SamplerInfo{});

@@ -27,6 +27,7 @@
 #include <Core/ResourceCache.h>
 
 #include "Material.h"
+#include "VK/TextureBuilder.h"
 #include "VK/VulkanContext.h"
 
 namespace sy::render
@@ -44,7 +45,11 @@ namespace sy::render
 		auto& descriptorManager = vulkanContext.GetDescriptorManager();
 		auto& pipelineLayoutCache = vulkanContext.GetPipelineLayoutCache();
 
-		depthStencil = vk::CreateDepthStencil("Depth-Stencil buffer", vulkanContext, windowExtent, VK_FORMAT_D24_UNORM_S8_UINT);
+		depthStencil = vk::TextureBuilder::Texture2DDepthStencilTemplate(vulkanContext)
+			.SetName("Depth-Stencil Buffer")
+			.SetExtent(windowExtent)
+			.SetFormat(VK_FORMAT_D24_UNORM_S8_UINT)
+			.Build();
 		depthStencilView = std::make_unique<vk::TextureView>("DepthStencil view", vulkanRHI, *depthStencil, VK_IMAGE_VIEW_TYPE_2D);
 
 		triVert = std::make_unique<vk::ShaderModule>("Triangle vertex shader", vulkanRHI, "Assets/Shaders/bin/textured_tri_bindless.vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");

@@ -5,6 +5,7 @@ namespace sy::vk
 {
 	class VulkanRHI;
 	class Texture;
+	/** @deprecated TextureView will be encapsulated into texture. */
 	class TextureView : public VulkanWrapper<VkImageView>
 	{
 	public:
