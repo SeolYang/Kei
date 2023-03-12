@@ -38,7 +38,7 @@ namespace sy::render
 		[[nodiscard]] size_t GetNumVertices() const { return numVertices; }
 		[[nodiscard]] size_t GetNumIndices() const { return numIndices; }
 
-		~Mesh();
+		~Mesh() override;
 
 	private:
 		Mesh(std::string_view name, size_t numVertices, std::unique_ptr<vk::Buffer> vertexBuffer, size_t numIndices, std::unique_ptr<vk::Buffer> indexBuffer);

@@ -77,7 +77,7 @@ namespace sy::vk
 			return SetDataToTransfer(typedData).SetSize(typedData.size_bytes());
 		}
 
-		[[nodiscard]] bool IsValidToBuild() const { return (size > 0) && (usage.has_value()) && (memoryUsage.has_value()); }
+		[[nodiscard]] bool IsValidToBuild() const;
 
 		[[nodiscard]] std::unique_ptr<Buffer> Build() const;
 

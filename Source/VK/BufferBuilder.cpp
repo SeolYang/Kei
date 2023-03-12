@@ -4,6 +4,18 @@
 
 namespace sy::vk
 {
+	bool BufferBuilder::IsValidToBuild() const
+	{
+		const bool bIsValidSize = size > 0;
+		const bool bIsValidUsage = usage.has_value();
+		const bool bIsValidMemoryUsage = memoryUsage.has_value();
+		SY_ASSERT(bIsValidSize, "BufferBuilder has invalid size to build buffer.");
+		SY_ASSERT(bIsValidUsage, "BufferBuilder has invalid usage to build buffer.");
+		SY_ASSERT(bIsValidMemoryUsage, "BufferBuilder has invalid memory usage to build buffer.");
+
+		return bIsValidSize && bIsValidUsage && bIsValidMemoryUsage;
+	}
+
 	std::unique_ptr<Buffer> BufferBuilder::Build() const
 	{
 		SY_ASSERT(IsValidToBuild(), "Buffer builder is not valid to build.");
