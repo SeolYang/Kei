@@ -15,14 +15,13 @@ namespace sy::vk
 			return *this;
 		}
 
-		VertexInputBuilder& AddVertexInputAttribute(uint32_t location, uint32_t binding, VkFormat format, uint32_t offset);
+		VertexInputBuilder& AddVertexInputAttribute(uint32_t location, uint32_t binding, VkFormat format,
+		                                            uint32_t offset);
 
 		VkPipelineVertexInputStateCreateInfo Build() const;
 
 	private:
 		std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
 		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
-
 	};
-
 }

@@ -61,15 +61,15 @@ namespace sy::app
 
 	void Context::InitializeLogger()
 	{
-		const auto currentTime = std::chrono::system_clock::now();
-		const auto localTime = std::chrono::current_zone()->to_local(currentTime);
+		const auto currentTime     = std::chrono::system_clock::now();
+		const auto localTime       = std::chrono::current_zone()->to_local(currentTime);
 		const std::string fileName = std::format("LOG_{:%F_%H_%M_%S}.log", localTime);
 
 		fs::path logFilePath = "Logs";
 		logFilePath /= fileName;
-		const auto consoleSink = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
+		const auto consoleSink     = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
 		const auto logFilePathAnsi = WStringToAnsi(logFilePath.c_str());
-		const auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFilePathAnsi, true);
+		const auto fileSink        = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFilePathAnsi, true);
 
 		const auto sinksInitList =
 		{
@@ -102,25 +102,41 @@ namespace sy::app
 	{
 		const std::array white{ 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
 		auto defaultTexBuilder = vk::TextureBuilder::Texture2DShaderResourceTemplate(*vulkanContext)
-			.SetName("DefaultWhite")
-			.SetExtent(Extent2D<uint32_t>{ 2, 2 })
-			.SetFormat(VK_FORMAT_R8G8B8A8_SRGB);
+		                         .SetName("DefaultWhite")
+		                         .SetExtent(Extent2D<uint32_t>{ 2, 2 })
+		                         .SetFormat(VK_FORMAT_R8G8B8A8_SRGB);
 
-		const auto defaultWhiteTex = resourceCache->Add(defaultTexBuilder.SetDataToTransfer(std::span{ white.data(), white.size() }).Build());
+		const auto defaultWhiteTex = resourceCache->Add(defaultTexBuilder.SetDataToTransfer(std::span{
+			                                                white.data(),
+			                                                white.size()
+		                                                }).Build());
 		resourceCache->SetAlias(vk::DefaultWhiteTexture, defaultWhiteTex);
 
-		constexpr std::array<uint32_t, 4> black = { 0x000000ff , 0x000000ff , 0x000000ff , 0x000000ff };
-		const auto defaultBlackTex = resourceCache->Add(defaultTexBuilder.SetName("DefaultBlack").SetDataToTransfer(std::span{white.data(), white.size()}).Build());
+		constexpr std::array<uint32_t, 4> black = { 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff };
+		const auto defaultBlackTex              = resourceCache->Add(defaultTexBuilder.SetName("DefaultBlack").
+		                                                             SetDataToTransfer(std::span{
+			                                                             white.data(),
+			                                                             white.size()
+		                                                             }).Build());
 		resourceCache->SetAlias(vk::DefaultBlackTexture, defaultBlackTex);
 
-		const auto linearSampler = resourceCache->Add<vk::Sampler>(vk::SamplerBuilder{*vulkanContext}.SetName(vk::LinearSamplerRepeat).Build());
+		const auto linearSampler = resourceCache->Add<
+			vk::Sampler>(vk::SamplerBuilder{ *vulkanContext }.SetName(vk::LinearSamplerRepeat).Build());
 		resourceCache->SetAlias(vk::LinearSamplerRepeat, linearSampler);
 
-		auto& defaultWhiteTexRef = Unwrap(resourceCache->Load(defaultWhiteTex));
-		const auto defaultWhiteTexView = resourceCache->Add<vk::TextureView>(std::format("{}_View", vk::DefaultWhiteTexture), vulkanContext->GetRHI(), defaultWhiteTexRef, VK_IMAGE_VIEW_TYPE_2D);
+		auto& defaultWhiteTexRef       = Unwrap(resourceCache->Load(defaultWhiteTex));
+		const auto defaultWhiteTexView = resourceCache->Add<
+			vk::TextureView>(std::format("{}_View", vk::DefaultWhiteTexture), vulkanContext->GetRHI(),
+			                 defaultWhiteTexRef, VK_IMAGE_VIEW_TYPE_2D);
 
-		auto& descriptorManager = vulkanContext->GetDescriptorManager();
-		const auto defaultMaterial = resourceCache->Add<render::Material>(resourceCache->Add<vk::Descriptor>(descriptorManager.RequestDescriptor(*resourceCache, defaultWhiteTex, defaultWhiteTexView, linearSampler, vk::ETextureState::AnyShaderReadSampledImage)));
+		auto& descriptorManager    = vulkanContext->GetDescriptorManager();
+		const auto defaultMaterial = resourceCache->Add<render::Material>(resourceCache->Add<
+			                                                                  vk::Descriptor>(descriptorManager.
+		                                                                   RequestDescriptor(*resourceCache,
+			                                                                   defaultWhiteTex,
+			                                                                   defaultWhiteTexView,
+			                                                                   linearSampler,
+			                                                                   vk::ETextureState::AnyShaderReadSampledImage)));
 		resourceCache->SetAlias(render::DefaultMaterial, defaultMaterial);
 	}
 
@@ -150,21 +166,21 @@ namespace sy::app
 	void Context::Run()
 	{
 		spdlog::info("Startup main loop.");
-        SDL_Event ev;
-        bool bExit = false;
+		SDL_Event ev;
+		bool bExit = false;
 
-        while (!bExit)
-        {
+		while (!bExit)
+		{
 			timer->Begin();
 			vulkanContext->BeginFrame();
 
-            while (SDL_PollEvent(&ev) != 0)
-            {
-                if (ev.type == SDL_QUIT)
-                {
-                    bExit = true;
-                }
-            }
+			while (SDL_PollEvent(&ev) != 0)
+			{
+				if (ev.type == SDL_QUIT)
+				{
+					bExit = true;
+				}
+			}
 
 			vulkanContext->BeginRender();
 			renderer->Render();
@@ -172,7 +188,7 @@ namespace sy::app
 
 			vulkanContext->EndFrame();
 			timer->End();
-        }
+		}
 		spdlog::info("Main loop finished.");
 	}
 }

@@ -7,7 +7,7 @@
 namespace sy::vk
 {
 	ResourceStateTracker::ResourceStateTracker(ResourceCache& resourceCache) :
-	resourceCache(resourceCache)
+		resourceCache(resourceCache)
 	{
 	}
 
@@ -21,9 +21,9 @@ namespace sy::vk
 
 				TextureState newState;
 				newState.Handle = handle;
-				newState.State = resource.GetInitialState();
+				newState.State  = resource.GetInitialState();
 				newState.SubResourceStates.resize(resource.GetNumSubResources(), resource.GetInitialState());
-				textureStates[handle.Value] = newState;
+				textureStates[ handle.Value ] = newState;
 			}
 		}
 	}
@@ -39,8 +39,8 @@ namespace sy::vk
 		{
 			if (const auto resourceRef = resourceCache.Load(handle); resourceRef)
 			{
-				const auto& resource = resourceRef.value().get();
-				bufferStates[handle.Value] = { handle, resource.GetInitialState() };
+				const auto& resource         = resourceRef.value().get();
+				bufferStates[ handle.Value ] = { handle, resource.GetInitialState() };
 			}
 		}
 	}
@@ -50,7 +50,8 @@ namespace sy::vk
 		bufferStates.erase(handle.Value);
 	}
 
-	void ResourceStateTracker::PendingTransition(const ETextureState dstState, const Handle<Texture> handle, const std::span<const TextureSubResource> subResources)
+	void ResourceStateTracker::PendingTransition(const ETextureState dstState, const Handle<Texture> handle,
+	                                             const std::span<const TextureSubResource> subResources)
 	{
 		auto foundItr = textureStates.find(handle.Value);
 		if (foundItr != textureStates.end())
@@ -58,7 +59,7 @@ namespace sy::vk
 			if (const auto resourceOpt = resourceCache.Load(handle); resourceOpt)
 			{
 				const auto& resource = Unwrap(resourceOpt);
-				TextureState& state = foundItr->second;
+				TextureState& state  = foundItr->second;
 				if (!subResources.empty())
 				{
 					if (!state.bTrackingPerSubResource)
@@ -68,11 +69,16 @@ namespace sy::vk
 
 					for (const auto& subResource : subResources)
 					{
-						const size_t subResourceIndex = ResolveTextureSubResourceRangeIndex(subResource.MipLevel, subResource.ArrayLayer, resource.GetMipLevels());
-						if (state.SubResourceStates[subResourceIndex] != dstState)
+						const size_t subResourceIndex = ResolveTextureSubResourceRangeIndex(subResource.MipLevel,
+							subResource.ArrayLayer, resource.GetMipLevels());
+						if (state.SubResourceStates[ subResourceIndex ] != dstState)
 						{
-							state.SubResourceStates[subResourceIndex] = dstState;
-							pendingTextureTransitions.emplace_back(resource, state.State, dstState, TextureSubResourceRange{ .MipLevel = subResource.MipLevel, .ArrayLayer = subResource.ArrayLayer });
+							state.SubResourceStates[ subResourceIndex ] = dstState;
+							pendingTextureTransitions.emplace_back(resource, state.State, dstState,
+							                                       TextureSubResourceRange{
+								                                       .MipLevel = subResource.MipLevel,
+								                                       .ArrayLayer = subResource.ArrayLayer
+							                                       });
 						}
 					}
 				}
@@ -84,28 +90,37 @@ namespace sy::vk
 						{
 							for (uint32_t mipLevel = 0; mipLevel < resource.GetMipLevels(); ++mipLevel)
 							{
-								const size_t subResourceIndex = ResolveTextureSubResourceRangeIndex(mipLevel, arrayLayer, resource.GetMipLevels());
-								if (state.SubResourceStates[subResourceIndex] != dstState)
+								const size_t subResourceIndex =
+										ResolveTextureSubResourceRangeIndex(mipLevel, arrayLayer,
+										                                    resource.GetMipLevels());
+								if (state.SubResourceStates[ subResourceIndex ] != dstState)
 								{
-									pendingTextureTransitions.emplace_back(resource, state.SubResourceStates[subResourceIndex], dstState, TextureSubResourceRange{ .MipLevel = mipLevel, .ArrayLayer = arrayLayer });
-									state.SubResourceStates[subResourceIndex] = dstState;
+									pendingTextureTransitions.emplace_back(resource,
+									                                       state.SubResourceStates[ subResourceIndex ],
+									                                       dstState, TextureSubResourceRange{
+										                                       .MipLevel = mipLevel,
+										                                       .ArrayLayer = arrayLayer
+									                                       });
+									state.SubResourceStates[ subResourceIndex ] = dstState;
 								}
 							}
 						}
 					}
 					else
 					{
-						pendingTextureTransitions.emplace_back(resource, state.State, dstState, resource.GetFullSubResourceRange());
+						pendingTextureTransitions.emplace_back(resource, state.State, dstState,
+						                                       resource.GetFullSubResourceRange());
 					}
 
-					state.State = dstState;
+					state.State                   = dstState;
 					state.bTrackingPerSubResource = false;
 				}
 			}
 		}
 	}
 
-	void ResourceStateTracker::PendingTransition(const EBufferState dstState, const Handle<Buffer> handle, const size_t offset, const size_t size) 
+	void ResourceStateTracker::PendingTransition(const EBufferState dstState, const Handle<Buffer> handle,
+	                                             const size_t offset, const size_t size)
 	{
 		auto foundItr = bufferStates.find(handle.Value);
 		if (foundItr != bufferStates.end())
@@ -113,7 +128,7 @@ namespace sy::vk
 			if (const auto resourceRef = resourceCache.Load(handle); resourceRef)
 			{
 				const auto& resource = resourceRef.value().get();
-				BufferState& state = foundItr->second;
+				BufferState& state   = foundItr->second;
 				if (state.State != dstState)
 				{
 					pendingBufferTransitions.emplace_back(resource, state.State, dstState);

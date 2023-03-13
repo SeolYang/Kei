@@ -27,10 +27,12 @@ namespace sy::render
 	};
 
 	class Mesh;
+
 	class SimpleRenderPass : public RenderPass
 	{
 	public:
-		SimpleRenderPass(std::string_view name, ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext, const vk::Pipeline& pipeline);
+		SimpleRenderPass(std::string_view name, ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext,
+		                 const vk::Pipeline& pipeline);
 
 		virtual void OnBegin() override;
 		virtual void Render() override;
@@ -58,6 +60,5 @@ namespace sy::render
 		VkRenderingAttachmentInfo depthAttachmentInfo;
 
 		TransformUniformBuffer transformData;
-
 	};
 }

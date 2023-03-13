@@ -32,6 +32,8 @@ namespace sy::render
 
 namespace sy::asset
 {
-	std::vector<component::StaticMeshComponent> LoadModel(const std::string& name, const fs::path& path, ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext);
+	std::vector<component::StaticMeshComponent> LoadModel(const std::string& name, const fs::path& path,
+	                                                      ResourceCache& resourceCache,
+	                                                      const vk::VulkanContext& vulkanContext);
 	bool ConvertModel(const fs::path& path);
 }

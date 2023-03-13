@@ -7,6 +7,7 @@ namespace sy::vk
 	class CommandPool;
 	class CommandBuffer;
 	class FrameTracker;
+
 	class CommandPoolManager final : public NonCopyable
 	{
 	public:
@@ -24,6 +25,5 @@ namespace sy::vk
 
 		std::shared_mutex cmdPoolMutex;
 		std::array<std::vector<std::unique_ptr<CommandPool>>, NumMaxInFlightFrames> cmdPools;
-
 	};
 }

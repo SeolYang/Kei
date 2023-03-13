@@ -6,11 +6,14 @@ namespace sy
 {
 	namespace vk
 	{
-		ShaderModule::ShaderModule(const std::string_view name, const VulkanRHI& vulkanRHI, const std::string_view filePath, const VkShaderStageFlagBits shaderType, const std::string_view entryPoint) :
-			VulkanWrapper<VkShaderModule>(name, vulkanRHI, VK_OBJECT_TYPE_SEMAPHORE, VK_DESTROY_LAMBDA_SIGNATURE(VkShaderModule)
-		{
-			vkDestroyShaderModule(vulkanRHI.GetDevice(), handle, nullptr);
-		}),
+		ShaderModule::ShaderModule(const std::string_view name, const VulkanRHI& vulkanRHI,
+		                           const std::string_view filePath, const VkShaderStageFlagBits shaderType,
+		                           const std::string_view entryPoint) :
+			VulkanWrapper<VkShaderModule>(name, vulkanRHI, VK_OBJECT_TYPE_SEMAPHORE,
+			                              VK_DESTROY_LAMBDA_SIGNATURE(VkShaderModule)
+			                              {
+				                              vkDestroyShaderModule(vulkanRHI.GetDevice(), handle, nullptr);
+			                              }),
 			path(filePath),
 			entryPoint(entryPoint),
 			shaderType(shaderType)
@@ -39,7 +42,8 @@ namespace sy
 			spdlog::trace("Creating shader module from {}...", path);
 
 			Native_t handle = VK_NULL_HANDLE;
-			VK_ASSERT(vkCreateShaderModule(vulkanRHI.GetDevice(), &createInfo, nullptr, &handle), "Failed to create shader module from {}.", path);
+			VK_ASSERT(vkCreateShaderModule(vulkanRHI.GetDevice(), &createInfo, nullptr, &handle),
+			          "Failed to create shader module from {}.", path);
 			UpdateHandle(handle);
 		}
 	}

@@ -14,6 +14,7 @@ namespace sy::vk
 	class TextureView;
 	class Sampler;
 	class FrameTracker;
+
 	class DescriptorManager final : public NonCopyable
 	{
 	public:
@@ -37,7 +38,7 @@ namespace sy::vk
 			DescriptorPoolSizeBuilder& AddDescriptors(const EDescriptorType type, const size_t count)
 			{
 				descriptorCount += count;
-				poolSizes[ToUnderlying(type)] += count;
+				poolSizes[ ToUnderlying(type) ] += count;
 				return *this;
 			}
 
@@ -47,9 +48,9 @@ namespace sy::vk
 				temp.reserve(poolSizes.size());
 				for (size_t idx = 0; idx < poolSizes.size(); ++idx)
 				{
-					if (poolSizes[idx] > 0)
+					if (poolSizes[ idx ] > 0)
 					{
-						temp.emplace_back(static_cast<EDescriptorType>(idx), poolSizes[idx]);
+						temp.emplace_back(static_cast<EDescriptorType>(idx), poolSizes[ idx ]);
 					}
 				}
 
@@ -62,12 +63,12 @@ namespace sy::vk
 				std::vector<VkDescriptorPoolSize> nativeTemp;
 				nativeTemp.resize(temp.size());
 				std::transform(
-					temp.cbegin(), temp.cend(),
-					nativeTemp.begin(),
-					[](const DescriptorPoolSize& val)
-					{
-						return VkDescriptorPoolSize{ ToNative(val.Type), static_cast<uint32_t>(val.Size) };
-					});
+				               temp.cbegin(), temp.cend(),
+				               nativeTemp.begin(),
+				               [](const DescriptorPoolSize& val)
+				               {
+					               return VkDescriptorPoolSize{ ToNative(val.Type), static_cast<uint32_t>(val.Size) };
+				               });
 
 				return nativeTemp;
 			}
@@ -80,7 +81,6 @@ namespace sy::vk
 		private:
 			size_t descriptorCount = 0;
 			std::array<size_t, ToUnderlying(EDescriptorType::EnumMax)> poolSizes;
-
 		};
 
 		struct OffsetPoolPackage
@@ -93,7 +93,7 @@ namespace sy::vk
 		struct PoolPackage
 		{
 			VkDescriptorPool DescriptorPool = VK_NULL_HANDLE;
-			VkDescriptorSet DescriptorSet = VK_NULL_HANDLE;
+			VkDescriptorSet DescriptorSet   = VK_NULL_HANDLE;
 			std::array<OffsetPoolPackage, ToUnderlying(EDescriptorType::EnumMax)> OffsetPoolPackages;
 		};
 
@@ -110,13 +110,23 @@ namespace sy::vk
 		void BeginFrame();
 		void EndFrame();
 
-		[[nodiscard]] VkDescriptorSetLayout GetDescriptorSetLayout() const { return bindlessLayout; }
-		[[nodiscard]] VkDescriptorSet GetDescriptorSet() const { return descriptorPoolPackage.DescriptorSet; }
+		[[nodiscard]] VkDescriptorSetLayout GetDescriptorSetLayout() const
+		{
+			return bindlessLayout;
+		}
+
+		[[nodiscard]] VkDescriptorSet GetDescriptorSet() const
+		{
+			return descriptorPoolPackage.DescriptorSet;
+		}
 
 		Descriptor RequestDescriptor(const Buffer& buffer, bool bIsDynamic = false);
 		Descriptor RequestDescriptor(ResourceCache& resourceCache, Handle<Buffer> handle, bool bIsDynamic = false);
-		Descriptor RequestDescriptor(const Texture& texture, const TextureView& view, const Sampler& sampler, ETextureState expectedState, bool bIsCombinedSampler = true);
-		Descriptor RequestDescriptor(ResourceCache& resourceCache, Handle<Texture> texture, Handle<TextureView> view, Handle<Sampler> sampler, ETextureState expectedState, bool bIsCombinedSampler = true);
+		Descriptor RequestDescriptor(const Texture& texture, const TextureView& view, const Sampler& sampler,
+		                             ETextureState expectedState, bool bIsCombinedSampler = true);
+		Descriptor RequestDescriptor(ResourceCache& resourceCache, Handle<Texture> texture, Handle<TextureView> view,
+		                             Handle<Sampler> sampler, ETextureState expectedState,
+		                             bool bIsCombinedSampler = true);
 
 	private:
 		const VulkanRHI& vulkanRHI;
@@ -133,6 +143,5 @@ namespace sy::vk
 		std::vector<VkWriteDescriptorSet> bufferWriteDescriptors;
 		std::vector<VkDescriptorBufferInfo> bufferInfos;
 		std::mutex bufferWriteDescriptorMutex;
-
 	};
 }

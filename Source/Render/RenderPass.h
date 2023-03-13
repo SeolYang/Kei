@@ -21,28 +21,47 @@ namespace sy::render
 		virtual ~RenderPass() noexcept override = default;
 
 		RenderPass(const RenderPass&) = delete;
-		RenderPass(RenderPass&&) = delete;
+		RenderPass(RenderPass&&)      = delete;
 
 		RenderPass& operator=(const RenderPass&) = delete;
-		RenderPass& operator=(RenderPass&&) = delete;
+		RenderPass& operator=(RenderPass&&)      = delete;
 
-		virtual void UpdateBuffers() { }
+		virtual void UpdateBuffers()
+		{
+		}
 
 		void Begin(vk::EQueueType queueType);
-		virtual void OnBegin() {}
+
+		virtual void OnBegin()
+		{
+		}
+
 		virtual void Render() = 0;
 		void End();
-		virtual void OnEnd() {}
 
-		[[nodiscard]] const auto& GetVulkanContext() const { return vulkanContext; }
-		[[nodiscard]] const auto& GetPipeline() const { return pipeline; }
-		[[nodiscard]] auto& GetCommandBuffer() const { return *currentCmdBuffer; }
+		virtual void OnEnd()
+		{
+		}
+
+		[[nodiscard]] const auto& GetVulkanContext() const
+		{
+			return vulkanContext;
+		}
+
+		[[nodiscard]] const auto& GetPipeline() const
+		{
+			return pipeline;
+		}
+
+		[[nodiscard]] auto& GetCommandBuffer() const
+		{
+			return *currentCmdBuffer;
+		}
 
 	private:
 		const vk::VulkanContext& vulkanContext;
 		const vk::Pipeline& pipeline;
 
 		vk::ManagedCommandBuffer currentCmdBuffer;
-
 	};
 }

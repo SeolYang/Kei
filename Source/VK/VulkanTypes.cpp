@@ -6,7 +6,8 @@ namespace sy
 {
 	namespace vk
 	{
-		VkRenderingAttachmentInfo DepthAttachmentInfo(const TextureView& depthStencilView, const float depthClearValue, const uint8_t stencilClearValue)
+		VkRenderingAttachmentInfo DepthAttachmentInfo(const TextureView& depthStencilView, const float depthClearValue,
+		                                              const uint8_t stencilClearValue)
 		{
 			return
 			{
@@ -16,7 +17,9 @@ namespace sy
 				.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
 				.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
 				.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-				.clearValue = VkClearValue{ .depthStencil = VkClearDepthStencilValue{depthClearValue, stencilClearValue} }
+				.clearValue = VkClearValue{
+					.depthStencil = VkClearDepthStencilValue{ depthClearValue, stencilClearValue }
+				}
 			};
 		}
 	}

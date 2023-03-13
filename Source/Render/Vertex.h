@@ -5,6 +5,7 @@
 namespace sy::render
 {
 	using IndexType = uint32_t;
+
 	enum class EVertexType
 	{
 		VertexPT,
@@ -27,8 +28,8 @@ namespace sy::render
 		using Vertex = VertexPT;
 		vk::VertexInputBuilder builder;
 		builder.AddVertexInputBinding<Vertex>(0, VK_VERTEX_INPUT_RATE_VERTEX)
-			.AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Position))
-			.AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, TexCoords));
+		       .AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Position))
+		       .AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, TexCoords));
 		return builder;
 	}
 
@@ -43,11 +44,11 @@ namespace sy::render
 	{
 		switch (type)
 		{
-		case EVertexType::VertexPT:
-			return sizeof(VertexPT);
+			case EVertexType::VertexPT:
+				return sizeof(VertexPT);
 
-		case EVertexType::VertexPTN:
-			return sizeof(VertexPTN);
+			case EVertexType::VertexPTN:
+				return sizeof(VertexPTN);
 		}
 
 		return 0;
@@ -59,9 +60,9 @@ namespace sy::render
 		using Vertex = VertexPTN;
 		vk::VertexInputBuilder builder;
 		builder.AddVertexInputBinding<Vertex>(0, VK_VERTEX_INPUT_RATE_VERTEX)
-			.AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Position))
-			.AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, TexCoords))
-			.AddVertexInputAttribute(2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Normal));
+		       .AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Position))
+		       .AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, TexCoords))
+		       .AddVertexInputAttribute(2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Normal));
 		return builder;
 	}
 
@@ -69,11 +70,11 @@ namespace sy::render
 	{
 		switch (type)
 		{
-		case EVertexType::VertexPT:
-			return BuildVertexInputLayout<VertexPT>();
+			case EVertexType::VertexPT:
+				return BuildVertexInputLayout<VertexPT>();
 
-		case EVertexType::VertexPTN:
-			return BuildVertexInputLayout<VertexPTN>();
+			case EVertexType::VertexPTN:
+				return BuildVertexInputLayout<VertexPTN>();
 		}
 
 		return std::nullopt;

@@ -33,14 +33,14 @@ namespace sy
 		{
 			switch (queueType)
 			{
-			case EQueueType::Graphics:
-				return graphicsQueueFamilyIdx;
-			case EQueueType::Compute:
-				return computeQueueFamilyIdx;
-			case EQueueType::Transfer:
-				return transferQueueFamilyIdx;
-			case EQueueType::Present:
-				return presentQueueFamilyIdx;
+				case EQueueType::Graphics:
+					return graphicsQueueFamilyIdx;
+				case EQueueType::Compute:
+					return computeQueueFamilyIdx;
+				case EQueueType::Transfer:
+					return transferQueueFamilyIdx;
+				case EQueueType::Present:
+					return presentQueueFamilyIdx;
 			}
 
 			return graphicsQueueFamilyIdx;
@@ -50,14 +50,14 @@ namespace sy
 		{
 			switch (queueType)
 			{
-			case EQueueType::Graphics:
-				return graphicsQueue;
-			case EQueueType::Compute:
-				return computeQueue;
-			case EQueueType::Transfer:
-				return transferQueue;
-			case EQueueType::Present:
-				return presentQueue;
+				case EQueueType::Graphics:
+					return graphicsQueue;
+				case EQueueType::Compute:
+					return computeQueue;
+				case EQueueType::Transfer:
+					return transferQueue;
+				case EQueueType::Present:
+					return presentQueue;
 			}
 
 			return graphicsQueue;
@@ -97,10 +97,11 @@ namespace sy
 			SubmitTo(cmdBuffer.GetQueueType(), submitInfo, fence);
 		}
 
-		void VulkanRHI::SubmitTo(const EQueueType queueType, const FrameTracker& frameTracker, const std::span<CRef<CommandBuffer>> cmdBuffers) const
+		void VulkanRHI::SubmitTo(const EQueueType queueType, const FrameTracker& frameTracker,
+		                         const std::span<CRef<CommandBuffer>> cmdBuffers) const
 		{
-			const auto& renderFence = frameTracker.GetCurrentInFlightRenderFence();
-			auto& presentSemaphore = frameTracker.GetCurrentInFlightPresentSemaphore();
+			const auto& renderFence     = frameTracker.GetCurrentInFlightRenderFence();
+			auto& presentSemaphore      = frameTracker.GetCurrentInFlightPresentSemaphore();
 			const auto& renderSemaphore = frameTracker.GetCurrentInFlightRenderSemaphore();
 
 			CRefVec<vk::Semaphore> waitSemaphores;
@@ -109,16 +110,20 @@ namespace sy
 			signalSemaphores.emplace_back(renderSemaphore);
 
 			SubmitTo(queueType,
-				waitSemaphores,
-				cmdBuffers,
-				signalSemaphores,
-				VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, renderFence);
+			         waitSemaphores,
+			         cmdBuffers,
+			         signalSemaphores,
+			         VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, renderFence);
 		}
 
-		void VulkanRHI::SubmitTo(EQueueType queueType, const std::span<std::reference_wrapper<const Semaphore>> waitSemaphores, const std::span<std::reference_wrapper<const CommandBuffer>> cmdBuffers, std::span<std::reference_wrapper<const Semaphore>> signalSemaphores, const VkPipelineStageFlags waitStage, const Fence& fence) const
+		void VulkanRHI::SubmitTo(EQueueType queueType,
+		                         const std::span<std::reference_wrapper<const Semaphore>> waitSemaphores,
+		                         const std::span<std::reference_wrapper<const CommandBuffer>> cmdBuffers,
+		                         std::span<std::reference_wrapper<const Semaphore>> signalSemaphores,
+		                         const VkPipelineStageFlags waitStage, const Fence& fence) const
 		{
 			const auto waitSemaphoreNatives = TransformVulkanWrappersToNatives(waitSemaphores);
-			const auto cmdBufferNatives = TransformVulkanWrappersToNativesWithValidation<CommandBuffer>(cmdBuffers
+			const auto cmdBufferNatives     = TransformVulkanWrappersToNativesWithValidation<CommandBuffer>(cmdBuffers
 				, [queueType](const CRef<CommandBuffer> cmdBufferRef)
 				{
 					const auto& cmdBuffer = cmdBufferRef.get();
@@ -149,9 +154,9 @@ namespace sy
 
 		void VulkanRHI::Present(const Swapchain& swapchain, const Semaphore& waitSemaphore) const
 		{
-			const auto swapchainImageIdx = swapchain.GetCurrentImageIndex();
+			const auto swapchainImageIdx   = swapchain.GetCurrentImageIndex();
 			const auto waitSemaphoreNative = waitSemaphore.GetNativeHandle();
-			const auto swapchainNative = swapchain.GetNativeHandle();
+			const auto swapchainNative     = swapchain.GetNativeHandle();
 			const VkPresentInfoKHR presentInfo
 			{
 				.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
@@ -207,7 +212,8 @@ namespace sy
 			vmaUnmapMemory(allocator, buffer.GetAllocation());
 		}
 
-		void VulkanRHI::SetObjectName(const uint64_t object, const VkObjectType objectType, const std::string_view name) const
+		void VulkanRHI::SetObjectName(const uint64_t object, const VkObjectType objectType,
+		                              const std::string_view name) const
 		{
 #if defined(DEBUG) || defined(_DEBUG)
 			if (!name.empty())
@@ -233,15 +239,15 @@ namespace sy
 			vkb::InstanceBuilder instanceBuilder;
 			auto instanceBuilderRes = instanceBuilder.set_app_name(window.GetTitle().data())
 #ifdef _DEBUG
-				.request_validation_layers()
-				.use_default_debug_messenger()
+					.request_validation_layers()
+					.use_default_debug_messenger()
 #endif
-				.require_api_version(1, 3, 0)
-				.build();
+					.require_api_version(1, 3, 0)
+					.build();
 
 			const auto vkbInstance = instanceBuilderRes.value();
-			instance = vkbInstance.instance;
-			debugMessenger = vkbInstance.debug_messenger;
+			instance               = vkbInstance.instance;
+			debugMessenger         = vkbInstance.debug_messenger;
 
 			volkLoadInstance(instance);
 
@@ -249,30 +255,30 @@ namespace sy
 
 			vkb::PhysicalDeviceSelector physicalDeviceSelector{ vkbInstance };
 			auto vkbPhysicalDevice = physicalDeviceSelector.set_minimum_version(1, 3)
-				.set_surface(surface)
-				.add_required_extension(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME)
-				.add_required_extension(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
-				.add_required_extension(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME)
-				.add_required_extension(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME)
-				.select()
-				.value();
+			                                               .set_surface(surface)
+			                                               .add_required_extension(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME)
+			                                               .add_required_extension(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
+			                                               .add_required_extension(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME)
+			                                               .add_required_extension(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME)
+			                                               .select()
+			                                               .value();
 
 			physicalDevice = vkbPhysicalDevice.physical_device;
-			gpuProperties = vkbPhysicalDevice.properties;
-			gpuName = gpuProperties.deviceName;
+			gpuProperties  = vkbPhysicalDevice.properties;
+			gpuName        = gpuProperties.deviceName;
 			spdlog::trace("\n----------- GPU Properties -----------\n* Device Name: {}\n* GPU Vendor ID: {}\n* API Version: {}\n* Driver Version: {}\n* Device ID: {}\n* Max Bound Descriptor Sets: {}\n* Min Uniform Buffer Offset Alignment: {}\n* Min Storage Buffer Offset Alignment: {}\n* Max Frame Buffer Extent: {}x{}\n* Max Memory Allocation Count: {}\n* Max Sampler Allocation Count: {}\n",
-				gpuName,
-				gpuProperties.vendorID,
-				gpuProperties.apiVersion,
-				gpuProperties.driverVersion,
-				gpuProperties.deviceID,
-				gpuProperties.limits.maxBoundDescriptorSets,
-				gpuProperties.limits.minUniformBufferOffsetAlignment,
-				gpuProperties.limits.minStorageBufferOffsetAlignment,
-				gpuProperties.limits.maxFramebufferWidth,
-				gpuProperties.limits.maxFramebufferHeight,
-				gpuProperties.limits.maxMemoryAllocationCount,
-				gpuProperties.limits.maxSamplerAllocationCount);
+			              gpuName,
+			              gpuProperties.vendorID,
+			              gpuProperties.apiVersion,
+			              gpuProperties.driverVersion,
+			              gpuProperties.deviceID,
+			              gpuProperties.limits.maxBoundDescriptorSets,
+			              gpuProperties.limits.minUniformBufferOffsetAlignment,
+			              gpuProperties.limits.minStorageBufferOffsetAlignment,
+			              gpuProperties.limits.maxFramebufferWidth,
+			              gpuProperties.limits.maxFramebufferHeight,
+			              gpuProperties.limits.maxMemoryAllocationCount,
+			              gpuProperties.limits.maxSamplerAllocationCount);
 
 			vkb::DeviceBuilder deviceBuilder{ vkbPhysicalDevice };
 			VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures
@@ -303,13 +309,13 @@ namespace sy
 			};
 
 			auto vkbDeviceRes =
-				deviceBuilder.add_pNext(&dynamicRenderingFeatures)
-				.add_pNext(&descriptorIndexingFeatures)
-				.add_pNext(&synchronization2Features)
-				.build();
+					deviceBuilder.add_pNext(&dynamicRenderingFeatures)
+					             .add_pNext(&descriptorIndexingFeatures)
+					             .add_pNext(&synchronization2Features)
+					             .build();
 			SY_ASSERT(vkbDeviceRes.has_value(), "Failed to create device using GPU {}.", gpuName);
 			auto& vkbDevice = vkbDeviceRes.value();
-			device = vkbDevice.device;
+			device          = vkbDevice.device;
 			spdlog::trace("Succeed to create logical device using GPU {}.", gpuName);
 
 			swapchain = std::make_unique<Swapchain>(window, *this);
@@ -327,7 +333,8 @@ namespace sy
 				.pVulkanFunctions = &vkFunctions,
 				.instance = instance,
 			};
-			VK_ASSERT(vmaCreateAllocator(&allocatorInfo, &allocator), "Failed to create vulkan memory allocator instance.");
+			VK_ASSERT(vmaCreateAllocator(&allocatorInfo, &allocator),
+			          "Failed to create vulkan memory allocator instance.");
 			spdlog::trace("VMA instance successfully created.");
 
 			InitQueues(vkbDevice);
@@ -364,25 +371,25 @@ namespace sy
 			spdlog::trace("Initializing queues..");
 			const auto graphicsQueueRes = vkbDevice.get_queue(vkb::QueueType::graphics);
 			SY_ASSERT(graphicsQueueRes.has_value(), "Failed to get graphics queue from logical device of vulkan.");
-			graphicsQueue = graphicsQueueRes.value();
+			graphicsQueue          = graphicsQueueRes.value();
 			graphicsQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
 			spdlog::trace("Graphics Queue successfully acquired. Family Index: {}.", graphicsQueueFamilyIdx);
 
 			const auto computeQueueRes = vkbDevice.get_queue(vkb::QueueType::compute);
 			SY_ASSERT(computeQueueRes.has_value(), "Failed to get compute queue from logical device of vulkan.");
-			computeQueue = computeQueueRes.value();
+			computeQueue          = computeQueueRes.value();
 			computeQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::compute).value();
 			spdlog::trace("Compute Queue successfully acquired. Family Index: {}.", computeQueueFamilyIdx);
 
 			const auto transferQueueRes = vkbDevice.get_queue(vkb::QueueType::transfer);
 			SY_ASSERT(transferQueueRes.has_value(), "Failed to get transfer queue from logical device of vulkan.");
-			transferQueue = transferQueueRes.value();
+			transferQueue          = transferQueueRes.value();
 			transferQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::transfer).value();
 			spdlog::trace("Transfer Queue successfully acquired. Family Index: {}.", transferQueueFamilyIdx);
 
 			const auto presentQueueRes = vkbDevice.get_queue(vkb::QueueType::present);
 			SY_ASSERT(presentQueueRes.has_value(), "Failed to get present queue from logical device of vulkan.");
-			presentQueue = presentQueueRes.value();
+			presentQueue          = presentQueueRes.value();
 			presentQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::present).value();
 			spdlog::trace("Present Queue successfully acquired. Family Index: {}.", presentQueueFamilyIdx);
 		}

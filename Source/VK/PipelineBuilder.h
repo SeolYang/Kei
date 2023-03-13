@@ -5,6 +5,7 @@ namespace sy::vk
 {
 	class ShaderModule;
 	class VertexInputBuilder;
+
 	class GraphicsPipelineBuilder
 	{
 	public:
@@ -30,7 +31,8 @@ namespace sy::vk
 		/** Rasterization State */
 
 		GraphicsPipelineBuilder& AddViewport(VkViewport viewport);
-		GraphicsPipelineBuilder& AddViewport(float x, float y, float width, float height, float minDepth, float maxDepth);
+		GraphicsPipelineBuilder& AddViewport(float x, float y, float width, float height, float minDepth,
+		                                     float maxDepth);
 
 		GraphicsPipelineBuilder& AddScissor(VkRect2D scissor);
 		GraphicsPipelineBuilder& AddScissor(int32_t x, int32_t y, uint32_t width, uint32_t height);
@@ -63,21 +65,35 @@ namespace sy::vk
 		GraphicsPipelineBuilder& SetDepthBoundsTestEnable(bool bDepthBoundsTestEnable);
 
 		GraphicsPipelineBuilder& SetStencilTestEnable(bool bStencilTestEnable);
-		GraphicsPipelineBuilder& SetStencilOpStateFront(VkStencilOp failOp, VkStencilOp passOp, VkStencilOp depthFailOp, VkCompareOp compareOp, uint32_t compareMask, uint32_t writeMask, uint32_t reference);
-		GraphicsPipelineBuilder& SetStencilOpStateBack(VkStencilOp failOp, VkStencilOp passOp, VkStencilOp depthFailOp, VkCompareOp compareOp, uint32_t compareMask, uint32_t writeMask, uint32_t reference);
+		GraphicsPipelineBuilder& SetStencilOpStateFront(VkStencilOp failOp, VkStencilOp passOp,
+		                                                VkStencilOp depthFailOp, VkCompareOp compareOp,
+		                                                uint32_t compareMask, uint32_t writeMask, uint32_t reference);
+		GraphicsPipelineBuilder& SetStencilOpStateBack(VkStencilOp failOp, VkStencilOp passOp, VkStencilOp depthFailOp,
+		                                               VkCompareOp compareOp, uint32_t compareMask, uint32_t writeMask,
+		                                               uint32_t reference);
 		GraphicsPipelineBuilder& SetMinDepthBounds(float minDepthBounds);
 		GraphicsPipelineBuilder& SetMaxDepthBounds(float maxDepthBounds);
 
 		/** Color Blend Attachment State */
 
-		GraphicsPipelineBuilder& AddColorBlendAttachmentState(bool bBlendEnable, VkBlendFactor srcColorBlendFactor, VkBlendFactor dstColorBlendFactor, VkBlendOp colorBlendOp, VkBlendFactor srcAlphaBlendFactor, VkBlendFactor dstAlphaBlendFactor, VkBlendOp alphaBlendOp, VkColorComponentFlags colorWriteMask);
+		GraphicsPipelineBuilder& AddColorBlendAttachmentState(bool bBlendEnable, VkBlendFactor srcColorBlendFactor,
+		                                                      VkBlendFactor dstColorBlendFactor,
+		                                                      VkBlendOp colorBlendOp,
+		                                                      VkBlendFactor srcAlphaBlendFactor,
+		                                                      VkBlendFactor dstAlphaBlendFactor,
+		                                                      VkBlendOp alphaBlendOp,
+		                                                      VkColorComponentFlags colorWriteMask);
 		GraphicsPipelineBuilder& DefaultColorBlendAttachment();
 		GraphicsPipelineBuilder& SetColorBlendLogicOpEnable(bool bLogicOpEnable);
 		GraphicsPipelineBuilder& SetColorBlendLogicOp(VkLogicOp logicOp);
 		GraphicsPipelineBuilder& SetColorBlendConstants(std::array<float, 4> blendConstants);
 
 		GraphicsPipelineBuilder& SetPipelineLayout(VkPipelineLayout pipelineLayout);
-		VkPipelineLayout GetLayout() const { return pipelineLayout; }
+
+		VkPipelineLayout GetLayout() const
+		{
+			return pipelineLayout;
+		}
 
 		GraphicsPipelineBuilder& SetDepthStencilFormat(VkFormat format = VK_FORMAT_D24_UNORM_S8_UINT);
 
@@ -101,7 +117,6 @@ namespace sy::vk
 		VkPipelineRenderingCreateInfo renderingCreateInfo;
 
 		std::optional<VkPipelineVertexInputStateCreateInfo> vertexInput;
-
 	};
 
 	class ComputePipelineBuilder
@@ -115,13 +130,16 @@ namespace sy::vk
 		ComputePipelineBuilder& SetPipelineLayout(VkPipelineLayout layout);
 
 		VkComputePipelineCreateInfo Build() const;
-		VkPipelineLayout GetLayout() const { return layout; }
+
+		VkPipelineLayout GetLayout() const
+		{
+			return layout;
+		}
 
 	private:
 		VkPipelineCreateFlags createFlags;
 		VkPipelineShaderStageCreateInfo shaderStage;
 		VkPipelineLayout layout;
-
 	};
 
 	class RayTracingPipelineBuilder

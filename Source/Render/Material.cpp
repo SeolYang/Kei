@@ -3,5 +3,4 @@
 
 namespace sy::render
 {
-	
 }

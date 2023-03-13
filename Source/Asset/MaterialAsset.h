@@ -15,6 +15,7 @@ namespace sy::render
 
 namespace sy::asset
 {
-	Handle<render::Material> LoadMaterialFromAsset(const fs::path& path, ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext);
+	Handle<render::Material> LoadMaterialFromAsset(const fs::path& path, ResourceCache& resourceCache,
+	                                               const vk::VulkanContext& vulkanContext);
 	void CreateMaterial(const fs::path& path);
 }

@@ -6,6 +6,7 @@ namespace sy::vk
 	class Fence;
 	class Semaphore;
 	class VulkanRHI;
+
 	class FrameTracker : public NonCopyable
 	{
 	private:
@@ -29,20 +30,30 @@ namespace sy::vk
 		void WaitForInFlightRenderFence() const;
 		void ResetInFlightRenderFence() const;
 
-		const Frame& GetCurrentInFlightFrame() const { return frames[GetCurrentInFlightFrameIndex()]; }
+		const Frame& GetCurrentInFlightFrame() const
+		{
+			return frames[ GetCurrentInFlightFrameIndex() ];
+		}
+
 		Fence& GetCurrentInFlightRenderFence() const;
 		Fence& GetCurrentInFlightUploadFence() const;
 		Semaphore& GetCurrentInFlightRenderSemaphore() const;
 		Semaphore& GetCurrentInFlightPresentSemaphore() const;
 		Semaphore& GetCurrentInFlightUploadSemaphore() const;
 
-		[[nodiscard]] size_t GetCurrentFrameIndex() const { return currentFrameIdx; }
-		[[nodiscard]] size_t GetCurrentInFlightFrameIndex() const { return currentFrameIdx % NumMaxInFlightFrames; }
+		[[nodiscard]] size_t GetCurrentFrameIndex() const
+		{
+			return currentFrameIdx;
+		}
+
+		[[nodiscard]] size_t GetCurrentInFlightFrameIndex() const
+		{
+			return currentFrameIdx % NumMaxInFlightFrames;
+		}
 
 	private:
 		const VulkanRHI& vulkanRHI;
 		std::array<Frame, NumMaxInFlightFrames> frames;
 		size_t currentFrameIdx = 0;
-
 	};
 }

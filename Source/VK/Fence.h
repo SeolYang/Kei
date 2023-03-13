@@ -4,6 +4,7 @@
 namespace sy::vk
 {
 	class VulkanRHI;
+
 	class Fence : public VulkanWrapper<VkFence>
 	{
 	public:
@@ -13,6 +14,5 @@ namespace sy::vk
 		void Wait() const;
 		void Reset() const;
 		[[nodiscard]] bool IsSignaled() const;
-
 	};
 }

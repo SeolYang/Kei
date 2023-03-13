@@ -6,7 +6,7 @@ namespace sy::vk
 	class PushConstantBuilder : public NonCopyable
 	{
 	public:
-		PushConstantBuilder() = default;
+		PushConstantBuilder()           = default;
 		~PushConstantBuilder() override = default;
 
 		template <typename T>
@@ -25,6 +25,5 @@ namespace sy::vk
 	private:
 		std::vector<VkPushConstantRange> ranges;
 		size_t offset = 0;
-
 	};
 }

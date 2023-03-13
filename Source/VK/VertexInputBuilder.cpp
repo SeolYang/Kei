@@ -11,7 +11,7 @@ namespace sy::vk
 	}
 
 	VertexInputBuilder& VertexInputBuilder::AddVertexInputAttribute(uint32_t location, uint32_t binding,
-		VkFormat format, uint32_t offset)
+	                                                                VkFormat format, uint32_t offset)
 	{
 		vertexInputAttributeDescriptions.emplace_back(location, binding, format, offset);
 		return *this;

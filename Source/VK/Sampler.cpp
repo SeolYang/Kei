@@ -7,18 +7,18 @@
 
 namespace sy::vk
 {
-
 	Sampler::Sampler(const SamplerBuilder& builder) :
-		VulkanWrapper<VkSampler>(builder.name, builder.vulkanContext.GetRHI(), VK_OBJECT_TYPE_SAMPLER, VK_DESTROY_LAMBDA_SIGNATURE(VkSampler)
-	{
-		vkDestroySampler(vulkanRHI.GetDevice(), handle, nullptr);
-	}),
-	minFilter(builder.minFilter),
-	magFilter(builder.magFilter),
-	mipmapMode(builder.mipmapMode),
-	addressModeU(builder.addressModeU),
-	addressModeV(builder.addressModeV),
-	addressModeW(builder.addressModeW)
+		VulkanWrapper<VkSampler>(builder.name, builder.vulkanContext.GetRHI(), VK_OBJECT_TYPE_SAMPLER,
+		                         VK_DESTROY_LAMBDA_SIGNATURE(VkSampler)
+		                         {
+			                         vkDestroySampler(vulkanRHI.GetDevice(), handle, nullptr);
+		                         }),
+		minFilter(builder.minFilter),
+		magFilter(builder.magFilter),
+		mipmapMode(builder.mipmapMode),
+		addressModeU(builder.addressModeU),
+		addressModeV(builder.addressModeV),
+		addressModeW(builder.addressModeW)
 	{
 		const VkSamplerCreateInfo samplerCreateInfo
 		{
@@ -33,7 +33,8 @@ namespace sy::vk
 		};
 
 		Native_t handle = VK_NULL_HANDLE;
-		VK_ASSERT(vkCreateSampler(GetRHI().GetDevice(), &samplerCreateInfo, nullptr, &handle), "Failed to create sampler {}.", builder.name);
+		VK_ASSERT(vkCreateSampler(GetRHI().GetDevice(), &samplerCreateInfo, nullptr, &handle),
+		          "Failed to create sampler {}.", builder.name);
 		UpdateHandle(handle);
 	}
 }

@@ -5,6 +5,7 @@ namespace sy::vk
 {
 	class VulkanContext;
 	class Texture;
+
 	class TextureBuilder
 	{
 	public:
@@ -105,7 +106,10 @@ namespace sy::vk
 			if (const bool bIsValidData = typedData.size() > 0 || typedData.data() != nullptr;
 				bIsValidData)
 			{
-				const auto bytesOfData = std::span<const uint8_t>{ reinterpret_cast<const uint8_t*>(typedData.data()), typedData.size_bytes() };
+				const auto bytesOfData = std::span<const uint8_t>{
+					reinterpret_cast<const uint8_t*>(typedData.data()),
+					typedData.size_bytes()
+				};
 				dataToTransfer = bytesOfData;
 			}
 			else
@@ -136,22 +140,19 @@ namespace sy::vk
 	private:
 		friend class Texture;
 		const VulkanContext& vulkanContext;
-		std::string name = "Texture";
-		std::optional<VkImageType> type = std::nullopt;
-		std::optional<VkImageUsageFlags> usage = std::nullopt;
-		VkFormat format = VK_FORMAT_UNDEFINED;
-		std::optional<VmaMemoryUsage> memoryUsage = std::nullopt;
-		VkMemoryPropertyFlags memoryProperty = 0;
-		std::optional<Extent3D<uint32_t>> extent = std::nullopt;
-		uint32_t mips = 1;
-		uint32_t layers = 1;
-		VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT;
-		VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL;
-		ETextureState targetInitialState = ETextureState::None;
+		std::string name                                       = "Texture";
+		std::optional<VkImageType> type                        = std::nullopt;
+		std::optional<VkImageUsageFlags> usage                 = std::nullopt;
+		VkFormat format                                        = VK_FORMAT_UNDEFINED;
+		std::optional<VmaMemoryUsage> memoryUsage              = std::nullopt;
+		VkMemoryPropertyFlags memoryProperty                   = 0;
+		std::optional<Extent3D<uint32_t>> extent               = std::nullopt;
+		uint32_t mips                                          = 1;
+		uint32_t layers                                        = 1;
+		VkSampleCountFlagBits samples                          = VK_SAMPLE_COUNT_1_BIT;
+		VkImageTiling tiling                                   = VK_IMAGE_TILING_OPTIMAL;
+		ETextureState targetInitialState                       = ETextureState::None;
 		std::optional<std::span<const uint8_t>> dataToTransfer = std::nullopt;
-		bool bGenerateMips = false;
-
+		bool bGenerateMips                                     = false;
 	};
-
-
 }

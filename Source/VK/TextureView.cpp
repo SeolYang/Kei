@@ -6,11 +6,11 @@
 namespace sy::vk
 {
 	TextureView::TextureView(const std::string_view name, const VulkanRHI& vulkanRHI, const Texture& texture,
-		const VkImageViewType viewType, const TextureSubResourceRange subResourceRange) :
+	                         const VkImageViewType viewType, const TextureSubResourceRange subResourceRange) :
 		VulkanWrapper<VkImageView>(name, vulkanRHI, VK_OBJECT_TYPE_IMAGE_VIEW, VK_DESTROY_LAMBDA_SIGNATURE(VkImageView)
-	{
-		vkDestroyImageView(vulkanRHI.GetDevice(), handle, nullptr);
-	}),
+		{
+			vkDestroyImageView(vulkanRHI.GetDevice(), handle, nullptr);
+		}),
 		viewType(viewType),
 		subResourceRange(subResourceRange)
 	{
@@ -35,12 +35,13 @@ namespace sy::vk
 		};
 
 		Native_t handle = VK_NULL_HANDLE;
-		VK_ASSERT(vkCreateImageView(vulkanRHI.GetDevice(), &viewCreateInfo, nullptr, &handle), "Failed to create image view {}.", name);
+		VK_ASSERT(vkCreateImageView(vulkanRHI.GetDevice(), &viewCreateInfo, nullptr, &handle),
+		          "Failed to create image view {}.", name);
 		UpdateHandle(handle);
 	}
 
 	TextureView::TextureView(const std::string_view name, const VulkanRHI& vulkanRHI, const Texture& texture,
-		const VkImageViewType viewType) :
+	                         const VkImageViewType viewType) :
 		TextureView(name, vulkanRHI, texture, viewType, texture.GetFullSubResourceRange())
 	{
 	}

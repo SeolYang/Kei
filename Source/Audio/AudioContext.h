@@ -8,9 +8,7 @@ namespace sy
 		class AudioContext
 		{
 		public:
-
 		private:
-
 		};
 	}
 }

@@ -5,6 +5,7 @@ namespace sy::vk
 {
 	class VulkanRHI;
 	class PushConstantBuilder;
+
 	class PipelineLayoutCache : public NonCopyable
 	{
 	public:
@@ -18,7 +19,6 @@ namespace sy::vk
 			VkPipelineLayoutCreateFlags Flags;
 			std::vector<VkDescriptorSetLayout> DescriptorSetLayouts;
 			std::vector<VkPushConstantRange> PushConstantRanges;
-
 		};
 
 		struct PipelineLayoutHash
@@ -34,11 +34,11 @@ namespace sy::vk
 		explicit PipelineLayoutCache(const VulkanRHI& vulkanRHI);
 		~PipelineLayoutCache() override;
 
-		VkPipelineLayout Request(std::span<VkDescriptorSetLayout> descriptorSetLayouts, const PushConstantBuilder& pushConstantBuilder);
+		VkPipelineLayout Request(std::span<VkDescriptorSetLayout> descriptorSetLayouts,
+		                         const PushConstantBuilder& pushConstantBuilder);
 
 	private:
 		const VulkanRHI& vulkanRHI;
 		robin_hood::unordered_map<PipelineLayoutInfo, VkPipelineLayout, PipelineLayoutHash> cache;
-
 	};
 }

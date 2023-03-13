@@ -57,6 +57,5 @@ namespace sy::app
 		std::unique_ptr<render::Renderer> renderer;
 		std::unique_ptr<game::World> world;
 		std::unique_ptr<game::GameContext> gameContext;
-
 	};
 }

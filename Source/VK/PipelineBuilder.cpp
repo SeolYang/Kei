@@ -24,32 +24,32 @@ namespace sy
 			ZeroMemory(&depthStencil, sizeof(depthStencil));
 
 			SetPipelineCreateFlags(0);
-			vertexInput = std::nullopt;
+			vertexInput         = std::nullopt;
 			inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 			inputAssembly.pNext = nullptr;
-			tessellation.sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
-			tessellation.pNext = nullptr;
+			tessellation.sType  = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
+			tessellation.pNext  = nullptr;
 			viewports.clear();
 			scissors.clear();
-			viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-			viewportState.pNext = nullptr;
-			viewportState.flags = 0;
+			viewportState.sType         = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+			viewportState.pNext         = nullptr;
+			viewportState.flags         = 0;
 			viewportState.viewportCount = 0;
-			viewportState.pViewports = nullptr;
-			viewportState.scissorCount = 0;
-			viewportState.pScissors = nullptr;
-			rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-			rasterizer.pNext = nullptr;
-			colorBlend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-			colorBlend.pNext = nullptr;
+			viewportState.pViewports    = nullptr;
+			viewportState.scissorCount  = 0;
+			viewportState.pScissors     = nullptr;
+			rasterizer.sType            = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+			rasterizer.pNext            = nullptr;
+			colorBlend.sType            = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+			colorBlend.pNext            = nullptr;
 			colorBlendAttachments.clear();
 			colorBlend.attachmentCount = 0;
-			colorBlend.pAttachments = nullptr;
-			multiSampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-			multiSampling.pNext = nullptr;
-			pipelineLayout = VK_NULL_HANDLE;
-			depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-			depthStencil.pNext = nullptr;
+			colorBlend.pAttachments    = nullptr;
+			multiSampling.sType        = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+			multiSampling.pNext        = nullptr;
+			pipelineLayout             = VK_NULL_HANDLE;
+			depthStencil.sType         = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+			depthStencil.pNext         = nullptr;
 
 			SetPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 			SetPrimitiveRestart(false);
@@ -98,11 +98,11 @@ namespace sy
 		GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddShaderStage(const ShaderModule& shaderModule)
 		{
 			shaderStages.emplace_back(
-				VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-				nullptr, 0,
-				shaderModule.GetShaderType(), shaderModule.GetNativeHandle(),
-				shaderModule.GetEntryPoint().data(),
-				nullptr);
+			                          VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+			                          nullptr, 0,
+			                          shaderModule.GetShaderType(), shaderModule.GetNativeHandle(),
+			                          shaderModule.GetEntryPoint().data(),
+			                          nullptr);
 
 			return *this;
 		}
@@ -140,7 +140,7 @@ namespace sy
 		}
 
 		GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddViewport(float x, float y, float width, float height,
-			float minDepth, float maxDepth)
+		                                                              float minDepth, float maxDepth)
 		{
 			viewports.emplace_back(x, y, width, height, minDepth, maxDepth);
 			++viewportState.viewportCount;
@@ -156,7 +156,8 @@ namespace sy
 			return *this;
 		}
 
-		GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddScissor(int32_t x, int32_t y, uint32_t width, uint32_t height)
+		GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddScissor(int32_t x, int32_t y, uint32_t width,
+		                                                             uint32_t height)
 		{
 			scissors.emplace_back(VkOffset2D{ x, y }, VkExtent2D{ width, height });
 			++viewportState.scissorCount;
@@ -224,7 +225,8 @@ namespace sy
 			return *this;
 		}
 
-		GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetRasterizerSamples(VkSampleCountFlagBits rasterizerSamples)
+		GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetRasterizerSamples(
+			VkSampleCountFlagBits rasterizerSamples)
 		{
 			multiSampling.rasterizationSamples = rasterizerSamples;
 			return *this;
@@ -290,16 +292,18 @@ namespace sy
 			return *this;
 		}
 
-		GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetStencilOpStateFront(VkStencilOp failOp, VkStencilOp passOp,
-			VkStencilOp depthFailOp, VkCompareOp compareOp, uint32_t compareMask, uint32_t writeMask, uint32_t reference)
+		GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetStencilOpStateFront(
+			VkStencilOp failOp, VkStencilOp passOp,
+			VkStencilOp depthFailOp, VkCompareOp compareOp, uint32_t compareMask, uint32_t writeMask,
+			uint32_t reference)
 		{
-			depthStencil.front.failOp = failOp;
-			depthStencil.front.passOp = passOp;
+			depthStencil.front.failOp      = failOp;
+			depthStencil.front.passOp      = passOp;
 			depthStencil.front.depthFailOp = depthFailOp;
-			depthStencil.front.compareOp = compareOp;
+			depthStencil.front.compareOp   = compareOp;
 			depthStencil.front.compareMask = compareMask;
-			depthStencil.front.writeMask = writeMask;
-			depthStencil.front.reference = reference;
+			depthStencil.front.writeMask   = writeMask;
+			depthStencil.front.reference   = reference;
 			return *this;
 		}
 
@@ -308,13 +312,13 @@ namespace sy
 			VkStencilOp depthFailOp, VkCompareOp compareOp,
 			uint32_t compareMask, uint32_t writeMask, uint32_t reference)
 		{
-			depthStencil.back.failOp = failOp;
-			depthStencil.back.passOp = passOp;
+			depthStencil.back.failOp      = failOp;
+			depthStencil.back.passOp      = passOp;
 			depthStencil.back.depthFailOp = depthFailOp;
-			depthStencil.back.compareOp = compareOp;
+			depthStencil.back.compareOp   = compareOp;
 			depthStencil.back.compareMask = compareMask;
-			depthStencil.back.writeMask = writeMask;
-			depthStencil.back.reference = reference;
+			depthStencil.back.writeMask   = writeMask;
+			depthStencil.back.reference   = reference;
 			return *this;
 		}
 
@@ -335,9 +339,11 @@ namespace sy
 			VkBlendFactor srcAlphaBlendFactor, VkBlendFactor dstAlphaBlendFactor, VkBlendOp alphaBlendOp,
 			VkColorComponentFlags colorWriteMask)
 		{
-			colorBlendAttachments.emplace_back(bBlendEnable ? VK_TRUE : VK_FALSE, srcColorBlendFactor, dstColorBlendFactor, colorBlendOp, srcAlphaBlendFactor, dstAlphaBlendFactor, alphaBlendOp, colorWriteMask);
+			colorBlendAttachments.emplace_back(bBlendEnable ? VK_TRUE : VK_FALSE, srcColorBlendFactor,
+			                                   dstColorBlendFactor, colorBlendOp, srcAlphaBlendFactor,
+			                                   dstAlphaBlendFactor, alphaBlendOp, colorWriteMask);
 			colorBlend.attachmentCount = static_cast<uint32_t>(colorBlendAttachments.size());
-			colorBlend.pAttachments = colorBlendAttachments.data();
+			colorBlend.pAttachments    = colorBlendAttachments.data();
 			return *this;
 		}
 
@@ -345,13 +351,13 @@ namespace sy
 		{
 			VkPipelineColorBlendAttachmentState colorBlendAttachment;
 			colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT |
-				VK_COLOR_COMPONENT_G_BIT |
-				VK_COLOR_COMPONENT_B_BIT |
-				VK_COLOR_COMPONENT_A_BIT;
+					VK_COLOR_COMPONENT_G_BIT |
+					VK_COLOR_COMPONENT_B_BIT |
+					VK_COLOR_COMPONENT_A_BIT;
 			colorBlendAttachment.blendEnable = VK_FALSE;
 			colorBlendAttachments.emplace_back(colorBlendAttachment);
 			colorBlend.attachmentCount = static_cast<uint32_t>(colorBlendAttachments.size());
-			colorBlend.pAttachments = colorBlendAttachments.data();
+			colorBlend.pAttachments    = colorBlendAttachments.data();
 			return *this;
 		}
 
@@ -369,10 +375,10 @@ namespace sy
 
 		GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetColorBlendConstants(std::array<float, 4> blendConstants)
 		{
-			colorBlend.blendConstants[0] = blendConstants[0];
-			colorBlend.blendConstants[1] = blendConstants[1];
-			colorBlend.blendConstants[2] = blendConstants[2];
-			colorBlend.blendConstants[3] = blendConstants[3];
+			colorBlend.blendConstants[ 0 ] = blendConstants[ 0 ];
+			colorBlend.blendConstants[ 1 ] = blendConstants[ 1 ];
+			colorBlend.blendConstants[ 2 ] = blendConstants[ 2 ];
+			colorBlend.blendConstants[ 3 ] = blendConstants[ 3 ];
 			return *this;
 		}
 
@@ -384,7 +390,7 @@ namespace sy
 
 		GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetDepthStencilFormat(VkFormat format)
 		{
-			this->renderingCreateInfo.depthAttachmentFormat = format;
+			this->renderingCreateInfo.depthAttachmentFormat   = format;
 			this->renderingCreateInfo.stencilAttachmentFormat = format;
 			return *this;
 		}
@@ -422,11 +428,11 @@ namespace sy
 
 		ComputePipelineBuilder& ComputePipelineBuilder::SetDefault()
 		{
-			shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-			shaderStage.flags = 0;
-			shaderStage.module = VK_NULL_HANDLE;
+			shaderStage.sType               = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			shaderStage.flags               = 0;
+			shaderStage.module              = VK_NULL_HANDLE;
 			shaderStage.pSpecializationInfo = nullptr;
-			shaderStage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+			shaderStage.stage               = VK_SHADER_STAGE_COMPUTE_BIT;
 
 			SetCreateFlags(0);
 			SetPipelineLayout(VK_NULL_HANDLE);
@@ -442,11 +448,12 @@ namespace sy
 
 		ComputePipelineBuilder& ComputePipelineBuilder::SetShader(const ShaderModule& shaderModule)
 		{
-			SY_ASSERT((shaderModule.GetShaderType() & VK_SHADER_STAGE_COMPUTE_BIT) != 0, "Shader is not a type of compute shader.");
-			shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-			shaderStage.pNext = nullptr;
+			SY_ASSERT((shaderModule.GetShaderType() & VK_SHADER_STAGE_COMPUTE_BIT) != 0,
+			          "Shader is not a type of compute shader.");
+			shaderStage.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			shaderStage.pNext  = nullptr;
 			shaderStage.module = shaderModule.GetNativeHandle();
-			shaderStage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+			shaderStage.stage  = VK_SHADER_STAGE_COMPUTE_BIT;
 			return *this;
 		}
 

@@ -13,6 +13,7 @@ namespace sy::vk
 	class DescriptorManager;
 	class FrameTracker;
 	class PipelineLayoutCache;
+
 	class VulkanContext
 	{
 	public:
@@ -37,6 +38,5 @@ namespace sy::vk
 		std::unique_ptr<CommandPoolManager> cmdPoolManager;
 		std::unique_ptr<DescriptorManager> descriptorManager;
 		std::unique_ptr<PipelineLayoutCache> pipelineLayoutCache;
-
 	};
 }

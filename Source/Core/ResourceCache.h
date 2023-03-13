@@ -29,11 +29,11 @@ namespace sy
 				if (const auto key = reinterpret_cast<size_t>(resource.get()); cachedFlag.contains(key))
 				{
 					spdlog::warn("Trying to add duplicated resource to cache.");
-					return { };
+					return {};
 				}
 
-				const auto newHandle = Handle<T>{ ++handleOffset };
-				cached[newHandle.Value] = std::move(resource);
+				const auto newHandle      = Handle<T>{ ++handleOffset };
+				cached[ newHandle.Value ] = std::move(resource);
 				return newHandle;
 			}
 
@@ -83,8 +83,8 @@ namespace sy
 			{
 				if (!Contains(alias) && Contains(handle))
 				{
-					const auto key = std::hash<std::string_view>()(alias);
-					aliasMap[key] = handle.Value;
+					const auto key  = std::hash<std::string_view>()(alias);
+					aliasMap[ key ] = handle.Value;
 				}
 			}
 
@@ -95,15 +95,15 @@ namespace sy
 
 			[[nodiscard]] bool Contains(const std::string_view alias) const
 			{
-				const auto key = std::hash<std::string_view>()(alias);
+				const auto key   = std::hash<std::string_view>()(alias);
 				const auto found = aliasMap.find(key);
-				return (found != aliasMap.end()) && Contains(Handle<T>{found->second});
+				return (found != aliasMap.end()) && Contains(Handle<T>{ found->second });
 			}
 
 			[[nodiscard]] Handle<T> QueryAlias(const std::string_view alias) const
 			{
 				const auto key = std::hash<std::string_view>()(alias);
-				auto found = aliasMap.find(key);
+				auto found     = aliasMap.find(key);
 				if (found != aliasMap.end())
 				{
 					return Handle<T>{ found->second };
@@ -117,7 +117,6 @@ namespace sy
 			robin_hood::unordered_set<size_t> cachedFlag;
 			robin_hood::unordered_map<size_t, std::unique_ptr<T>> cached;
 			robin_hood::unordered_map<size_t, size_t> aliasMap;
-
 		};
 
 	public:
@@ -226,7 +225,7 @@ namespace sy
 		CRefOptional<Cache<T>> Acquire() const
 		{
 			const auto& type = typeid(T);
-			const auto key = type.hash_code();
+			const auto key   = type.hash_code();
 			if (!caches.contains(key))
 			{
 				return std::nullopt;
@@ -240,13 +239,13 @@ namespace sy
 		RefOptional<Cache<T>> Acquire()
 		{
 			const auto& type = typeid(T);
-			const auto key = type.hash_code();
+			const auto key   = type.hash_code();
 			if (!caches.contains(key))
 			{
 				return std::nullopt;
 			}
 
-			return static_cast<Cache<T>&>(*caches[key]);
+			return static_cast<Cache<T>&>(*caches[ key ]);
 		}
 
 		template <typename T>
@@ -258,14 +257,13 @@ namespace sy
 			}
 
 			const auto& type = typeid(T);
-			const auto key = type.hash_code();
-			caches[key] = std::make_unique<Cache<T>>();
+			const auto key   = type.hash_code();
+			caches[ key ]    = std::make_unique<Cache<T>>();
 
-			return static_cast<Cache<T>&>(*caches[key]);
+			return static_cast<Cache<T>&>(*caches[ key ]);
 		}
 
 	private:
 		robin_hood::unordered_map<size_t, std::unique_ptr<CacheBase>> caches;
-
 	};
 }

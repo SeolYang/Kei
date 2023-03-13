@@ -24,6 +24,7 @@
       "taskflow",
       "lz4",
       "nlohmann-json",
-      "magic-enum"
+      "magic-enum",
+      "catch2"
     ]
   }

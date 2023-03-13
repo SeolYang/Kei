@@ -16,30 +16,52 @@ namespace sy::vk
 	class DescriptorPool;
 	class Buffer;
 	class FrameTracker;
+
 	class VulkanRHI
 	{
 	public:
 		VulkanRHI(const window::Window& window);
 		~VulkanRHI();
 
-		VulkanRHI(const VulkanRHI&) = delete;
-		VulkanRHI(VulkanRHI&&) = delete;
+		VulkanRHI(const VulkanRHI&)            = delete;
+		VulkanRHI(VulkanRHI&&)                 = delete;
 		VulkanRHI& operator=(const VulkanRHI&) = delete;
-		VulkanRHI& operator=(VulkanRHI&&) = delete;
+		VulkanRHI& operator=(VulkanRHI&&)      = delete;
 
-		[[nodiscard]] VkPhysicalDevice GetPhysicalDevice() const { return physicalDevice; }
-		[[nodiscard]] VkDevice GetDevice() const { return device; }
+		[[nodiscard]] VkPhysicalDevice GetPhysicalDevice() const
+		{
+			return physicalDevice;
+		}
+
+		[[nodiscard]] VkDevice GetDevice() const
+		{
+			return device;
+		}
+
 		[[nodiscard]] uint32_t GetQueueFamilyIndex(EQueueType queueType) const;
 		[[nodiscard]] VkQueue GetQueue(EQueueType queueType) const;
-		[[nodiscard]] VkSurfaceKHR GetSurface() const { return surface; }
-		[[nodiscard]] Swapchain& GetSwapchain() const { return *swapchain; }
-		[[nodiscard]] VmaAllocator GetAllocator() const { return allocator; }
+
+		[[nodiscard]] VkSurfaceKHR GetSurface() const
+		{
+			return surface;
+		}
+
+		[[nodiscard]] Swapchain& GetSwapchain() const
+		{
+			return *swapchain;
+		}
+
+		[[nodiscard]] VmaAllocator GetAllocator() const
+		{
+			return allocator;
+		}
 
 		void SubmitImmediateTo(const CommandBuffer& cmdBuffer) const;
 
 		void SubmitTo(EQueueType queueType, const VkSubmitInfo& submitInfo, const Fence& fence) const;
 		void SubmitTo(const CommandBuffer& cmdBuffer, const Fence& fence) const;
-		void SubmitTo(EQueueType queueType, const FrameTracker& frameTracker, std::span<CRef<CommandBuffer>> cmdBuffers) const;
+		void SubmitTo(EQueueType queueType, const FrameTracker& frameTracker,
+		              std::span<CRef<CommandBuffer>> cmdBuffers) const;
 		void SubmitTo(
 			EQueueType queueType,
 			std::span<std::reference_wrapper<const Semaphore>> waitSemaphores,
@@ -99,6 +121,5 @@ namespace sy::vk
 		uint32_t presentQueueFamilyIdx;
 
 		std::unique_ptr<Fence> immediateFence;
-
 	};
 }

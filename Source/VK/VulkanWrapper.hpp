@@ -14,11 +14,14 @@ namespace sy::vk
 
 	public:
 		VulkanWrapper(const std::string_view name, const VulkanRHI& vulkanRHI, const VkObjectType type) :
-			VulkanWrapper(name, vulkanRHI, type, VK_DESTROY_LAMBDA_SIGNATURE(Native_t){})
+			VulkanWrapper(name, vulkanRHI, type, VK_DESTROY_LAMBDA_SIGNATURE(Native_t)
+			{
+			})
 		{
 		}
 
-		VulkanWrapper(const std::string_view name, const VulkanRHI& vulkanRHI, const VkObjectType type, const VulkanDestroyFunction_t destroyFunction) :
+		VulkanWrapper(const std::string_view name, const VulkanRHI& vulkanRHI, const VkObjectType type,
+		              const VulkanDestroyFunction_t destroyFunction) :
 			NamedType(name),
 			vulkanRHI(vulkanRHI),
 			type(type),
@@ -31,9 +34,20 @@ namespace sy::vk
 			destroyFunction(vulkanRHI, handle);
 		}
 
-		[[nodiscard]] Native_t GetNativeHandle() const { return handle; }
-		[[nodiscard]] VkObjectType GetType() const { return type; }
-		[[nodiscard]] const VulkanRHI& GetRHI() const { return vulkanRHI; }
+		[[nodiscard]] Native_t GetNativeHandle() const
+		{
+			return handle;
+		}
+
+		[[nodiscard]] VkObjectType GetType() const
+		{
+			return type;
+		}
+
+		[[nodiscard]] const VulkanRHI& GetRHI() const
+		{
+			return vulkanRHI;
+		}
 
 	protected:
 		void UpdateHandle(const Native_t newHandle)
@@ -48,28 +62,30 @@ namespace sy::vk
 		const VulkanDestroyFunction_t destroyFunction;
 		const VkObjectType type;
 		Native_t handle = VK_NULL_HANDLE;
-
 	};
 
 	template <typename VulkanWrapperType>
-	std::vector<typename VulkanWrapperType::Native_t> TransformVulkanWrappersToNativesWithValidation(const CRefSpan<VulkanWrapperType> wrappers, const std::function<bool(const CRef<VulkanWrapperType> wrapper)> validation)
+	std::vector<typename VulkanWrapperType::Native_t> TransformVulkanWrappersToNativesWithValidation(
+		const CRefSpan<VulkanWrapperType> wrappers,
+		const std::function<bool(const CRef<VulkanWrapperType> wrapper)> validation)
 	{
 		std::vector<typename VulkanWrapperType::Native_t> natives;
 		natives.resize(wrappers.size());
 		std::transform(wrappers.begin(), wrappers.end(),
-			natives.begin(),
-			[&validation](const CRef<VulkanWrapperType> wrapper) -> VulkanWrapperType::Native_t
-			{
-				const bool bIsValid = validation(wrapper);
-				SY_ASSERT(bIsValid, "Invalid wrapper transformation.");
-				return wrapper.get().GetNativeHandle();
-			});
+		               natives.begin(),
+		               [&validation](const CRef<VulkanWrapperType> wrapper) -> VulkanWrapperType::Native_t
+		               {
+			               const bool bIsValid = validation(wrapper);
+			               SY_ASSERT(bIsValid, "Invalid wrapper transformation.");
+			               return wrapper.get().GetNativeHandle();
+		               });
 
 		return natives;
 	}
 
 	template <typename VulkanWrapperType>
-	std::vector<typename VulkanWrapperType::Native_t> TransformVulkanWrappersToNatives(const CRefSpan<VulkanWrapperType> wrappers)
+	std::vector<typename VulkanWrapperType::Native_t> TransformVulkanWrappersToNatives(
+		const CRefSpan<VulkanWrapperType> wrappers)
 	{
 		return TransformVulkanWrappersToNativesWithValidation<VulkanWrapperType>(wrappers,
 			[](const CRef<VulkanWrapperType>)

@@ -56,21 +56,26 @@ namespace sy
 			this->name = name;
 		}
 
-		[[nodiscard]] std::string_view GetName() const { return name; }
-		[[nodiscard]] std::string& GetName() { return name; }
+		[[nodiscard]] std::string_view GetName() const
+		{
+			return name;
+		}
+
+		[[nodiscard]] std::string& GetName()
+		{
+			return name;
+		}
 
 	private:
 		std::string name;
-
 	};
 
 	class NonCopyable
 	{
 	public:
-		NonCopyable() = default;
-		virtual ~NonCopyable() = default;
-		NonCopyable(const NonCopyable&) = delete;
+		NonCopyable()                             = default;
+		virtual ~NonCopyable()                    = default;
+		NonCopyable(const NonCopyable&)           = delete;
 		NonCopyable& operator=(const NonCopyable) = delete;
-
 	};
 }

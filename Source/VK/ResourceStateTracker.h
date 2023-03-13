@@ -8,20 +8,22 @@ namespace sy
 
 namespace sy::vk
 {
-	inline auto ResolveTextureSubResourceRangeIndex(const size_t mipLevel, const size_t arrayLayer, const size_t numMipLevels)
+	inline auto ResolveTextureSubResourceRangeIndex(const size_t mipLevel, const size_t arrayLayer,
+	                                                const size_t numMipLevels)
 	{
 		return (arrayLayer * numMipLevels) + mipLevel;
 	}
 
 	class Texture;
 	class Buffer;
+
 	class ResourceStateTracker : public NonCopyable
 	{
 	public:
 		struct TextureState
 		{
 			Handle<Texture> Handle = {};
-			ETextureState State = ETextureState::None;
+			ETextureState State    = ETextureState::None;
 			std::vector<ETextureState> SubResourceStates;
 			bool bTrackingPerSubResource = false;
 		};
@@ -29,7 +31,7 @@ namespace sy::vk
 		struct BufferState
 		{
 			Handle<Buffer> Handle = {};
-			EBufferState State = EBufferState::None;
+			EBufferState State    = EBufferState::None;
 		};
 
 		struct TextureStateTransition
@@ -56,12 +58,20 @@ namespace sy::vk
 		void Register(Handle<Buffer> handle);
 		void UnRegister(Handle<Buffer> handle);
 
-		void PendingTransition(ETextureState dstState, Handle<Texture> handle, std::span<const TextureSubResource> subResources = {});
+		void PendingTransition(ETextureState dstState, Handle<Texture> handle,
+		                       std::span<const TextureSubResource> subResources = {});
 		void PendingTransition(EBufferState dstState, Handle<Buffer> handle, size_t offset, size_t size);
 		void PendingTransition(EBufferState dstState, Handle<Buffer> handle);
-		
-		std::vector<TextureStateTransition> FlushTextureTransitions() { return std::move(pendingTextureTransitions); }
-		std::vector<BufferStateTransition> FlushBufferTransitions() { return std::move(pendingBufferTransitions); }
+
+		std::vector<TextureStateTransition> FlushTextureTransitions()
+		{
+			return std::move(pendingTextureTransitions);
+		}
+
+		std::vector<BufferStateTransition> FlushBufferTransitions()
+		{
+			return std::move(pendingBufferTransitions);
+		}
 
 	private:
 		//mutable std::mutex mutex;
@@ -71,6 +81,5 @@ namespace sy::vk
 
 		std::vector<TextureStateTransition> pendingTextureTransitions;
 		std::vector<BufferStateTransition> pendingBufferTransitions;
-
 	};
 }

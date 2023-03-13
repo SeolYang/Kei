@@ -9,6 +9,7 @@ namespace sy::vk
 namespace sy::render
 {
 	constexpr std::string_view DefaultMaterial = "DefaultMaterial";
+
 	class Material
 	{
 	public:

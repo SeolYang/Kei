@@ -23,7 +23,7 @@ namespace sy::asset
 		const nlohmann::json& metadataJson = assetData.GetMetadata();
 		MaterialMetadata result;
 
-		result.BaseTexture = metadataJson[MATERIAL_METADATA_BASE_TEXTURE];
+		result.BaseTexture = metadataJson[ MATERIAL_METADATA_BASE_TEXTURE ];
 		return result;
 	}
 
@@ -44,16 +44,24 @@ namespace sy::asset
 			return {};
 		}
 
-		const auto& vulkanRHI = vulkanContext.GetRHI();
+		const auto& vulkanRHI   = vulkanContext.GetRHI();
 		auto& descriptorManager = vulkanContext.GetDescriptorManager();
-		const auto& assetData = Unwrap(resourceCache.Load(assetDataHandle));
-		const auto metadata = QueryMetadata(assetData);
+		const auto& assetData   = Unwrap(resourceCache.Load(assetDataHandle));
+		const auto metadata     = QueryMetadata(assetData);
 
-		const auto baseTexHandle = LoadTexture2DFromAsset(metadata.BaseTexture, resourceCache, vulkanContext);
-		auto& baseTexRef = Unwrap(resourceCache.Load(baseTexHandle));
-		const auto baseTexViewHandle = resourceCache.Add<vk::TextureView>(std::format("{}_View", metadata.BaseTexture), vulkanRHI, baseTexRef, VK_IMAGE_VIEW_TYPE_2D);
+		const auto baseTexHandle     = LoadTexture2DFromAsset(metadata.BaseTexture, resourceCache, vulkanContext);
+		auto& baseTexRef             = Unwrap(resourceCache.Load(baseTexHandle));
+		const auto baseTexViewHandle = resourceCache.Add<vk::TextureView>(std::format("{}_View", metadata.BaseTexture),
+		                                                                  vulkanRHI, baseTexRef, VK_IMAGE_VIEW_TYPE_2D);
 		const auto linearSampler = resourceCache.QueryAlias<vk::Sampler>(vk::LinearSamplerRepeat);
-		const auto newHandle = resourceCache.Add<render::Material>(render::Material{ resourceCache.Add<vk::Descriptor>(descriptorManager.RequestDescriptor(resourceCache, baseTexHandle, baseTexViewHandle, linearSampler, vk::ETextureState::AnyShaderReadSampledImage)) });
+		const auto newHandle     = resourceCache.Add<render::Material>(render::Material{
+			                                                               resourceCache.Add<
+				                                                               vk::Descriptor>(descriptorManager.
+			                                                                RequestDescriptor(resourceCache,
+				                                                                baseTexHandle, baseTexViewHandle,
+				                                                                linearSampler,
+				                                                                vk::ETextureState::AnyShaderReadSampledImage))
+		                                                               });
 		resourceCache.SetAlias(pathStr, newHandle);
 		return newHandle;
 	}
@@ -61,7 +69,7 @@ namespace sy::asset
 	nlohmann::json ToMetadata(const MaterialMetadata metadata)
 	{
 		nlohmann::json result;
-		result[MATERIAL_METADATA_BASE_TEXTURE] = metadata.BaseTexture;
+		result[ MATERIAL_METADATA_BASE_TEXTURE ] = metadata.BaseTexture;
 		return result;
 	}
 

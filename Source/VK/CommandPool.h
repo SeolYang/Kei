@@ -6,6 +6,7 @@ namespace sy::vk
 	class VulkanRHI;
 	class CommandBuffer;
 	class Fence;
+
 	class CommandPool : public VulkanWrapper<VkCommandPool>
 	{
 	public:
@@ -19,7 +20,12 @@ namespace sy::vk
 		virtual ~CommandPool() override = default;
 
 		ManagedCommandBuffer RequestCommandBuffer(std::string_view name);
-		[[nodiscard]] EQueueType GetQueueType() const { return queueType; }
+
+		[[nodiscard]] EQueueType GetQueueType() const
+		{
+			return queueType;
+		}
+
 		void BeginFrame();
 
 		void Reset() const;

@@ -10,24 +10,28 @@ namespace sy::asset
 {
 	struct TextureMetadata
 	{
-		VkFormat Format = VK_FORMAT_UNDEFINED;
+		VkFormat Format           = VK_FORMAT_UNDEFINED;
 		Extent3D<uint32_t> Extent = { 1, 1, 1 };
 	};
 
 	constexpr std::string_view TEXTURE_METADATA_FORMAT = "Format";
-	constexpr std::string_view TEXTURE_METADATA_WIDTH = "Width";
+	constexpr std::string_view TEXTURE_METADATA_WIDTH  = "Width";
 	constexpr std::string_view TEXTURE_METADATA_HEIGHT = "Height";
-	constexpr std::string_view TEXTURE_METADATA_DEPTH = "Depth";
+	constexpr std::string_view TEXTURE_METADATA_DEPTH  = "Depth";
 
 	TextureMetadata QueryMetadata(const AssetData<vk::Texture>& assetData)
 	{
 		const nlohmann::json& metadataJson = assetData.GetMetadata();
 		TextureMetadata result;
 
-		const std::string formatStr = metadataJson[TEXTURE_METADATA_FORMAT];
-		const auto formatOpt = magic_enum::enum_cast<VkFormat>(formatStr);
-		result.Format = formatOpt.value_or(VK_FORMAT_UNDEFINED);
-		result.Extent = { metadataJson[TEXTURE_METADATA_WIDTH], metadataJson[TEXTURE_METADATA_HEIGHT], metadataJson[TEXTURE_METADATA_DEPTH] };
+		const std::string formatStr = metadataJson[ TEXTURE_METADATA_FORMAT ];
+		const auto formatOpt        = magic_enum::enum_cast<VkFormat>(formatStr);
+		result.Format               = formatOpt.value_or(VK_FORMAT_UNDEFINED);
+		result.Extent               = {
+			metadataJson[ TEXTURE_METADATA_WIDTH ],
+			metadataJson[ TEXTURE_METADATA_HEIGHT ],
+			metadataJson[ TEXTURE_METADATA_DEPTH ]
+		};
 		return result;
 	}
 
@@ -36,15 +40,15 @@ namespace sy::asset
 		const AssetData<vk::Texture>& assetData,
 		const vk::VulkanContext& vulkanContext)
 	{
-		const auto& blob = assetData.GetBlob();
+		const auto& blob    = assetData.GetBlob();
 		const auto metadata = QueryMetadata(assetData);
 
 		return vk::TextureBuilder::Texture2DShaderResourceTemplate(vulkanContext)
-			.SetName(name)
-			.SetExtent(metadata.Extent)
-			.SetFormat(metadata.Format)
-			.SetDataToTransfer(std::span{ blob })
-			.Build();
+		       .SetName(name)
+		       .SetExtent(metadata.Extent)
+		       .SetFormat(metadata.Format)
+		       .SetDataToTransfer(std::span{ blob })
+		       .Build();
 	}
 
 	Handle<vk::Texture> LoadTexture2DFromAsset(
@@ -58,7 +62,7 @@ namespace sy::asset
 		}
 
 		const auto& assetData = Unwrap(resourceCache.Load<AssetData<vk::Texture>>(assetDataHandle));
-		const auto pathStr = assetData.GetPath().string();
+		const auto pathStr    = assetData.GetPath().string();
 
 		if (resourceCache.Contains<vk::Texture>(pathStr))
 		{
@@ -71,18 +75,19 @@ namespace sy::asset
 	}
 
 	Handle<vk::Texture> LoadTexture2DFromAsset(const fs::path& path,
-		ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext)
+	                                           ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext)
 	{
-		return LoadTexture2DFromAsset(LoadOrCreateAssetData<vk::Texture>(path, resourceCache), resourceCache, vulkanContext);
+		return LoadTexture2DFromAsset(LoadOrCreateAssetData<vk::Texture>(path, resourceCache), resourceCache,
+		                              vulkanContext);
 	}
 
 	auto PackMetadataToJson(const TextureMetadata metadata)
 	{
 		nlohmann::json metadataJson;
-		metadataJson[TEXTURE_METADATA_FORMAT] = magic_enum::enum_name(metadata.Format);
-		metadataJson[TEXTURE_METADATA_WIDTH] = metadata.Extent.width;
-		metadataJson[TEXTURE_METADATA_HEIGHT] = metadata.Extent.height;
-		metadataJson[TEXTURE_METADATA_DEPTH] = metadata.Extent.depth;
+		metadataJson[ TEXTURE_METADATA_FORMAT ] = magic_enum::enum_name(metadata.Format);
+		metadataJson[ TEXTURE_METADATA_WIDTH ]  = metadata.Extent.width;
+		metadataJson[ TEXTURE_METADATA_HEIGHT ] = metadata.Extent.height;
+		metadataJson[ TEXTURE_METADATA_DEPTH ]  = metadata.Extent.depth;
 		return metadataJson;
 	}
 
@@ -92,7 +97,7 @@ namespace sy::asset
 		outputPath.replace_extension(magic_enum::enum_name(EAsset::Texture));
 
 		std::string inputExtension = input.extension().string();
-		inputExtension = inputExtension.substr(1);
+		inputExtension             = inputExtension.substr(1);
 		std::transform(inputExtension.begin(), inputExtension.end(), inputExtension.begin(), ::toupper);
 		const auto srcExtension = magic_enum::enum_cast<ETextureExtension>(inputExtension);
 		if (!srcExtension.has_value())
@@ -101,12 +106,12 @@ namespace sy::asset
 			return false;
 		}
 
-		const auto requiredFormat = ExtensionToFormat(srcExtension.value());
+		const auto requiredFormat   = ExtensionToFormat(srcExtension.value());
 		const auto requiredChannels = vk::ToNumberOfComponents(requiredFormat);
 
 		int width, height, channels;
 		const std::string inputStr = input.string();
-		stbi_uc* pixels = stbi_load(inputStr.c_str(), &width, &height, &channels, requiredChannels);
+		stbi_uc* pixels            = stbi_load(inputStr.c_str(), &width, &height, &channels, requiredChannels);
 		if (pixels == nullptr)
 		{
 			SY_ASSERT(false, "Failed load data from file {}.", input.string());

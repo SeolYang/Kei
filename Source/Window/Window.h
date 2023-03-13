@@ -10,14 +10,26 @@ namespace sy::window
 		~Window();
 
 		Window(const window::Window&) = delete;
-		Window(window::Window&&) = default;
+		Window(window::Window&&)      = default;
 
 		window::Window& operator=(const window::Window&) = delete;
-		window::Window& operator=(window::Window&&) = default;
+		window::Window& operator=(window::Window&&)      = default;
 
-		[[nodiscard]] std::string_view GetTitle() const { return title; }
-		[[nodiscard]] SDL_Window& GetSDLWindow() const { return *window; }
-		[[nodiscard]] auto GetExtent() const { return extent; }
+		[[nodiscard]] std::string_view GetTitle() const
+		{
+			return title;
+		}
+
+		[[nodiscard]] SDL_Window& GetSDLWindow() const
+		{
+			return *window;
+		}
+
+		[[nodiscard]] auto GetExtent() const
+		{
+			return extent;
+		}
+
 	private:
 		void Startup();
 		void Cleanup();
@@ -26,6 +38,5 @@ namespace sy::window
 		std::string title;
 		Extent2D<uint32_t> extent;
 		SDL_Window* window;
-
 	};
 }

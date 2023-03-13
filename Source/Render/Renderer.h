@@ -34,11 +34,13 @@ namespace sy::render
 {
 	class Mesh;
 	class SimpleRenderPass;
+
 	/** @todo Renderer to RenderContext? */
 	class Renderer final : public NonCopyable
 	{
 	public:
-		Renderer(const window::Window& window, vk::VulkanContext& vulkanContext, vk::ResourceStateTracker& resStateTracker, ResourceCache& resourceCache);
+		Renderer(const window::Window& window, vk::VulkanContext& vulkanContext,
+		         vk::ResourceStateTracker& resStateTracker, ResourceCache& resourceCache);
 		~Renderer() override;
 
 		void Render();
@@ -68,6 +70,5 @@ namespace sy::render
 		float elapsedTime;
 
 		std::vector<component::StaticMeshComponent> staticMeshes;
-
 	};
 }

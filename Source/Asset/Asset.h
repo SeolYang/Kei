@@ -39,9 +39,20 @@ namespace sy::asset
 		{
 		}
 
-		[[nodiscard]] fs::path GetPath() const { return path; }
-		[[nodiscard]] const nlohmann::json& GetMetadata() const { return metadata; }
-		[[nodiscard]] const std::vector<char>& GetBlob() const { return blob; }
+		[[nodiscard]] fs::path GetPath() const
+		{
+			return path;
+		}
+
+		[[nodiscard]] const nlohmann::json& GetMetadata() const
+		{
+			return metadata;
+		}
+
+		[[nodiscard]] const std::vector<char>& GetBlob() const
+		{
+			return blob;
+		}
 
 		void SaveMetadata() const
 		{
@@ -97,7 +108,7 @@ namespace sy::asset
 				buffer.resize(size);
 				inFileStream.read(buffer.data(), size);
 			}
-			
+
 			return buffer;
 		}
 
@@ -105,7 +116,6 @@ namespace sy::asset
 		fs::path path;
 		nlohmann::json metadata;
 		std::vector<char> blob;
-
 	};
 
 	template <typename T>

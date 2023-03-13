@@ -10,6 +10,7 @@ namespace sy::vk
 {
 	class VulkanRHI;
 	class Semaphore;
+
 	class Swapchain : public VulkanWrapper<VkSwapchainKHR>
 	{
 	public:
@@ -17,9 +18,22 @@ namespace sy::vk
 		virtual ~Swapchain() override;
 
 		void AcquireNext(const Semaphore& presentSemaphore);
-		[[nodiscard]] auto GetCurrentImage() const { return images[currentImageIdx]; }
-		[[nodiscard]] auto GetCurrentImageView() const { return imageViews[currentImageIdx]; }
-		[[nodiscard]] auto GetCurrentImageIndex() const { return currentImageIdx; }
+
+		[[nodiscard]] auto GetCurrentImage() const
+		{
+			return images[ currentImageIdx ];
+		}
+
+		[[nodiscard]] auto GetCurrentImageView() const
+		{
+			return imageViews[ currentImageIdx ];
+		}
+
+		[[nodiscard]] auto GetCurrentImageIndex() const
+		{
+			return currentImageIdx;
+		}
+
 		[[nodiscard]] auto GetColorAttachmentInfo(VkClearColorValue clearColorValue = { 0.f, 0.f, 0.f, 1.f }) const
 		{
 			return VkRenderingAttachmentInfoKHR
@@ -41,6 +55,5 @@ namespace sy::vk
 		VkFormat format;
 
 		uint32_t currentImageIdx;
-
 	};
 }

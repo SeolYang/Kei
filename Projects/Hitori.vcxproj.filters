@@ -49,6 +49,9 @@
     <Filter Include="Source\Vulkan\Builders">
       <UniqueIdentifier>{275abf55-a2b0-4c1f-ac9e-0b44877e3ca8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Tests">
+      <UniqueIdentifier>{710f489e-6fcd-480e-a36a-44eefdb6c194}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\main.cpp">
@@ -185,6 +188,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\VK\SamplerBuilder.cpp">
       <Filter>Source\Vulkan\Builders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Tests\Tests.cpp">
+      <Filter>Source\Tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

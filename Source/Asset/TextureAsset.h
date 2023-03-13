@@ -24,7 +24,8 @@ namespace sy::asset
 	enum class ETextureExtension
 	{
 		PNG,
-		JPEG, JPG,
+		JPEG,
+		JPG,
 		HDR
 	};
 
@@ -32,15 +33,16 @@ namespace sy::asset
 	{
 		static const robin_hood::unordered_map<ETextureExtension, VkFormat> Table
 		{
-				{ ETextureExtension::HDR,		VK_FORMAT_R32G32B32_SFLOAT		},
-				{ ETextureExtension::PNG,		VK_FORMAT_R8G8B8A8_SRGB			},
-				{ ETextureExtension::JPEG,		VK_FORMAT_R8G8B8A8_SRGB			},
-				{ ETextureExtension::JPG,		VK_FORMAT_R8G8B8A8_SRGB			}
+			{ ETextureExtension::HDR, VK_FORMAT_R32G32B32_SFLOAT },
+			{ ETextureExtension::PNG, VK_FORMAT_R8G8B8A8_SRGB },
+			{ ETextureExtension::JPEG, VK_FORMAT_R8G8B8A8_SRGB },
+			{ ETextureExtension::JPG, VK_FORMAT_R8G8B8A8_SRGB }
 		};
 
 		return Table.find(extension)->second;
 	}
 
-	Handle<vk::Texture> LoadTexture2DFromAsset(const fs::path& path, ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext);
+	Handle<vk::Texture> LoadTexture2DFromAsset(const fs::path& path, ResourceCache& resourceCache,
+	                                           const vk::VulkanContext& vulkanContext);
 	bool ConvertTexture2D(const fs::path& input);
 }

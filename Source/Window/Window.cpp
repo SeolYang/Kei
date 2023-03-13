@@ -20,14 +20,14 @@ namespace sy::window
 		SY_ASSERT(extent.IsValid(), "Extent may contains non-valid values.");
 
 		constexpr SDL_WindowFlags windowFlags = SDL_WINDOW_VULKAN;
-		window = SDL_CreateWindow(
-			"Hitori",
-			SDL_WINDOWPOS_UNDEFINED,
-			SDL_WINDOWPOS_UNDEFINED,
-			extent.width,
-			extent.height,
-			windowFlags
-		);
+		window                                = SDL_CreateWindow(
+		                                                         "Hitori",
+		                                                         SDL_WINDOWPOS_UNDEFINED,
+		                                                         SDL_WINDOWPOS_UNDEFINED,
+		                                                         extent.width,
+		                                                         extent.height,
+		                                                         windowFlags
+		                                                        );
 
 		SY_ASSERT(window != nullptr, "Failed to create sdl window");
 	}
