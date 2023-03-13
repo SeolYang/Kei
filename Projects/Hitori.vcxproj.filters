@@ -189,7 +189,7 @@
     <ClCompile Include="..\Source\VK\SamplerBuilder.cpp">
       <Filter>Source\Vulkan\Builders</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Tests\Tests.cpp">
+    <ClCompile Include="..\Source\Tests\CoreUnitTest.cpp">
       <Filter>Source\Tests</Filter>
     </ClCompile>
   </ItemGroup>

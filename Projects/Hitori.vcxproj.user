@@ -9,7 +9,7 @@
     </LocalDebuggerCommand>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'">
-    <LocalDebuggerCommandArguments>--test --success -d yes</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>--test --success -d yes -v quiet</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(TargetDir)</LocalDebuggerWorkingDirectory>
     <LocalDebuggerCommand />

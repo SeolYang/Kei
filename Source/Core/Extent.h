@@ -6,7 +6,7 @@ namespace sy
 	struct Extent2D
 	{
 	public:
-		bool IsValid() const
+		[[nodiscard]] bool IsValid() const
 		{
 			return (width > 0) && (height > 0);
 		}
@@ -19,7 +19,7 @@ namespace sy
 	struct Extent3D
 	{
 	public:
-		bool IsValid() const
+		[[nodiscard]] bool IsValid() const
 		{
 			return (width > 0) && (height > 0) && (depth > 0);
 		}

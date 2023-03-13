@@ -38,7 +38,7 @@
     <ClCompile Include="..\Source\Render\Renderer.cpp" />
     <ClCompile Include="..\Source\Render\RenderPass.cpp" />
     <ClCompile Include="..\Source\Render\RenderPasses\SimpleRenderPass.cpp" />
-    <ClCompile Include="..\Source\Tests\Tests.cpp" />
+    <ClCompile Include="..\Source\Tests\CoreUnitTest.cpp" />
     <ClCompile Include="..\Source\VK\Buffer.cpp" />
     <ClCompile Include="..\Source\VK\BufferBuilder.cpp" />
     <ClCompile Include="..\Source\VK\CommandBuffer.cpp" />

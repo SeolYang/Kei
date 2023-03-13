@@ -79,13 +79,16 @@ namespace sy
 				return Load(QueryAlias(alias));
 			}
 
-			void SetAlias(const std::string_view alias, const Handle<T> handle)
+			bool SetAlias(const std::string_view alias, const Handle<T> handle)
 			{
-				if (!Contains(alias) && Contains(handle))
+				if (Contains(handle))
 				{
 					const auto key  = std::hash<std::string_view>()(alias);
 					aliasMap[ key ] = handle.Value;
+					return true;
 				}
+
+				return false;
 			}
 
 			[[nodiscard]] bool Contains(const Handle<T> handle) const
@@ -154,10 +157,10 @@ namespace sy
 		}
 
 		template <typename T>
-		void SetAlias(const std::string_view alias, const Handle<T> handle)
+		bool SetAlias(const std::string_view alias, const Handle<T> handle)
 		{
 			Cache<T>& cache = AcquireOrCreate<T>();
-			cache.SetAlias(alias, handle);
+			return cache.SetAlias(alias, handle);
 		}
 
 		template <typename T>

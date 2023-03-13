@@ -11,9 +11,11 @@ namespace sy
 	public:
 		HandleUnderType Value = InvalidValue;
 
+		[[nodiscard]] bool IsValidHandleValue() const { return Value != InvalidValue;}
+
 		[[nodiscard]] operator bool() const
 		{
-			return Value != InvalidValue;
+			return IsValidHandleValue();
 		}
 
 	private:
