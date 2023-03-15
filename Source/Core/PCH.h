@@ -91,7 +91,7 @@
 #include <Core/Types.h>
 #include <Core/Handle.h>
 #include <Core/Extent.h>
-#include <Core/HitoriAssert.h>
+#include <Core/Assert.h>
 #include <Core/Pool.hpp>
 #include <Core/Timer.h>
 #include <Core/ECS.h>

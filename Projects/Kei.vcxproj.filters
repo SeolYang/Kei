@@ -177,7 +177,7 @@
     <ClInclude Include="..\Source\Core\Handle.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Core\HitoriAssert.h">
+    <ClInclude Include="..\Source\Core\Assert.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Core\Pool.hpp">
