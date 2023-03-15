@@ -55,14 +55,12 @@ TEST_CASE("ResourceCache", "[res_cache]")
 
 	SECTION("Load resource from cache")
 	{
-		/** @todo Handle<T> is only used for a resource cache, so its better to specialize it for that specific purpose. */
 		const auto resCache = std::make_unique<sy::ResourceCache>();
 		const auto newResource = resCache->Add<uint32_t>(153);
 		const auto newResourceValOpt = resCache->Load(newResource);
 		REQUIRE(newResourceValOpt.has_value());
 		REQUIRE(*newResourceValOpt == 153);
 
-		/** @todo Prevent Manually created handle! */
 		constexpr sy::Handle<uint32_t> manualHandle{1};
 		const auto manualValOpt = resCache->Load(manualHandle);
 		REQUIRE(manualValOpt.has_value());

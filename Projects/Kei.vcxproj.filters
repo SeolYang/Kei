@@ -1,0 +1,374 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\Source\Core\PCH.cpp" />
+    <ClCompile Include="..\Source\main.cpp" />
+    <ClCompile Include="..\Source\Asset\Asset.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\AssetConverter.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Audio\AudioContext.cpp">
+      <Filter>Source\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\Buffer.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\BufferBuilder.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\CommandBuffer.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\CommandPool.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\CommandPoolManager.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Core\CommandLineParser.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Application\Context.cpp">
+      <Filter>Source\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Core\ResourceCache.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Game\GameContext.cpp">
+      <Filter>Source\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\DescriptorManager.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\Fence.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\FrameTracker.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\LayoutCache.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\Pipeline.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\PipelineBuilder.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\ResourceStateTracker.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\Sampler.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\SamplerBuilder.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\Semaphore.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\ShaderModule.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\Swapchain.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\Texture.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\TextureBuilder.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\TextureView.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\VertexInputBuilder.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\VulkanContext.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\VulkanRHI.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\VulkanTypes.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Render\Material.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Render\Mesh.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Render\Model.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Render\Renderer.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Render\RenderPass.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Render\RenderPasses\SimpleRenderPass.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Game\World.cpp">
+      <Filter>Source\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Window\Window.cpp">
+      <Filter>Source\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\MaterialAsset.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\ModelAsset.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\TextureAsset.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\volk\volk.c">
+      <Filter>Thirdparty\volk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Tests\CoreUnitTest.cpp">
+      <Filter>Source\Test</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Source\Core\PCH.h" />
+    <ClInclude Include="..\Source\Asset\AssetConverter.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\Asset.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Audio\AudioContext.h">
+      <Filter>Source\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\Buffer.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\BufferBuilder.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\CommandBuffer.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\CommandPool.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\CommandPoolManager.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\CommandLineParser.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Application\Context.h">
+      <Filter>Source\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\ECS.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\Extent.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\Handle.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\HitoriAssert.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\Pool.hpp">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\ResourceCache.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\Timer.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\Utils.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\Types.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Game\GameContext.h">
+      <Filter>Source\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Component\HierarchyComponent.h">
+      <Filter>Source\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\DescriptorManager.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\Fence.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\FrameTracker.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\LayoutCache.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\Pipeline.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\PipelineBuilder.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\PushConstantBuilder.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\ResourceStateTracker.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\Sampler.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\SamplerBuilder.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\Semaphore.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\ShaderModule.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\Swapchain.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\Synchronization.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\Texture.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\TextureBuilder.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\TextureView.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\VertexInputBuilder.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\VulkanContext.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\VulkanRHI.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\VulkanTypes.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\VulkanWrapper.hpp">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\Material.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\Mesh.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\Model.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\Renderer.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\RenderPass.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\RenderPasses\SimpleRenderPass.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\Vertex.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Game\World.h">
+      <Filter>Source\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Window\Window.h">
+      <Filter>Source\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\ModelAsset.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\MaterialAsset.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\TextureAsset.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\volk\volk.h">
+      <Filter>Thirdparty\volk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Math\MathUtils.h">
+      <Filter>Source\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Component\TransformComponent.h">
+      <Filter>Source\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Component\StaticMeshComponent.h">
+      <Filter>Source\Component</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Assets\Shaders\tri.vert">
+      <Filter>Source\Shader</Filter>
+    </None>
+    <None Include="..\Assets\Shaders\tri.frag">
+      <Filter>Source\Shader</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{ee8c4001-cc06-4d83-8878-beee635ab803}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application">
+      <UniqueIdentifier>{3093e37e-a6fb-4d4d-a1b9-bf701096ea66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\VK">
+      <UniqueIdentifier>{ecf4f2f8-e6ed-415d-a9f2-06ac62589d85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Asset">
+      <UniqueIdentifier>{87ba9e8e-111b-420c-92ec-128fcbb67f08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Audio">
+      <UniqueIdentifier>{bd0b7dec-dae4-4d55-8c8a-f2fdc2d8e91c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Component">
+      <UniqueIdentifier>{cd50f8d6-8a32-406e-a783-0a132f15d461}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Core">
+      <UniqueIdentifier>{5211299d-cf4e-4e6c-8838-847c3234f8c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Game">
+      <UniqueIdentifier>{80cce2c6-83b6-4fd5-82dc-9ece544f5077}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Math">
+      <UniqueIdentifier>{5ea091ce-28c8-4a9d-9125-77030a43f59e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Render">
+      <UniqueIdentifier>{e52b2ead-71bf-4123-bc9d-dc8f51b545f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Window">
+      <UniqueIdentifier>{65049aad-ad72-4395-9a73-9bb40d0252d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Shader">
+      <UniqueIdentifier>{a02680e7-a407-4534-abd4-81f2b02a2820}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty">
+      <UniqueIdentifier>{91ba0cbc-466a-4a68-acaf-5cd3fe72d772}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty\volk">
+      <UniqueIdentifier>{c478ddae-3fff-4992-ab6d-67cb801d4764}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Test">
+      <UniqueIdentifier>{dfcde011-8b21-4eba-99d0-2365080f7baf}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
