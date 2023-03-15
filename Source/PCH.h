@@ -1,5 +1,5 @@
 #pragma once
-
+#pragma warning(disable:4819)
 /** Standard Library */
 #include <vector>
 #include <array>
@@ -33,7 +33,6 @@
 #include <tuple>
 #include <fstream>
 #include <concurrent_queue.h>
-#include <execution>
 
 /** Vulkan Headers */
 #define VK_USE_PLATFORM_WIN32_KHR
@@ -107,3 +106,4 @@
 
 /** Internal - Render */
 #include <Render/Vertex.h>
+#include <Render/Mesh.h>
