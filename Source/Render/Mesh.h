@@ -6,7 +6,7 @@ namespace sy::vk
 {
 	class Buffer;
 	class VulkanContext;
-}
+} // namespace sy::vk
 
 namespace sy::render
 {
@@ -17,22 +17,22 @@ namespace sy::render
 	public:
 		template <typename VertexType, typename IndexType = render::IndexType>
 		static std::unique_ptr<Mesh> Create(const std::string_view name, const vk::VulkanContext& vulkanContext,
-		                                    const std::span<const VertexType> vertices,
-		                                    const std::span<const IndexType> indices)
+			const std::span<const VertexType> vertices,
+			const std::span<const IndexType> indices)
 		{
 			const vk::BufferBuilder vertexBufferBuilder =
-					vk::BufferBuilder::VertexBufferTemplate(vulkanContext)
+				vk::BufferBuilder::VertexBufferTemplate(vulkanContext)
 					.SetName(std::format("{}_Vertex_Buffer", name))
 					.SetDataToTransferWithSize(vertices);
 
 			const vk::BufferBuilder indexBufferBuilder =
-					vk::BufferBuilder::IndexBufferTemplate(vulkanContext)
+				vk::BufferBuilder::IndexBufferTemplate(vulkanContext)
 					.SetName(std::format("{}_Index_Buffer", name))
 					.SetDataToTransferWithSize(indices);
 
 			return std::unique_ptr<Mesh>(new Mesh(name,
-			                                      vertices.size(), vertexBufferBuilder.Build(),
-			                                      indices.size(), indexBufferBuilder.Build()));
+				vertices.size(), vertexBufferBuilder.Build(),
+				indices.size(), indexBufferBuilder.Build()));
 		}
 
 		[[nodiscard]] const vk::Buffer& GetVertexBuffer() const
@@ -59,7 +59,7 @@ namespace sy::render
 
 	private:
 		Mesh(std::string_view name, size_t numVertices, std::unique_ptr<vk::Buffer> vertexBuffer, size_t numIndices,
-		     std::unique_ptr<vk::Buffer> indexBuffer);
+			std::unique_ptr<vk::Buffer> indexBuffer);
 
 	private:
 		std::unique_ptr<vk::Buffer> vertexBuffer;
@@ -68,4 +68,4 @@ namespace sy::render
 		const size_t numVertices;
 		const size_t numIndices;
 	};
-}
+} // namespace sy::render

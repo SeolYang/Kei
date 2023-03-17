@@ -6,7 +6,7 @@ namespace sy::vk
 {
 	class Swapchain;
 	class Sampler;
-}
+} // namespace sy::vk
 
 namespace sy::render
 {
@@ -27,7 +27,7 @@ namespace sy::render
 	{
 	public:
 		SimpleRenderPass(std::string_view name, const vk::VulkanContext& vulkanContext,
-		                 const vk::Pipeline& pipeline);
+			const vk::Pipeline& pipeline);
 
 		virtual void OnBegin() override;
 		virtual void Render() override;
@@ -55,4 +55,4 @@ namespace sy::render
 
 		TransformUniformBuffer transformData;
 	};
-}
+} // namespace sy::render

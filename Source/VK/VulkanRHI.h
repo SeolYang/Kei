@@ -23,10 +23,10 @@ namespace sy::vk
 		VulkanRHI(const window::Window& window);
 		~VulkanRHI();
 
-		VulkanRHI(const VulkanRHI&)            = delete;
-		VulkanRHI(VulkanRHI&&)                 = delete;
+		VulkanRHI(const VulkanRHI&) = delete;
+		VulkanRHI(VulkanRHI&&) = delete;
 		VulkanRHI& operator=(const VulkanRHI&) = delete;
-		VulkanRHI& operator=(VulkanRHI&&)      = delete;
+		VulkanRHI& operator=(VulkanRHI&&) = delete;
 
 		[[nodiscard]] VkPhysicalDevice GetPhysicalDevice() const
 		{
@@ -61,7 +61,7 @@ namespace sy::vk
 		void SubmitTo(EQueueType queueType, const VkSubmitInfo& submitInfo, const Fence& fence) const;
 		void SubmitTo(const CommandBuffer& cmdBuffer, const Fence& fence) const;
 		void SubmitTo(EQueueType queueType, const FrameTracker& frameTracker,
-		              std::span<CRef<CommandBuffer>> cmdBuffers) const;
+			std::span<CRef<CommandBuffer>> cmdBuffers) const;
 		void SubmitTo(
 			EQueueType queueType,
 			std::span<std::reference_wrapper<const Semaphore>> waitSemaphores,
@@ -122,4 +122,4 @@ namespace sy::vk
 
 		std::unique_ptr<Fence> immediateFence;
 	};
-}
+} // namespace sy::vk

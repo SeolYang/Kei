@@ -8,7 +8,7 @@ int main(int argc, char** argv)
 {
 	bool bUnitTestRequired = false;
 	Catch::Session session;
-	const auto cli = session.cli() | Catch::Clara::Opt(bUnitTestRequired)[ "--test" ]("Execute Unit Tests.");
+	const auto cli = session.cli() | Catch::Clara::Opt(bUnitTestRequired)["--test"]("Execute Unit Tests.");
 	session.cli(cli);
 
 	if (const int returnCode = session.applyCommandLine(argc, argv); returnCode != 0)

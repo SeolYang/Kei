@@ -32,7 +32,7 @@ namespace sy::vk
 
 		GraphicsPipelineBuilder& AddViewport(VkViewport viewport);
 		GraphicsPipelineBuilder& AddViewport(float x, float y, float width, float height, float minDepth,
-		                                     float maxDepth);
+			float maxDepth);
 
 		GraphicsPipelineBuilder& AddScissor(VkRect2D scissor);
 		GraphicsPipelineBuilder& AddScissor(int32_t x, int32_t y, uint32_t width, uint32_t height);
@@ -66,23 +66,23 @@ namespace sy::vk
 
 		GraphicsPipelineBuilder& SetStencilTestEnable(bool bStencilTestEnable);
 		GraphicsPipelineBuilder& SetStencilOpStateFront(VkStencilOp failOp, VkStencilOp passOp,
-		                                                VkStencilOp depthFailOp, VkCompareOp compareOp,
-		                                                uint32_t compareMask, uint32_t writeMask, uint32_t reference);
+			VkStencilOp depthFailOp, VkCompareOp compareOp,
+			uint32_t compareMask, uint32_t writeMask, uint32_t reference);
 		GraphicsPipelineBuilder& SetStencilOpStateBack(VkStencilOp failOp, VkStencilOp passOp, VkStencilOp depthFailOp,
-		                                               VkCompareOp compareOp, uint32_t compareMask, uint32_t writeMask,
-		                                               uint32_t reference);
+			VkCompareOp compareOp, uint32_t compareMask, uint32_t writeMask,
+			uint32_t reference);
 		GraphicsPipelineBuilder& SetMinDepthBounds(float minDepthBounds);
 		GraphicsPipelineBuilder& SetMaxDepthBounds(float maxDepthBounds);
 
 		/** Color Blend Attachment State */
 
 		GraphicsPipelineBuilder& AddColorBlendAttachmentState(bool bBlendEnable, VkBlendFactor srcColorBlendFactor,
-		                                                      VkBlendFactor dstColorBlendFactor,
-		                                                      VkBlendOp colorBlendOp,
-		                                                      VkBlendFactor srcAlphaBlendFactor,
-		                                                      VkBlendFactor dstAlphaBlendFactor,
-		                                                      VkBlendOp alphaBlendOp,
-		                                                      VkColorComponentFlags colorWriteMask);
+			VkBlendFactor dstColorBlendFactor,
+			VkBlendOp colorBlendOp,
+			VkBlendFactor srcAlphaBlendFactor,
+			VkBlendFactor dstAlphaBlendFactor,
+			VkBlendOp alphaBlendOp,
+			VkColorComponentFlags colorWriteMask);
 		GraphicsPipelineBuilder& DefaultColorBlendAttachment();
 		GraphicsPipelineBuilder& SetColorBlendLogicOpEnable(bool bLogicOpEnable);
 		GraphicsPipelineBuilder& SetColorBlendLogicOp(VkLogicOp logicOp);
@@ -146,4 +146,4 @@ namespace sy::vk
 	{
 		// Empty
 	};
-}
+} // namespace sy::vk

@@ -26,4 +26,4 @@ namespace sy::vk
 		std::shared_mutex cmdPoolMutex;
 		std::array<std::vector<std::unique_ptr<CommandPool>>, NumMaxInFlightFrames> cmdPools;
 	};
-}
+} // namespace sy::vk

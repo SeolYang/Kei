@@ -43,6 +43,6 @@ namespace sy
 
 	private:
 		chrono::steady_clock::time_point begin = chrono::high_resolution_clock::now();
-		chrono::nanoseconds deltaTime          = chrono::nanoseconds(0);
+		chrono::nanoseconds deltaTime = chrono::nanoseconds(0);
 	};
-}
+} // namespace sy

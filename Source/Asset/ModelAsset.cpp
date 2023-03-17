@@ -25,35 +25,35 @@ namespace sy::asset
 		size_t NumIndices;
 	};
 
-	constexpr std::string_view MODEL_METADATA_MESHES         = "Meshes";
-	constexpr std::string_view MODEL_METADATA_NUM_VERTICES   = "NumVertices";
-	constexpr std::string_view MODEL_METADATA_NUM_INDICES    = "NumIndices";
-	constexpr std::string_view MESH_METADATA_NAME            = "Name";
+	constexpr std::string_view MODEL_METADATA_MESHES = "Meshes";
+	constexpr std::string_view MODEL_METADATA_NUM_VERTICES = "NumVertices";
+	constexpr std::string_view MODEL_METADATA_NUM_INDICES = "NumIndices";
+	constexpr std::string_view MESH_METADATA_NAME = "Name";
 	constexpr std::string_view MESH_METADATA_VERTICES_OFFSET = "VerticesOffset";
-	constexpr std::string_view MESH_METADATA_NUM_VERTICES    = "NumVertices";
-	constexpr std::string_view MESH_METADATA_INDICES_OFFSET  = "IndicesOffset";
-	constexpr std::string_view MESH_METADATA_NUM_INDICES     = "NumIndices";
-	constexpr std::string_view MESH_METADATA_MATERIAL        = "Material";
-	constexpr std::string_view MESH_METADATA_MATERIAL_NAME   = "MaterialName";
+	constexpr std::string_view MESH_METADATA_NUM_VERTICES = "NumVertices";
+	constexpr std::string_view MESH_METADATA_INDICES_OFFSET = "IndicesOffset";
+	constexpr std::string_view MESH_METADATA_NUM_INDICES = "NumIndices";
+	constexpr std::string_view MESH_METADATA_MATERIAL = "Material";
+	constexpr std::string_view MESH_METADATA_MATERIAL_NAME = "MaterialName";
 
 	using ModelVertex = render::VertexPTN;
 	using ModelIndex = render::IndexType;
 
 	constexpr size_t SizeOfVertex = sizeof(ModelVertex);
-	constexpr size_t SizeOfIndex  = sizeof(ModelIndex);
+	constexpr size_t SizeOfIndex = sizeof(ModelIndex);
 
 	std::vector<MeshMetadata> QueryMeshes(const nlohmann::json& json)
 	{
-		const nlohmann::json& meshes = json[ MODEL_METADATA_MESHES ];
+		const nlohmann::json& meshes = json[MODEL_METADATA_MESHES];
 		std::vector<MeshMetadata> result;
 		result.reserve(meshes.size());
 		for (const auto& mesh : meshes)
 		{
 			result.emplace_back(
-			                    mesh[ MESH_METADATA_NAME ],
-			                    mesh[ MESH_METADATA_VERTICES_OFFSET ], mesh[ MESH_METADATA_NUM_VERTICES ],
-			                    mesh[ MESH_METADATA_INDICES_OFFSET ], mesh[ MESH_METADATA_NUM_INDICES ],
-			                    mesh[ MESH_METADATA_MATERIAL ]);
+				mesh[MESH_METADATA_NAME],
+				mesh[MESH_METADATA_VERTICES_OFFSET], mesh[MESH_METADATA_NUM_VERTICES],
+				mesh[MESH_METADATA_INDICES_OFFSET], mesh[MESH_METADATA_NUM_INDICES],
+				mesh[MESH_METADATA_MATERIAL]);
 		}
 
 		return result;
@@ -64,16 +64,16 @@ namespace sy::asset
 		const nlohmann::json& metadataJson = assetData.GetMetadata();
 		return {
 			QueryMeshes(metadataJson),
-			metadataJson[ MODEL_METADATA_NUM_VERTICES ],
-			metadataJson[ MODEL_METADATA_NUM_INDICES ]
+			metadataJson[MODEL_METADATA_NUM_VERTICES],
+			metadataJson[MODEL_METADATA_NUM_INDICES]
 		};
 	}
 
 	std::vector<component::StaticMeshComponent> LoadModel(const std::string& name, const fs::path& path,
-	                                                      HandleManager& handleManager,
-	                                                      const vk::VulkanContext& vulkanContext)
+		HandleManager& handleManager,
+		const vk::VulkanContext& vulkanContext)
 	{
-		const auto pathStr         = path.string();
+		const auto pathStr = path.string();
 		const auto assetDataHandle = LoadOrCreateAssetData<render::Model>(path, handleManager);
 		if (!assetDataHandle)
 		{
@@ -81,8 +81,8 @@ namespace sy::asset
 			return {};
 		}
 
-		const auto metadata   = QueryMetadata(*assetDataHandle);
-		const auto& blob      = assetDataHandle->GetBlob();
+		const auto metadata = QueryMetadata(*assetDataHandle);
+		const auto& blob = assetDataHandle->GetBlob();
 
 		std::vector<ModelVertex> vertices;
 		std::vector<ModelIndex> indices;
@@ -90,7 +90,7 @@ namespace sy::asset
 		indices.resize(metadata.NumIndices);
 
 		const size_t sizeOfVerticesBytes = SizeOfVertex * metadata.NumVertices;
-		const size_t sizeOfIndicesBytes  = SizeOfIndex * metadata.NumIndices;
+		const size_t sizeOfIndicesBytes = SizeOfIndex * metadata.NumIndices;
 		std::memcpy(vertices.data(), blob.data(), sizeOfVerticesBytes);
 		std::memcpy(indices.data(), blob.data() + sizeOfVerticesBytes, sizeOfIndicesBytes);
 
@@ -101,14 +101,14 @@ namespace sy::asset
 			const std::span verticesSpan{ vertices.data() + mesh.VerticesOffset, mesh.NumVertices };
 			const std::span indicesSpan{ indices.data() + mesh.IndicesOffset, mesh.NumIndices };
 			const Handle<render::Mesh> meshHandle = handleManager.Add(render::Mesh::Create<ModelVertex, ModelIndex>(
-			                                                           std::format("{}_{}", path.string(),
-				                                                           mesh.Name),
-			                                                           vulkanContext,
-			                                                           verticesSpan, indicesSpan));
+				std::format("{}_{}", path.string(),
+					mesh.Name),
+				vulkanContext,
+				verticesSpan, indicesSpan));
 			const Handle<render::Material> materialHandle = LoadMaterialFromAsset(mesh.Material, handleManager,
 				vulkanContext);
 			component::StaticMeshComponent component;
-			component.Mesh     = meshHandle;
+			component.Mesh = meshHandle;
 			component.Material = materialHandle;
 			components.emplace_back(component);
 		}
@@ -122,13 +122,13 @@ namespace sy::asset
 		for (const auto& mesh : metadata.Meshes)
 		{
 			nlohmann::json meshJson;
-			meshJson[ MESH_METADATA_NAME ]            = mesh.Name;
-			meshJson[ MESH_METADATA_VERTICES_OFFSET ] = mesh.VerticesOffset;
-			meshJson[ MESH_METADATA_NUM_VERTICES ]    = mesh.NumVertices;
-			meshJson[ MESH_METADATA_INDICES_OFFSET ]  = mesh.IndicesOffset;
-			meshJson[ MESH_METADATA_NUM_INDICES ]     = mesh.NumIndices;
-			meshJson[ MESH_METADATA_MATERIAL ]        = mesh.Material;
-			meshJson[ MESH_METADATA_MATERIAL_NAME ]   = mesh.MaterialName;
+			meshJson[MESH_METADATA_NAME] = mesh.Name;
+			meshJson[MESH_METADATA_VERTICES_OFFSET] = mesh.VerticesOffset;
+			meshJson[MESH_METADATA_NUM_VERTICES] = mesh.NumVertices;
+			meshJson[MESH_METADATA_INDICES_OFFSET] = mesh.IndicesOffset;
+			meshJson[MESH_METADATA_NUM_INDICES] = mesh.NumIndices;
+			meshJson[MESH_METADATA_MATERIAL] = mesh.Material;
+			meshJson[MESH_METADATA_MATERIAL_NAME] = mesh.MaterialName;
 			result.push_back(meshJson);
 		}
 
@@ -138,26 +138,24 @@ namespace sy::asset
 	auto PackMetadataToJson(const ModelMetadata& metadata)
 	{
 		nlohmann::json result;
-		result[ MODEL_METADATA_MESHES ]       = PackMeshesToJson(metadata);
-		result[ MODEL_METADATA_NUM_VERTICES ] = metadata.NumVertices;
-		result[ MODEL_METADATA_NUM_INDICES ]  = metadata.NumIndices;
+		result[MODEL_METADATA_MESHES] = PackMeshesToJson(metadata);
+		result[MODEL_METADATA_NUM_VERTICES] = metadata.NumVertices;
+		result[MODEL_METADATA_NUM_INDICES] = metadata.NumIndices;
 		return result;
 	}
 
 	MeshMetadata ProcessStaticMesh(const aiScene& scene, const aiMesh& mesh, std::vector<ModelVertex>& vertices,
-	                               std::vector<ModelIndex>& indices)
+		std::vector<ModelIndex>& indices)
 	{
 		MeshMetadata metadata;
 
 		const size_t vertexOffset = vertices.size();
-		const size_t indexOffset  = indices.size();
+		const size_t indexOffset = indices.size();
 		for (unsigned int idx = 0; idx < mesh.mNumVertices; ++idx)
 		{
-			const aiVector3D v = mesh.mVertices[ idx ];
-			const aiVector3D t = mesh.HasTextureCoords(0) ?
-				                     mesh.mTextureCoords[ 0 ][ idx ] :
-				                     aiVector3D{ 0.f, 0.f, 0.f };
-			const aiVector3D n = mesh.mNormals[ idx ];
+			const aiVector3D v = mesh.mVertices[idx];
+			const aiVector3D t = mesh.HasTextureCoords(0) ? mesh.mTextureCoords[0][idx] : aiVector3D{ 0.f, 0.f, 0.f };
+			const aiVector3D n = mesh.mNormals[idx];
 			vertices.emplace_back(glm::vec3(v.x, v.z, v.y), glm::vec2(t.x, t.y), glm::vec3(n.x, n.y, n.z));
 		}
 
@@ -165,15 +163,15 @@ namespace sy::asset
 		{
 			for (int j = 0; j != 3; ++j)
 			{
-				indices.push_back(mesh.mFaces[ idx ].mIndices[ j ]);
+				indices.push_back(mesh.mFaces[idx].mIndices[j]);
 			}
 		}
 
 		std::string materialName{};
 		if (scene.HasMaterials())
 		{
-			const auto& material = *scene.mMaterials[ mesh.mMaterialIndex ];
-			materialName         = material.GetName().C_Str();
+			const auto& material = *scene.mMaterials[mesh.mMaterialIndex];
+			materialName = material.GetName().C_Str();
 		}
 
 		const std::string defaultMaterial = render::DefaultMaterial.data();
@@ -189,17 +187,17 @@ namespace sy::asset
 	}
 
 	std::vector<MeshMetadata> ProcessScene(const aiScene& scene, std::vector<ModelVertex>& vertices,
-	                                       std::vector<ModelIndex>& indices)
+		std::vector<ModelIndex>& indices)
 	{
 		std::vector<MeshMetadata> result;
 		result.reserve(scene.mNumMeshes);
 
 		size_t numOfVertices = 0;
-		size_t numOfIndices  = 0;
+		size_t numOfIndices = 0;
 		for (size_t meshIdx = 0; meshIdx < scene.mNumMeshes; ++meshIdx)
 		{
-			numOfVertices += scene.mMeshes[ meshIdx ]->mNumVertices;
-			numOfIndices += scene.mMeshes[ meshIdx ]->mNumFaces * 3;
+			numOfVertices += scene.mMeshes[meshIdx]->mNumVertices;
+			numOfIndices += scene.mMeshes[meshIdx]->mNumFaces * 3;
 		}
 		vertices.reserve(numOfVertices);
 		indices.reserve(numOfIndices);
@@ -207,14 +205,14 @@ namespace sy::asset
 		/** @todo process materials */
 		for (size_t materialIdx = 0; materialIdx < scene.mNumMaterials; ++materialIdx)
 		{
-			aiMaterial& material = *scene.mMaterials[ materialIdx ];
+			aiMaterial& material = *scene.mMaterials[materialIdx];
 			spdlog::trace("Material Idx: {}, Name: {}, Texture Count: {}", materialIdx, material.GetName().C_Str(),
-			              material.GetTextureCount(aiTextureType_DIFFUSE));
+				material.GetTextureCount(aiTextureType_DIFFUSE));
 		}
 
 		for (size_t meshIdx = 0; meshIdx < scene.mNumMeshes; ++meshIdx)
 		{
-			result.emplace_back(ProcessStaticMesh(scene, *scene.mMeshes[ meshIdx ], vertices, indices));
+			result.emplace_back(ProcessStaticMesh(scene, *scene.mMeshes[meshIdx], vertices, indices));
 		}
 
 		return result;
@@ -225,9 +223,8 @@ namespace sy::asset
 		fs::path outputPath = path;
 		outputPath.replace_extension(magic_enum::enum_name(EAsset::Model));
 
-		const std::string pathStr          = path.string();
-		constexpr unsigned int importFlags = aiProcess_GenNormals | aiProcess_GenUVCoords | aiProcess_GenBoundingBoxes |
-				aiProcess_Triangulate | aiProcess_PreTransformVertices | aiProcess_MakeLeftHanded;
+		const std::string pathStr = path.string();
+		constexpr unsigned int importFlags = aiProcess_GenNormals | aiProcess_GenUVCoords | aiProcess_GenBoundingBoxes | aiProcess_Triangulate | aiProcess_PreTransformVertices | aiProcess_MakeLeftHanded;
 		const aiScene* scene = aiImportFile(pathStr.c_str(), importFlags);
 		if (scene == nullptr || !scene->HasMeshes())
 		{
@@ -239,12 +236,12 @@ namespace sy::asset
 		/** @todo: material import */
 		std::vector<ModelVertex> vertices;
 		std::vector<ModelIndex> indices;
-		metadata.Meshes      = ProcessScene(*scene, vertices, indices);
+		metadata.Meshes = ProcessScene(*scene, vertices, indices);
 		metadata.NumVertices = vertices.size();
-		metadata.NumIndices  = indices.size();
+		metadata.NumIndices = indices.size();
 
 		const size_t sizeOfVerticesBytes = metadata.NumVertices * SizeOfVertex;
-		const size_t sizeOfIndicesBytes  = metadata.NumIndices * SizeOfIndex;
+		const size_t sizeOfIndicesBytes = metadata.NumIndices * SizeOfIndex;
 		std::vector<char> blob;
 		blob.resize(sizeOfVerticesBytes + sizeOfIndicesBytes);
 		memcpy(blob.data(), vertices.data(), sizeOfVerticesBytes);
@@ -255,4 +252,4 @@ namespace sy::asset
 		newAssetData.SaveMetadata();
 		return true;
 	}
-}
+} // namespace sy::asset

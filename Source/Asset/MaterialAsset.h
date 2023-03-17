@@ -5,7 +5,7 @@ namespace sy::vk
 {
 	class VulkanContext;
 	class Texture;
-}
+} // namespace sy::vk
 
 namespace sy::render
 {
@@ -15,6 +15,6 @@ namespace sy::render
 namespace sy::asset
 {
 	Handle<render::Material> LoadMaterialFromAsset(const fs::path& path, HandleManager& handleManager,
-	                                               const vk::VulkanContext& vulkanContext);
+		const vk::VulkanContext& vulkanContext);
 	void CreateMaterial(const fs::path& path);
-}
+} // namespace sy::asset

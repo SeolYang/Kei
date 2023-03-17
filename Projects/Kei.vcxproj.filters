@@ -109,9 +109,6 @@
     <ClCompile Include="..\Source\Render\RenderPasses\SimpleRenderPass.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Game\World.cpp">
-      <Filter>Source\Window</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Window\Window.cpp">
       <Filter>Source\Window</Filter>
     </ClCompile>
@@ -135,6 +132,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\main.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Game\World.cpp">
+      <Filter>Source\Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -323,6 +323,7 @@
     <None Include="..\Assets\Shaders\tri.frag">
       <Filter>Source\Shader</Filter>
     </None>
+    <None Include=".clang-format" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">

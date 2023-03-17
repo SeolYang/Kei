@@ -133,6 +133,7 @@
   <ItemGroup>
     <None Include="..\Assets\Shaders\tri.frag" />
     <None Include="..\Assets\Shaders\tri.vert" />
+    <None Include=".clang-format" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

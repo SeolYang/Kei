@@ -15,4 +15,4 @@ namespace sy::component
 		/** SRT */
 		return glm::scale(transform.Scale) * (glm::toMat4(transform.Rotation) * glm::translate(transform.Position));
 	}
-}
+} // namespace sy::component

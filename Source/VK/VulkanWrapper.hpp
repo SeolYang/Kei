@@ -13,19 +13,14 @@ namespace sy::vk
 		using Native_t = VulkanHandleType;
 
 	public:
-		VulkanWrapper(const std::string_view name, const VulkanRHI& vulkanRHI, const VkObjectType type) :
-			VulkanWrapper(name, vulkanRHI, type, VK_DESTROY_LAMBDA_SIGNATURE(Native_t)
-			{
-			})
+		VulkanWrapper(const std::string_view name, const VulkanRHI& vulkanRHI, const VkObjectType type)
+			: VulkanWrapper(name, vulkanRHI, type, VK_DESTROY_LAMBDA_SIGNATURE(Native_t){})
 		{
 		}
 
 		VulkanWrapper(const std::string_view name, const VulkanRHI& vulkanRHI, const VkObjectType type,
-		              const VulkanDestroyFunction_t destroyFunction) :
-			NamedType(name),
-			vulkanRHI(vulkanRHI),
-			type(type),
-			destroyFunction(destroyFunction)
+			const VulkanDestroyFunction_t destroyFunction)
+			: NamedType(name), vulkanRHI(vulkanRHI), type(type), destroyFunction(destroyFunction)
 		{
 		}
 
@@ -72,13 +67,12 @@ namespace sy::vk
 		std::vector<typename VulkanWrapperType::Native_t> natives;
 		natives.resize(wrappers.size());
 		std::transform(wrappers.begin(), wrappers.end(),
-		               natives.begin(),
-		               [&validation](const CRef<VulkanWrapperType> wrapper) -> VulkanWrapperType::Native_t
-		               {
-			               const bool bIsValid = validation(wrapper);
-			               SY_ASSERT(bIsValid, "Invalid wrapper transformation.");
-			               return wrapper.get().GetNativeHandle();
-		               });
+			natives.begin(),
+			[&validation](const CRef<VulkanWrapperType> wrapper) -> VulkanWrapperType::Native_t {
+				const bool bIsValid = validation(wrapper);
+				SY_ASSERT(bIsValid, "Invalid wrapper transformation.");
+				return wrapper.get().GetNativeHandle();
+			});
 
 		return natives;
 	}
@@ -88,9 +82,8 @@ namespace sy::vk
 		const CRefSpan<VulkanWrapperType> wrappers)
 	{
 		return TransformVulkanWrappersToNativesWithValidation<VulkanWrapperType>(wrappers,
-			[](const CRef<VulkanWrapperType>)
-			{
+			[](const CRef<VulkanWrapperType>) {
 				return true;
 			});
 	}
-}
+} // namespace sy::vk

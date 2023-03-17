@@ -39,4 +39,4 @@ namespace sy::vk
 		std::unique_ptr<DescriptorManager> descriptorManager;
 		std::unique_ptr<PipelineLayoutCache> pipelineLayoutCache;
 	};
-}
+} // namespace sy::vk

@@ -32,7 +32,7 @@ namespace sy::vk
 
 		const Frame& GetCurrentInFlightFrame() const
 		{
-			return frames[ GetCurrentInFlightFrameIndex() ];
+			return frames[GetCurrentInFlightFrameIndex()];
 		}
 
 		Fence& GetCurrentInFlightRenderFence() const;
@@ -56,4 +56,4 @@ namespace sy::vk
 		std::array<Frame, NumMaxInFlightFrames> frames;
 		size_t currentFrameIdx = 0;
 	};
-}
+} // namespace sy::vk

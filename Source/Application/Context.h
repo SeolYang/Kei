@@ -10,7 +10,7 @@ namespace sy::vk
 {
 	class VulkanContext;
 	class ResourceStateTracker;
-}
+} // namespace sy::vk
 
 namespace sy::render
 {
@@ -21,7 +21,7 @@ namespace sy::game
 {
 	class World;
 	class GameContext;
-}
+} // namespace sy::game
 
 namespace sy::window
 {
@@ -57,4 +57,4 @@ namespace sy::app
 		std::unique_ptr<game::World> world;
 		std::unique_ptr<game::GameContext> gameContext;
 	};
-}
+} // namespace sy::app

@@ -12,30 +12,30 @@ namespace sy::vk
 	TextureBuilder TextureBuilder::Texture2DShaderResourceTemplate(const VulkanContext& vulkanContext)
 	{
 		return TextureBuilder{ vulkanContext }
-		       .SetType(VK_IMAGE_TYPE_2D)
-		       .SetUsage(VK_IMAGE_USAGE_SAMPLED_BIT)
-		       .SetMemoryUsage(VMA_MEMORY_USAGE_GPU_ONLY)
-		       .SetMemoryProperty(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
-		       .SetTargetInitialState(ETextureState::AnyShaderReadGeneral);
+			.SetType(VK_IMAGE_TYPE_2D)
+			.SetUsage(VK_IMAGE_USAGE_SAMPLED_BIT)
+			.SetMemoryUsage(VMA_MEMORY_USAGE_GPU_ONLY)
+			.SetMemoryProperty(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+			.SetTargetInitialState(ETextureState::AnyShaderReadGeneral);
 	}
 
 	TextureBuilder TextureBuilder::Texture2DRenderTargetTemplate(const VulkanContext& vulkanContext)
 	{
 		return TextureBuilder{ vulkanContext }
-		       .SetType(VK_IMAGE_TYPE_2D)
-		       .SetUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
-		       .SetMemoryUsage(VMA_MEMORY_USAGE_GPU_ONLY)
-		       .SetMemoryProperty(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
-		       .SetTargetInitialState(ETextureState::ColorAttachmentReadWrite);
+			.SetType(VK_IMAGE_TYPE_2D)
+			.SetUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
+			.SetMemoryUsage(VMA_MEMORY_USAGE_GPU_ONLY)
+			.SetMemoryProperty(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+			.SetTargetInitialState(ETextureState::ColorAttachmentReadWrite);
 	}
 
 	TextureBuilder TextureBuilder::Texture2DDepthStencilTemplate(const VulkanContext& vulkanContext)
 	{
 		return TextureBuilder{ vulkanContext }
-		       .SetType(VK_IMAGE_TYPE_2D)
-		       .SetUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
-		       .SetMemoryUsage(VMA_MEMORY_USAGE_GPU_ONLY)
-		       .SetMemoryProperty(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
-		       .SetTargetInitialState(ETextureState::DepthStencilAttachmentWrite);
+			.SetType(VK_IMAGE_TYPE_2D)
+			.SetUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
+			.SetMemoryUsage(VMA_MEMORY_USAGE_GPU_ONLY)
+			.SetMemoryProperty(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+			.SetTargetInitialState(ETextureState::DepthStencilAttachmentWrite);
 	}
-}
+} // namespace sy::vk

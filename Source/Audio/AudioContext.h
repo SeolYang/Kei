@@ -10,5 +10,5 @@ namespace sy
 		public:
 		private:
 		};
-	}
-}
+	} // namespace audio
+} // namespace sy

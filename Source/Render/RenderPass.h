@@ -10,7 +10,7 @@ namespace sy::vk
 	class DescriptorManager;
 	class FrameTracker;
 	class Pipeline;
-}
+} // namespace sy::vk
 
 namespace sy::render
 {
@@ -21,10 +21,10 @@ namespace sy::render
 		virtual ~RenderPass() noexcept override = default;
 
 		RenderPass(const RenderPass&) = delete;
-		RenderPass(RenderPass&&)      = delete;
+		RenderPass(RenderPass&&) = delete;
 
 		RenderPass& operator=(const RenderPass&) = delete;
-		RenderPass& operator=(RenderPass&&)      = delete;
+		RenderPass& operator=(RenderPass&&) = delete;
 
 		virtual void UpdateBuffers()
 		{
@@ -64,4 +64,4 @@ namespace sy::render
 
 		vk::ManagedCommandBuffer currentCmdBuffer;
 	};
-}
+} // namespace sy::render

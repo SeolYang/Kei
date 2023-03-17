@@ -21,4 +21,4 @@ namespace sy::vk
 		const VkSamplerAddressMode addressModeV;
 		const VkSamplerAddressMode addressModeW;
 	};
-}
+} // namespace sy::vk

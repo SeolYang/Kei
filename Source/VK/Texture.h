@@ -108,4 +108,4 @@ namespace sy::vk
 		const bool bGenerateMips;
 		const uint32_t mips;
 	};
-}
+} // namespace sy::vk

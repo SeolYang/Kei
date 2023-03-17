@@ -1,5 +1,5 @@
 #pragma once
-#pragma warning(disable:4819)
+#pragma warning(disable : 4819)
 /** Standard Library */
 #include <vector>
 #include <array>
@@ -78,7 +78,7 @@
 #include <nlohmann/json.hpp>
 
 /** stduuid */
-//#include <uuid.h>
+// #include <uuid.h>
 
 /** magic-enum */
 #include <magic_enum.hpp>

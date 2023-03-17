@@ -5,7 +5,7 @@ namespace sy::render
 {
 	class Mesh;
 	class Material;
-}
+} // namespace sy::render
 
 namespace sy::component
 {
@@ -14,4 +14,4 @@ namespace sy::component
 		Handle<render::Mesh> Mesh;
 		Handle<render::Material> Material;
 	};
-}
+} // namespace sy::component

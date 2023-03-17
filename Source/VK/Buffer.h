@@ -49,4 +49,4 @@ namespace sy::vk
 		const VmaMemoryUsage memoryUsage;
 		const EBufferState initialState;
 	};
-}
+} // namespace sy::vk

@@ -26,15 +26,13 @@ namespace sy::asset
 	class AssetData : public NonCopyable
 	{
 	public:
-		AssetData(const fs::path& path) :
-			AssetData(path, LoadMetadata(path), LoadBlob(path))
+		AssetData(const fs::path& path)
+			: AssetData(path, LoadMetadata(path), LoadBlob(path))
 		{
 		}
 
-		AssetData(const fs::path& path, const nlohmann::json metadata, std::vector<char> blob) :
-			path(path),
-			metadata(metadata),
-			blob(std::move(blob))
+		AssetData(const fs::path& path, const nlohmann::json metadata, std::vector<char> blob)
+			: path(path), metadata(metadata), blob(std::move(blob))
 		{
 		}
 
@@ -130,4 +128,4 @@ namespace sy::asset
 
 		return handle;
 	}
-}
+} // namespace sy::asset

@@ -12,4 +12,4 @@ namespace sy::component
 	{
 		return component.Parent != ecs::INVALID_ENTITY_HANDLE;
 	}
-}
+} // namespace sy::component

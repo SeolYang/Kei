@@ -60,18 +60,17 @@ namespace sy::app
 
 	void Context::InitializeLogger()
 	{
-		const auto currentTime     = std::chrono::system_clock::now();
-		const auto localTime       = std::chrono::current_zone()->to_local(currentTime);
+		const auto currentTime = std::chrono::system_clock::now();
+		const auto localTime = std::chrono::current_zone()->to_local(currentTime);
 		const std::string fileName = std::format("LOG_{:%F_%H_%M_%S}.log", localTime);
 
 		fs::path logFilePath = "Logs";
 		logFilePath /= fileName;
-		const auto consoleSink     = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
+		const auto consoleSink = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
 		const auto logFilePathAnsi = WStringToAnsi(logFilePath.c_str());
-		const auto fileSink        = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFilePathAnsi, true);
+		const auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFilePathAnsi, true);
 
-		const auto sinksInitList =
-		{
+		const auto sinksInitList = {
 			std::static_pointer_cast<spdlog::sinks::sink>(consoleSink),
 			std::static_pointer_cast<spdlog::sinks::sink>(fileSink)
 		};
@@ -101,22 +100,18 @@ namespace sy::app
 	{
 		const std::array white{ 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
 		auto defaultTexBuilder = vk::TextureBuilder::Texture2DShaderResourceTemplate(*vulkanContext)
-		                         .SetName("DefaultWhite")
-		                         .SetExtent(Extent2D<uint32_t>{ 2, 2 })
-		                         .SetFormat(VK_FORMAT_R8G8B8A8_SRGB);
+									 .SetName("DefaultWhite")
+									 .SetExtent(Extent2D<uint32_t>{ 2, 2 })
+									 .SetFormat(VK_FORMAT_R8G8B8A8_SRGB);
 
 		auto defaultWhiteTex = handleManager->Add(defaultTexBuilder.SetDataToTransfer(std::span{
-			                                                white.data(),
-			                                                white.size()
-		                                                }).Build());
+																						  white.data(),
+																						  white.size() })
+													  .Build());
 		defaultWhiteTex.SetAlias(vk::DefaultWhiteTexture);
 
 		constexpr std::array<uint32_t, 4> black = { 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff };
-		auto defaultBlackTex              = handleManager->Add(defaultTexBuilder.SetName("DefaultBlack").
-		                                                             SetDataToTransfer(std::span{
-			                                                             white.data(),
-			                                                             white.size()
-		                                                             }).Build());
+		auto defaultBlackTex = handleManager->Add(defaultTexBuilder.SetName("DefaultBlack").SetDataToTransfer(std::span{ white.data(), white.size() }).Build());
 		defaultBlackTex.SetAlias(vk::DefaultBlackTexture);
 
 		auto linearSampler = handleManager->Add<
@@ -125,16 +120,15 @@ namespace sy::app
 
 		const auto defaultWhiteTexView = handleManager->Add<
 			vk::TextureView>(std::format("{}_View", vk::DefaultWhiteTexture), vulkanContext->GetRHI(),
-			                 *defaultWhiteTex, VK_IMAGE_VIEW_TYPE_2D);
+			*defaultWhiteTex, VK_IMAGE_VIEW_TYPE_2D);
 
-		auto& descriptorManager    = vulkanContext->GetDescriptorManager();
+		auto& descriptorManager = vulkanContext->GetDescriptorManager();
 		auto defaultMaterial = handleManager->Add<render::Material>(handleManager->Add<
-			                                                                  vk::Descriptor>(descriptorManager.
-		                                                                   RequestDescriptor(*handleManager,
-			                                                                   defaultWhiteTex,
-			                                                                   defaultWhiteTexView,
-			                                                                   linearSampler,
-			                                                                   vk::ETextureState::AnyShaderReadSampledImage)));
+																	vk::Descriptor>(descriptorManager.RequestDescriptor(*handleManager,
+			defaultWhiteTex,
+			defaultWhiteTexView,
+			linearSampler,
+			vk::ETextureState::AnyShaderReadSampledImage)));
 		defaultMaterial.SetAlias(render::DefaultMaterial);
 	}
 
@@ -189,4 +183,4 @@ namespace sy::app
 		}
 		spdlog::info("Main loop finished.");
 	}
-}
+} // namespace sy::app

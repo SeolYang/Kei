@@ -18,7 +18,7 @@ namespace sy::vk
 	class FrameTracker;
 	class CommandPoolManager;
 	class DescriptorManager;
-}
+} // namespace sy::vk
 
 namespace sy::window
 {
@@ -35,7 +35,7 @@ namespace sy::render
 	{
 	public:
 		Renderer(const window::Window& window, vk::VulkanContext& vulkanContext,
-		         vk::ResourceStateTracker& resStateTracker, HandleManager& handleManager);
+			vk::ResourceStateTracker& resStateTracker, HandleManager& handleManager);
 		~Renderer() override;
 
 		void Render();
@@ -50,7 +50,7 @@ namespace sy::render
 		HandleManager& handleManager;
 
 		vk::ResourceStateTracker& resStateTracker;
-		//std::unique_ptr<vk::ResourceStateTracker> resourceStateTracker;
+		// std::unique_ptr<vk::ResourceStateTracker> resourceStateTracker;
 
 		std::unique_ptr<vk::ShaderModule> triVert;
 		std::unique_ptr<vk::ShaderModule> triFrag;
@@ -66,4 +66,4 @@ namespace sy::render
 
 		std::vector<component::StaticMeshComponent> staticMeshes;
 	};
-}
+} // namespace sy::render

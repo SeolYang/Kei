@@ -11,7 +11,7 @@ namespace sy::vk
 	}
 
 	VertexInputBuilder& VertexInputBuilder::AddVertexInputAttribute(uint32_t location, uint32_t binding,
-	                                                                VkFormat format, uint32_t offset)
+		VkFormat format, uint32_t offset)
 	{
 		vertexInputAttributeDescriptions.emplace_back(location, binding, format, offset);
 		return *this;
@@ -19,8 +19,7 @@ namespace sy::vk
 
 	VkPipelineVertexInputStateCreateInfo VertexInputBuilder::Build() const
 	{
-		return
-		{
+		return {
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
 			.pNext = nullptr,
 			.flags = 0,
@@ -30,4 +29,4 @@ namespace sy::vk
 			.pVertexAttributeDescriptions = vertexInputAttributeDescriptions.data()
 		};
 	}
-}
+} // namespace sy::vk

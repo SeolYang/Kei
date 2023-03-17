@@ -14,27 +14,25 @@ namespace sy
 		{
 		public:
 			/** Invalid Handle<Empty Handle>/Not owned Handle */
-			Handle() noexcept :
-				owner(std::nullopt),
-				placement(InvalidPlacement)
+			Handle() noexcept
+				: owner(std::nullopt), placement(InvalidPlacement)
 			{
 			}
 
-			Handle( const Handle& other ) = default;
+			Handle(const Handle& other) = default;
 
-			Handle( Handle&& other ) noexcept :
-				owner(std::exchange(other.owner, std::nullopt)),
-				placement(std::exchange(other.placement, InvalidPlacement))
+			Handle(Handle&& other) noexcept
+				: owner(std::exchange(other.owner, std::nullopt)), placement(std::exchange(other.placement, InvalidPlacement))
 			{
 			}
 
 			~Handle() = default;
 
-			Handle& operator=( const Handle& rhs ) = default;
+			Handle& operator=(const Handle& rhs) = default;
 
-			Handle& operator=( Handle&& rhs ) noexcept
+			Handle& operator=(Handle&& rhs) noexcept
 			{
-				this->owner     = std::exchange(rhs.owner, std::nullopt);
+				this->owner = std::exchange(rhs.owner, std::nullopt);
 				this->placement = std::exchange(rhs.placement, InvalidPlacement);
 				return *this;
 			}
@@ -118,7 +116,7 @@ namespace sy
 			}
 
 			/** The Alias is unique string identifier for handle. */
-			void SetAlias( const std::string_view alias )
+			void SetAlias(const std::string_view alias)
 			{
 				if (IsValid())
 				{
@@ -140,7 +138,7 @@ namespace sy
 				if (IsValid())
 				{
 					owner->get().Destroy(this->placement);
-					owner     = std::nullopt;
+					owner = std::nullopt;
 					placement = InvalidPlacement;
 				}
 			}
@@ -158,9 +156,8 @@ namespace sy
 		private:
 			friend HandleMap;
 
-			Handle( HandleMap& owner, const Placement placement ) :
-				owner(owner),
-				placement(placement)
+			Handle(HandleMap& owner, const Placement placement)
+				: owner(owner), placement(placement)
 			{
 			}
 
@@ -175,41 +172,36 @@ namespace sy
 		};
 
 	public:
-		explicit HandleMap( const size_t reservedMapSize = 1024 )
+		explicit HandleMap(const size_t reservedMapSize = 1024)
 		{
 			objectMap.reserve(reservedMapSize);
 			objectMapIndexPool.reserve(reservedMapSize);
 		}
 
-		HandleMap( HandleMap&& other ) noexcept :
-			mutex(std::move(other.mutex)),
-			handleCounter(std::swap(other.handleCounter, 0)),
-			objectMap(std::move(other.objectMap)),
-			objectMapIndexPool(std::move(other.objectMapIndexPool)),
-			aliasToHandle(std::move(other.aliasToHandle)),
-			handleToAlias(std::move(other.handleToAlias))
+		HandleMap(HandleMap&& other) noexcept
+			: mutex(std::move(other.mutex)), handleCounter(std::swap(other.handleCounter, 0)), objectMap(std::move(other.objectMap)), objectMapIndexPool(std::move(other.objectMapIndexPool)), aliasToHandle(std::move(other.aliasToHandle)), handleToAlias(std::move(other.handleToAlias))
 		{
 		}
 
 		~HandleMap() = default;
 
 		/** Non-copyable */
-		HandleMap( const HandleMap& )            = delete;
-		HandleMap& operator=( const HandleMap& ) = delete;
+		HandleMap(const HandleMap&) = delete;
+		HandleMap& operator=(const HandleMap&) = delete;
 
-		HandleMap& operator=( HandleMap&& rhs ) noexcept
+		HandleMap& operator=(HandleMap&& rhs) noexcept
 		{
-			this->mutex              = std::move(rhs.mutex);
-			this->handleCounter      = std::swap(rhs.handleCounter, 0);
-			this->objectMap          = std::move(rhs.objectMap);
+			this->mutex = std::move(rhs.mutex);
+			this->handleCounter = std::swap(rhs.handleCounter, 0);
+			this->objectMap = std::move(rhs.objectMap);
 			this->objectMapIndexPool = std::move(rhs.objectMapIndexPool);
-			this->aliasToHandle      = std::move(rhs.aliasToHandle);
-			this->handleToAlias      = std::move(rhs.handleToAlias);
+			this->aliasToHandle = std::move(rhs.aliasToHandle);
+			this->handleToAlias = std::move(rhs.handleToAlias);
 
 			return *this;
 		}
 
-		[[nodiscard]] Handle Add( std::unique_ptr<T> object )
+		[[nodiscard]] Handle Add(std::unique_ptr<T> object)
 		{
 			RWLock lock{ mutex };
 
@@ -221,7 +213,7 @@ namespace sy
 
 				SY_ASSERT(placement < objectMap.size(), "The placement index must be lesser than size of object map.");
 				SY_ASSERT(objectMap[placement] == nullptr, "Trying to place at already valid slot of object map!");
-				objectMap[ placement ] = std::move(object);
+				objectMap[placement] = std::move(object);
 			}
 			else
 			{
@@ -233,84 +225,83 @@ namespace sy
 		}
 
 		template <typename... Args>
-		[[nodiscard]] Handle Add( Args&&... args )
+		[[nodiscard]] Handle Add(Args&&... args)
 		{
 			return Add(std::make_unique<T>(std::forward<Args>(args)...));
 		}
 
-		[[nodiscard]] Handle QueryAlias( const std::string_view alias )
+		[[nodiscard]] Handle QueryAlias(const std::string_view alias)
 		{
 			ReadOnlyLock lock{ mutex };
 			const auto hashOfAlias = std::hash<std::string_view>()(alias);
-			if (HasAliasUnsafe(alias) && HasValidAliasUnsafe(aliasToHandle[ hashOfAlias ]))
+			if (HasAliasUnsafe(alias) && HasValidAliasUnsafe(aliasToHandle[hashOfAlias]))
 			{
-				return Handle{ *this, aliasToHandle[ hashOfAlias ] };
+				return Handle{ *this, aliasToHandle[hashOfAlias] };
 			}
 
 			return Handle{};
 		}
 
-		[[nodiscard]] Handle Query( const Placement placement )
+		[[nodiscard]] Handle Query(const Placement placement)
 		{
 			ReadOnlyLock lock{ mutex };
 			return ContainsUnsafe(placement) ? Handle{ *this, placement } : Handle{};
 		}
 
 	private:
-		[[nodiscard]] bool ContainsUnsafe( const Placement placement ) const
+		[[nodiscard]] bool ContainsUnsafe(const Placement placement) const
 		{
-			return (placement < objectMap.size()) && (objectMap[ placement ] != nullptr);
+			return (placement < objectMap.size()) && (objectMap[placement] != nullptr);
 		}
 
-		[[nodiscard]] bool HasAliasUnsafe( const std::string_view alias ) const
+		[[nodiscard]] bool HasAliasUnsafe(const std::string_view alias) const
 		{
 			return aliasToHandle.contains(std::hash<std::string_view>()(alias));
 		}
 
-		[[nodiscard]] bool HasAliasForPlacementUnsafe( const Placement placement ) const
+		[[nodiscard]] bool HasAliasForPlacementUnsafe(const Placement placement) const
 		{
 			return handleToAlias.contains(placement);
 		}
 
-		[[nodiscard]] bool HasValidAliasUnsafe( const Placement placement ) const
+		[[nodiscard]] bool HasValidAliasUnsafe(const Placement placement) const
 		{
-			return ContainsUnsafe(placement) && HasAliasForPlacementUnsafe(placement) &&
-					HasAliasUnsafe(handleToAlias.find(placement)->second);
+			return ContainsUnsafe(placement) && HasAliasForPlacementUnsafe(placement) && HasAliasUnsafe(handleToAlias.find(placement)->second);
 		}
 
-		void SetAliasUnsafe( const Placement placement, const std::string_view newAlias )
+		void SetAliasUnsafe(const Placement placement, const std::string_view newAlias)
 		{
-			const bool bContains                    = ContainsUnsafe(placement);
+			const bool bContains = ContainsUnsafe(placement);
 			const bool bIsExistAnyAliasForPlacement = HasAliasForPlacementUnsafe(placement);
-			const bool bIsNewAliasAlreadyUsed       = HasAliasUnsafe(newAlias);
+			const bool bIsNewAliasAlreadyUsed = HasAliasUnsafe(newAlias);
 			if (bContains && bIsExistAnyAliasForPlacement && !bIsNewAliasAlreadyUsed)
 			{
-				aliasToHandle.erase(std::hash<std::string_view>()(handleToAlias[ placement ]));
+				aliasToHandle.erase(std::hash<std::string_view>()(handleToAlias[placement]));
 			}
 
 			if (bContains && !bIsNewAliasAlreadyUsed)
 			{
-				aliasToHandle[ std::hash<std::string_view>()(newAlias) ] = placement;
-				handleToAlias[ placement ]                               = newAlias;
+				aliasToHandle[std::hash<std::string_view>()(newAlias)] = placement;
+				handleToAlias[placement] = newAlias;
 			}
 		}
 
-		void RemoveAliasUnsafe( const Placement placement )
+		void RemoveAliasUnsafe(const Placement placement)
 		{
 			if (HasAliasForPlacementUnsafe(placement))
 			{
-				aliasToHandle.erase(std::hash<std::string_view>()(handleToAlias[ placement ]));
+				aliasToHandle.erase(std::hash<std::string_view>()(handleToAlias[placement]));
 				handleToAlias.erase(placement);
 			}
 		}
 
-		void SetAlias( const Placement placement, const std::string_view newAlias )
+		void SetAlias(const Placement placement, const std::string_view newAlias)
 		{
 			RWLock lock{ mutex };
 			SetAliasUnsafe(placement, newAlias);
 		}
 
-		[[nodiscard]] RefOptional<T> TryGetObject( const Placement placement )
+		[[nodiscard]] RefOptional<T> TryGetObject(const Placement placement)
 		{
 			ReadOnlyLock lock{ mutex };
 			if (!ContainsUnsafe(placement))
@@ -318,10 +309,10 @@ namespace sy
 				return std::nullopt;
 			}
 
-			return *objectMap[ placement ];
+			return *objectMap[placement];
 		}
 
-		[[nodiscard]] CRefOptional<T> TryGetObject( const Placement placement ) const
+		[[nodiscard]] CRefOptional<T> TryGetObject(const Placement placement) const
 		{
 			ReadOnlyLock lock{ mutex };
 			if (!ContainsUnsafe(placement))
@@ -329,16 +320,16 @@ namespace sy
 				return std::nullopt;
 			}
 
-			return *objectMap[ placement ];
+			return *objectMap[placement];
 		}
 
-		void RemoveAlias( const Placement placement )
+		void RemoveAlias(const Placement placement)
 		{
 			RWLock lock{ mutex };
 			RemoveAliasUnsafe(placement);
 		}
 
-		[[nodiscard]] std::optional<std::string_view> TryGetAlias( const Placement placement ) const
+		[[nodiscard]] std::optional<std::string_view> TryGetAlias(const Placement placement) const
 		{
 			ReadOnlyLock lock{ mutex };
 			if (HasValidAliasUnsafe(placement))
@@ -349,13 +340,13 @@ namespace sy
 			return std::nullopt;
 		}
 
-		void Destroy( const Placement placement )
+		void Destroy(const Placement placement)
 		{
 			RWLock lock{ mutex };
 			if (ContainsUnsafe(placement))
 			{
 				RemoveAliasUnsafe(placement);
-				objectMap[ placement ].reset();
+				objectMap[placement].reset();
 				objectMapIndexPool.emplace_back(placement);
 			}
 		}
@@ -379,7 +370,7 @@ namespace sy
 	class HandleManager
 	{
 	private:
-		using UntypedHandleMap = std::pair<void*, std::function<void( void* )>>;
+		using UntypedHandleMap = std::pair<void*, std::function<void(void*)>>;
 
 	public:
 		HandleManager() = default;
@@ -394,11 +385,11 @@ namespace sy
 		}
 
 		/** Non-copyable */
-		HandleManager( const HandleManager& )            = delete;
-		HandleManager& operator=( const HandleManager& ) = delete;
+		HandleManager(const HandleManager&) = delete;
+		HandleManager& operator=(const HandleManager&) = delete;
 		/** Non-movable */
-		HandleManager( HandleManager&& ) noexcept            = delete;
-		HandleManager& operator=( HandleManager&& ) noexcept = delete;
+		HandleManager(HandleManager&&) noexcept = delete;
+		HandleManager& operator=(HandleManager&&) noexcept = delete;
 
 		template <typename T>
 		HandleMap<T>& GetHandleMap()
@@ -407,50 +398,47 @@ namespace sy
 			if (!table.contains(typeHash))
 			{
 				static std::once_flag initFlag;
-				std::call_once(initFlag, [&]()
-				{
+				std::call_once(initFlag, [&]() {
 					RWLock lock{ mutex };
-					table[ typeHash ] = std::make_pair(
-					                                   reinterpret_cast<void*>(new HandleMap<T>()),
-					                                   []( const void* ptr )
-					                                   {
-						                                   if (ptr != nullptr)
-						                                   {
-							                                   delete static_cast<const HandleMap<T>*>(ptr);
-						                                   }
-					                                   }
-					                                  );
+					table[typeHash] = std::make_pair(
+						reinterpret_cast<void*>(new HandleMap<T>()),
+						[](const void* ptr) {
+							if (ptr != nullptr)
+							{
+								delete static_cast<const HandleMap<T>*>(ptr);
+							}
+						});
 				});
 			}
 
 			ReadOnlyLock lock{ mutex };
-			return *(static_cast<HandleMap<T>*>(table[ typeHash ].first));
+			return *(static_cast<HandleMap<T>*>(table[typeHash].first));
 		}
 
 		/** Proxy for HandleMaps */
 		template <typename T>
-		[[nodiscard]] Handle<T> Add( std::unique_ptr<T> object )
+		[[nodiscard]] Handle<T> Add(std::unique_ptr<T> object)
 		{
 			auto& handleMap = GetHandleMap<T>();
 			return handleMap.Add(std::move(object));
 		}
 
 		template <typename T, typename... Args>
-		[[nodiscard]] Handle<T> Add( Args&&... args )
+		[[nodiscard]] Handle<T> Add(Args&&... args)
 		{
 			auto& handleMap = GetHandleMap<T>();
 			return handleMap.Add(std::forward<Args>(args)...);
 		}
 
 		template <typename T>
-		[[nodiscard]] Handle<T> QueryAlias( const std::string_view alias )
+		[[nodiscard]] Handle<T> QueryAlias(const std::string_view alias)
 		{
 			auto& handleMap = GetHandleMap<T>();
 			return handleMap.QueryAlias(alias);
 		}
 
 		template <typename T>
-		[[nodiscard]] Handle<T> Query( const typename Placement placement )
+		[[nodiscard]] Handle<T> Query(const typename Placement placement)
 		{
 			auto& handleMap = GetHandleMap<T>();
 			return handleMap.Query(placement);
@@ -460,4 +448,4 @@ namespace sy
 		mutable std::shared_mutex mutex;
 		mutable robin_hood::unordered_map<TypeHashType, UntypedHandleMap> table;
 	};
-}
+} // namespace sy

@@ -9,14 +9,18 @@ namespace sy::vk
 		VertexInputBuilder& Clear();
 
 		template <typename T>
-		VertexInputBuilder& AddVertexInputBinding(uint32_t binding, const VkVertexInputRate inputRate)
+		VertexInputBuilder& AddVertexInputBinding(uint32_t binding,
+			const VkVertexInputRate inputRate)
 		{
-			vertexInputBindingDescriptions.emplace_back(binding, static_cast<uint32_t>(sizeof(T)), inputRate);
+			vertexInputBindingDescriptions.emplace_back(
+				binding, static_cast<uint32_t>(sizeof(T)), inputRate);
 			return *this;
 		}
 
-		VertexInputBuilder& AddVertexInputAttribute(uint32_t location, uint32_t binding, VkFormat format,
-		                                            uint32_t offset);
+		VertexInputBuilder& AddVertexInputAttribute(uint32_t location,
+			uint32_t binding,
+			VkFormat format,
+			uint32_t offset);
 
 		VkPipelineVertexInputStateCreateInfo Build() const;
 
@@ -24,4 +28,4 @@ namespace sy::vk
 		std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
 		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
 	};
-}
+} // namespace sy::vk

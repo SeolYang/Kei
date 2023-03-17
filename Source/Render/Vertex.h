@@ -26,10 +26,10 @@ namespace sy::render
 	inline vk::VertexInputBuilder BuildVertexInputLayout<VertexPT>()
 	{
 		using Vertex = VertexPT;
-		vk::VertexInputBuilder builder;
-		builder.AddVertexInputBinding<Vertex>(0, VK_VERTEX_INPUT_RATE_VERTEX)
-		       .AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Position))
-		       .AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, TexCoords));
+		const auto builder = vk::VertexInputBuilder{}
+								 .AddVertexInputBinding<Vertex>(0, VK_VERTEX_INPUT_RATE_VERTEX)
+								 .AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Position))
+								 .AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, TexCoords));
 		return builder;
 	}
 
@@ -60,9 +60,9 @@ namespace sy::render
 		using Vertex = VertexPTN;
 		vk::VertexInputBuilder builder;
 		builder.AddVertexInputBinding<Vertex>(0, VK_VERTEX_INPUT_RATE_VERTEX)
-		       .AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Position))
-		       .AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, TexCoords))
-		       .AddVertexInputAttribute(2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Normal));
+			.AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Position))
+			.AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, TexCoords))
+			.AddVertexInputAttribute(2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Normal));
 		return builder;
 	}
 
@@ -79,4 +79,4 @@ namespace sy::render
 
 		return std::nullopt;
 	}
-}
+} // namespace sy::render

@@ -31,10 +31,10 @@ namespace sy::vk
 
 	private:
 		Pipeline(std::string_view name, const VulkanRHI& vulkanRHI, EPipelineType pipelineType,
-		         VkPipelineLayout layout);
+			VkPipelineLayout layout);
 
 	private:
 		const EPipelineType pipelineType;
 		VkPipelineLayout layout;
 	};
-}
+} // namespace sy::vk

@@ -36,4 +36,4 @@ namespace sy::vk
 		std::vector<std::unique_ptr<CommandBuffer>> cmdBuffers;
 		std::vector<Deallocation> pendingDeallocations;
 	};
-}
+} // namespace sy::vk

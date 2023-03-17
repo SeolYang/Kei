@@ -5,7 +5,7 @@ namespace sy
 {
 	/************************ Strings ************************/
 	template <size_t BufferSize = 512>
-	std::wstring AnsiToWString( const std::string_view ansiString )
+	std::wstring AnsiToWString(const std::string_view ansiString)
 	{
 		std::array<wchar_t, BufferSize> buffer;
 		MultiByteToWideChar(CP_ACP, 0, ansiString.data(), -1, buffer.data(), BufferSize);
@@ -13,7 +13,7 @@ namespace sy
 	}
 
 	template <size_t BufferSize = 512>
-	std::string WStringToAnsi( const std::wstring_view wideString )
+	std::string WStringToAnsi(const std::wstring_view wideString)
 	{
 		std::array<char, BufferSize> buffer;
 		WideCharToMultiByte(CP_ACP, 0, wideString.data(), -1, buffer.data(), BufferSize, NULL, NULL);
@@ -21,7 +21,7 @@ namespace sy
 	}
 
 	/************************ Memory ************************/
-	constexpr size_t AlignForwardAdjustment( const size_t offset, const size_t alignment ) noexcept
+	constexpr size_t AlignForwardAdjustment(const size_t offset, const size_t alignment) noexcept
 	{
 		const size_t adjustment = alignment - (offset & (alignment - 1));
 		if (adjustment == alignment)
@@ -32,7 +32,7 @@ namespace sy
 		return adjustment;
 	}
 
-	constexpr size_t PadSizeWithAlignment( const size_t allocSize, const size_t alignment )
+	constexpr size_t PadSizeWithAlignment(const size_t allocSize, const size_t alignment)
 	{
 		size_t alignedSize = allocSize;
 		if (alignment > 0)
@@ -44,13 +44,13 @@ namespace sy
 	}
 
 	template <typename T>
-	size_t SizeBytes( const std::vector<T>& vec )
+	size_t SizeBytes(const std::vector<T>& vec)
 	{
 		return sizeof(T) * vec.size();
 	}
 
 	template <typename T>
-	std::vector<char> ToBytes( const std::span<const T> data )
+	std::vector<char> ToBytes(const std::span<const T> data)
 	{
 		std::vector<char> bytes;
 		bytes.resize(data.size_bytes());
@@ -60,24 +60,24 @@ namespace sy
 
 	/************************ Helpers ************************/
 	template <typename T>
-	[[nodiscard]] bool FlagsContains( T flags, T flag ) noexcept
+	[[nodiscard]] bool FlagsContains(T flags, T flag) noexcept
 	{
 		return (flags & flag) != 0;
 	}
 
 	template <typename T, size_t N>
-	constexpr size_t LengthOfArray( T (&)[ N ] )
+	constexpr size_t LengthOfArray(T (&)[N])
 	{
 		return N;
 	}
 
 	template <typename T>
-	constexpr auto ToUnderlying( const T& val )
+	constexpr auto ToUnderlying(const T& val)
 	{
 		return static_cast<std::underlying_type_t<T>>(val);
 	}
 
-	inline size_t QuerySizeOfStream( std::ifstream& stream )
+	inline size_t QuerySizeOfStream(std::ifstream& stream)
 	{
 		if (!stream.is_open())
 		{
@@ -90,7 +90,7 @@ namespace sy
 		return result;
 	}
 
-	inline std::string InputFileStreamToString( const std::ifstream& stream )
+	inline std::string InputFileStreamToString(const std::ifstream& stream)
 	{
 		std::stringstream ss;
 		ss << stream.rdbuf();
@@ -106,9 +106,9 @@ namespace sy
 		TypeHashType result{};
 
 #ifdef _MSC_VER
-#define _FUNC_SIG_FOR_TYPE_HASH_ __FUNCSIG__
+	#define _FUNC_SIG_FOR_TYPE_HASH_ __FUNCSIG__
 #else
-#define _FUNC_SIG_FOR_TYPE_HASH_ __PRETTRY_FUNCTION__
+	#define _FUNC_SIG_FOR_TYPE_HASH_ __PRETTRY_FUNCTION__
 #endif
 
 		for (const auto& c : _FUNC_SIG_FOR_TYPE_HASH_)
@@ -121,4 +121,4 @@ namespace sy
 
 	template <typename T>
 	constexpr TypeHashType TypeHash = Hash<T>();
-}
+} // namespace sy

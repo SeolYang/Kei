@@ -945,4 +945,4 @@ namespace sy::vk
 				};
 		}
 	}
-}
+} // namespace sy::vk

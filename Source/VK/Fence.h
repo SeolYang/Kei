@@ -15,4 +15,4 @@ namespace sy::vk
 		void Reset() const;
 		[[nodiscard]] bool IsSignaled() const;
 	};
-}
+} // namespace sy::vk

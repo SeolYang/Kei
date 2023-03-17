@@ -8,8 +8,8 @@ namespace sy::vk
 	class SamplerBuilder
 	{
 	public:
-		explicit SamplerBuilder(const VulkanContext& vulkanContext) :
-			vulkanContext(vulkanContext)
+		explicit SamplerBuilder(const VulkanContext& vulkanContext)
+			: vulkanContext(vulkanContext)
 		{
 		}
 
@@ -68,12 +68,12 @@ namespace sy::vk
 	private:
 		friend class Sampler;
 		const VulkanContext& vulkanContext;
-		std::string name                  = "LinearRepeatSampler";
-		VkFilter minFilter                = VK_FILTER_LINEAR;
-		VkFilter magFilter                = VK_FILTER_LINEAR;
-		VkSamplerMipmapMode mipmapMode    = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		std::string name = "LinearRepeatSampler";
+		VkFilter minFilter = VK_FILTER_LINEAR;
+		VkFilter magFilter = VK_FILTER_LINEAR;
+		VkSamplerMipmapMode mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 		VkSamplerAddressMode addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		VkSamplerAddressMode addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		VkSamplerAddressMode addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 	};
-}
+} // namespace sy::vk

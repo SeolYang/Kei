@@ -14,6 +14,6 @@ namespace sy::render
 	{
 	public:
 		Handle<vk::Descriptor> BaseTexture;
-		//Handle<vk::Descriptor> SpecularTexture;
+		// Handle<vk::Descriptor> SpecularTexture;
 	};
-}
+} // namespace sy::render

@@ -21,12 +21,12 @@ namespace sy::vk
 
 		[[nodiscard]] auto GetCurrentImage() const
 		{
-			return images[ currentImageIdx ];
+			return images[currentImageIdx];
 		}
 
 		[[nodiscard]] auto GetCurrentImageView() const
 		{
-			return imageViews[ currentImageIdx ];
+			return imageViews[currentImageIdx];
 		}
 
 		[[nodiscard]] auto GetCurrentImageIndex() const
@@ -36,8 +36,7 @@ namespace sy::vk
 
 		[[nodiscard]] auto GetColorAttachmentInfo(VkClearColorValue clearColorValue = { 0.f, 0.f, 0.f, 1.f }) const
 		{
-			return VkRenderingAttachmentInfoKHR
-			{
+			return VkRenderingAttachmentInfoKHR{
 				.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
 				.pNext = nullptr,
 				.imageView = GetCurrentImageView(),
@@ -56,4 +55,4 @@ namespace sy::vk
 
 		uint32_t currentImageIdx;
 	};
-}
+} // namespace sy::vk

@@ -3,14 +3,14 @@
 #include "volk.h"
 
 #ifdef _WIN32
-	typedef const char* LPCSTR;
-	typedef struct HINSTANCE__* HINSTANCE;
-	typedef HINSTANCE HMODULE;
-	#ifdef _WIN64
-		typedef __int64 (__stdcall* FARPROC)(void);
-	#else
+typedef const char* LPCSTR;
+typedef struct HINSTANCE__* HINSTANCE;
+typedef HINSTANCE HMODULE;
+#ifdef _WIN64
+typedef __int64 (__stdcall* FARPROC)( void );
+#else
 		typedef int (__stdcall* FARPROC)(void);
-	#endif
+#endif
 #else
 #	include <dlfcn.h>
 #endif
@@ -20,29 +20,29 @@ extern "C" {
 #endif
 
 #ifdef _WIN32
-__declspec(dllimport) HMODULE __stdcall LoadLibraryA(LPCSTR);
-__declspec(dllimport) FARPROC __stdcall GetProcAddress(HMODULE, LPCSTR);
+__declspec(dllimport) HMODULE __stdcall LoadLibraryA( LPCSTR );
+__declspec(dllimport) FARPROC __stdcall GetProcAddress( HMODULE, LPCSTR );
 #endif
 
 static VkInstance loadedInstance = VK_NULL_HANDLE;
 static VkDevice loadedDevice = VK_NULL_HANDLE;
 
-static void volkGenLoadLoader(void* context, PFN_vkVoidFunction (*load)(void*, const char*));
-static void volkGenLoadInstance(void* context, PFN_vkVoidFunction (*load)(void*, const char*));
-static void volkGenLoadDevice(void* context, PFN_vkVoidFunction (*load)(void*, const char*));
-static void volkGenLoadDeviceTable(struct VolkDeviceTable* table, void* context, PFN_vkVoidFunction (*load)(void*, const char*));
+static void volkGenLoadLoader( void* context, PFN_vkVoidFunction (*load)( void*, const char* ) );
+static void volkGenLoadInstance( void* context, PFN_vkVoidFunction (*load)( void*, const char* ) );
+static void volkGenLoadDevice( void* context, PFN_vkVoidFunction (*load)( void*, const char* ) );
+static void volkGenLoadDeviceTable( struct VolkDeviceTable* table, void* context, PFN_vkVoidFunction (*load)( void*, const char* ) );
 
-static PFN_vkVoidFunction vkGetInstanceProcAddrStub(void* context, const char* name)
+static PFN_vkVoidFunction vkGetInstanceProcAddrStub( void* context, const char* name )
 {
 	return vkGetInstanceProcAddr((VkInstance)context, name);
 }
 
-static PFN_vkVoidFunction vkGetDeviceProcAddrStub(void* context, const char* name)
+static PFN_vkVoidFunction vkGetDeviceProcAddrStub( void* context, const char* name )
 {
 	return vkGetDeviceProcAddr((VkDevice)context, name);
 }
 
-VkResult volkInitialize(void)
+VkResult volkInitialize( void )
 {
 #if defined(_WIN32)
 	HMODULE module = LoadLibraryA("vulkan-1.dll");
@@ -50,7 +50,7 @@ VkResult volkInitialize(void)
 		return VK_ERROR_INITIALIZATION_FAILED;
 
 	// note: function pointer is cast through void function pointer to silence cast-function-type warning on gcc8
-	vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)(void(*)(void))GetProcAddress(module, "vkGetInstanceProcAddr");
+	vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)(void(*)( void ))GetProcAddress(module, "vkGetInstanceProcAddr");
 #elif defined(__APPLE__)
 	void* module = dlopen("libvulkan.dylib", RTLD_NOW | RTLD_LOCAL);
 	if (!module)
@@ -76,14 +76,14 @@ VkResult volkInitialize(void)
 	return VK_SUCCESS;
 }
 
-void volkInitializeCustom(PFN_vkGetInstanceProcAddr handler)
+void volkInitializeCustom( PFN_vkGetInstanceProcAddr handler )
 {
 	vkGetInstanceProcAddr = handler;
 
 	volkGenLoadLoader(NULL, vkGetInstanceProcAddrStub);
 }
 
-uint32_t volkGetInstanceVersion(void)
+uint32_t volkGetInstanceVersion( void )
 {
 #if defined(VK_VERSION_1_1)
 	uint32_t apiVersion = 0;
@@ -97,17 +97,17 @@ uint32_t volkGetInstanceVersion(void)
 	return 0;
 }
 
-void volkLoadInstance(VkInstance instance)
+void volkLoadInstance( VkInstance instance )
 {
 	loadedInstance = instance;
 	volkGenLoadInstance(instance, vkGetInstanceProcAddrStub);
 	volkGenLoadDevice(instance, vkGetInstanceProcAddrStub);
 }
 
-void volkLoadInstanceOnly(VkInstance instance)
+void volkLoadInstanceOnly( VkInstance instance )
 {
-    loadedInstance = instance;
-    volkGenLoadInstance(instance, vkGetInstanceProcAddrStub);
+	loadedInstance = instance;
+	volkGenLoadInstance(instance, vkGetInstanceProcAddrStub);
 }
 
 VkInstance volkGetLoadedInstance()
@@ -115,7 +115,7 @@ VkInstance volkGetLoadedInstance()
 	return loadedInstance;
 }
 
-void volkLoadDevice(VkDevice device)
+void volkLoadDevice( VkDevice device )
 {
 	loadedDevice = device;
 	volkGenLoadDevice(device, vkGetDeviceProcAddrStub);
@@ -126,12 +126,12 @@ VkDevice volkGetLoadedDevice()
 	return loadedDevice;
 }
 
-void volkLoadDeviceTable(struct VolkDeviceTable* table, VkDevice device)
+void volkLoadDeviceTable( struct VolkDeviceTable* table, VkDevice device )
 {
 	volkGenLoadDeviceTable(table, device, vkGetDeviceProcAddrStub);
 }
 
-static void volkGenLoadLoader(void* context, PFN_vkVoidFunction (*load)(void*, const char*))
+static void volkGenLoadLoader( void* context, PFN_vkVoidFunction (*load)( void*, const char* ) )
 {
 	/* VOLK_GENERATE_LOAD_LOADER */
 #if defined(VK_VERSION_1_0)
@@ -145,7 +145,7 @@ static void volkGenLoadLoader(void* context, PFN_vkVoidFunction (*load)(void*, c
 	/* VOLK_GENERATE_LOAD_LOADER */
 }
 
-static void volkGenLoadInstance(void* context, PFN_vkVoidFunction (*load)(void*, const char*))
+static void volkGenLoadInstance( void* context, PFN_vkVoidFunction (*load)( void*, const char* ) )
 {
 	/* VOLK_GENERATE_LOAD_INSTANCE */
 #if defined(VK_VERSION_1_0)
@@ -351,7 +351,7 @@ static void volkGenLoadInstance(void* context, PFN_vkVoidFunction (*load)(void*,
 	/* VOLK_GENERATE_LOAD_INSTANCE */
 }
 
-static void volkGenLoadDevice(void* context, PFN_vkVoidFunction (*load)(void*, const char*))
+static void volkGenLoadDevice( void* context, PFN_vkVoidFunction (*load)( void*, const char* ) )
 {
 	/* VOLK_GENERATE_LOAD_DEVICE */
 #if defined(VK_VERSION_1_0)
@@ -1078,7 +1078,7 @@ static void volkGenLoadDevice(void* context, PFN_vkVoidFunction (*load)(void*, c
 	/* VOLK_GENERATE_LOAD_DEVICE */
 }
 
-static void volkGenLoadDeviceTable(struct VolkDeviceTable* table, void* context, PFN_vkVoidFunction (*load)(void*, const char*))
+static void volkGenLoadDeviceTable( struct VolkDeviceTable* table, void* context, PFN_vkVoidFunction (*load)( void*, const char* ) )
 {
 	/* VOLK_GENERATE_LOAD_DEVICE_TABLE */
 #if defined(VK_VERSION_1_0)

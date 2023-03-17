@@ -7,21 +7,20 @@
 
 namespace sy::vk
 {
-	Sampler::Sampler(const SamplerBuilder& builder) :
-		VulkanWrapper<VkSampler>(builder.name, builder.vulkanContext.GetRHI(), VK_OBJECT_TYPE_SAMPLER,
-		                         VK_DESTROY_LAMBDA_SIGNATURE(VkSampler)
-		                         {
-			                         vkDestroySampler(vulkanRHI.GetDevice(), handle, nullptr);
-		                         }),
-		minFilter(builder.minFilter),
-		magFilter(builder.magFilter),
-		mipmapMode(builder.mipmapMode),
-		addressModeU(builder.addressModeU),
-		addressModeV(builder.addressModeV),
-		addressModeW(builder.addressModeW)
+	Sampler::Sampler(const SamplerBuilder& builder)
+		: VulkanWrapper<VkSampler>(
+			builder.name, builder.vulkanContext.GetRHI(), VK_OBJECT_TYPE_SAMPLER,
+			VK_DESTROY_LAMBDA_SIGNATURE(VkSampler) {
+				vkDestroySampler(vulkanRHI.GetDevice(), handle, nullptr);
+			})
+		, minFilter(builder.minFilter)
+		, magFilter(builder.magFilter)
+		, mipmapMode(builder.mipmapMode)
+		, addressModeU(builder.addressModeU)
+		, addressModeV(builder.addressModeV)
+		, addressModeW(builder.addressModeW)
 	{
-		const VkSamplerCreateInfo samplerCreateInfo
-		{
+		const VkSamplerCreateInfo samplerCreateInfo{
 			.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
 			.pNext = nullptr,
 			.magFilter = magFilter,
@@ -34,7 +33,7 @@ namespace sy::vk
 
 		Native_t handle = VK_NULL_HANDLE;
 		VK_ASSERT(vkCreateSampler(GetRHI().GetDevice(), &samplerCreateInfo, nullptr, &handle),
-		          "Failed to create sampler {}.", builder.name);
+			"Failed to create sampler {}.", builder.name);
 		UpdateHandle(handle);
 	}
-}
+} // namespace sy::vk

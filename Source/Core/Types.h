@@ -44,8 +44,8 @@ namespace sy
 	struct NamedType
 	{
 	public:
-		NamedType(const std::string_view name) :
-			name(name)
+		NamedType(const std::string_view name)
+			: name(name)
 		{
 		}
 
@@ -73,12 +73,11 @@ namespace sy
 	class NonCopyable
 	{
 	public:
-		virtual ~NonCopyable()                    = default;
-		NonCopyable(const NonCopyable&)           = delete;
+		virtual ~NonCopyable() = default;
+		NonCopyable(const NonCopyable&) = delete;
 		NonCopyable& operator=(const NonCopyable) = delete;
 
 	protected:
-		NonCopyable()                             = default;
-
+		NonCopyable() = default;
 	};
-}
+} // namespace sy

@@ -8,12 +8,8 @@
 
 namespace sy::vk
 {
-	VulkanContext::VulkanContext(const window::Window& window) :
-		vulkanRHI(std::make_unique<VulkanRHI>(window)),
-		frameTracker(std::make_unique<FrameTracker>(*vulkanRHI)),
-		cmdPoolManager(std::make_unique<CommandPoolManager>(*vulkanRHI, *frameTracker)),
-		descriptorManager(std::make_unique<DescriptorManager>(*vulkanRHI, *frameTracker)),
-		pipelineLayoutCache(std::make_unique<PipelineLayoutCache>(*vulkanRHI))
+	VulkanContext::VulkanContext(const window::Window& window)
+		: vulkanRHI(std::make_unique<VulkanRHI>(window)), frameTracker(std::make_unique<FrameTracker>(*vulkanRHI)), cmdPoolManager(std::make_unique<CommandPoolManager>(*vulkanRHI, *frameTracker)), descriptorManager(std::make_unique<DescriptorManager>(*vulkanRHI, *frameTracker)), pipelineLayoutCache(std::make_unique<PipelineLayoutCache>(*vulkanRHI))
 	{
 	}
 
@@ -69,4 +65,4 @@ namespace sy::vk
 		descriptorManager->EndFrame();
 		cmdPoolManager->EndFrame();
 	}
-}
+} // namespace sy::vk

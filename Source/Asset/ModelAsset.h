@@ -18,7 +18,7 @@ namespace sy::vk
 	class CommandPoolManager;
 	class FrameTracker;
 	class DescriptorManager;
-}
+} // namespace sy::vk
 
 namespace sy::render
 {
@@ -28,7 +28,7 @@ namespace sy::render
 namespace sy::asset
 {
 	std::vector<component::StaticMeshComponent> LoadModel(const std::string& name, const fs::path& path,
-	                                                      HandleManager& handleManager,
-	                                                      const vk::VulkanContext& vulkanContext);
+		HandleManager& handleManager,
+		const vk::VulkanContext& vulkanContext);
 	bool ConvertModel(const fs::path& path);
-}
+} // namespace sy::asset

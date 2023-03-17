@@ -11,9 +11,9 @@ namespace sy::vk
 	{
 	public:
 		TextureView(std::string_view name, const VulkanRHI& vulkanRHI, const Texture& texture,
-		            VkImageViewType viewType, TextureSubResourceRange subResourceRange);
+			VkImageViewType viewType, TextureSubResourceRange subResourceRange);
 		TextureView(std::string_view name, const VulkanRHI& vulkanRHI, const Texture& texture,
-		            VkImageViewType viewType);
+			VkImageViewType viewType);
 
 		virtual ~TextureView() override = default;
 
@@ -21,4 +21,4 @@ namespace sy::vk
 		const VkImageViewType viewType;
 		const TextureSubResourceRange subResourceRange;
 	};
-}
+} // namespace sy::vk

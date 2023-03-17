@@ -11,23 +11,21 @@ namespace sy
 {
 	namespace vk
 	{
-		DescriptorManager::DescriptorManager(const vk::VulkanRHI& vulkanRHI, const FrameTracker& frameTracker) :
-			vulkanRHI(vulkanRHI),
-			frameTracker(frameTracker)
+		DescriptorManager::DescriptorManager(const vk::VulkanRHI& vulkanRHI, const FrameTracker& frameTracker)
+			: vulkanRHI(vulkanRHI), frameTracker(frameTracker)
 		{
-			DescriptorPoolSizeBuilder poolSizeBuilder;
-			poolSizeBuilder.AddDescriptors(vk::EDescriptorType::CombinedImageSampler, 1000)
-			               .AddDescriptors(vk::EDescriptorType::UniformBuffer, 1000)
-			               .AddDescriptors(vk::EDescriptorType::StorageBuffer, 1000)
-			               .AddDescriptors(vk::EDescriptorType::SampledImage, 1000)
-			               .AddDescriptors(vk::EDescriptorType::CombinedImageSampler, 1000)
-			               .AddDescriptors(vk::EDescriptorType::StorageImage, 1000);
+			const auto poolSizeBuilder = DescriptorPoolSizeBuilder{}
+											 .AddDescriptors(vk::EDescriptorType::CombinedImageSampler, 1000)
+											 .AddDescriptors(vk::EDescriptorType::UniformBuffer, 1000)
+											 .AddDescriptors(vk::EDescriptorType::StorageBuffer, 1000)
+											 .AddDescriptors(vk::EDescriptorType::SampledImage, 1000)
+											 .AddDescriptors(vk::EDescriptorType::CombinedImageSampler, 1000)
+											 .AddDescriptors(vk::EDescriptorType::StorageImage, 1000);
 
 			const auto nativePoolSizes = poolSizeBuilder.BuildAsNative();
-			const auto poolSizes       = poolSizeBuilder.Build();
+			const auto poolSizes = poolSizeBuilder.Build();
 
-			const VkDescriptorPoolCreateInfo poolCreateInfo
-			{
+			const VkDescriptorPoolCreateInfo poolCreateInfo{
 				.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
 				.pNext = nullptr,
 				.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT,
@@ -39,7 +37,7 @@ namespace sy
 			std::vector<VkDescriptorBindingFlags> bindingFlags;
 			bindingFlags.resize(nativePoolSizes.size());
 			std::fill(bindingFlags.begin(), bindingFlags.end(),
-			          VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT_EXT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT);
+				VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT_EXT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT);
 			bindingFlags.back() |= VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT_EXT;
 
 			std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -47,36 +45,30 @@ namespace sy
 			std::vector<uint32_t> descriptorCounts;
 			descriptorCounts.resize(nativePoolSizes.size());
 			std::transform(poolSizes.begin(), poolSizes.end(),
-			               bindings.begin(),
-			               [](const DescriptorPoolSize& poolSize)
-			               {
-				               return
-						               VkDescriptorSetLayoutBinding
-						               {
-							               ToUnderlying(poolSize.Type),
-							               ToNative(poolSize.Type),
-							               static_cast<uint32_t>(poolSize.Size),
-							               VK_SHADER_STAGE_ALL,
-							               nullptr
-						               };
-			               });
+				bindings.begin(),
+				[](const DescriptorPoolSize& poolSize) {
+					return VkDescriptorSetLayoutBinding{
+						ToUnderlying(poolSize.Type),
+						ToNative(poolSize.Type),
+						static_cast<uint32_t>(poolSize.Size),
+						VK_SHADER_STAGE_ALL,
+						nullptr
+					};
+				});
 
 			std::transform(poolSizes.begin(), poolSizes.end(),
-			               descriptorCounts.begin(),
-			               [](const DescriptorPoolSize& poolSize)
-			               {
-				               return static_cast<uint32_t>(poolSize.Size);
-			               });
+				descriptorCounts.begin(),
+				[](const DescriptorPoolSize& poolSize) {
+					return static_cast<uint32_t>(poolSize.Size);
+				});
 
-			const VkDescriptorSetLayoutBindingFlagsCreateInfoEXT extendedLayoutInfo
-			{
+			const VkDescriptorSetLayoutBindingFlagsCreateInfoEXT extendedLayoutInfo{
 				.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT,
 				.bindingCount = static_cast<uint32_t>(bindingFlags.size()),
 				.pBindingFlags = bindingFlags.data()
 			};
 
-			const VkDescriptorSetLayoutCreateInfo bindlessLayoutInfo
-			{
+			const VkDescriptorSetLayoutCreateInfo bindlessLayoutInfo{
 				.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
 				.pNext = &extendedLayoutInfo,
 				.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT,
@@ -86,23 +78,19 @@ namespace sy
 
 			spdlog::trace("Creating Bindless descriptor set layout...");
 			VK_ASSERT(vkCreateDescriptorSetLayout(vulkanRHI.GetDevice(), &bindlessLayoutInfo, nullptr, &bindlessLayout),
-			          "Failed to create bindless descriptor set layout.");
-
+				"Failed to create bindless descriptor set layout.");
 
 			spdlog::trace("Creating pool package...");
-			VK_ASSERT(vkCreateDescriptorPool(vulkanRHI.GetDevice(), &poolCreateInfo, nullptr, &descriptorPoolPackage.
-				          DescriptorPool), "Failed to create descriptor pool.");
+			VK_ASSERT(vkCreateDescriptorPool(vulkanRHI.GetDevice(), &poolCreateInfo, nullptr, &descriptorPoolPackage.DescriptorPool), "Failed to create descriptor pool.");
 
-			const VkDescriptorSetVariableDescriptorCountAllocateInfoEXT descriptorSetVariableDescriptorCountAllocateInfo
-			{
+			const VkDescriptorSetVariableDescriptorCountAllocateInfoEXT descriptorSetVariableDescriptorCountAllocateInfo{
 				.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT,
 				.pNext = nullptr,
 				.descriptorSetCount = 1,
 				.pDescriptorCounts = descriptorCounts.data()
 			};
 
-			const VkDescriptorSetAllocateInfo setAllocateInfo
-			{
+			const VkDescriptorSetAllocateInfo setAllocateInfo{
 				.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
 				.pNext = &descriptorSetVariableDescriptorCountAllocateInfo,
 				.descriptorPool = descriptorPoolPackage.DescriptorPool,
@@ -110,12 +98,11 @@ namespace sy
 				.pSetLayouts = &bindlessLayout
 			};
 
-			VK_ASSERT(vkAllocateDescriptorSets(vulkanRHI.GetDevice(), &setAllocateInfo, &descriptorPoolPackage.
-				          DescriptorSet), "Failed to allocate descriptor set.");
+			VK_ASSERT(vkAllocateDescriptorSets(vulkanRHI.GetDevice(), &setAllocateInfo, &descriptorPoolPackage.DescriptorSet), "Failed to allocate descriptor set.");
 
 			for (const auto& poolSize : poolSizes)
 			{
-				auto& offsetPoolPackage = descriptorPoolPackage.OffsetPoolPackages[ ToUnderlying(poolSize.Type) ];
+				auto& offsetPoolPackage = descriptorPoolPackage.OffsetPoolPackages[ToUnderlying(poolSize.Type)];
 				offsetPoolPackage.Pool.Grow(poolSize.Size);
 				offsetPoolPackage.AllocatedSlots.resize(poolSize.Size);
 			}
@@ -129,7 +116,7 @@ namespace sy
 
 		void DescriptorManager::BeginFrame()
 		{
-			auto& pendingList = pendingDeallocations[ frameTracker.GetCurrentInFlightFrameIndex() ];
+			auto& pendingList = pendingDeallocations[frameTracker.GetCurrentInFlightFrameIndex()];
 			for (const Allocation& allocation : pendingList)
 			{
 				allocation.Owner.Pool.Deallocate(allocation.AllocatedSlot);
@@ -140,7 +127,7 @@ namespace sy
 		void DescriptorManager::EndFrame()
 		{
 			const bool bHasBufferDescriptorToUpdate = !bufferWriteDescriptors.empty();
-			const bool bHasImageDescriptorToUpdate  = !imageWriteDescriptors.empty();
+			const bool bHasImageDescriptorToUpdate = !imageWriteDescriptors.empty();
 			if (bHasBufferDescriptorToUpdate || bHasImageDescriptorToUpdate)
 			{
 				combinedWriteDescriptorSets.reserve(bufferWriteDescriptors.size() + imageWriteDescriptors.size());
@@ -148,7 +135,7 @@ namespace sy
 				{
 					for (size_t idx = 0; idx < bufferWriteDescriptors.size(); ++idx)
 					{
-						bufferWriteDescriptors[ idx ].pBufferInfo = &bufferInfos[ idx ];
+						bufferWriteDescriptors[idx].pBufferInfo = &bufferInfos[idx];
 					}
 
 					combinedWriteDescriptorSets.assign(bufferWriteDescriptors.begin(), bufferWriteDescriptors.end());
@@ -158,18 +145,18 @@ namespace sy
 				{
 					for (size_t idx = 0; idx < imageWriteDescriptors.size(); ++idx)
 					{
-						imageWriteDescriptors[ idx ].pImageInfo = &imageInfos[ idx ];
+						imageWriteDescriptors[idx].pImageInfo = &imageInfos[idx];
 					}
 
 					combinedWriteDescriptorSets.insert(combinedWriteDescriptorSets.end(), imageWriteDescriptors.begin(),
-					                                   imageWriteDescriptors.end());
+						imageWriteDescriptors.end());
 				}
 
 				if (!combinedWriteDescriptorSets.empty())
 				{
 					vkUpdateDescriptorSets(vulkanRHI.GetDevice(),
-					                       static_cast<uint32_t>(combinedWriteDescriptorSets.size()),
-					                       combinedWriteDescriptorSets.data(), 0, nullptr);
+						static_cast<uint32_t>(combinedWriteDescriptorSets.size()),
+						combinedWriteDescriptorSets.data(), 0, nullptr);
 					bufferWriteDescriptors.clear();
 					bufferInfos.clear();
 					imageWriteDescriptors.clear();
@@ -181,25 +168,24 @@ namespace sy
 
 		Descriptor DescriptorManager::RequestDescriptor(const vk::Buffer& buffer, const bool bIsDynamic)
 		{
-			const auto descriptorType    = vk::BufferUsageToDescriptorType(buffer.GetUsage(), bIsDynamic);
+			const auto descriptorType = vk::BufferUsageToDescriptorType(buffer.GetUsage(), bIsDynamic);
 			const auto descriptorBinding = ToUnderlying(descriptorType);
-			auto& offsetPoolPackage      = descriptorPoolPackage.OffsetPoolPackages[ descriptorBinding ];
+			auto& offsetPoolPackage = descriptorPoolPackage.OffsetPoolPackages[descriptorBinding];
 
 			auto& allocatedSlots = offsetPoolPackage.AllocatedSlots;
 			size_t slotOffset;
 			{
 				std::lock_guard lock{ offsetPoolPackage.Mutex };
 				const FixedOffsetPool::Slot_t allocatedSlot = offsetPoolPackage.Pool.Allocate();
-				slotOffset                                  = allocatedSlot.Offset;
-				allocatedSlots[ slotOffset ]                = allocatedSlot;
+				slotOffset = allocatedSlot.Offset;
+				allocatedSlots[slotOffset] = allocatedSlot;
 			}
 
-			// Add new write descriptor set to write descriptor set list 
+			// Add new write descriptor set to write descriptor set list
 			{
 				std::lock_guard lock{ bufferWriteDescriptorMutex };
 
-				const VkWriteDescriptorSet writeDescriptorSet
-				{
+				const VkWriteDescriptorSet writeDescriptorSet{
 					.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 					.pNext = nullptr,
 					.dstSet = GetDescriptorSet(),
@@ -216,11 +202,10 @@ namespace sy
 			}
 
 			return {
-				&allocatedSlots[ slotOffset ],
-				[this, &offsetPoolPackage](const FixedOffsetPool::Slot_t* slotPtr)
-				{
-					auto& pendingList      = pendingDeallocations[ frameTracker.GetCurrentInFlightFrameIndex() ];
-					auto& pendingListMutex = pendingMutexList[ frameTracker.GetCurrentInFlightFrameIndex() ];
+				&allocatedSlots[slotOffset],
+				[this, &offsetPoolPackage](const FixedOffsetPool::Slot_t* slotPtr) {
+					auto& pendingList = pendingDeallocations[frameTracker.GetCurrentInFlightFrameIndex()];
+					auto& pendingListMutex = pendingMutexList[frameTracker.GetCurrentInFlightFrameIndex()];
 					std::lock_guard lock{ pendingListMutex };
 					pendingList.emplace_back(*slotPtr, offsetPoolPackage);
 				}
@@ -228,7 +213,7 @@ namespace sy
 		}
 
 		Descriptor DescriptorManager::RequestDescriptor(HandleManager& handleManager, const Handle<Buffer> handle,
-		                                                bool bIsDynamic)
+			bool bIsDynamic)
 		{
 			SY_ASSERT(handle, "Invalid Buffer Handle");
 			if (!handle)
@@ -241,28 +226,27 @@ namespace sy
 		}
 
 		Descriptor DescriptorManager::RequestDescriptor(const vk::Texture& texture, const TextureView& view,
-		                                                const Sampler& sampler, const ETextureState expectedState,
-		                                                const bool bIsCombinedSampler)
+			const Sampler& sampler, const ETextureState expectedState,
+			const bool bIsCombinedSampler)
 		{
-			const auto descriptorType    = vk::ImageUsageToDescriptorType(texture.GetUsage(), bIsCombinedSampler);
+			const auto descriptorType = vk::ImageUsageToDescriptorType(texture.GetUsage(), bIsCombinedSampler);
 			const auto descriptorBinding = ToUnderlying(descriptorType);
-			auto& offsetPoolPackage      = descriptorPoolPackage.OffsetPoolPackages[ descriptorBinding ];
+			auto& offsetPoolPackage = descriptorPoolPackage.OffsetPoolPackages[descriptorBinding];
 
 			auto& allocatedSlots = offsetPoolPackage.AllocatedSlots;
 			size_t slotOffset;
 			{
 				std::lock_guard lock{ offsetPoolPackage.Mutex };
 				const FixedOffsetPool::Slot_t allocatedSlot = offsetPoolPackage.Pool.Allocate();
-				slotOffset                                  = allocatedSlot.Offset;
-				allocatedSlots[ slotOffset ]                = allocatedSlot;
+				slotOffset = allocatedSlot.Offset;
+				allocatedSlots[slotOffset] = allocatedSlot;
 			}
 
-			// Add new write descriptor set to write descriptor set list 
+			// Add new write descriptor set to write descriptor set list
 			{
 				std::lock_guard lock{ imageWriteDescriptorMutex };
 
-				const VkWriteDescriptorSet writeDescriptorSet
-				{
+				const VkWriteDescriptorSet writeDescriptorSet{
 					.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 					.pNext = nullptr,
 					.dstSet = GetDescriptorSet(),
@@ -274,9 +258,8 @@ namespace sy
 					.pTexelBufferView = nullptr
 				};
 
-				const auto [ pipelineStage, accessFlag, layout ] = QueryAccessPattern(expectedState);
-				const VkDescriptorImageInfo descriptorImageInfo
-				{
+				const auto [pipelineStage, accessFlag, layout] = QueryAccessPattern(expectedState);
+				const VkDescriptorImageInfo descriptorImageInfo{
 					.sampler = sampler.GetNativeHandle(),
 					.imageView = view.GetNativeHandle(),
 					.imageLayout = layout
@@ -286,11 +269,10 @@ namespace sy
 			}
 
 			return {
-				&allocatedSlots[ slotOffset ],
-				[this, &offsetPoolPackage](const FixedOffsetPool::Slot_t* slotPtr)
-				{
-					auto& pendingList      = pendingDeallocations[ frameTracker.GetCurrentInFlightFrameIndex() ];
-					auto& pendingListMutex = pendingMutexList[ frameTracker.GetCurrentInFlightFrameIndex() ];
+				&allocatedSlots[slotOffset],
+				[this, &offsetPoolPackage](const FixedOffsetPool::Slot_t* slotPtr) {
+					auto& pendingList = pendingDeallocations[frameTracker.GetCurrentInFlightFrameIndex()];
+					auto& pendingListMutex = pendingMutexList[frameTracker.GetCurrentInFlightFrameIndex()];
 					std::lock_guard lock{ pendingListMutex };
 					pendingList.emplace_back(*slotPtr, offsetPoolPackage);
 				}
@@ -298,10 +280,10 @@ namespace sy
 		}
 
 		Descriptor DescriptorManager::RequestDescriptor(HandleManager& handleManager, const Handle<Texture> texture,
-		                                                const Handle<TextureView> view,
-		                                                const Handle<Sampler> sampler,
-		                                                const ETextureState expectedState,
-		                                                const bool bIsCombinedSampler)
+			const Handle<TextureView> view,
+			const Handle<Sampler> sampler,
+			const ETextureState expectedState,
+			const bool bIsCombinedSampler)
 		{
 			SY_ASSERT(texture, "Invalid Texture Handle.");
 			SY_ASSERT(view, "Invalid Texture View Handle.");
@@ -327,5 +309,5 @@ namespace sy
 
 			return RequestDescriptor(*texture, *view, *sampler, expectedState, bIsCombinedSampler);
 		}
-	}
-}
+	} // namespace vk
+} // namespace sy

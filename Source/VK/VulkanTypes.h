@@ -12,19 +12,19 @@ namespace sy::vk
 	using ManagedCommandBuffer = std::unique_ptr<CommandBuffer, std::function<void(CommandBuffer*)>>;
 
 	constexpr uint32_t MaxBindlessResourcesPerDescriptor = 2048;
-	constexpr size_t NumMaxInFlightFrames                = 2;
+	constexpr size_t NumMaxInFlightFrames = 2;
 
 	struct TextureSubResourceRange
 	{
-		uint32_t MipLevel        = 0;
-		uint32_t MipLevelCount   = 1;
-		uint32_t ArrayLayer      = 0;
+		uint32_t MipLevel = 0;
+		uint32_t MipLevelCount = 1;
+		uint32_t ArrayLayer = 0;
 		uint32_t ArrayLayerCount = 1;
 	};
 
 	struct TextureSubResource
 	{
-		uint32_t MipLevel   = 0;
+		uint32_t MipLevel = 0;
 		uint32_t ArrayLayer = 0;
 	};
 
@@ -105,7 +105,7 @@ namespace sy::vk
 	}
 
 	constexpr static auto BufferUsageToDescriptorType(const VkBufferUsageFlags bufferUsageFlags,
-	                                                  bool bIsDynamic = false)
+		bool bIsDynamic = false)
 	{
 		switch (bufferUsageFlags)
 		{
@@ -120,7 +120,7 @@ namespace sy::vk
 	}
 
 	constexpr static auto ImageUsageToDescriptorType(const VkImageUsageFlags imageUsageFlags,
-	                                                 const bool bIsCombinedSampler = true)
+		const bool bIsCombinedSampler = true)
 	{
 		if ((imageUsageFlags & VK_IMAGE_USAGE_STORAGE_BIT) == VK_IMAGE_USAGE_STORAGE_BIT)
 		{
@@ -433,7 +433,7 @@ namespace sy::vk
 
 	constexpr static VkImageSubresourceRange ImageSubresourceRange(
 		const VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT, const uint32_t baseMipLevel = 0,
-		const uint32_t levelCount           = 1, const uint32_t baseArrayLayer = 0, const uint32_t layerCount = 1)
+		const uint32_t levelCount = 1, const uint32_t baseArrayLayer = 0, const uint32_t layerCount = 1)
 	{
 		return {
 			aspectMask,
@@ -445,7 +445,7 @@ namespace sy::vk
 	}
 
 	VkRenderingAttachmentInfo DepthAttachmentInfo(const TextureView& depthStencil, float depthClearValue = 1.f,
-	                                              uint8_t stencilClearValue                              = 0);
+		uint8_t stencilClearValue = 0);
 
 	constexpr static bool IsDepthStencilFormat(const VkFormat format)
 	{
@@ -454,9 +454,7 @@ namespace sy::vk
 
 	constexpr static VkImageAspectFlags FormatToImageAspect(const VkFormat format)
 	{
-		if (format == VK_FORMAT_D16_UNORM ||
-			format == VK_FORMAT_D32_SFLOAT ||
-			format == VK_FORMAT_X8_D24_UNORM_PACK32)
+		if (format == VK_FORMAT_D16_UNORM || format == VK_FORMAT_D32_SFLOAT || format == VK_FORMAT_X8_D24_UNORM_PACK32)
 		{
 			return VK_IMAGE_ASPECT_DEPTH_BIT;
 		}
@@ -471,4 +469,4 @@ namespace sy::vk
 
 		return VK_IMAGE_ASPECT_COLOR_BIT;
 	}
-}
+} // namespace sy::vk

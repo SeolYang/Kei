@@ -31,4 +31,4 @@ namespace sy
 		fs::path assetPath;
 		bool bShouldConvertAssets = false;
 	};
-}
+} // namespace sy

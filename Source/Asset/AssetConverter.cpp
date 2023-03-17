@@ -8,8 +8,7 @@ namespace sy::asset
 {
 	std::optional<EAsset> FileExtensionToAssetType(const std::string& extension)
 	{
-		static const robin_hood::unordered_map<std::string, EAsset> extAssetMap
-		{
+		static const robin_hood::unordered_map<std::string, EAsset> extAssetMap{
 			{ "PNG", EAsset::Texture },
 			{ "JPG", EAsset::Texture },
 			{ "JPEG", EAsset::Texture },
@@ -31,7 +30,7 @@ namespace sy::asset
 			if (entry.is_regular_file())
 			{
 				const fs::path filePath = fs::relative(entry.path(), root.parent_path());
-				std::string extension   = filePath.extension().string();
+				std::string extension = filePath.extension().string();
 				if (extension.find('.') == 0)
 				{
 					extension = extension.substr(1);
@@ -57,4 +56,4 @@ namespace sy::asset
 			}
 		}
 	}
-}
+} // namespace sy::asset

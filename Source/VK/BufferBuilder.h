@@ -9,8 +9,8 @@ namespace sy::vk
 	class BufferBuilder
 	{
 	public:
-		explicit BufferBuilder(const VulkanContext& vulkanContext) :
-			vulkanContext(vulkanContext)
+		explicit BufferBuilder(const VulkanContext& vulkanContext)
+			: vulkanContext(vulkanContext)
 		{
 		}
 
@@ -61,9 +61,8 @@ namespace sy::vk
 		template <typename T>
 		BufferBuilder& SetDataToTransfer(const std::span<const T> typedData)
 		{
-			[[likely]]
-			if (const bool bIsValidData = typedData.size() > 0 || typedData.data() != nullptr;
-				bIsValidData)
+			[[likely]] if (const bool bIsValidData = typedData.size() > 0 || typedData.data() != nullptr;
+						   bIsValidData)
 			{
 				const std::span<const uint8_t> bytesOfData = std::span<const uint8_t>{
 					reinterpret_cast<const uint8_t*>(typedData.data()),
@@ -100,13 +99,13 @@ namespace sy::vk
 	private:
 		friend Buffer;
 		const VulkanContext& vulkanContext;
-		std::string name                = "Buffer";
-		size_t size                     = 1;
+		std::string name = "Buffer";
+		size_t size = 1;
 		EBufferState targetInitialState = EBufferState::None;
 		/** @todo May builder have vector of bytes instead of span? cause it can be dangling in some situation. */
 		std::optional<std::span<const uint8_t>> dataToTransfer = std::nullopt;
-		std::optional<VkBufferUsageFlags> usage                = std::nullopt;
-		std::optional<VmaMemoryUsage> memoryUsage              = std::nullopt;
-		VkMemoryPropertyFlags memoryProperty                   = 0;
+		std::optional<VkBufferUsageFlags> usage = std::nullopt;
+		std::optional<VmaMemoryUsage> memoryUsage = std::nullopt;
+		VkMemoryPropertyFlags memoryProperty = 0;
 	};
-}
+} // namespace sy::vk

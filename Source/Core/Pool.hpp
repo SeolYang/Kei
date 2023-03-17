@@ -47,10 +47,8 @@ namespace sy
 		using Slot_t = SlotType<SlotDataType>;
 
 	public:
-		FixedPool(const size_t sizePerSlot = 1, size_t maxSlotCount = 0) :
-			sizePerSlot(sizePerSlot),
-			maxSlotCount(0),
-			allocatedSize(0)
+		FixedPool(const size_t sizePerSlot = 1, size_t maxSlotCount = 0)
+			: sizePerSlot(sizePerSlot), maxSlotCount(0), allocatedSize(0)
 		{
 			Grow(maxSlotCount);
 		}
@@ -101,10 +99,8 @@ namespace sy
 		using Slot_t = SlotType<SlotDataType>;
 
 	public:
-		Pool(const size_t sizePerSlot, const size_t numOfGrowSlots = 64) :
-			sizePerSlot(sizePerSlot),
-			numOfGrowSlots(numOfGrowSlots),
-			allocatedSize(0)
+		Pool(const size_t sizePerSlot, const size_t numOfGrowSlots = 64)
+			: sizePerSlot(sizePerSlot), numOfGrowSlots(numOfGrowSlots), allocatedSize(0)
 		{
 		}
 
@@ -148,4 +144,4 @@ namespace sy
 	};
 
 	using OffsetPool = Pool<void>;
-}
+} // namespace sy

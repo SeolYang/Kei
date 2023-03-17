@@ -9,10 +9,9 @@ namespace sy
 	{
 		bool PipelineLayoutCache::PipelineLayoutInfo::operator==(const PipelineLayoutInfo& rhs) const
 		{
-			const bool bHasSameNumOfDescriptorSetLayouts = DescriptorSetLayouts.size() == rhs.DescriptorSetLayouts.
-					size();
+			const bool bHasSameNumOfDescriptorSetLayouts = DescriptorSetLayouts.size() == rhs.DescriptorSetLayouts.size();
 			const bool bHasSameNumOfPushConstantRanges = PushConstantRanges.size() == rhs.PushConstantRanges.size();
-			const bool bHasSameFlags                   = Flags == rhs.Flags;
+			const bool bHasSameFlags = Flags == rhs.Flags;
 			if (!(bHasSameNumOfDescriptorSetLayouts && bHasSameNumOfPushConstantRanges && bHasSameFlags))
 			{
 				return false;
@@ -20,7 +19,7 @@ namespace sy
 
 			for (size_t idx = 0; idx < DescriptorSetLayouts.size(); ++idx)
 			{
-				if (DescriptorSetLayouts[ idx ] != rhs.DescriptorSetLayouts[ idx ])
+				if (DescriptorSetLayouts[idx] != rhs.DescriptorSetLayouts[idx])
 				{
 					return false;
 				}
@@ -28,12 +27,11 @@ namespace sy
 
 			for (size_t idx = 0; idx < PushConstantRanges.size(); ++idx)
 			{
-				const auto& pushConstantRange              = PushConstantRanges[ idx ];
-				const auto& rhsPushConstantRange           = rhs.PushConstantRanges[ idx ];
-				const bool bHasSameConstantRangeSize       = pushConstantRange.size == rhsPushConstantRange.size;
-				const bool bHasSameConstantRangeOffset     = pushConstantRange.offset == rhsPushConstantRange.offset;
-				const bool bHasSameConstantRangeStageFlags = pushConstantRange.stageFlags == rhsPushConstantRange.
-						stageFlags;
+				const auto& pushConstantRange = PushConstantRanges[idx];
+				const auto& rhsPushConstantRange = rhs.PushConstantRanges[idx];
+				const bool bHasSameConstantRangeSize = pushConstantRange.size == rhsPushConstantRange.size;
+				const bool bHasSameConstantRangeOffset = pushConstantRange.offset == rhsPushConstantRange.offset;
+				const bool bHasSameConstantRangeStageFlags = pushConstantRange.stageFlags == rhsPushConstantRange.stageFlags;
 				if (!(bHasSameConstantRangeSize && bHasSameConstantRangeOffset && bHasSameConstantRangeStageFlags))
 				{
 					return false;
@@ -53,16 +51,15 @@ namespace sy
 
 			for (const auto& pushConstantRange : PushConstantRanges)
 			{
-				const size_t constantRangeHash = std::hash<size_t>()(pushConstantRange.size | pushConstantRange.offset
-				                                                     << 8 | pushConstantRange.stageFlags << 16);
+				const size_t constantRangeHash = std::hash<size_t>()(pushConstantRange.size | pushConstantRange.offset << 8 | pushConstantRange.stageFlags << 16);
 				result ^= constantRangeHash;
 			}
 
 			return result;
 		}
 
-		PipelineLayoutCache::PipelineLayoutCache(const VulkanRHI& vulkanRHI) :
-			vulkanRHI(vulkanRHI)
+		PipelineLayoutCache::PipelineLayoutCache(const VulkanRHI& vulkanRHI)
+			: vulkanRHI(vulkanRHI)
 		{
 		}
 
@@ -75,10 +72,9 @@ namespace sy
 		}
 
 		VkPipelineLayout PipelineLayoutCache::Request(const std::span<VkDescriptorSetLayout> descriptorSetLayouts,
-		                                              const PushConstantBuilder& pushConstantBuilder)
+			const PushConstantBuilder& pushConstantBuilder)
 		{
-			PipelineLayoutInfo pipelineLayoutInfo
-			{
+			PipelineLayoutInfo pipelineLayoutInfo{
 				.Flags = 0,
 			};
 
@@ -88,8 +84,7 @@ namespace sy
 
 			if (!cache.contains(pipelineLayoutInfo))
 			{
-				const VkPipelineLayoutCreateInfo createInfo
-				{
+				const VkPipelineLayoutCreateInfo createInfo{
 					.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 					.pNext = nullptr,
 					.flags = 0,
@@ -101,11 +96,11 @@ namespace sy
 
 				VkPipelineLayout newPipelineLayout = VK_NULL_HANDLE;
 				VK_ASSERT(vkCreatePipelineLayout(vulkanRHI.GetDevice(), &createInfo, nullptr, &newPipelineLayout),
-				          "Failed to create new pipeline layout.");
-				cache[ pipelineLayoutInfo ] = newPipelineLayout;
+					"Failed to create new pipeline layout.");
+				cache[pipelineLayoutInfo] = newPipelineLayout;
 			}
 
-			return cache[ pipelineLayoutInfo ];
+			return cache[pipelineLayoutInfo];
 		}
-	}
-}
+	} // namespace vk
+} // namespace sy

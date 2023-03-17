@@ -11,4 +11,4 @@ namespace sy::vk
 		Semaphore(std::string_view name, const VulkanRHI& vulkanRHI);
 		virtual ~Semaphore() = default;
 	};
-}
+} // namespace sy::vk

@@ -5,8 +5,8 @@
 
 namespace sy::vk
 {
-	ResourceStateTracker::ResourceStateTracker(HandleManager& handleManager) :
-		handleManager(handleManager)
+	ResourceStateTracker::ResourceStateTracker(HandleManager& handleManager)
+		: handleManager(handleManager)
 	{
 	}
 
@@ -17,10 +17,10 @@ namespace sy::vk
 		{
 			if (handle)
 			{
-				textureStates[ placement ] = {
+				textureStates[placement] = {
 					.Handle = handle,
 					.State = handle->GetInitialState(),
-					.SubResourceStates =  std::vector{handle->GetNumSubResources(), handle->GetInitialState()}
+					.SubResourceStates = std::vector{ handle->GetNumSubResources(), handle->GetInitialState() }
 				};
 			}
 		}
@@ -37,7 +37,7 @@ namespace sy::vk
 		{
 			if (handle)
 			{
-				bufferStates[ handle.GetPlacement() ] = { handle, handle->GetInitialState() };
+				bufferStates[handle.GetPlacement()] = { handle, handle->GetInitialState() };
 			}
 		}
 	}
@@ -48,14 +48,14 @@ namespace sy::vk
 	}
 
 	void ResourceStateTracker::PendingTransition(const ETextureState dstState, const Handle<Texture> handle,
-	                                             const std::span<const TextureSubResource> subResources)
+		const std::span<const TextureSubResource> subResources)
 	{
 		auto foundItr = textureStates.find(handle.GetPlacement());
 		if (foundItr != textureStates.end())
 		{
 			if (handle)
 			{
-				TextureState& state  = foundItr->second;
+				TextureState& state = foundItr->second;
 				if (!subResources.empty())
 				{
 					if (!state.bTrackingPerSubResource)
@@ -67,14 +67,13 @@ namespace sy::vk
 					{
 						const size_t subResourceIndex = ResolveTextureSubResourceRangeIndex(subResource.MipLevel,
 							subResource.ArrayLayer, handle->GetMipLevels());
-						if (state.SubResourceStates[ subResourceIndex ] != dstState)
+						if (state.SubResourceStates[subResourceIndex] != dstState)
 						{
-							state.SubResourceStates[ subResourceIndex ] = dstState;
+							state.SubResourceStates[subResourceIndex] = dstState;
 							pendingTextureTransitions.emplace_back(*handle, state.State, dstState,
-							                                       TextureSubResourceRange{
-								                                       .MipLevel = subResource.MipLevel,
-								                                       .ArrayLayer = subResource.ArrayLayer
-							                                       });
+								TextureSubResourceRange{
+									.MipLevel = subResource.MipLevel,
+									.ArrayLayer = subResource.ArrayLayer });
 						}
 					}
 				}
@@ -87,17 +86,14 @@ namespace sy::vk
 							for (uint32_t mipLevel = 0; mipLevel < handle->GetMipLevels(); ++mipLevel)
 							{
 								const size_t subResourceIndex =
-										ResolveTextureSubResourceRangeIndex(mipLevel, arrayLayer,
-										                                    handle->GetMipLevels());
-								if (state.SubResourceStates[ subResourceIndex ] != dstState)
+									ResolveTextureSubResourceRangeIndex(mipLevel, arrayLayer,
+										handle->GetMipLevels());
+								if (state.SubResourceStates[subResourceIndex] != dstState)
 								{
 									pendingTextureTransitions.emplace_back(*handle,
-									                                       state.SubResourceStates[ subResourceIndex ],
-									                                       dstState, TextureSubResourceRange{
-										                                       .MipLevel = mipLevel,
-										                                       .ArrayLayer = arrayLayer
-									                                       });
-									state.SubResourceStates[ subResourceIndex ] = dstState;
+										state.SubResourceStates[subResourceIndex],
+										dstState, TextureSubResourceRange{ .MipLevel = mipLevel, .ArrayLayer = arrayLayer });
+									state.SubResourceStates[subResourceIndex] = dstState;
 								}
 							}
 						}
@@ -105,10 +101,10 @@ namespace sy::vk
 					else
 					{
 						pendingTextureTransitions.emplace_back(*handle, state.State, dstState,
-						                                       handle->GetFullSubResourceRange());
+							handle->GetFullSubResourceRange());
 					}
 
-					state.State                   = dstState;
+					state.State = dstState;
 					state.bTrackingPerSubResource = false;
 				}
 			}
@@ -116,14 +112,14 @@ namespace sy::vk
 	}
 
 	void ResourceStateTracker::PendingTransition(const EBufferState dstState, const Handle<Buffer> handle,
-	                                             const size_t offset, const size_t size)
+		const size_t offset, const size_t size)
 	{
 		auto foundItr = bufferStates.find(handle.GetPlacement());
 		if (foundItr != bufferStates.end())
 		{
 			if (handle)
 			{
-				BufferState& state   = foundItr->second;
+				BufferState& state = foundItr->second;
 				if (state.State != dstState)
 				{
 					pendingBufferTransitions.emplace_back(*handle, state.State, dstState);
@@ -140,4 +136,4 @@ namespace sy::vk
 			PendingTransition(dstState, handle, 0, handle->GetAlignedSize());
 		}
 	}
-}
+} // namespace sy::vk

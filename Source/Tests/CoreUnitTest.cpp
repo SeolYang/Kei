@@ -109,7 +109,7 @@ TEST_CASE("HandleManager", "[handle_mng]")
 		constexpr float PI = 3.141592f;
 		HandleManager handleMng;
 		auto& floatHandleMap = handleMng.GetHandleMap<float>();
-		auto piHandle        = handleMng.Add<float>(PI);
+		auto piHandle = handleMng.Add<float>(PI);
 		REQUIRE(piHandle.IsValid());
 		const auto ownerOfPiHandle = piHandle.GetOwner();
 		REQUIRE(&floatHandleMap == &ownerOfPiHandle.value().get());
@@ -133,8 +133,7 @@ TEST_CASE("Utilities", "[utils]")
 {
 	SECTION("Flags")
 	{
-		constexpr VkCommandBufferUsageFlags tempFlagBits = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT |
-				VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+		constexpr VkCommandBufferUsageFlags tempFlagBits = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT | VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
 		REQUIRE(sy::FlagsContains<VkCommandBufferUsageFlags>(tempFlagBits, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT));
 	}
 }

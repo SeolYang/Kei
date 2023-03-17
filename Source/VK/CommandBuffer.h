@@ -31,11 +31,11 @@ namespace sy::vk
 
 		/** Synchronizations */
 		void ChangeState(EBufferState srcState, EBufferState dstState, VkBuffer buffer, size_t offset,
-		                 size_t size) const;
+			size_t size) const;
 		void ChangeState(EBufferState srcState, EBufferState dstState, const Buffer& buffer) const;
 		void ChangeState(ETextureState srcState, ETextureState dstState, VkImage image, VkImageAspectFlags aspectMask,
-		                 uint32_t mipLevelCount  = 1, uint32_t baseMipLevel = 0, uint32_t arrayLayerCount = 1,
-		                 uint32_t baseArrayLayer = 0) const;
+			uint32_t mipLevelCount = 1, uint32_t baseMipLevel = 0, uint32_t arrayLayerCount = 1,
+			uint32_t baseArrayLayer = 0) const;
 		void ChangeState(ETextureState srcState, ETextureState dstState, const Texture& texture) const;
 
 		void FlushStateTransitions(ResourceStateTracker& resourceStateTracker) const;
@@ -44,7 +44,7 @@ namespace sy::vk
 		void BindPipeline(const Pipeline& pipeline) const;
 		void BindDescriptorSet(VkDescriptorSet descriptorSet, const Pipeline& pipeline) const;
 		void BindVertexBuffers(uint32_t firstBinding, std::span<CRef<Buffer>> buffers,
-		                       std::span<size_t> offsets) const;
+			std::span<size_t> offsets) const;
 		void BindVertexBuffers(uint32_t firstBinding, std::span<VkBuffer> buffers, std::span<size_t> offsets) const;
 		void BindIndexBuffer(const Buffer& indexBuffer, size_t offset = 0) const;
 		void BindIndexBuffer(VkBuffer indexBuffer, size_t offset = 0) const;
@@ -56,34 +56,34 @@ namespace sy::vk
 		}
 
 		void PushConstants(const Pipeline& pipeline, VkShaderStageFlags shaderStageFlags, uint32_t offset,
-		                   uint32_t size, const void* values) const;
+			uint32_t size, const void* values) const;
 
 		/** Draw calls */
 		void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const;
 		void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset,
-		                 uint32_t firstInstance) const;
+			uint32_t firstInstance) const;
 
 		/** Memory Transfer */
 		void CopyBufferToImage(const Buffer& srcBuffer, const Texture& dstTexture,
-		                       std::span<VkBufferImageCopy> copySubresourceRegions) const;
+			std::span<VkBufferImageCopy> copySubresourceRegions) const;
 		void CopyBufferToImageSimple(const Buffer& srcBuffer, const Texture& dstTexture) const;
 		void CopyBufferSimple(const Buffer& srcBuffer, size_t srcOffset, const Buffer& dstBuffer, size_t dstOffset,
-		                      const size_t sizeofData) const;
+			const size_t sizeofData) const;
 
 	private:
 		void BufferMemoryBarrier(VkPipelineStageFlags2 srcStage, VkPipelineStageFlags2 dstStage,
-		                         VkAccessFlags2 srcAccess, VkAccessFlags2 dstAccess, VkBuffer buffer, size_t offset,
-		                         size_t size) const;
+			VkAccessFlags2 srcAccess, VkAccessFlags2 dstAccess, VkBuffer buffer, size_t offset,
+			size_t size) const;
 		void ImageMemoryBarrier(VkPipelineStageFlags2 srcStage, VkPipelineStageFlags2 dstStage,
-		                        VkAccessFlags2 srcAccess, VkAccessFlags2 dstAccess, VkImage image,
-		                        VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask,
-		                        uint32_t mipLevelCount  = 1, uint32_t baseMipLevel = 0, uint32_t arrayLayerCount = 1,
-		                        uint32_t baseArrayLayer = 0) const;
+			VkAccessFlags2 srcAccess, VkAccessFlags2 dstAccess, VkImage image,
+			VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask,
+			uint32_t mipLevelCount = 1, uint32_t baseMipLevel = 0, uint32_t arrayLayerCount = 1,
+			uint32_t baseArrayLayer = 0) const;
 		void PipelineBarrier(std::span<VkMemoryBarrier2> memoryBarriers,
-		                     std::span<VkBufferMemoryBarrier2> bufferMemoryBarriers,
-		                     std::span<VkImageMemoryBarrier2> imageMemoryBarriers) const;
+			std::span<VkBufferMemoryBarrier2> bufferMemoryBarriers,
+			std::span<VkImageMemoryBarrier2> imageMemoryBarriers) const;
 
 	private:
 		const EQueueType queueType;
 	};
-}
+} // namespace sy::vk

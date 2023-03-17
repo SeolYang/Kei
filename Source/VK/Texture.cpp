@@ -15,26 +15,23 @@ namespace sy
 {
 	namespace vk
 	{
-		Texture::Texture(const TextureBuilder& builder) :
-			VulkanWrapper(builder.name, builder.vulkanContext.GetRHI(), VK_OBJECT_TYPE_IMAGE,
-			              VK_DESTROY_LAMBDA_SIGNATURE(VkImage)
-			              {
-			              }),
-			type(*builder.type),
-			usage(*builder.usage | (builder.dataToTransfer.has_value() ? VK_IMAGE_USAGE_TRANSFER_DST_BIT : 0)),
-			format(builder.format),
-			memoryUsage(*builder.memoryUsage),
-			memoryProperty(builder.memoryProperty),
-			extent(*builder.extent),
-			layers(builder.layers),
-			samples(builder.samples),
-			tiling(builder.tiling),
-			initialState(builder.targetInitialState),
-			bGenerateMips(builder.bGenerateMips && math::IsPowOfTwo(extent)),
-			mips(bGenerateMips ? static_cast<uint32_t>(std::log2(extent.width)) : builder.mips)
+		Texture::Texture(const TextureBuilder& builder)
+			: VulkanWrapper(builder.name, builder.vulkanContext.GetRHI(), VK_OBJECT_TYPE_IMAGE,
+				VK_DESTROY_LAMBDA_SIGNATURE(VkImage){})
+			, type(*builder.type)
+			, usage(*builder.usage | (builder.dataToTransfer.has_value() ? VK_IMAGE_USAGE_TRANSFER_DST_BIT : 0))
+			, format(builder.format)
+			, memoryUsage(*builder.memoryUsage)
+			, memoryProperty(builder.memoryProperty)
+			, extent(*builder.extent)
+			, layers(builder.layers)
+			, samples(builder.samples)
+			, tiling(builder.tiling)
+			, initialState(builder.targetInitialState)
+			, bGenerateMips(builder.bGenerateMips && math::IsPowOfTwo(extent))
+			, mips(bGenerateMips ? static_cast<uint32_t>(std::log2(extent.width)) : builder.mips)
 		{
-			const VkImageCreateInfo imageCreateInfo
-			{
+			const VkImageCreateInfo imageCreateInfo{
 				.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
 				.pNext = nullptr,
 				.flags = 0,
@@ -43,8 +40,7 @@ namespace sy
 				.extent = VkExtent3D{
 					extent.width,
 					type != VK_IMAGE_TYPE_1D ? extent.height : 1,
-					type == VK_IMAGE_TYPE_3D ? extent.depth : 1
-				},
+					type == VK_IMAGE_TYPE_3D ? extent.depth : 1 },
 				.mipLevels = mips,
 				.arrayLayers = layers,
 				.samples = samples,
@@ -54,26 +50,25 @@ namespace sy
 				.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
 			};
 
-			const VmaAllocationCreateInfo allocationCreateInfo
-			{
+			const VmaAllocationCreateInfo allocationCreateInfo{
 				.usage = memoryUsage,
 				.requiredFlags = memoryProperty
 			};
 
 			const auto& vulkanContext = builder.vulkanContext;
-			const auto& vulkanRHI     = vulkanContext.GetRHI();
-			const auto allocator      = vulkanRHI.GetAllocator();
-			Native_t handle           = VK_NULL_HANDLE;
+			const auto& vulkanRHI = vulkanContext.GetRHI();
+			const auto allocator = vulkanRHI.GetAllocator();
+			Native_t handle = VK_NULL_HANDLE;
 			VK_ASSERT(vmaCreateImage(allocator, &imageCreateInfo, &allocationCreateInfo, &handle, &allocation, nullptr),
-			          "Failed to create image {}.", builder.name);
+				"Failed to create image {}.", builder.name);
 			UpdateHandle(handle);
 
 			const bool bRequiredDataTransfer = builder.dataToTransfer.has_value();
-			const bool bRequiredStateChange  = initialState != ETextureState::None;
+			const bool bRequiredStateChange = initialState != ETextureState::None;
 			if (bRequiredDataTransfer || bRequiredStateChange)
 			{
 				auto& cmdPoolManager = vulkanContext.GetCommandPoolManager();
-				auto& cmdPool        = cmdPoolManager.RequestCommandPool(EQueueType::Graphics);
+				auto& cmdPool = cmdPoolManager.RequestCommandPool(EQueueType::Graphics);
 				const auto cmdBuffer = cmdPool.RequestCommandBuffer("Buffer Transfer Command Buffer");
 
 				std::unique_ptr<Buffer> stagingBuffer = nullptr;
@@ -83,13 +78,13 @@ namespace sy
 					if (bRequiredDataTransfer)
 					{
 						stagingBuffer = BufferBuilder::StagingBufferTemplate(builder.vulkanContext)
-						                .SetName("Staging Buffer-To Texture")
-						                .SetSize(builder.dataToTransfer->size_bytes())
-						                .Build();
+											.SetName("Staging Buffer-To Texture")
+											.SetSize(builder.dataToTransfer->size_bytes())
+											.Build();
 
 						void* mappedStagingBuffer = vulkanRHI.Map(*stagingBuffer);
 						std::memcpy(mappedStagingBuffer, builder.dataToTransfer->data(),
-						            builder.dataToTransfer->size());
+							builder.dataToTransfer->size());
 						vulkanRHI.Unmap(*stagingBuffer);
 
 						cmdBuffer->ChangeState(localState, ETextureState::TransferWrite, *this);
@@ -117,9 +112,9 @@ namespace sy
 			if (allocation != VK_NULL_HANDLE)
 			{
 				const auto& vulkanRHI = GetRHI();
-				const auto handle     = GetNativeHandle();
+				const auto handle = GetNativeHandle();
 				vmaDestroyImage(vulkanRHI.GetAllocator(), handle, allocation);
 			}
 		}
-	}
-}
+	} // namespace vk
+} // namespace sy

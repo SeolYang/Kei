@@ -8,4 +8,4 @@ namespace sy::vk
 	{
 		return std::make_unique<Sampler>(*this);
 	}
-}
+} // namespace sy::vk

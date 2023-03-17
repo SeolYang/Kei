@@ -27,4 +27,4 @@ namespace sy
 	public:
 		T width, height, depth;
 	};
-}
+} // namespace sy
