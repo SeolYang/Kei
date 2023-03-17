@@ -42,6 +42,9 @@
 #include <VkBootstrap.h>
 #include <vk_mem_alloc.h>
 
+/** Spirv-reflect */
+#include <spirv_reflect.h>
+
 /** robinhood hash */
 #include <robin_hood.h>
 
@@ -74,6 +77,9 @@
 /** nlohmann-json */
 #include <nlohmann/json.hpp>
 
+/** stduuid */
+//#include <uuid.h>
+
 /** magic-enum */
 #include <magic_enum.hpp>
 
@@ -85,6 +91,9 @@
 
 /** mesh optimizer */
 #include <meshoptimizer.h>
+
+/** Tiny gltf */
+#include <tiny_gltf.h>
 
 /** Internal - Core */
 #include <Core/Types.h>

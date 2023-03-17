@@ -321,6 +321,9 @@
     <ClInclude Include="..\Source\PCH.h">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Core\HandleManager.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Assets\Shaders\tri.vert">

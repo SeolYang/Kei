@@ -10,21 +10,23 @@
         "name" : "sdl2",
         "features": ["vulkan"]
       },
-      "sdl2-mixer",
       "vk-bootstrap",
-      "glm",
+      "spirv-reflect",
       "imgui",
-      "tinyobjloader",
-      "stb",
+      "tinygltf",
       "assimp",
       "meshoptimizer",
-      "spdlog",
+      "stb",
+      "glm",
       "robin-hood-hashing",
-      "entt",
-      "taskflow",
-      "lz4",
       "nlohmann-json",
       "magic-enum",
-      "catch2"
+      "spdlog",
+      "entt",
+      "lz4",
+      "sdl2-mixer",
+      "taskflow",
+      "catch2",
+      "stduuid"
     ]
   }

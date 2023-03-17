@@ -85,6 +85,7 @@
     <ClInclude Include="..\Source\Core\ECS.h" />
     <ClInclude Include="..\Source\Core\Extent.h" />
     <ClInclude Include="..\Source\Core\Assert.h" />
+    <ClInclude Include="..\Source\Core\HandleManager.h" />
     <ClInclude Include="..\Source\Core\Pool.hpp" />
     <ClInclude Include="..\Source\Core\ResourceCache.h" />
     <ClInclude Include="..\Source\Core\Timer.h" />
