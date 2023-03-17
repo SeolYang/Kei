@@ -12,11 +12,6 @@
  * 4. Compressed Index data
  */
 
-namespace sy
-{
-	class ResourceCache;
-}
-
 namespace sy::vk
 {
 	class VulkanContext;
@@ -33,7 +28,7 @@ namespace sy::render
 namespace sy::asset
 {
 	std::vector<component::StaticMeshComponent> LoadModel(const std::string& name, const fs::path& path,
-	                                                      ResourceCache& resourceCache,
+	                                                      HandleManager& handleManager,
 	                                                      const vk::VulkanContext& vulkanContext);
 	bool ConvertModel(const fs::path& path);
 }

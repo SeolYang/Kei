@@ -23,7 +23,6 @@
     <ClCompile Include="..\Source\Asset\TextureAsset.cpp" />
     <ClCompile Include="..\Source\Audio\AudioContext.cpp" />
     <ClCompile Include="..\Source\Core\CommandLineParser.cpp" />
-    <ClCompile Include="..\Source\Core\ResourceCache.cpp" />
     <ClCompile Include="..\Source\Game\GameContext.cpp" />
     <ClCompile Include="..\Source\Game\World.cpp" />
     <ClCompile Include="..\Source\main.cpp" />
@@ -87,10 +86,8 @@
     <ClInclude Include="..\Source\Core\Assert.h" />
     <ClInclude Include="..\Source\Core\HandleManager.h" />
     <ClInclude Include="..\Source\Core\Pool.hpp" />
-    <ClInclude Include="..\Source\Core\ResourceCache.h" />
     <ClInclude Include="..\Source\Core\Timer.h" />
     <ClInclude Include="..\Source\Core\Types.h" />
-    <ClInclude Include="..\Source\Core\Handle.h" />
     <ClInclude Include="..\Source\Core\Utils.h" />
     <ClInclude Include="..\Source\Game\GameContext.h" />
     <ClInclude Include="..\Source\Game\World.h" />

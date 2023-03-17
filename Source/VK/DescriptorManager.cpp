@@ -6,7 +6,6 @@
 #include <VK/Texture.h>
 #include <VK/TextureView.h>
 #include <VK/Sampler.h>
-#include <Core/ResourceCache.h>
 
 namespace sy
 {
@@ -228,19 +227,17 @@ namespace sy
 			};
 		}
 
-		Descriptor DescriptorManager::RequestDescriptor(ResourceCache& resourceCache, const Handle<Buffer> handle,
+		Descriptor DescriptorManager::RequestDescriptor(HandleManager& handleManager, const Handle<Buffer> handle,
 		                                                bool bIsDynamic)
 		{
 			SY_ASSERT(handle, "Invalid Buffer Handle");
-
-			const auto bufferOpt = resourceCache.Load(handle);
-			if (!bufferOpt)
+			if (!handle)
 			{
-				SY_ASSERT(false, "Invalid Buffer Resource {}", handle.Value);
+				SY_ASSERT(false, "Invalid Buffer Resource");
 				return nullptr;
 			}
 
-			return RequestDescriptor(Unwrap(bufferOpt), bIsDynamic);
+			return RequestDescriptor(*handle, bIsDynamic);
 		}
 
 		Descriptor DescriptorManager::RequestDescriptor(const vk::Texture& texture, const TextureView& view,
@@ -300,7 +297,7 @@ namespace sy
 			};
 		}
 
-		Descriptor DescriptorManager::RequestDescriptor(ResourceCache& resourceCache, const Handle<Texture> texture,
+		Descriptor DescriptorManager::RequestDescriptor(HandleManager& handleManager, const Handle<Texture> texture,
 		                                                const Handle<TextureView> view,
 		                                                const Handle<Sampler> sampler,
 		                                                const ETextureState expectedState,
@@ -310,29 +307,25 @@ namespace sy
 			SY_ASSERT(view, "Invalid Texture View Handle.");
 			SY_ASSERT(sampler, "Invalid Sampler Handle.");
 
-			const auto textureOpt = resourceCache.Load(texture);
-			if (!textureOpt)
+			if (!texture)
 			{
-				SY_ASSERT(false, "Invalid Texture Resource {}", texture.Value);
+				SY_ASSERT(false, "Invalid Texture Resource.");
 				return nullptr;
 			}
 
-			const auto viewOpt = resourceCache.Load(view);
-			if (!viewOpt)
+			if (!view)
 			{
-				SY_ASSERT(false, "Invalid Texture View Resource {}", view.Value);
+				SY_ASSERT(false, "Invalid Texture View Resource.");
 				return nullptr;
 			}
 
-			const auto samplerOpt = resourceCache.Load(sampler);
-			if (!samplerOpt)
+			if (!sampler)
 			{
-				SY_ASSERT(false, "Invalid Sampler Resource {}", sampler.Value);
+				SY_ASSERT(false, "Invalid Sampler Resource.");
 				return nullptr;
 			}
 
-			return RequestDescriptor(Unwrap(textureOpt), Unwrap(viewOpt), Unwrap(samplerOpt), expectedState,
-			                         bIsCombinedSampler);
+			return RequestDescriptor(*texture, *view, *sampler, expectedState, bIsCombinedSampler);
 		}
 	}
 }

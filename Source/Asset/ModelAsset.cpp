@@ -2,7 +2,6 @@
 #include <Asset/ModelAsset.h>
 #include <Asset/MaterialAsset.h>
 #include <VK/Buffer.h>
-#include <Core/ResourceCache.h>
 #include <Component/StaticMeshComponent.h>
 #include <Render/Material.h>
 
@@ -71,20 +70,19 @@ namespace sy::asset
 	}
 
 	std::vector<component::StaticMeshComponent> LoadModel(const std::string& name, const fs::path& path,
-	                                                      ResourceCache& resourceCache,
+	                                                      HandleManager& handleManager,
 	                                                      const vk::VulkanContext& vulkanContext)
 	{
 		const auto pathStr         = path.string();
-		const auto assetDataHandle = LoadOrCreateAssetData<render::Model>(path, resourceCache);
+		const auto assetDataHandle = LoadOrCreateAssetData<render::Model>(path, handleManager);
 		if (!assetDataHandle)
 		{
 			SY_ASSERT(false, " Failed to load model asset from {}.", pathStr);
 			return {};
 		}
 
-		const auto& assetData = Unwrap(resourceCache.Load(assetDataHandle));
-		const auto metadata   = QueryMetadata(assetData);
-		const auto& blob      = assetData.GetBlob();
+		const auto metadata   = QueryMetadata(*assetDataHandle);
+		const auto& blob      = assetDataHandle->GetBlob();
 
 		std::vector<ModelVertex> vertices;
 		std::vector<ModelIndex> indices;
@@ -102,12 +100,12 @@ namespace sy::asset
 			/** @todo material load first! */
 			const std::span verticesSpan{ vertices.data() + mesh.VerticesOffset, mesh.NumVertices };
 			const std::span indicesSpan{ indices.data() + mesh.IndicesOffset, mesh.NumIndices };
-			const Handle<render::Mesh> meshHandle = resourceCache.Add(render::Mesh::Create<ModelVertex, ModelIndex>(
+			const Handle<render::Mesh> meshHandle = handleManager.Add(render::Mesh::Create<ModelVertex, ModelIndex>(
 			                                                           std::format("{}_{}", path.string(),
 				                                                           mesh.Name),
 			                                                           vulkanContext,
 			                                                           verticesSpan, indicesSpan));
-			const Handle<render::Material> materialHandle = LoadMaterialFromAsset(mesh.Material, resourceCache,
+			const Handle<render::Material> materialHandle = LoadMaterialFromAsset(mesh.Material, handleManager,
 				vulkanContext);
 			component::StaticMeshComponent component;
 			component.Mesh     = meshHandle;

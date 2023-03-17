@@ -15,14 +15,12 @@
 #include <VK/Sampler.h>
 #include <VK/Fence.h>
 #include <Render/Mesh.h>
-#include <Core/ResourceCache.h>
 
 namespace sy::render
 {
-	SimpleRenderPass::SimpleRenderPass(const std::string_view name, ResourceCache& resourceCache,
+	SimpleRenderPass::SimpleRenderPass(const std::string_view name,
 	                                   const vk::VulkanContext& vulkanContext, const vk::Pipeline& pipeline) :
-		RenderPass(name, vulkanContext, pipeline),
-		resourceCache(resourceCache)
+		RenderPass(name, vulkanContext, pipeline)
 	{
 		auto& cmdPoolManager     = vulkanContext.GetCommandPoolManager();
 		const auto& frameTracker = vulkanContext.GetFrameTracker();
@@ -93,25 +91,23 @@ namespace sy::render
 		const auto& frameTracker      = vulkanContext.GetFrameTracker();
 		const auto& graphicsCmdBuffer = GetCommandBuffer();
 		const auto& pipeline          = GetPipeline();
-		const auto& descriptorRef     = Unwrap(resourceCache.Load<vk::Descriptor>(descriptor));
 
 		const PushConstants pushConstants
 		{
-			.textureIndex = static_cast<int>(descriptorRef->Offset),
+			.textureIndex = static_cast<int>((*descriptor)->Offset),
 			.transformDataIndex = static_cast<int>(transformBufferIndices[ frameTracker.GetCurrentInFlightFrameIndex() ]
 				->Offset)
 		};
 
-		const auto& meshRef = Unwrap(resourceCache.Load(mesh));
 
-		std::array vertexBuffers = { CRef(meshRef.GetVertexBuffer()) };
+		std::array vertexBuffers = { CRef<vk::Buffer>(mesh->GetVertexBuffer()) };
 		std::array offsets       = { uint64_t() };
 
 		graphicsCmdBuffer.BindVertexBuffers(0, vertexBuffers, offsets);
-		graphicsCmdBuffer.BindIndexBuffer(meshRef.GetIndexBuffer());
+		graphicsCmdBuffer.BindIndexBuffer(mesh->GetIndexBuffer());
 		graphicsCmdBuffer.PushConstants(pipeline, VK_SHADER_STAGE_ALL_GRAPHICS, pushConstants);
 
-		graphicsCmdBuffer.DrawIndexed(static_cast<uint32_t>(meshRef.GetNumIndices()), 1, 0, 0, 0);
+		graphicsCmdBuffer.DrawIndexed(static_cast<uint32_t>(mesh->GetNumIndices()), 1, 0, 0, 0);
 	}
 
 	void SimpleRenderPass::OnEnd()

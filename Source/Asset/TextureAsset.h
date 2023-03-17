@@ -42,7 +42,7 @@ namespace sy::asset
 		return Table.find(extension)->second;
 	}
 
-	Handle<vk::Texture> LoadTexture2DFromAsset(const fs::path& path, ResourceCache& resourceCache,
+	Handle<vk::Texture> LoadTexture2DFromAsset(const fs::path& path, HandleManager& handleManager,
 	                                           const vk::VulkanContext& vulkanContext);
 	bool ConvertTexture2D(const fs::path& input);
 }

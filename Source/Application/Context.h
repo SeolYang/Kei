@@ -4,7 +4,6 @@
 namespace sy
 {
 	class CommandLineParser;
-	class ResourceCache;
 }
 
 namespace sy::vk
@@ -51,7 +50,7 @@ namespace sy::app
 		std::unique_ptr<CommandLineParser> cmdLineParser;
 		std::unique_ptr<Timer> timer;
 		std::unique_ptr<window::Window> window;
-		std::unique_ptr<ResourceCache> resourceCache;
+		std::unique_ptr<HandleManager> handleManager;
 		std::unique_ptr<vk::VulkanContext> vulkanContext;
 		std::unique_ptr<vk::ResourceStateTracker> resourceStateTracker;
 		std::unique_ptr<render::Renderer> renderer;

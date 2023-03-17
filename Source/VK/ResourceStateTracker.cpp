@@ -2,63 +2,59 @@
 #include <VK/ResourceStateTracker.h>
 #include <VK/Texture.h>
 #include <VK/Buffer.h>
-#include <Core/ResourceCache.h>
 
 namespace sy::vk
 {
-	ResourceStateTracker::ResourceStateTracker(ResourceCache& resourceCache) :
-		resourceCache(resourceCache)
+	ResourceStateTracker::ResourceStateTracker(HandleManager& handleManager) :
+		handleManager(handleManager)
 	{
 	}
 
 	void ResourceStateTracker::Register(const Handle<Texture> handle)
 	{
-		if (textureStates.find(handle.Value) == textureStates.end())
+		const auto placement = handle.GetPlacement();
+		if (textureStates.find(placement) == textureStates.end())
 		{
-			if (const auto resourceRef = resourceCache.Load(handle); resourceRef)
+			if (handle)
 			{
-				const auto& resource = resourceRef.value().get();
-
-				TextureState newState;
-				newState.Handle = handle;
-				newState.State  = resource.GetInitialState();
-				newState.SubResourceStates.resize(resource.GetNumSubResources(), resource.GetInitialState());
-				textureStates[ handle.Value ] = newState;
+				textureStates[ placement ] = {
+					.Handle = handle,
+					.State = handle->GetInitialState(),
+					.SubResourceStates =  std::vector{handle->GetNumSubResources(), handle->GetInitialState()}
+				};
 			}
 		}
 	}
 
 	void ResourceStateTracker::UnRegister(const Handle<Texture> handle)
 	{
-		textureStates.erase(handle.Value);
+		textureStates.erase(handle.GetPlacement());
 	}
 
 	void ResourceStateTracker::Register(const Handle<Buffer> handle)
 	{
-		if (bufferStates.find(handle.Value) == bufferStates.end())
+		if (bufferStates.find(handle.GetPlacement()) == bufferStates.end())
 		{
-			if (const auto resourceRef = resourceCache.Load(handle); resourceRef)
+			if (handle)
 			{
-				const auto& resource         = resourceRef.value().get();
-				bufferStates[ handle.Value ] = { handle, resource.GetInitialState() };
+				bufferStates[ handle.GetPlacement() ] = { handle, handle->GetInitialState() };
 			}
 		}
 	}
 
 	void ResourceStateTracker::UnRegister(const Handle<Buffer> handle)
 	{
-		bufferStates.erase(handle.Value);
+		bufferStates.erase(handle.GetPlacement());
 	}
 
 	void ResourceStateTracker::PendingTransition(const ETextureState dstState, const Handle<Texture> handle,
 	                                             const std::span<const TextureSubResource> subResources)
 	{
-		auto foundItr = textureStates.find(handle.Value);
+		auto foundItr = textureStates.find(handle.GetPlacement());
 		if (foundItr != textureStates.end())
 		{
-			if (const auto resourceOpt = resourceCache.Load(handle); resourceOpt)
+			if (handle)
 			{
-				const auto& resource = Unwrap(resourceOpt);
 				TextureState& state  = foundItr->second;
 				if (!subResources.empty())
 				{
@@ -70,11 +66,11 @@ namespace sy::vk
 					for (const auto& subResource : subResources)
 					{
 						const size_t subResourceIndex = ResolveTextureSubResourceRangeIndex(subResource.MipLevel,
-							subResource.ArrayLayer, resource.GetMipLevels());
+							subResource.ArrayLayer, handle->GetMipLevels());
 						if (state.SubResourceStates[ subResourceIndex ] != dstState)
 						{
 							state.SubResourceStates[ subResourceIndex ] = dstState;
-							pendingTextureTransitions.emplace_back(resource, state.State, dstState,
+							pendingTextureTransitions.emplace_back(*handle, state.State, dstState,
 							                                       TextureSubResourceRange{
 								                                       .MipLevel = subResource.MipLevel,
 								                                       .ArrayLayer = subResource.ArrayLayer
@@ -86,16 +82,16 @@ namespace sy::vk
 				{
 					if (state.bTrackingPerSubResource)
 					{
-						for (uint32_t arrayLayer = 0; arrayLayer < resource.GetArrayLayers(); ++arrayLayer)
+						for (uint32_t arrayLayer = 0; arrayLayer < handle->GetArrayLayers(); ++arrayLayer)
 						{
-							for (uint32_t mipLevel = 0; mipLevel < resource.GetMipLevels(); ++mipLevel)
+							for (uint32_t mipLevel = 0; mipLevel < handle->GetMipLevels(); ++mipLevel)
 							{
 								const size_t subResourceIndex =
 										ResolveTextureSubResourceRangeIndex(mipLevel, arrayLayer,
-										                                    resource.GetMipLevels());
+										                                    handle->GetMipLevels());
 								if (state.SubResourceStates[ subResourceIndex ] != dstState)
 								{
-									pendingTextureTransitions.emplace_back(resource,
+									pendingTextureTransitions.emplace_back(*handle,
 									                                       state.SubResourceStates[ subResourceIndex ],
 									                                       dstState, TextureSubResourceRange{
 										                                       .MipLevel = mipLevel,
@@ -108,8 +104,8 @@ namespace sy::vk
 					}
 					else
 					{
-						pendingTextureTransitions.emplace_back(resource, state.State, dstState,
-						                                       resource.GetFullSubResourceRange());
+						pendingTextureTransitions.emplace_back(*handle, state.State, dstState,
+						                                       handle->GetFullSubResourceRange());
 					}
 
 					state.State                   = dstState;
@@ -122,16 +118,15 @@ namespace sy::vk
 	void ResourceStateTracker::PendingTransition(const EBufferState dstState, const Handle<Buffer> handle,
 	                                             const size_t offset, const size_t size)
 	{
-		auto foundItr = bufferStates.find(handle.Value);
+		auto foundItr = bufferStates.find(handle.GetPlacement());
 		if (foundItr != bufferStates.end())
 		{
-			if (const auto resourceRef = resourceCache.Load(handle); resourceRef)
+			if (handle)
 			{
-				const auto& resource = resourceRef.value().get();
 				BufferState& state   = foundItr->second;
 				if (state.State != dstState)
 				{
-					pendingBufferTransitions.emplace_back(resource, state.State, dstState);
+					pendingBufferTransitions.emplace_back(*handle, state.State, dstState);
 					state.State = dstState;
 				}
 			}
@@ -140,10 +135,9 @@ namespace sy::vk
 
 	void ResourceStateTracker::PendingTransition(const EBufferState dstState, const Handle<Buffer> handle)
 	{
-		if (const auto resourceRef = resourceCache.Load(handle); resourceRef)
+		if (handle)
 		{
-			const auto& resource = resourceRef.value().get();
-			PendingTransition(dstState, handle, 0, resource.GetAlignedSize());
+			PendingTransition(dstState, handle, 0, handle->GetAlignedSize());
 		}
 	}
 }

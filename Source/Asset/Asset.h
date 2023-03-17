@@ -1,6 +1,5 @@
 #pragma once
 #include <PCH.h>
-#include <Core/ResourceCache.h>
 
 namespace sy::asset
 {
@@ -119,16 +118,16 @@ namespace sy::asset
 	};
 
 	template <typename T>
-	Handle<AssetData<T>> LoadOrCreateAssetData(const fs::path& path, ResourceCache& resourceCache)
+	Handle<AssetData<T>> LoadOrCreateAssetData(const fs::path& path, HandleManager& handleManager)
 	{
 		const auto pathStr = path.string();
-		if (!resourceCache.Contains<AssetData<T>>(pathStr))
+		auto handle = handleManager.QueryAlias<AssetData<T>>(pathStr);
+		if (!handle)
 		{
-			const auto newHandle = resourceCache.Add<AssetData<T>>(pathStr);
-			resourceCache.SetAlias(pathStr, newHandle);
-			return newHandle;
+			handle = handleManager.Add<AssetData<T>>(pathStr);
+			handle.SetAlias(pathStr);
 		}
 
-		return resourceCache.QueryAlias<AssetData<T>>(pathStr);
+		return handle;
 	}
 }

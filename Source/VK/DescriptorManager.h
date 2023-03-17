@@ -1,11 +1,6 @@
 #pragma once
 #include <PCH.h>
 
-namespace sy
-{
-	class ResourceCache;
-}
-
 namespace sy::vk
 {
 	class VulkanRHI;
@@ -121,10 +116,10 @@ namespace sy::vk
 		}
 
 		Descriptor RequestDescriptor(const Buffer& buffer, bool bIsDynamic = false);
-		Descriptor RequestDescriptor(ResourceCache& resourceCache, Handle<Buffer> handle, bool bIsDynamic = false);
+		Descriptor RequestDescriptor(HandleManager& handleManager, Handle<Buffer> handle, bool bIsDynamic = false);
 		Descriptor RequestDescriptor(const Texture& texture, const TextureView& view, const Sampler& sampler,
 		                             ETextureState expectedState, bool bIsCombinedSampler = true);
-		Descriptor RequestDescriptor(ResourceCache& resourceCache, Handle<Texture> texture, Handle<TextureView> view,
+		Descriptor RequestDescriptor(HandleManager& handleManager, Handle<Texture> texture, Handle<TextureView> view,
 		                             Handle<Sampler> sampler, ETextureState expectedState,
 		                             bool bIsCombinedSampler = true);
 

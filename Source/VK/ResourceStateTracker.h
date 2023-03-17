@@ -1,11 +1,6 @@
 #pragma once
 #include <PCH.h>
 
-namespace sy
-{
-	class ResourceCache;
-}
-
 namespace sy::vk
 {
 	inline auto ResolveTextureSubResourceRangeIndex(const size_t mipLevel, const size_t arrayLayer,
@@ -50,7 +45,7 @@ namespace sy::vk
 		};
 
 	public:
-		ResourceStateTracker(ResourceCache& resourceCache);
+		ResourceStateTracker(HandleManager& handleManager);
 		~ResourceStateTracker() override = default;
 
 		void Register(Handle<Texture> handle);
@@ -74,10 +69,9 @@ namespace sy::vk
 		}
 
 	private:
-		//mutable std::mutex mutex;
-		ResourceCache& resourceCache;
-		robin_hood::unordered_map<HandleUnderType, TextureState> textureStates;
-		robin_hood::unordered_map<HandleUnderType, BufferState> bufferStates;
+		HandleManager& handleManager;
+		robin_hood::unordered_map<Placement, TextureState> textureStates;
+		robin_hood::unordered_map<Placement, BufferState> bufferStates;
 
 		std::vector<TextureStateTransition> pendingTextureTransitions;
 		std::vector<BufferStateTransition> pendingBufferTransitions;

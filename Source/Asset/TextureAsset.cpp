@@ -2,9 +2,7 @@
 #include <Asset/TextureAsset.h>
 #include <VK/Texture.h>
 #include <VK/VulkanContext.h>
-#include <Core/ResourceCache.h>
-
-#include "VK/TextureBuilder.h"
+#include <VK/TextureBuilder.h>
 
 namespace sy::asset
 {
@@ -53,31 +51,31 @@ namespace sy::asset
 
 	Handle<vk::Texture> LoadTexture2DFromAsset(
 		const Handle<AssetData<vk::Texture>> assetDataHandle,
-		ResourceCache& resourceCache,
+		HandleManager& handleManager,
 		const vk::VulkanContext& vulkanContext)
 	{
-		if (!resourceCache.Contains<AssetData<vk::Texture>>(assetDataHandle))
+		if (!assetDataHandle)
 		{
 			return {};
 		}
 
-		const auto& assetData = Unwrap(resourceCache.Load<AssetData<vk::Texture>>(assetDataHandle));
-		const auto pathStr    = assetData.GetPath().string();
+		const auto pathStr    = assetDataHandle->GetPath().string();
 
-		if (resourceCache.Contains<vk::Texture>(pathStr))
+		auto textureHandle = handleManager.QueryAlias<vk::Texture>(pathStr);
+		if (textureHandle)
 		{
-			return resourceCache.QueryAlias<vk::Texture>(pathStr);
+			return textureHandle;
 		}
 
-		const auto newHandle = resourceCache.Add(LoadTexture2DFromAsset(pathStr, assetData, vulkanContext));
-		resourceCache.SetAlias(pathStr, newHandle);
-		return newHandle;
+		textureHandle = handleManager.Add(LoadTexture2DFromAsset(pathStr, *assetDataHandle, vulkanContext));
+		textureHandle.SetAlias(pathStr);
+		return textureHandle;
 	}
 
 	Handle<vk::Texture> LoadTexture2DFromAsset(const fs::path& path,
-	                                           ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext)
+	                                           HandleManager& handleManager, const vk::VulkanContext& vulkanContext)
 	{
-		return LoadTexture2DFromAsset(LoadOrCreateAssetData<vk::Texture>(path, resourceCache), resourceCache,
+		return LoadTexture2DFromAsset(LoadOrCreateAssetData<vk::Texture>(path, handleManager), handleManager,
 		                              vulkanContext);
 	}
 

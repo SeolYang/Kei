@@ -31,9 +31,6 @@
     <ClCompile Include="..\Source\Application\Context.cpp">
       <Filter>Source\Application</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Core\ResourceCache.cpp">
-      <Filter>Source\Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Game\GameContext.cpp">
       <Filter>Source\Game</Filter>
     </ClCompile>
@@ -177,16 +174,10 @@
     <ClInclude Include="..\Source\Core\Extent.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Core\Handle.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Core\Assert.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Core\Pool.hpp">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Core\ResourceCache.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Core\Timer.h">

@@ -2,11 +2,6 @@
 #include <PCH.h>
 #include <Render/RenderPass.h>
 
-namespace sy
-{
-	class ResourceCache;
-}
-
 namespace sy::vk
 {
 	class Swapchain;
@@ -31,7 +26,7 @@ namespace sy::render
 	class SimpleRenderPass : public RenderPass
 	{
 	public:
-		SimpleRenderPass(std::string_view name, ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext,
+		SimpleRenderPass(std::string_view name, const vk::VulkanContext& vulkanContext,
 		                 const vk::Pipeline& pipeline);
 
 		virtual void OnBegin() override;
@@ -47,7 +42,6 @@ namespace sy::render
 		void SetTransformData(TransformUniformBuffer buffer);
 
 	private:
-		ResourceCache& resourceCache;
 		Handle<Mesh> mesh;
 		Handle<vk::Descriptor> descriptor;
 

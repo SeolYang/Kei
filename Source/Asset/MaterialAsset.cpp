@@ -18,7 +18,7 @@ namespace sy::asset
 
 	constexpr std::string_view MATERIAL_METADATA_BASE_TEXTURE = "BaseTexture";
 
-	MaterialMetadata QueryMetadata(const AssetData<render::Material>& assetData)
+	MaterialMetadata QueryMetadata( const AssetData<render::Material>& assetData )
 	{
 		const nlohmann::json& metadataJson = assetData.GetMetadata();
 		MaterialMetadata result;
@@ -29,15 +29,16 @@ namespace sy::asset
 
 	Handle<render::Material> LoadMaterialFromAsset(
 		const fs::path& path,
-		ResourceCache& resourceCache, const vk::VulkanContext& vulkanContext)
+		HandleManager& handleManager, const vk::VulkanContext& vulkanContext )
 	{
 		std::string pathStr = path.string();
-		if (const auto handle = resourceCache.QueryAlias<render::Material>(pathStr); handle)
+		auto handle         = handleManager.QueryAlias<render::Material>(pathStr);
+		if (handle)
 		{
 			return handle;
 		}
 
-		const auto assetDataHandle = LoadOrCreateAssetData<render::Material>(path, resourceCache);
+		const auto assetDataHandle = LoadOrCreateAssetData<render::Material>(path, handleManager);
 		if (!assetDataHandle)
 		{
 			SY_ASSERT(false, " Failed to load material asset from {}.", pathStr);
@@ -46,34 +47,32 @@ namespace sy::asset
 
 		const auto& vulkanRHI   = vulkanContext.GetRHI();
 		auto& descriptorManager = vulkanContext.GetDescriptorManager();
-		const auto& assetData   = Unwrap(resourceCache.Load(assetDataHandle));
-		const auto metadata     = QueryMetadata(assetData);
+		const auto metadata     = QueryMetadata(*assetDataHandle);
 
-		const auto baseTexHandle     = LoadTexture2DFromAsset(metadata.BaseTexture, resourceCache, vulkanContext);
-		auto& baseTexRef             = Unwrap(resourceCache.Load(baseTexHandle));
-		const auto baseTexViewHandle = resourceCache.Add<vk::TextureView>(std::format("{}_View", metadata.BaseTexture),
-		                                                                  vulkanRHI, baseTexRef, VK_IMAGE_VIEW_TYPE_2D);
-		const auto linearSampler = resourceCache.QueryAlias<vk::Sampler>(vk::LinearSamplerRepeat);
-		const auto newHandle     = resourceCache.Add<render::Material>(render::Material{
-			                                                               resourceCache.Add<
-				                                                               vk::Descriptor>(descriptorManager.
-			                                                                RequestDescriptor(resourceCache,
-				                                                                baseTexHandle, baseTexViewHandle,
-				                                                                linearSampler,
-				                                                                vk::ETextureState::AnyShaderReadSampledImage))
-		                                                               });
-		resourceCache.SetAlias(pathStr, newHandle);
-		return newHandle;
+		const auto baseTexHandle     = LoadTexture2DFromAsset(metadata.BaseTexture, handleManager, vulkanContext);
+		const auto baseTexViewHandle = handleManager.Add<vk::TextureView>(std::format("{}_View", metadata.BaseTexture),
+		                                                                  vulkanRHI, *baseTexHandle,
+		                                                                  VK_IMAGE_VIEW_TYPE_2D);
+		const auto linearSampler = handleManager.QueryAlias<vk::Sampler>(vk::LinearSamplerRepeat);
+		handle                   = handleManager.Add<render::Material>(
+		                                                               handleManager.Add<vk::Descriptor>(descriptorManager.
+		                                                                RequestDescriptor(handleManager,
+			                                                                baseTexHandle, baseTexViewHandle,
+			                                                                linearSampler,
+			                                                                vk::ETextureState::AnyShaderReadSampledImage))
+		                                                              );
+		handle.SetAlias(pathStr);
+		return handle;
 	}
 
-	nlohmann::json ToMetadata(const MaterialMetadata metadata)
+	nlohmann::json ToMetadata( const MaterialMetadata metadata )
 	{
 		nlohmann::json result;
 		result[ MATERIAL_METADATA_BASE_TEXTURE ] = metadata.BaseTexture;
 		return result;
 	}
 
-	void CreateMaterial(const fs::path& path)
+	void CreateMaterial( const fs::path& path )
 	{
 		fs::create_directory(path.parent_path());
 		const MaterialMetadata metadata;

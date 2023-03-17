@@ -1,43 +1,35 @@
 #include <PCH.h>
-#include <Window/Window.h>
 #include <Render/Renderer.h>
+#include <Render/Material.h>
 #include <Render/Vertex.h>
 #include <Render/RenderPasses/SimpleRenderPass.h>
+#include <VK/VulkanContext.h>
 #include <VK/VulkanRHI.h>
-#include <VK/Fence.h>
 #include <VK/Semaphore.h>
 #include <VK/Swapchain.h>
-#include <VK/CommandPool.h>
 #include <VK/CommandBuffer.h>
 #include <VK/ShaderModule.h>
 #include <VK/Pipeline.h>
 #include <VK/PipelineBuilder.h>
 #include <VK/LayoutCache.h>
-#include <VK/Texture.h>
 #include <VK/TextureView.h>
-#include <Vk/Sampler.h>
-#include <VK/Buffer.h>
 #include <VK/DescriptorManager.h>
-#include <VK/CommandPoolManager.h>
 #include <VK/FrameTracker.h>
 #include <VK/PushConstantBuilder.h>
+#include <VK/Texture.h>
+#include <VK/TextureBuilder.h>
+#include <Window/Window.h>
 #include <Math/MathUtils.h>
-#include <Asset/TextureAsset.h>
 #include <Asset/ModelAsset.h>
-#include <Core/ResourceCache.h>
-
-#include "Material.h"
-#include "VK/TextureBuilder.h"
-#include "VK/VulkanContext.h"
 
 namespace sy::render
 {
 	Renderer::Renderer(const window::Window& window, vk::VulkanContext& vulkanContext,
-	                   vk::ResourceStateTracker& resStateTracker, ResourceCache& resourceCache) :
+	                   vk::ResourceStateTracker& resStateTracker, HandleManager& handleManager) :
 		window(window),
 		vulkanContext(vulkanContext),
 		resStateTracker(resStateTracker),
-		resourceCache(resourceCache)
+		handleManager(handleManager)
 	{
 		const auto windowExtent   = window.GetExtent();
 		const auto& frameTracker  = vulkanContext.GetFrameTracker();
@@ -79,12 +71,11 @@ namespace sy::render
 
 		basicPipeline = std::make_unique<vk::Pipeline>("Basic Graphics Pipeline", vulkanRHI, basicPipelineBuilder);
 
-		staticMeshes = asset::LoadModel("Homura", "Assets/Models/homura/homura_v1.MODEL", resourceCache, vulkanContext);
+		staticMeshes = asset::LoadModel("Homura", "Assets/Models/homura/homura_v1.MODEL", handleManager, vulkanContext);
 		const auto proj = math::PerspectiveYFlipped(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
 		viewProjMat = proj * glm::lookAt(glm::vec3{ 1.5f, 160.f, -150.f }, { 0.f, 70.f, 0.f }, { 0.f, 1.f, 0.f });
 
-		renderPass = std::make_unique<SimpleRenderPass>("Simple Render Pass", resourceCache, vulkanContext,
-		                                                *basicPipeline);
+		renderPass = std::make_unique<SimpleRenderPass>("Simple Render Pass", vulkanContext,*basicPipeline);
 	}
 
 	Renderer::~Renderer()
@@ -124,9 +115,8 @@ namespace sy::render
 			renderPass->Begin(vk::EQueueType::Graphics);
 			for (const auto& mesh : staticMeshes)
 			{
-				const auto& materialRef = Unwrap(resourceCache.Load(mesh.Material));
 				renderPass->SetMesh(mesh.Mesh);
-				renderPass->SetTextureDescriptor(materialRef.BaseTexture);
+				renderPass->SetTextureDescriptor(mesh.Material->BaseTexture);
 				renderPass->Render();
 			}
 			renderPass->End();

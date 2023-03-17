@@ -1,6 +1,5 @@
 #include <PCH.h>
 #include <catch.hpp>
-#include <Core/ResourceCache.h>
 #include <Core/Utils.h>
 #include <Core/HandleManager.h>
 
@@ -36,64 +35,11 @@ TEST_CASE("Extent3D", "[extent_3d]")
 	}
 }
 
-TEST_CASE("ResourceCache", "[res_cache]")
-{
-	SECTION("Resource caching")
-	{
-		const auto resCache    = std::make_unique<sy::ResourceCache>();
-		const auto newResource = resCache->Add<uint32_t>(153);
-		REQUIRE(newResource.IsValidHandleValue());
-		REQUIRE(resCache->Contains(newResource));
-
-		const auto anotherResource = resCache->Add<uint32_t>(153);
-		REQUIRE(anotherResource.IsValidHandleValue());
-		REQUIRE(resCache->Contains(anotherResource));
-		REQUIRE(newResource.Value != anotherResource.Value);
-
-		const auto otherTypeNewResource = resCache->Add<float>(153.f);
-		REQUIRE(otherTypeNewResource.IsValidHandleValue());
-	}
-
-	SECTION("Load resource from cache")
-	{
-		const auto resCache          = std::make_unique<sy::ResourceCache>();
-		const auto newResource       = resCache->Add<uint32_t>(153);
-		const auto newResourceValOpt = resCache->Load(newResource);
-		REQUIRE(newResourceValOpt.has_value());
-		REQUIRE(*newResourceValOpt == 153);
-
-		constexpr sy::Handle<uint32_t> manualHandle{ 1 };
-		const auto manualValOpt = resCache->Load(manualHandle);
-		REQUIRE(manualValOpt.has_value());
-		REQUIRE(*manualValOpt == 153);
-
-		const auto anotherResource       = resCache->Add<uint32_t>(303);
-		const auto anotherResourceValOpt = resCache->Load(anotherResource);
-		REQUIRE(anotherResourceValOpt.has_value());
-
-		constexpr sy::Handle<uint32_t> invalidHandle{ 30303 };
-		REQUIRE(!resCache->Load(invalidHandle).has_value());
-	}
-
-	SECTION("Aliasing")
-	{
-		const auto resCache        = std::make_unique<sy::ResourceCache>();
-		const auto newResource     = resCache->Add<uint32_t>(153);
-		const auto anotherResource = resCache->Add<uint32_t>(435);
-		REQUIRE(resCache->SetAlias("NiceInteger", newResource));
-		REQUIRE(resCache->Contains<uint32_t>("NiceInteger"));
-		REQUIRE(resCache->SetAlias("153", newResource));
-		REQUIRE(resCache->Contains<uint32_t>("NiceInteger"));
-		REQUIRE(resCache->Contains<uint32_t>("153"));
-		REQUIRE(resCache->Load<uint32_t>("NiceInteger").value() == resCache->Load<uint32_t>("153").value());
-	}
-}
-
 TEST_CASE("HandleMap", "[handle_map]")
 {
 	SECTION("Allocation of Handle")
 	{
-		sy::experimental::HandleMap<size_t> map;
+		sy::HandleMap<size_t> map;
 		auto handleOfHundred = map.Add(std::make_unique<size_t>(100));
 		REQUIRE(handleOfHundred.IsValid());
 		REQUIRE(!handleOfHundred.HasAlias());
@@ -108,16 +54,16 @@ TEST_CASE("HandleMap", "[handle_map]")
 
 		REQUIRE(handleOfHundred.GetPlacement() != handleOfTwo.GetPlacement());
 
-		auto emptyHandle = sy::experimental::Handle<size_t>{};
+		auto emptyHandle = sy::Handle<size_t>{};
 		REQUIRE(!emptyHandle.IsValid());
 		REQUIRE(emptyHandle.TryGetObject() == std::nullopt);
 		REQUIRE(emptyHandle.TryGetAlias() == std::nullopt);
-		REQUIRE(emptyHandle.GetPlacement() == decltype(map)::InvalidPlacement);
+		REQUIRE(emptyHandle.GetPlacement() == sy::InvalidPlacement);
 
 		auto invalidHandle = map.Query(1231234); /* Querying non-existing handle */
 		REQUIRE(!invalidHandle.IsValid());
 		REQUIRE(invalidHandle.TryGetObject() == std::nullopt);
-		REQUIRE(invalidHandle.GetPlacement() == decltype(map)::InvalidPlacement);
+		REQUIRE(invalidHandle.GetPlacement() == sy::InvalidPlacement);
 
 		handleOfHundred.DestroySelf();
 		REQUIRE(!handleOfHundred.IsValid());
@@ -125,7 +71,7 @@ TEST_CASE("HandleMap", "[handle_map]")
 
 	SECTION("Handle Alias")
 	{
-		sy::experimental::HandleMap<size_t> map;
+		sy::HandleMap<size_t> map;
 		constexpr std::string_view HundredAlias = "Hundred";
 
 		auto handleOfHundred = map.Add(std::make_unique<size_t>(100));
@@ -157,7 +103,7 @@ TEST_CASE("HandleMap", "[handle_map]")
 
 TEST_CASE("HandleManager", "[handle_mng]")
 {
-	using HandleManager = sy::experimental::HandleManager;
+	using HandleManager = sy::HandleManager;
 	SECTION("Allocation of HandleMap")
 	{
 		constexpr float PI = 3.141592f;
@@ -189,7 +135,6 @@ TEST_CASE("Utilities", "[utils]")
 	{
 		constexpr VkCommandBufferUsageFlags tempFlagBits = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT |
 				VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
-		REQUIRE(sy::FlagsContains<VkCommandBufferUsageFlags>(tempFlagBits, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT))
-		;
+		REQUIRE(sy::FlagsContains<VkCommandBufferUsageFlags>(tempFlagBits, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT));
 	}
 }

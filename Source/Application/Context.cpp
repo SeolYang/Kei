@@ -3,7 +3,6 @@
 #include <Core/CommandLineParser.h>
 #include <Window/Window.h>
 #include <Core/Utils.h>
-#include <Core/ResourceCache.h>
 #include <VK/VulkanContext.h>
 #include <VK/ResourceStateTracker.h>
 #include <VK/Texture.h>
@@ -47,16 +46,16 @@ namespace sy::app
 		timer = std::make_unique<Timer>();
 		spdlog::info("Initializing Window sub-context.");
 		window = std::make_unique<window::Window>("Test", Extent2D<uint32_t>{ 1280, 720 });
-		spdlog::info("Initializing Resource Cache.");
-		resourceCache = std::make_unique<ResourceCache>();
+		spdlog::info("Initializing Handle Manager.");
+		handleManager = std::make_unique<HandleManager>();
 		spdlog::info("Initializing Vulkan context.");
 		vulkanContext = std::make_unique<vk::VulkanContext>(*window);
 		spdlog::info("Initializing Resource State Tracker.");
-		resourceStateTracker = std::make_unique<vk::ResourceStateTracker>(*resourceCache);
+		resourceStateTracker = std::make_unique<vk::ResourceStateTracker>(*handleManager);
 		spdlog::info("Initializing Default engine resources.");
 		InitDefaultEngineResources();
 		spdlog::info("Initializing Renderer sub-context.");
-		renderer = std::make_unique<render::Renderer>(*window, *vulkanContext, *resourceStateTracker, *resourceCache);
+		renderer = std::make_unique<render::Renderer>(*window, *vulkanContext, *resourceStateTracker, *handleManager);
 	}
 
 	void Context::InitializeLogger()
@@ -106,46 +105,45 @@ namespace sy::app
 		                         .SetExtent(Extent2D<uint32_t>{ 2, 2 })
 		                         .SetFormat(VK_FORMAT_R8G8B8A8_SRGB);
 
-		const auto defaultWhiteTex = resourceCache->Add(defaultTexBuilder.SetDataToTransfer(std::span{
+		auto defaultWhiteTex = handleManager->Add(defaultTexBuilder.SetDataToTransfer(std::span{
 			                                                white.data(),
 			                                                white.size()
 		                                                }).Build());
-		resourceCache->SetAlias(vk::DefaultWhiteTexture, defaultWhiteTex);
+		defaultWhiteTex.SetAlias(vk::DefaultWhiteTexture);
 
 		constexpr std::array<uint32_t, 4> black = { 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff };
-		const auto defaultBlackTex              = resourceCache->Add(defaultTexBuilder.SetName("DefaultBlack").
+		auto defaultBlackTex              = handleManager->Add(defaultTexBuilder.SetName("DefaultBlack").
 		                                                             SetDataToTransfer(std::span{
 			                                                             white.data(),
 			                                                             white.size()
 		                                                             }).Build());
-		resourceCache->SetAlias(vk::DefaultBlackTexture, defaultBlackTex);
+		defaultBlackTex.SetAlias(vk::DefaultBlackTexture);
 
-		const auto linearSampler = resourceCache->Add<
+		auto linearSampler = handleManager->Add<
 			vk::Sampler>(vk::SamplerBuilder{ *vulkanContext }.SetName(vk::LinearSamplerRepeat).Build());
-		resourceCache->SetAlias(vk::LinearSamplerRepeat, linearSampler);
+		linearSampler.SetAlias(vk::LinearSamplerRepeat);
 
-		auto& defaultWhiteTexRef       = Unwrap(resourceCache->Load(defaultWhiteTex));
-		const auto defaultWhiteTexView = resourceCache->Add<
+		const auto defaultWhiteTexView = handleManager->Add<
 			vk::TextureView>(std::format("{}_View", vk::DefaultWhiteTexture), vulkanContext->GetRHI(),
-			                 defaultWhiteTexRef, VK_IMAGE_VIEW_TYPE_2D);
+			                 *defaultWhiteTex, VK_IMAGE_VIEW_TYPE_2D);
 
 		auto& descriptorManager    = vulkanContext->GetDescriptorManager();
-		const auto defaultMaterial = resourceCache->Add<render::Material>(resourceCache->Add<
+		auto defaultMaterial = handleManager->Add<render::Material>(handleManager->Add<
 			                                                                  vk::Descriptor>(descriptorManager.
-		                                                                   RequestDescriptor(*resourceCache,
+		                                                                   RequestDescriptor(*handleManager,
 			                                                                   defaultWhiteTex,
 			                                                                   defaultWhiteTexView,
 			                                                                   linearSampler,
 			                                                                   vk::ETextureState::AnyShaderReadSampledImage)));
-		resourceCache->SetAlias(render::DefaultMaterial, defaultMaterial);
+		defaultMaterial.SetAlias(render::DefaultMaterial);
 	}
 
 	void Context::Cleanup()
 	{
 		vulkanContext->GetRHI().WaitForDeviceIdle();
 
-		spdlog::info("Clean-up Resource Cache.");
-		resourceCache->Clear();
+		spdlog::info("Clean-up Handle Manager.");
+		handleManager.reset();
 
 		spdlog::info("Clean-up Renderer sub-context.");
 		renderer.reset();

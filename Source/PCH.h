@@ -97,13 +97,13 @@
 
 /** Internal - Core */
 #include <Core/Types.h>
-#include <Core/Handle.h>
 #include <Core/Extent.h>
 #include <Core/Assert.h>
 #include <Core/Pool.hpp>
 #include <Core/Timer.h>
 #include <Core/ECS.h>
 #include <Core/Utils.h>
+#include <Core/HandleManager.h>
 
 /** Internal - Vulkan */
 #include <VK/VulkanTypes.h>

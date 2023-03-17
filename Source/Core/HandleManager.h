@@ -1,15 +1,15 @@
 #pragma once
 #include <PCH.h>
 
-namespace sy::experimental
+namespace sy
 {
+	using Placement = size_t;
+	static constexpr Placement InvalidPlacement = std::numeric_limits<Placement>::max();
+
 	template <typename T>
 	class HandleMap
 	{
 	public:
-		using Placement = size_t;
-		static constexpr Placement InvalidPlacement = std::numeric_limits<Placement>::max();
-
 		class Handle
 		{
 		public:
@@ -37,6 +37,11 @@ namespace sy::experimental
 				this->owner     = std::exchange(rhs.owner, std::nullopt);
 				this->placement = std::exchange(rhs.placement, InvalidPlacement);
 				return *this;
+			}
+
+			[[nodiscard]] explicit operator bool() const
+			{
+				return IsValid();
 			}
 
 			[[nodiscard]] RefOptional<T> TryGetObject()
@@ -71,6 +76,20 @@ namespace sy::experimental
 				const auto opt = TryGetObject();
 				SY_ASSERT(opt, "Trying to access invalid handle.");
 				return opt.value().get();
+			}
+
+			[[nodiscard]] T* operator->()
+			{
+				const auto opt = TryGetObject();
+				SY_ASSERT(opt, "Trying to access invalid handle.");
+				return opt != std::nullopt ? &(opt.value().get()) : nullptr;
+			}
+
+			[[nodiscard]] const T* operator->() const
+			{
+				const auto opt = TryGetObject();
+				SY_ASSERT(opt, "Trying to access invalid handle.");
+				return opt != std::nullopt ? &(opt.value().get()) : nullptr;
 			}
 
 			[[nodiscard]] bool IsValid() const
@@ -431,7 +450,7 @@ namespace sy::experimental
 		}
 
 		template <typename T>
-		[[nodiscard]] Handle<T> Query( const typename HandleMap<T>::Placement placement )
+		[[nodiscard]] Handle<T> Query( const typename Placement placement )
 		{
 			auto& handleMap = GetHandleMap<T>();
 			return handleMap.Query(placement);

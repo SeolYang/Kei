@@ -1,6 +1,5 @@
 #pragma once
 #include <PCH.h>
-#include <Asset/Asset.h>
 
 namespace sy::vk
 {
@@ -15,7 +14,7 @@ namespace sy::render
 
 namespace sy::asset
 {
-	Handle<render::Material> LoadMaterialFromAsset(const fs::path& path, ResourceCache& resourceCache,
+	Handle<render::Material> LoadMaterialFromAsset(const fs::path& path, HandleManager& handleManager,
 	                                               const vk::VulkanContext& vulkanContext);
 	void CreateMaterial(const fs::path& path);
 }

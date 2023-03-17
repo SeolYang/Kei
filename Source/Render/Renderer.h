@@ -2,11 +2,6 @@
 #include <PCH.h>
 #include <Component/StaticMeshComponent.h>
 
-namespace sy
-{
-	class ResourceCache;
-}
-
 namespace sy::vk
 {
 	class VulkanContext;
@@ -40,7 +35,7 @@ namespace sy::render
 	{
 	public:
 		Renderer(const window::Window& window, vk::VulkanContext& vulkanContext,
-		         vk::ResourceStateTracker& resStateTracker, ResourceCache& resourceCache);
+		         vk::ResourceStateTracker& resStateTracker, HandleManager& handleManager);
 		~Renderer() override;
 
 		void Render();
@@ -52,7 +47,7 @@ namespace sy::render
 	private:
 		const window::Window& window;
 		vk::VulkanContext& vulkanContext;
-		ResourceCache& resourceCache;
+		HandleManager& handleManager;
 
 		vk::ResourceStateTracker& resStateTracker;
 		//std::unique_ptr<vk::ResourceStateTracker> resourceStateTracker;
