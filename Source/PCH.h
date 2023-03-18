@@ -102,7 +102,6 @@
 #include <Core/Assert.h>
 #include <Core/Pool.hpp>
 #include <Core/Timer.h>
-#include <Core/ECS.h>
 #include <Core/Utils.h>
 #include <Core/HandleManager.h>
 

@@ -171,9 +171,6 @@
     <ClInclude Include="..\Source\Application\Context.h">
       <Filter>Source\Application</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Core\ECS.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Core\Extent.h">
       <Filter>Source\Core</Filter>
     </ClInclude>

@@ -3,7 +3,7 @@
 
 namespace sy::component
 {
-struct TransformComponent : ecs::Component
+struct TransformComponent
 {
     glm::vec3 Position;
     glm::vec3 Scale;

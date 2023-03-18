@@ -3,7 +3,7 @@
 
 namespace sy::component
 {
-struct HierarchyComponent : ecs::Component
+struct HierarchyComponent
 {
     ecs::Entity Parent = ecs::INVALID_ENTITY_HANDLE;
 };

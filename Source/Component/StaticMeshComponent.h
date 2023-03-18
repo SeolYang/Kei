@@ -9,7 +9,7 @@ class Material;
 
 namespace sy::component
 {
-struct StaticMeshComponent : ecs::Component
+struct StaticMeshComponent
 {
     Handle<render::Mesh>     Mesh;
     Handle<render::Material> Material;

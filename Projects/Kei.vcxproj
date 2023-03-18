@@ -82,7 +82,6 @@
     <ClInclude Include="..\Source\Component\StaticMeshComponent.h" />
     <ClInclude Include="..\Source\Component\TransformComponent.h" />
     <ClInclude Include="..\Source\Core\CommandLineParser.h" />
-    <ClInclude Include="..\Source\Core\ECS.h" />
     <ClInclude Include="..\Source\Core\Extent.h" />
     <ClInclude Include="..\Source\Core\Assert.h" />
     <ClInclude Include="..\Source\Core\HandleManager.h" />
