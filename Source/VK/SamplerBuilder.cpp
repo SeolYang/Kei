@@ -4,8 +4,8 @@
 
 namespace sy::vk
 {
-	std::unique_ptr<Sampler> SamplerBuilder::Build() const
-	{
-		return std::make_unique<Sampler>(*this);
-	}
+std::unique_ptr<Sampler> SamplerBuilder::Build() const
+{
+    return std::make_unique<Sampler>(*this);
+}
 } // namespace sy::vk

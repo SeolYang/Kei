@@ -3,32 +3,32 @@
 
 namespace sy
 {
-	class CommandLineParser final : public NonCopyable
-	{
-	public:
-		CommandLineParser(int argc, char** argv);
+class CommandLineParser final : public NonCopyable
+{
+public:
+    CommandLineParser(int argc, char** argv);
 
-		[[nodiscard]] auto GetExecutablePath() const noexcept
-		{
-			return executablePath;
-		}
+    [[nodiscard]] auto GetExecutablePath() const noexcept
+    {
+        return executablePath;
+    }
 
-		[[nodiscard]] auto GetAssetPath() const noexcept
-		{
-			return assetPath;
-		}
+    [[nodiscard]] auto GetAssetPath() const noexcept
+    {
+        return assetPath;
+    }
 
-		[[nodiscard]] auto ShouldConvertAssets() const noexcept
-		{
-			return bShouldConvertAssets;
-		}
+    [[nodiscard]] auto ShouldConvertAssets() const noexcept
+    {
+        return bShouldConvertAssets;
+    }
 
-	private:
-		bool Argument(const char* argument);
+private:
+    bool Argument(const char* argument);
 
-	private:
-		fs::path executablePath;
-		fs::path assetPath;
-		bool bShouldConvertAssets = false;
-	};
+private:
+    fs::path executablePath;
+    fs::path assetPath;
+    bool     bShouldConvertAssets = false;
+};
 } // namespace sy

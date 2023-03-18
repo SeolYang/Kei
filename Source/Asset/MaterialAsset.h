@@ -3,18 +3,18 @@
 
 namespace sy::vk
 {
-	class VulkanContext;
-	class Texture;
+class VulkanContext;
+class Texture;
 } // namespace sy::vk
 
 namespace sy::render
 {
-	class Material;
+class Material;
 }
 
 namespace sy::asset
 {
-	Handle<render::Material> LoadMaterialFromAsset(const fs::path& path, HandleManager& handleManager,
-		vk::VulkanContext& vulkanContext);
-	void CreateMaterial(const fs::path& path);
+Handle<render::Material> LoadMaterialFromAsset(const fs::path& path, HandleManager& handleManager, vk::VulkanContext& vulkanContext);
+
+void CreateMaterial(const fs::path& path);
 } // namespace sy::asset

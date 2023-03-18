@@ -3,7 +3,7 @@
 
 namespace sy::game
 {
-	class World
-	{
-	};
-}
+class World
+{
+};
+} // namespace sy::game

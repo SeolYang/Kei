@@ -3,7 +3,7 @@
 
 namespace sy::game
 {
-	class GameContext
-	{
-	};
-}
+class GameContext
+{
+};
+} // namespace sy::game

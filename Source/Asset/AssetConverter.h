@@ -3,5 +3,5 @@
 
 namespace sy::asset
 {
-	void ConvertAssets(const fs::path& root);
+void ConvertAssets(const fs::path& root);
 }

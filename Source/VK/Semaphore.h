@@ -4,10 +4,10 @@
 
 namespace sy::vk
 {
-	class Semaphore : public VulkanWrapper<VkSemaphore>
-	{
-	public:
-		Semaphore(std::string_view name, VulkanContext& vulkanContext);
-		~Semaphore() = default;
-	};
+class Semaphore : public VulkanWrapper<VkSemaphore>
+{
+public:
+    Semaphore(std::string_view name, VulkanContext& vulkanContext);
+    ~Semaphore() = default;
+};
 } // namespace sy::vk

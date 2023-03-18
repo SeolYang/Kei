@@ -3,12 +3,12 @@
 
 namespace sy
 {
-	namespace audio
-	{
-		class AudioContext
-		{
-		public:
-		private:
-		};
-	} // namespace audio
+namespace audio
+{
+class AudioContext
+{
+public:
+private:
+};
+} // namespace audio
 } // namespace sy

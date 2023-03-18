@@ -332,7 +332,6 @@
     <None Include="..\Assets\Shaders\tri.frag">
       <Filter>Source\Shader</Filter>
     </None>
-    <None Include=".clang-format" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">

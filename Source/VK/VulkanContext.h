@@ -3,53 +3,53 @@
 
 namespace sy::window
 {
-	class Window;
+class Window;
 }
 
 namespace sy::vk
 {
-	class VulkanRHI;
-	class CommandPoolManager;
-	class DescriptorManager;
-	class FrameTracker;
-	class PipelineLayoutCache;
-	class Swapchain;
-	class VulkanContext : public Subsystem
-	{
-	public:
-		VulkanContext(const window::Window& window);
-		~VulkanContext();
+class VulkanRHI;
+class CommandPoolManager;
+class DescriptorManager;
+class FrameTracker;
+class PipelineLayoutCache;
+class Swapchain;
+class VulkanContext : public Subsystem
+{
+public:
+    VulkanContext(const window::Window& window);
+    ~VulkanContext();
 
-		void Startup() override;
-		void Shutdown() override;
+    void Startup() override;
+    void Shutdown() override;
 
-		[[nodiscard]] VulkanRHI& GetRHI() const;
-		[[nodiscard]] FrameTracker& GetFrameTracker() const;
-		[[nodiscard]] CommandPoolManager& GetCommandPoolManager() const;
-		[[nodiscard]] DescriptorManager& GetDescriptorManager() const;
-		[[nodiscard]] PipelineLayoutCache& GetPipelineLayoutCache() const;
-		[[nodiscard]] Swapchain& GetSwapchain() const;
+    [[nodiscard]] VulkanRHI&           GetRHI() const;
+    [[nodiscard]] FrameTracker&        GetFrameTracker() const;
+    [[nodiscard]] CommandPoolManager&  GetCommandPoolManager() const;
+    [[nodiscard]] DescriptorManager&   GetDescriptorManager() const;
+    [[nodiscard]] PipelineLayoutCache& GetPipelineLayoutCache() const;
+    [[nodiscard]] Swapchain&           GetSwapchain() const;
 
-		void BeginFrame();
-		void EndFrame();
+    void BeginFrame();
+    void EndFrame();
 
-		void BeginRender();
-		void EndRender();
+    void BeginRender();
+    void EndRender();
 
-		void EnqueueDeferredDeallocation(VulkanObjectDeleter deleter);
+    void EnqueueDeferredDeallocation(VulkanObjectDeleter deleter);
 
-	private:
-		void FlushDeferredDeallocations();
+private:
+    void FlushDeferredDeallocations();
 
-	private:
-		const window::Window& window;
-		std::unique_ptr<VulkanRHI> vulkanRHI;
-		std::unique_ptr<FrameTracker> frameTracker;
-		std::unique_ptr<CommandPoolManager> cmdPoolManager;
-		std::unique_ptr<DescriptorManager> descriptorManager;
-		std::unique_ptr<PipelineLayoutCache> pipelineLayoutCache;
-		std::vector<VulkanObjectDeleter> deferredObjectDeallocations;
+private:
+    const window::Window&                window;
+    std::unique_ptr<VulkanRHI>           vulkanRHI;
+    std::unique_ptr<FrameTracker>        frameTracker;
+    std::unique_ptr<CommandPoolManager>  cmdPoolManager;
+    std::unique_ptr<DescriptorManager>   descriptorManager;
+    std::unique_ptr<PipelineLayoutCache> pipelineLayoutCache;
+    std::vector<VulkanObjectDeleter>     deferredObjectDeallocations;
 
-		std::unique_ptr<Swapchain> swapchain;
-	};
+    std::unique_ptr<Swapchain> swapchain;
+};
 } // namespace sy::vk

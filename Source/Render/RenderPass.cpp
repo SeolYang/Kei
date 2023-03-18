@@ -7,24 +7,23 @@
 
 namespace sy::render
 {
-	RenderPass::RenderPass(std::string_view name, vk::VulkanContext& vulkanContext,
-		const vk::Pipeline& pipeline)
-		: NamedType(name), vulkanContext(vulkanContext), pipeline(pipeline)
-	{
-	}
+RenderPass::RenderPass(std::string_view name, vk::VulkanContext& vulkanContext, const vk::Pipeline& pipeline) :
+    NamedType(name), vulkanContext(vulkanContext), pipeline(pipeline)
+{
+}
 
-	void RenderPass::Begin(const vk::EQueueType queueType)
-	{
-		auto& cmdPoolManager = vulkanContext.GetCommandPoolManager();
-		auto& graphicsCmdPool = cmdPoolManager.RequestCommandPool(queueType);
-		currentCmdBuffer = graphicsCmdPool.RequestCommandBuffer(std::format("{}_CommandBuffer", GetName()));
-		currentCmdBuffer->Begin();
-		OnBegin();
-	}
+void RenderPass::Begin(const vk::EQueueType queueType)
+{
+    auto& cmdPoolManager  = vulkanContext.GetCommandPoolManager();
+    auto& graphicsCmdPool = cmdPoolManager.RequestCommandPool(queueType);
+    currentCmdBuffer      = graphicsCmdPool.RequestCommandBuffer(std::format("{}_CommandBuffer", GetName()));
+    currentCmdBuffer->Begin();
+    OnBegin();
+}
 
-	void RenderPass::End()
-	{
-		OnEnd();
-		currentCmdBuffer->End();
-	}
+void RenderPass::End()
+{
+    OnEnd();
+    currentCmdBuffer->End();
+}
 } // namespace sy::render

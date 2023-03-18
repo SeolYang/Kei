@@ -4,55 +4,54 @@
 
 namespace sy::vk
 {
-	class Swapchain;
-	class Sampler;
+class Swapchain;
+class Sampler;
 } // namespace sy::vk
 
 namespace sy::render
 {
-	struct TransformUniformBuffer
-	{
-		glm::mat4 modelViewProj;
-	};
+struct TransformUniformBuffer
+{
+    glm::mat4 modelViewProj;
+};
 
-	struct PushConstants
-	{
-		int textureIndex;
-		int transformDataIndex;
-	};
+struct PushConstants
+{
+    int textureIndex;
+    int transformDataIndex;
+};
 
-	class Mesh;
+class Mesh;
 
-	class SimpleRenderPass : public RenderPass
-	{
-	public:
-		SimpleRenderPass(std::string_view name, vk::VulkanContext& vulkanContext,
-			const vk::Pipeline& pipeline);
+class SimpleRenderPass : public RenderPass
+{
+public:
+    SimpleRenderPass(std::string_view name, vk::VulkanContext& vulkanContext, const vk::Pipeline& pipeline);
 
-		virtual void OnBegin() override;
-		virtual void Render() override;
-		virtual void OnEnd() override;
-		virtual void UpdateBuffers() override;
+    virtual void OnBegin() override;
+    virtual void Render() override;
+    virtual void OnEnd() override;
+    virtual void UpdateBuffers() override;
 
-		void SetMesh(Handle<Mesh> mesh);
-		void SetTextureDescriptor(Handle<vk::Descriptor> descriptor);
-		void SetWindowExtent(Extent2D<uint32_t> extent);
-		void SetSwapchain(const vk::Swapchain& swapchain, VkClearColorValue clearColorValue);
-		void SetDepthStencilView(const vk::TextureView& depthStencilView);
-		void SetTransformData(TransformUniformBuffer buffer);
+    void SetMesh(Handle<Mesh> mesh);
+    void SetTextureDescriptor(Handle<vk::Descriptor> descriptor);
+    void SetWindowExtent(Extent2D<uint32_t> extent);
+    void SetSwapchain(const vk::Swapchain& swapchain, VkClearColorValue clearColorValue);
+    void SetDepthStencilView(const vk::TextureView& depthStencilView);
+    void SetTransformData(TransformUniformBuffer buffer);
 
-	private:
-		Handle<Mesh> mesh;
-		Handle<vk::Descriptor> descriptor;
+private:
+    Handle<Mesh>           mesh;
+    Handle<vk::Descriptor> descriptor;
 
-		std::array<std::unique_ptr<vk::Buffer>, vk::NumMaxInFlightFrames> transformBuffers;
-		std::array<vk::Descriptor, vk::NumMaxInFlightFrames> transformBufferIndices;
+    std::array<std::unique_ptr<vk::Buffer>, vk::NumMaxInFlightFrames> transformBuffers;
+    std::array<vk::Descriptor, vk::NumMaxInFlightFrames>              transformBufferIndices;
 
-		Extent2D<uint32_t> windowExtent;
-		VkImage swapchainImage;
-		VkRenderingAttachmentInfo swapchainAttachmentInfo;
-		VkRenderingAttachmentInfo depthAttachmentInfo;
+    Extent2D<uint32_t>        windowExtent;
+    VkImage                   swapchainImage;
+    VkRenderingAttachmentInfo swapchainAttachmentInfo;
+    VkRenderingAttachmentInfo depthAttachmentInfo;
 
-		TransformUniformBuffer transformData;
-	};
+    TransformUniformBuffer transformData;
+};
 } // namespace sy::render

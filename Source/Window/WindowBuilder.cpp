@@ -4,8 +4,8 @@
 
 namespace sy::window
 {
-	std::unique_ptr<sy::window::Window> WindowBuilder::Build() const
-	{
-		return std::make_unique<Window>(*this);
-	}
+std::unique_ptr<sy::window::Window> WindowBuilder::Build() const
+{
+    return std::make_unique<Window>(*this);
+}
 } // namespace sy::window

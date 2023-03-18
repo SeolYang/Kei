@@ -9,107 +9,112 @@
 
 namespace sy::vk
 {
-	VulkanContext::VulkanContext(const window::Window& window)
-		: window(window), vulkanRHI(std::make_unique<VulkanRHI>(*this, window)), frameTracker(std::make_unique<FrameTracker>(*this)), cmdPoolManager(std::make_unique<CommandPoolManager>(*this, *frameTracker)), descriptorManager(std::make_unique<DescriptorManager>(*this, *frameTracker)), pipelineLayoutCache(std::make_unique<PipelineLayoutCache>(*this))
-	{
-	}
+VulkanContext::VulkanContext(const window::Window& window) :
+    window(window),
+    vulkanRHI(std::make_unique<VulkanRHI>(*this, window)),
+    frameTracker(std::make_unique<FrameTracker>(*this)),
+    cmdPoolManager(std::make_unique<CommandPoolManager>(*this, *frameTracker)),
+    descriptorManager(std::make_unique<DescriptorManager>(*this, *frameTracker)),
+    pipelineLayoutCache(std::make_unique<PipelineLayoutCache>(*this))
+{
+}
 
-	VulkanContext::~VulkanContext()
-	{
-	}
+VulkanContext::~VulkanContext()
+{
+}
 
-	void VulkanContext::Startup()
-	{
-		spdlog::info("Startup Vulkan Context.");
-		vulkanRHI->Startup();
-		frameTracker->Startup();
-		cmdPoolManager->Startup();
-		descriptorManager->Startup();
-		pipelineLayoutCache->Startup();
+void VulkanContext::Startup()
+{
+    spdlog::info("Startup Vulkan Context.");
+    vulkanRHI->Startup();
+    frameTracker->Startup();
+    cmdPoolManager->Startup();
+    descriptorManager->Startup();
+    pipelineLayoutCache->Startup();
 
-		swapchain = std::make_unique<Swapchain>(window, *this);
-	}
+    swapchain = std::make_unique<Swapchain>(window, *this);
+}
 
-	void VulkanContext::Shutdown()
-	{
-		spdlog::info("Shutdown Vulkan Context.");
-		vulkanRHI->WaitForDeviceIdle();
+void VulkanContext::Shutdown()
+{
+    spdlog::info("Shutdown Vulkan Context.");
+    vulkanRHI->WaitForDeviceIdle();
 
-		pipelineLayoutCache->Shutdown();
-		descriptorManager->Shutdown();
-		cmdPoolManager->Shutdown();
-		frameTracker->Shutdown();
-		swapchain.reset();
-		FlushDeferredDeallocations();
-		vulkanRHI->Shutdown();
-	}
+    pipelineLayoutCache->Shutdown();
+    descriptorManager->Shutdown();
+    cmdPoolManager->Shutdown();
+    frameTracker->Shutdown();
+    swapchain.reset();
+    FlushDeferredDeallocations();
+    vulkanRHI->Shutdown();
+}
 
-	CommandPoolManager& VulkanContext::GetCommandPoolManager() const
-	{
-		return *cmdPoolManager;
-	}
+CommandPoolManager& VulkanContext::GetCommandPoolManager() const
+{
+    return *cmdPoolManager;
+}
 
-	DescriptorManager& VulkanContext::GetDescriptorManager() const
-	{
-		return *descriptorManager;
-	}
+DescriptorManager& VulkanContext::GetDescriptorManager() const
+{
+    return *descriptorManager;
+}
 
-	VulkanRHI& VulkanContext::GetRHI() const
-	{
-		return *vulkanRHI;
-	}
+VulkanRHI& VulkanContext::GetRHI() const
+{
+    return *vulkanRHI;
+}
 
-	FrameTracker& VulkanContext::GetFrameTracker() const
-	{
-		return *frameTracker;
-	}
+FrameTracker& VulkanContext::GetFrameTracker() const
+{
+    return *frameTracker;
+}
 
-	PipelineLayoutCache& VulkanContext::GetPipelineLayoutCache() const
-	{
-		return *pipelineLayoutCache;
-	}
+PipelineLayoutCache& VulkanContext::GetPipelineLayoutCache() const
+{
+    return *pipelineLayoutCache;
+}
 
-	void VulkanContext::BeginFrame()
-	{
-		frameTracker->BeginFrame();
-	}
+void VulkanContext::BeginFrame()
+{
+    frameTracker->BeginFrame();
+}
 
-	void VulkanContext::EndFrame()
-	{
-		frameTracker->EndFrame();
-	}
+void VulkanContext::EndFrame()
+{
+    frameTracker->EndFrame();
+}
 
-	void VulkanContext::BeginRender()
-	{
-		frameTracker->WaitForInFlightRenderFence();
-		FlushDeferredDeallocations();
-		cmdPoolManager->BeginFrame();
-		descriptorManager->BeginFrame();
-	}
+void VulkanContext::BeginRender()
+{
+    frameTracker->WaitForInFlightRenderFence();
+    FlushDeferredDeallocations();
+    cmdPoolManager->BeginFrame();
+    descriptorManager->BeginFrame();
+}
 
-	void VulkanContext::EndRender()
-	{
-		descriptorManager->EndFrame();
-		cmdPoolManager->EndFrame();
-	}
+void VulkanContext::EndRender()
+{
+    descriptorManager->EndFrame();
+    cmdPoolManager->EndFrame();
+}
 
-	void VulkanContext::EnqueueDeferredDeallocation(VulkanObjectDeleter deleter)
-	{
-		this->deferredObjectDeallocations.emplace_back(std::move(deleter));
-	}
+void VulkanContext::EnqueueDeferredDeallocation(VulkanObjectDeleter deleter)
+{
+    this->deferredObjectDeallocations.emplace_back(std::move(deleter));
+}
 
-	void VulkanContext::FlushDeferredDeallocations()
-	{
-		for (auto& deleter : deferredObjectDeallocations)
-		{
-			deleter(*vulkanRHI);
-		}
-		deferredObjectDeallocations.clear();
-	}
+void VulkanContext::FlushDeferredDeallocations()
+{
+    for (auto& deleter : deferredObjectDeallocations)
+    {
+        deleter(*vulkanRHI);
+    }
+    deferredObjectDeallocations.clear();
+}
 
-	Swapchain& VulkanContext::GetSwapchain() const
-	{
-		return *swapchain;
-	}
+Swapchain& VulkanContext::GetSwapchain() const
+{
+    return *swapchain;
+}
 
 } // namespace sy::vk
