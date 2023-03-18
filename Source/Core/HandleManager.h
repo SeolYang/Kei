@@ -374,14 +374,9 @@ namespace sy
 
 	public:
 		HandleManager() = default;
-
 		~HandleManager()
 		{
-			for (auto& element : table)
-			{
-				UntypedHandleMap& value = element.second;
-				value.second(value.first);
-			}
+			/** Empty */
 		}
 
 		/** Non-copyable */
@@ -390,6 +385,20 @@ namespace sy
 		/** Non-movable */
 		HandleManager(HandleManager&&) noexcept = delete;
 		HandleManager& operator=(HandleManager&&) noexcept = delete;
+
+		void Startup()
+		{
+			/** Empty */
+		}
+
+		void Shutdown()
+		{
+			for (auto& element : table)
+			{
+				UntypedHandleMap& value = element.second;
+				value.second(value.first);
+			}
+		}
 
 		template <typename T>
 		HandleMap<T>& GetHandleMap()

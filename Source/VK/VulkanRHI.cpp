@@ -13,15 +13,13 @@ namespace sy
 {
 	namespace vk
 	{
-		VulkanRHI::VulkanRHI(const window::Window& window)
-			: window(window), instance(VK_NULL_HANDLE), surface(VK_NULL_HANDLE), physicalDevice(VK_NULL_HANDLE), device(VK_NULL_HANDLE), allocator(VK_NULL_HANDLE)
+		VulkanRHI::VulkanRHI(VulkanContext& vulkanContext, const window::Window& window)
+			: vulkanContext(vulkanContext), window(window), instance(VK_NULL_HANDLE), surface(VK_NULL_HANDLE), physicalDevice(VK_NULL_HANDLE), device(VK_NULL_HANDLE), allocator(VK_NULL_HANDLE)
 		{
-			Startup();
 		}
 
 		VulkanRHI::~VulkanRHI()
 		{
-			Cleanup();
 		}
 
 		uint32_t VulkanRHI::GetQueueFamilyIndex(const EQueueType queueType) const
@@ -60,9 +58,10 @@ namespace sy
 
 		void VulkanRHI::SubmitImmediateTo(const CommandBuffer& cmdBuffer) const
 		{
-			SubmitTo(cmdBuffer, *immediateFence);
-			immediateFence->Wait();
-			immediateFence->Reset();
+			const std::unique_ptr<Fence> tempFence = std::make_unique<Fence>(std::format("ImmediateFence for {}", cmdBuffer.GetName()), vulkanContext, false);
+			SubmitTo(cmdBuffer, *tempFence);
+			tempFence->Wait();
+			tempFence->Reset();
 		}
 
 		void VulkanRHI::SubmitTo(const EQueueType queueType, const VkSubmitInfo& submitInfo, const Fence& fence) const
@@ -304,8 +303,6 @@ namespace sy
 			device = vkbDevice.device;
 			spdlog::trace("Succeed to create logical device using GPU {}.", gpuName);
 
-			swapchain = std::make_unique<Swapchain>(window, *this);
-
 			const VmaVulkanFunctions vkFunctions{
 				.vkGetInstanceProcAddr = vkGetInstanceProcAddr,
 				.vkGetDeviceProcAddr = vkGetDeviceProcAddr
@@ -322,19 +319,15 @@ namespace sy
 			spdlog::trace("VMA instance successfully created.");
 
 			InitQueues(vkbDevice);
-
-			immediateFence = std::make_unique<Fence>("Immediate Fence", *this, false);
 		}
 
-		void VulkanRHI::Cleanup()
+		void VulkanRHI::Shutdown()
 		{
 			WaitAllQueuesForIdle();
 			{
-				immediateFence.reset();
 				vmaDestroyAllocator(allocator);
 				allocator = VK_NULL_HANDLE;
 				spdlog::trace("Cleanup swap chain...");
-				swapchain.reset();
 
 				spdlog::trace("Cleanup vulkan logical device...");
 				vkDestroyDevice(device, nullptr);

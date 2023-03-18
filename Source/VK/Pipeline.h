@@ -1,18 +1,18 @@
 #pragma once
 #include <PCH.h>
+#include <VK/VulkanWrapper.h>
 
 namespace sy::vk
 {
 	class GraphicsPipelineBuilder;
 	class ComputePipelineBuilder;
 	class RayTracingPipelineBuilder;
-	class VulkanRHI;
-
+	class VulkanContext;
 	class Pipeline : public VulkanWrapper<VkPipeline>
 	{
 	public:
-		Pipeline(std::string_view name, const VulkanRHI& vulkanRHI, const GraphicsPipelineBuilder& builder);
-		Pipeline(std::string_view name, const VulkanRHI& vulkanRHI, const ComputePipelineBuilder& builder);
+		Pipeline(std::string_view name, VulkanContext& vulkanContext, const GraphicsPipelineBuilder& builder);
+		Pipeline(std::string_view name, VulkanContext& vulkanContext, const ComputePipelineBuilder& builder);
 		~Pipeline() override = default;
 
 		[[nodiscard]] auto GetPipelineType() const
@@ -31,8 +31,7 @@ namespace sy::vk
 		}
 
 	private:
-		Pipeline(std::string_view name, const VulkanRHI& vulkanRHI, EPipelineType pipelineType,
-			VkPipelineLayout layout);
+		Pipeline(std::string_view name, VulkanContext& vulkanContext, EPipelineType pipelineType, VkPipelineLayout layout);
 
 	private:
 		const EPipelineType pipelineType;

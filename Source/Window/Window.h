@@ -7,7 +7,7 @@ namespace sy::window
 	{
 	public:
 		Window(std::string_view title, Extent2D<uint32_t> extent);
-		~Window();
+		~Window() = default;
 
 		Window(const window::Window&) = delete;
 		Window(window::Window&&) = default;
@@ -30,9 +30,8 @@ namespace sy::window
 			return extent;
 		}
 
-	private:
 		void Startup();
-		void Cleanup();
+		void Shutdown();
 
 	private:
 		std::string title;

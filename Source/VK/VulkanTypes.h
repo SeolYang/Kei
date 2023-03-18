@@ -6,10 +6,12 @@ namespace sy::vk
 	class Buffer;
 	class Texture;
 	class TextureView;
+	class VulkanRHI;
 
 	using Descriptor = OffsetSlotPtr;
 	class CommandBuffer;
 	using ManagedCommandBuffer = std::unique_ptr<CommandBuffer, std::function<void(CommandBuffer*)>>;
+	using VulkanObjectDeleter = std::function<void(const VulkanRHI&)>;
 
 	constexpr uint32_t MaxBindlessResourcesPerDescriptor = 2048;
 	constexpr size_t NumMaxInFlightFrames = 2;

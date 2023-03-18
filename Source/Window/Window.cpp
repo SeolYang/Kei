@@ -4,14 +4,8 @@
 namespace sy::window
 {
 	Window::Window(const std::string_view title, const Extent2D<uint32_t> extent)
-		: title(title), extent(extent)
+		: title(title), extent(extent), window(nullptr)
 	{
-		Startup();
-	}
-
-	Window::~Window()
-	{
-		Cleanup();
 	}
 
 	void Window::Startup()
@@ -20,7 +14,7 @@ namespace sy::window
 
 		constexpr SDL_WindowFlags windowFlags = SDL_WINDOW_VULKAN;
 		window = SDL_CreateWindow(
-			"Hitori",
+			title.c_str(),
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
 			extent.width,
@@ -30,7 +24,7 @@ namespace sy::window
 		SY_ASSERT(window != nullptr, "Failed to create sdl window");
 	}
 
-	void Window::Cleanup()
+	void Window::Shutdown()
 	{
 		if (window != nullptr)
 		{

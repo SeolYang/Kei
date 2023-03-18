@@ -1,16 +1,15 @@
 #pragma once
 #include <PCH.h>
+#include <VK/VulkanWrapper.h>
 
 namespace sy::vk
 {
 	constexpr std::string_view DefaultWhiteTexture = "Default_White_Tex";
 	constexpr std::string_view DefaultBlackTexture = "Default_Black_Tex";
 
-	class VulkanContext;
 	class CommandPoolManager;
 	class FrameTracker;
 	class TextureBuilder;
-
 	class Texture : public VulkanWrapper<VkImage>
 	{
 	public:

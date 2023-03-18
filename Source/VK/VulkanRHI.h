@@ -1,5 +1,6 @@
 #pragma once
 #include <PCH.h>
+#include <VK/VulkanWrapper.h>
 
 namespace sy::window
 {
@@ -16,17 +17,19 @@ namespace sy::vk
 	class DescriptorPool;
 	class Buffer;
 	class FrameTracker;
-
 	class VulkanRHI
 	{
 	public:
-		VulkanRHI(const window::Window& window);
+		VulkanRHI(VulkanContext& vulkanContext, const window::Window& window);
 		~VulkanRHI();
 
 		VulkanRHI(const VulkanRHI&) = delete;
 		VulkanRHI(VulkanRHI&&) = delete;
 		VulkanRHI& operator=(const VulkanRHI&) = delete;
 		VulkanRHI& operator=(VulkanRHI&&) = delete;
+
+		void Startup();
+		void Shutdown();
 
 		[[nodiscard]] VkPhysicalDevice GetPhysicalDevice() const
 		{
@@ -44,11 +47,6 @@ namespace sy::vk
 		[[nodiscard]] VkSurfaceKHR GetSurface() const
 		{
 			return surface;
-		}
-
-		[[nodiscard]] Swapchain& GetSwapchain() const
-		{
-			return *swapchain;
 		}
 
 		[[nodiscard]] VmaAllocator GetAllocator() const
@@ -91,12 +89,10 @@ namespace sy::vk
 		}
 
 	private:
-		void Startup();
-		void Cleanup();
-
 		void InitQueues(const vkb::Device& vkbDevice);
 
 	private:
+		VulkanContext& vulkanContext;
 		const window::Window& window;
 		VkInstance instance;
 		VkDebugUtilsMessengerEXT debugMessenger;
@@ -105,8 +101,6 @@ namespace sy::vk
 		VkPhysicalDeviceProperties gpuProperties;
 		VkDevice device;
 		std::string gpuName;
-
-		std::unique_ptr<Swapchain> swapchain;
 
 		VmaAllocator allocator;
 
@@ -119,7 +113,5 @@ namespace sy::vk
 		uint32_t computeQueueFamilyIdx;
 		uint32_t transferQueueFamilyIdx;
 		uint32_t presentQueueFamilyIdx;
-
-		std::unique_ptr<Fence> immediateFence;
 	};
 } // namespace sy::vk

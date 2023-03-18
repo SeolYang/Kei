@@ -1,20 +1,19 @@
 #pragma once
 #include <PCH.h>
+#include <VK/VulkanWrapper.h>
 
 namespace sy::vk
 {
-	class VulkanRHI;
 	class CommandPool;
 	class ResourceStateTracker;
 	class Fence;
 	class Pipeline;
 	class Buffer;
 	class Texture;
-
 	class CommandBuffer : public VulkanWrapper<VkCommandBuffer>
 	{
 	public:
-		CommandBuffer(std::string_view name, const VulkanRHI& vulkanRHI, const CommandPool& cmdPool);
+		CommandBuffer(std::string_view name, VulkanContext& vulkanContext, const CommandPool& cmdPool);
 		~CommandBuffer() override = default;
 
 		[[nodiscard]] EQueueType GetQueueType() const

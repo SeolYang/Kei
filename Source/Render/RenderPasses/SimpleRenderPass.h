@@ -26,7 +26,7 @@ namespace sy::render
 	class SimpleRenderPass : public RenderPass
 	{
 	public:
-		SimpleRenderPass(std::string_view name, const vk::VulkanContext& vulkanContext,
+		SimpleRenderPass(std::string_view name, vk::VulkanContext& vulkanContext,
 			const vk::Pipeline& pipeline);
 
 		virtual void OnBegin() override;

@@ -1,15 +1,16 @@
 #include <PCH.h>
 #include <VK/ShaderModule.h>
+#include <VK/VulkanContext.h>
 #include <VK/VulkanRHI.h>
 
 namespace sy
 {
 	namespace vk
 	{
-		ShaderModule::ShaderModule(const std::string_view name, const VulkanRHI& vulkanRHI,
+		ShaderModule::ShaderModule(const std::string_view name, VulkanContext& vulkanContext,
 			const std::string_view filePath, const VkShaderStageFlagBits shaderType,
 			const std::string_view entryPoint)
-			: VulkanWrapper<VkShaderModule>(name, vulkanRHI, VK_OBJECT_TYPE_SEMAPHORE)
+			: VulkanWrapper<VkShaderModule>(name, vulkanContext, VK_OBJECT_TYPE_SEMAPHORE)
 			, path(filePath)
 			, entryPoint(entryPoint)
 			, shaderType(shaderType)
@@ -37,11 +38,12 @@ namespace sy
 			spdlog::trace("Creating shader module from {}...", path);
 
 			NativeHandle handle = VK_NULL_HANDLE;
+			const auto& vulkanRHI = vulkanContext.GetRHI();
 			VK_ASSERT(vkCreateShaderModule(vulkanRHI.GetDevice(), &createInfo, nullptr, &handle), "Failed to create shader module from {}.", path);
 
 			UpdateHandle(
 				handle,
-				SY_VK_WRAPPER_DELETER(rhi) {
+				[handle](const VulkanRHI& rhi) {
 					vkDestroyShaderModule(rhi.GetDevice(), handle, nullptr);
 				});
 		}

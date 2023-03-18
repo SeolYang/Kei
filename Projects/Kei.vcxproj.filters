@@ -258,7 +258,7 @@
     <ClInclude Include="..\Source\VK\VulkanTypes.h">
       <Filter>Source\VK</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\VK\VulkanWrapper.hpp">
+    <ClInclude Include="..\Source\VK\VulkanWrapper.h">
       <Filter>Source\VK</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Render\Material.h">

@@ -11,8 +11,8 @@ namespace sy
 {
 	namespace vk
 	{
-		CommandBuffer::CommandBuffer(const std::string_view name, const VulkanRHI& vulkanRHI, const CommandPool& cmdPool)
-			: VulkanWrapper<VkCommandBuffer>(name, vulkanRHI, VK_OBJECT_TYPE_COMMAND_BUFFER)
+		CommandBuffer::CommandBuffer(const std::string_view name, VulkanContext& vulkanContext, const CommandPool& cmdPool)
+			: VulkanWrapper<VkCommandBuffer>(name, vulkanContext, VK_OBJECT_TYPE_COMMAND_BUFFER)
 			, queueType(cmdPool.GetQueueType())
 		{
 			const VkCommandBufferAllocateInfo allocInfo{
@@ -24,7 +24,7 @@ namespace sy
 			};
 
 			NativeHandle handle = VK_NULL_HANDLE;
-			VK_ASSERT(vkAllocateCommandBuffers(vulkanRHI.GetDevice(), &allocInfo, &handle),
+			VK_ASSERT(vkAllocateCommandBuffers(GetRHI().GetDevice(), &allocInfo, &handle),
 				"Failed to creating command buffer.");
 			UpdateHandle(handle, SY_VK_WRAPPER_EMPTY_DELETER);
 		}

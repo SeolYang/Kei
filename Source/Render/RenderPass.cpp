@@ -7,7 +7,7 @@
 
 namespace sy::render
 {
-	RenderPass::RenderPass(std::string_view name, const vk::VulkanContext& vulkanContext,
+	RenderPass::RenderPass(std::string_view name, vk::VulkanContext& vulkanContext,
 		const vk::Pipeline& pipeline)
 		: NamedType(name), vulkanContext(vulkanContext), pipeline(pipeline)
 	{

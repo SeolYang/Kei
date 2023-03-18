@@ -13,7 +13,7 @@ namespace sy
 {
 	namespace vk
 	{
-		size_t CalculateAlignedBufferSize(const VulkanContext& vulkanContext,
+		size_t CalculateAlignedBufferSize(VulkanContext& vulkanContext,
 			const size_t originSize,
 			const VkBufferUsageFlags bufferUsage)
 		{
@@ -33,7 +33,7 @@ namespace sy
 		}
 
 		Buffer::Buffer(const BufferBuilder& builder)
-			: VulkanWrapper(builder.name, builder.vulkanContext.GetRHI(), VK_OBJECT_TYPE_BUFFER)
+			: VulkanWrapper(builder.name, builder.vulkanContext, VK_OBJECT_TYPE_BUFFER)
 			, alignedSize(CalculateAlignedBufferSize(builder.vulkanContext, builder.size, *builder.usage))
 			, usage(*builder.usage | (builder.dataToTransfer.has_value() ? VK_BUFFER_USAGE_TRANSFER_DST_BIT : 0))
 			, memoryUsage(*builder.memoryUsage)
@@ -62,7 +62,7 @@ namespace sy
 
 			UpdateHandle(
 				handle,
-				SY_VK_WRAPPER_DELETER(rhi) {
+				[handle, allocation = allocation](const VulkanRHI& rhi) {
 					vmaDestroyBuffer(rhi.GetAllocator(), handle, allocation);
 				});
 

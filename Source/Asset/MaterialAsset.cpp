@@ -29,7 +29,7 @@ namespace sy::asset
 
 	Handle<render::Material> LoadMaterialFromAsset(
 		const fs::path& path,
-		HandleManager& handleManager, const vk::VulkanContext& vulkanContext)
+		HandleManager& handleManager, vk::VulkanContext& vulkanContext)
 	{
 		std::string pathStr = path.string();
 		auto handle = handleManager.QueryAlias<render::Material>(pathStr);
@@ -45,15 +45,17 @@ namespace sy::asset
 			return {};
 		}
 
-		const auto& vulkanRHI = vulkanContext.GetRHI();
 		auto& descriptorManager = vulkanContext.GetDescriptorManager();
 		const auto metadata = QueryMetadata(*assetDataHandle);
 
 		const auto baseTexHandle = LoadTexture2DFromAsset(metadata.BaseTexture, handleManager, vulkanContext);
-		const auto baseTexViewHandle = handleManager.Add<vk::TextureView>(std::format("{}_View", metadata.BaseTexture),
-			vulkanRHI, *baseTexHandle,
+		const auto baseTexViewHandle = handleManager.Add<vk::TextureView>(
+			std::format("{}_View", metadata.BaseTexture),
+			vulkanContext, *baseTexHandle,
 			VK_IMAGE_VIEW_TYPE_2D);
+
 		const auto linearSampler = handleManager.QueryAlias<vk::Sampler>(vk::LinearSamplerRepeat);
+
 		handle = handleManager.Add<render::Material>(
 			handleManager.Add<vk::Descriptor>(descriptorManager.RequestDescriptor(handleManager,
 				baseTexHandle, baseTexViewHandle,

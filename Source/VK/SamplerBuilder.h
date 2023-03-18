@@ -4,11 +4,11 @@
 namespace sy::vk
 {
 	class Sampler;
-
+	class VulkanContext;
 	class SamplerBuilder
 	{
 	public:
-		explicit SamplerBuilder(const VulkanContext& vulkanContext)
+		explicit SamplerBuilder(VulkanContext& vulkanContext)
 			: vulkanContext(vulkanContext)
 		{
 		}
@@ -67,7 +67,7 @@ namespace sy::vk
 
 	private:
 		friend class Sampler;
-		const VulkanContext& vulkanContext;
+		VulkanContext& vulkanContext;
 		std::string name = "LinearRepeatSampler";
 		VkFilter minFilter = VK_FILTER_LINEAR;
 		VkFilter magFilter = VK_FILTER_LINEAR;

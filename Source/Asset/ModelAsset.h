@@ -29,6 +29,6 @@ namespace sy::asset
 {
 	std::vector<component::StaticMeshComponent> LoadModel(const std::string& name, const fs::path& path,
 		HandleManager& handleManager,
-		const vk::VulkanContext& vulkanContext);
+		vk::VulkanContext& vulkanContext);
 	bool ConvertModel(const fs::path& path);
 } // namespace sy::asset

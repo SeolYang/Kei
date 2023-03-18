@@ -9,7 +9,6 @@ namespace sy::vk
 	class TextureView;
 	class Sampler;
 	class FrameTracker;
-
 	class DescriptorManager final : public NonCopyable
 	{
 	public:
@@ -98,8 +97,11 @@ namespace sy::vk
 		};
 
 	public:
-		DescriptorManager(const VulkanRHI& vulkanRHI, const FrameTracker& frameTracker);
+		DescriptorManager(VulkanContext& vulkanContext, const FrameTracker& frameTracker);
 		virtual ~DescriptorManager() override;
+
+		void Startup();
+		void Shutdown();
 
 		void BeginFrame();
 		void EndFrame();
@@ -123,7 +125,7 @@ namespace sy::vk
 			bool bIsCombinedSampler = true);
 
 	private:
-		const VulkanRHI& vulkanRHI;
+		VulkanContext& vulkanContext;
 		const FrameTracker& frameTracker;
 		VkDescriptorSetLayout bindlessLayout = VK_NULL_HANDLE;
 		PoolPackage descriptorPoolPackage;

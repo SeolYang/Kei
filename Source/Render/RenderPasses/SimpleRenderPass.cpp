@@ -19,7 +19,7 @@
 namespace sy::render
 {
 	SimpleRenderPass::SimpleRenderPass(const std::string_view name,
-		const vk::VulkanContext& vulkanContext, const vk::Pipeline& pipeline)
+		vk::VulkanContext& vulkanContext, const vk::Pipeline& pipeline)
 		: RenderPass(name, vulkanContext, pipeline)
 	{
 		auto& cmdPoolManager = vulkanContext.GetCommandPoolManager();

@@ -9,7 +9,7 @@ namespace sy::vk
 		return std::make_unique<Texture>(*this);
 	}
 
-	TextureBuilder TextureBuilder::Texture2DShaderResourceTemplate(const VulkanContext& vulkanContext)
+	TextureBuilder TextureBuilder::Texture2DShaderResourceTemplate(VulkanContext& vulkanContext)
 	{
 		return TextureBuilder{ vulkanContext }
 			.SetType(VK_IMAGE_TYPE_2D)
@@ -19,7 +19,7 @@ namespace sy::vk
 			.SetTargetInitialState(ETextureState::AnyShaderReadGeneral);
 	}
 
-	TextureBuilder TextureBuilder::Texture2DRenderTargetTemplate(const VulkanContext& vulkanContext)
+	TextureBuilder TextureBuilder::Texture2DRenderTargetTemplate(VulkanContext& vulkanContext)
 	{
 		return TextureBuilder{ vulkanContext }
 			.SetType(VK_IMAGE_TYPE_2D)
@@ -29,7 +29,7 @@ namespace sy::vk
 			.SetTargetInitialState(ETextureState::ColorAttachmentReadWrite);
 	}
 
-	TextureBuilder TextureBuilder::Texture2DDepthStencilTemplate(const VulkanContext& vulkanContext)
+	TextureBuilder TextureBuilder::Texture2DDepthStencilTemplate(VulkanContext& vulkanContext)
 	{
 		return TextureBuilder{ vulkanContext }
 			.SetType(VK_IMAGE_TYPE_2D)

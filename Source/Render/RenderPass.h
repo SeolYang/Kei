@@ -17,7 +17,7 @@ namespace sy::render
 	class RenderPass : public NamedType, public NonCopyable
 	{
 	public:
-		RenderPass(std::string_view name, const vk::VulkanContext& vulkanContext, const vk::Pipeline& pipeline);
+		RenderPass(std::string_view name, vk::VulkanContext& vulkanContext, const vk::Pipeline& pipeline);
 		virtual ~RenderPass() noexcept override = default;
 
 		RenderPass(const RenderPass&) = delete;
@@ -59,7 +59,7 @@ namespace sy::render
 		}
 
 	private:
-		const vk::VulkanContext& vulkanContext;
+		vk::VulkanContext& vulkanContext;
 		const vk::Pipeline& pipeline;
 
 		vk::ManagedCommandBuffer currentCmdBuffer;

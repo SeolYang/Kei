@@ -1,13 +1,14 @@
 #include <PCH.h>
 #include <VK/TextureView.h>
 #include <VK/Texture.h>
+#include <VK/VulkanContext.h>
 #include <VK/VulkanRHI.h>
 
 namespace sy::vk
 {
-	TextureView::TextureView(const std::string_view name, const VulkanRHI& vulkanRHI, const Texture& texture,
+	TextureView::TextureView(const std::string_view name, VulkanContext& vulkanContext, const Texture& texture,
 		const VkImageViewType viewType, const TextureSubResourceRange subResourceRange)
-		: VulkanWrapper<VkImageView>(name, vulkanRHI, VK_OBJECT_TYPE_IMAGE_VIEW)
+		: VulkanWrapper<VkImageView>(name, vulkanContext, VK_OBJECT_TYPE_IMAGE_VIEW)
 		, viewType(viewType)
 		, subResourceRange(subResourceRange)
 	{
@@ -29,18 +30,19 @@ namespace sy::vk
 		};
 
 		NativeHandle handle = VK_NULL_HANDLE;
+		const auto& vulkanRHI = vulkanContext.GetRHI();
 		VK_ASSERT(vkCreateImageView(vulkanRHI.GetDevice(), &viewCreateInfo, nullptr, &handle),
 			"Failed to create image view {}.", name);
 
 		UpdateHandle(
-			handle, SY_VK_WRAPPER_DELETER(rhi) {
+			handle, [handle](const VulkanRHI& rhi) {
 				vkDestroyImageView(rhi.GetDevice(), handle, nullptr);
 			});
 	}
 
-	TextureView::TextureView(const std::string_view name, const VulkanRHI& vulkanRHI, const Texture& texture,
+	TextureView::TextureView(const std::string_view name, VulkanContext& vulkanContext, const Texture& texture,
 		const VkImageViewType viewType)
-		: TextureView(name, vulkanRHI, texture, viewType, texture.GetFullSubResourceRange())
+		: TextureView(name, vulkanContext, texture, viewType, texture.GetFullSubResourceRange())
 	{
 	}
 } // namespace sy::vk

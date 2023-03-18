@@ -10,7 +10,6 @@ namespace sy::vk
 
 	class Texture;
 	class Buffer;
-
 	class ResourceStateTracker : public NonCopyable
 	{
 	public:

@@ -126,7 +126,7 @@
     <ClInclude Include="..\Source\VK\VulkanRHI.h" />
     <ClInclude Include="..\Source\VK\VulkanContext.h" />
     <ClInclude Include="..\Source\VK\VulkanTypes.h" />
-    <ClInclude Include="..\Source\VK\VulkanWrapper.hpp" />
+    <ClInclude Include="..\Source\VK\VulkanWrapper.h" />
     <ClInclude Include="..\Source\Window\Window.h" />
     <ClInclude Include="..\ThirdParty\volk\volk.h" />
   </ItemGroup>

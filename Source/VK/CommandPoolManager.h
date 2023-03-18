@@ -7,12 +7,14 @@ namespace sy::vk
 	class CommandPool;
 	class CommandBuffer;
 	class FrameTracker;
-
 	class CommandPoolManager final : public NonCopyable
 	{
 	public:
-		CommandPoolManager(const VulkanRHI& vulkanRHI, const FrameTracker& frameTracker);
+		CommandPoolManager(VulkanContext& vulkanContext, const FrameTracker& frameTracker);
 		virtual ~CommandPoolManager() override;
+
+		void Startup();
+		void Shutdown();
 
 		[[nodiscard]] CommandPool& RequestCommandPool(EQueueType queueType);
 
@@ -20,7 +22,7 @@ namespace sy::vk
 		void EndFrame();
 
 	private:
-		const VulkanRHI& vulkanRHI;
+		VulkanContext& vulkanContext;
 		const FrameTracker& frameTracker;
 
 		std::shared_mutex cmdPoolMutex;

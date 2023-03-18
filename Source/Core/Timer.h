@@ -11,6 +11,11 @@ namespace sy
 			Begin();
 		}
 
+		void Shutdown()
+		{
+			/** Empty */
+		}
+
 		void Begin() noexcept
 		{
 			begin = chrono::high_resolution_clock::now();

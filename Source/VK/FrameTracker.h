@@ -5,8 +5,7 @@ namespace sy::vk
 {
 	class Fence;
 	class Semaphore;
-	class VulkanRHI;
-
+	class VulkanContext;
 	class FrameTracker : public NonCopyable
 	{
 	private:
@@ -21,8 +20,11 @@ namespace sy::vk
 		};
 
 	public:
-		explicit FrameTracker(const VulkanRHI& vulkanRHI);
+		explicit FrameTracker(VulkanContext& vulkanContext);
 		~FrameTracker();
+
+		void Startup();
+		void Shutdown();
 
 		void BeginFrame();
 		void EndFrame();
@@ -52,7 +54,7 @@ namespace sy::vk
 		}
 
 	private:
-		const VulkanRHI& vulkanRHI;
+		VulkanContext& vulkanContext;
 		std::array<Frame, NumMaxInFlightFrames> frames;
 		size_t currentFrameIdx = 0;
 	};

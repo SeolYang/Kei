@@ -29,14 +29,15 @@ namespace sy::render
 {
 	class Mesh;
 	class SimpleRenderPass;
-
 	/** @todo Renderer to RenderContext? */
 	class Renderer final : public NonCopyable
 	{
 	public:
-		Renderer(const window::Window& window, vk::VulkanContext& vulkanContext,
-			vk::ResourceStateTracker& resStateTracker, HandleManager& handleManager);
+		Renderer(const window::Window& window, vk::VulkanContext& vulkanContext, HandleManager& handleManager);
 		~Renderer() override;
+
+		void Startup();
+		void Shutdown();
 
 		void Render();
 
@@ -49,8 +50,7 @@ namespace sy::render
 		vk::VulkanContext& vulkanContext;
 		HandleManager& handleManager;
 
-		vk::ResourceStateTracker& resStateTracker;
-		// std::unique_ptr<vk::ResourceStateTracker> resourceStateTracker;
+		std::unique_ptr<vk::ResourceStateTracker> resStateTracker;
 
 		std::unique_ptr<vk::ShaderModule> triVert;
 		std::unique_ptr<vk::ShaderModule> triFrag;

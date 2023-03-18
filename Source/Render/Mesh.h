@@ -16,7 +16,7 @@ namespace sy::render
 	{
 	public:
 		template <typename VertexType, typename IndexType = render::IndexType>
-		static std::unique_ptr<Mesh> Create(const std::string_view name, const vk::VulkanContext& vulkanContext,
+		static std::unique_ptr<Mesh> Create(const std::string_view name, vk::VulkanContext& vulkanContext,
 			const std::span<const VertexType> vertices,
 			const std::span<const IndexType> indices)
 		{

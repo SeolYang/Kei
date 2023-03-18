@@ -1,14 +1,13 @@
 #pragma once
 #include <PCH.h>
+#include <VK/VulkanWrapper.h>
 
 namespace sy::vk
 {
-	class VulkanRHI;
-
 	class ShaderModule : public VulkanWrapper<VkShaderModule>
 	{
 	public:
-		ShaderModule(std::string_view name, const VulkanRHI& vulkanRHI, std::string_view filePath,
+		ShaderModule(std::string_view name, VulkanContext& vulkanContext, std::string_view filePath,
 			VkShaderStageFlagBits shaderType, std::string_view entryPoint);
 		~ShaderModule() override = default;
 

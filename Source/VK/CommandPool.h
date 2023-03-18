@@ -1,12 +1,12 @@
 #pragma once
 #include <PCH.h>
+#include <VK/VulkanWrapper.h>
 
 namespace sy::vk
 {
 	class VulkanRHI;
 	class CommandBuffer;
 	class Fence;
-
 	class CommandPool : public VulkanWrapper<VkCommandPool>
 	{
 	public:
@@ -16,7 +16,7 @@ namespace sy::vk
 		};
 
 	public:
-		CommandPool(const VulkanRHI& vulkanRHI, EQueueType queueType);
+		CommandPool(VulkanContext& vulkanContext, EQueueType queueType);
 		~CommandPool() override = default;
 
 		ManagedCommandBuffer RequestCommandBuffer(std::string_view name);

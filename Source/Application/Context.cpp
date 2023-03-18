@@ -16,24 +16,26 @@
 #include <Asset/AssetConverter.h>
 #include <Game/World.h>
 #include <Game/GameContext.h>
-
-#include "VK/TextureBuilder.h"
+#include <VK/TextureBuilder.h>
 
 namespace sy::app
 {
-	Context::Context(const int argc, char** argv)
+	Context::Context(CommandLineParser& cmdLineParser, window::Window& window)
+		: cmdLineParser(cmdLineParser), window(window), timer(std::make_unique<Timer>()), handleManager(std::make_unique<HandleManager>()), vulkanContext(std::make_unique<vk::VulkanContext>(window)), renderer(std::make_unique<render::Renderer>(window, *vulkanContext, *handleManager))
 	{
-		Startup(argc, argv);
 	}
 
 	Context::~Context()
 	{
 	}
 
-	void Context::Startup(const int argc, char** argv)
+	void Context::Startup()
 	{
 		InitializeLogger();
-		InitializeCommandLineParser(argc, argv);
+		if (cmdLineParser.ShouldConvertAssets())
+		{
+			asset::ConvertAssets(cmdLineParser.GetAssetPath());
+		}
 
 		spdlog::info("Initializing SDL.");
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
@@ -41,20 +43,21 @@ namespace sy::app
 			spdlog::critical("Failed to initialize SDL!");
 		}
 
-		spdlog::info("Initializing Timer sub-context.");
-		timer = std::make_unique<Timer>();
-		spdlog::info("Initializing Window sub-context.");
-		window = std::make_unique<window::Window>("Test", Extent2D<uint32_t>{ 1280, 720 });
-		spdlog::info("Initializing Handle Manager.");
-		handleManager = std::make_unique<HandleManager>();
-		spdlog::info("Initializing Vulkan context.");
-		vulkanContext = std::make_unique<vk::VulkanContext>(*window);
-		spdlog::info("Initializing Resource State Tracker.");
-		resourceStateTracker = std::make_unique<vk::ResourceStateTracker>(*handleManager);
-		spdlog::info("Initializing Default engine resources.");
+		timer->Startup();
+		vulkanContext->Startup();
+		handleManager->Startup();
 		InitDefaultEngineResources();
-		spdlog::info("Initializing Renderer sub-context.");
-		renderer = std::make_unique<render::Renderer>(*window, *vulkanContext, *resourceStateTracker, *handleManager);
+		renderer->Startup();
+	}
+
+	void Context::Shutdown()
+	{
+		vulkanContext->GetRHI().WaitForDeviceIdle();
+
+		renderer->Shutdown();
+		handleManager->Shutdown();
+		vulkanContext->Shutdown();
+		timer->Shutdown();
 	}
 
 	void Context::InitializeLogger()
@@ -85,16 +88,6 @@ namespace sy::app
 		spdlog::info("Logger initialized: output : {}", logFilePathAnsi);
 	}
 
-	void Context::InitializeCommandLineParser(const int argc, char** argv)
-	{
-		spdlog::info("Initializing Command Line Parser sub-context.");
-		cmdLineParser = std::make_unique<CommandLineParser>(argc, argv);
-		if (cmdLineParser->ShouldConvertAssets())
-		{
-			asset::ConvertAssets(cmdLineParser->GetAssetPath());
-		}
-	}
-
 	void Context::InitDefaultEngineResources()
 	{
 		const std::array white{ 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
@@ -110,48 +103,36 @@ namespace sy::app
 		defaultWhiteTex.SetAlias(vk::DefaultWhiteTexture);
 
 		constexpr std::array<uint32_t, 4> black = { 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff };
-		auto defaultBlackTex = handleManager->Add(defaultTexBuilder.SetName("DefaultBlack").SetDataToTransfer(std::span{ white.data(), white.size() }).Build());
+		auto defaultBlackTex = handleManager->Add(
+			defaultTexBuilder
+				.SetName("DefaultBlack")
+				.SetDataToTransfer(std::span{ white.data(), white.size() })
+				.Build());
+
 		defaultBlackTex.SetAlias(vk::DefaultBlackTexture);
 
-		auto linearSampler = handleManager->Add<
-			vk::Sampler>(vk::SamplerBuilder{ *vulkanContext }.SetName(vk::LinearSamplerRepeat).Build());
+		auto linearSampler = handleManager->Add(
+			vk::SamplerBuilder{ *vulkanContext }
+				.SetName(vk::LinearSamplerRepeat)
+				.Build());
+
 		linearSampler.SetAlias(vk::LinearSamplerRepeat);
 
 		const auto defaultWhiteTexView = handleManager->Add<
-			vk::TextureView>(std::format("{}_View", vk::DefaultWhiteTexture), vulkanContext->GetRHI(),
+			vk::TextureView>(std::format("{}_View", vk::DefaultWhiteTexture), *vulkanContext,
 			*defaultWhiteTex, VK_IMAGE_VIEW_TYPE_2D);
 
 		auto& descriptorManager = vulkanContext->GetDescriptorManager();
-		auto defaultMaterial = handleManager->Add<render::Material>(handleManager->Add<
-																	vk::Descriptor>(descriptorManager.RequestDescriptor(*handleManager,
-			defaultWhiteTex,
-			defaultWhiteTexView,
-			linearSampler,
-			vk::ETextureState::AnyShaderReadSampledImage)));
+
+		auto defaultWhiteDescriptor = handleManager->Add<vk::Descriptor>(
+			descriptorManager.RequestDescriptor(*handleManager,
+				defaultWhiteTex,
+				defaultWhiteTexView,
+				linearSampler,
+				vk::ETextureState::AnyShaderReadSampledImage));
+
+		auto defaultMaterial = handleManager->Add<render::Material>(defaultWhiteDescriptor);
 		defaultMaterial.SetAlias(render::DefaultMaterial);
-	}
-
-	void Context::Cleanup()
-	{
-		vulkanContext->GetRHI().WaitForDeviceIdle();
-
-		spdlog::info("Clean-up Resource State Tracker.");
-		resourceStateTracker.reset();
-
-		spdlog::info("Clean-up Renderer sub-context.");
-		renderer.reset();
-
-		spdlog::info("Clean-up Handle Manager.");
-		handleManager.reset();
-
-		spdlog::info("Clean-up Vulkan context.");
-		vulkanContext.reset();
-
-		spdlog::info("Clean-up Window sub-context");
-		window.reset();
-
-		spdlog::info("Clean-up Command Line Parser sub-context");
-		cmdLineParser.reset();
 	}
 
 	void Context::Run()
@@ -181,7 +162,5 @@ namespace sy::app
 			timer->End();
 		}
 		spdlog::info("Main loop finished.");
-
-		Cleanup();
 	}
 } // namespace sy::app

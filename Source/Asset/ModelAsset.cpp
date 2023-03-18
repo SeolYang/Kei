@@ -71,7 +71,7 @@ namespace sy::asset
 
 	std::vector<component::StaticMeshComponent> LoadModel(const std::string& name, const fs::path& path,
 		HandleManager& handleManager,
-		const vk::VulkanContext& vulkanContext)
+		vk::VulkanContext& vulkanContext)
 	{
 		const auto pathStr = path.string();
 		const auto assetDataHandle = LoadOrCreateAssetData<render::Model>(path, handleManager);

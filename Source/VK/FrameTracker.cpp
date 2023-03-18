@@ -1,5 +1,6 @@
 #include <PCH.h>
 #include <VK/FrameTracker.h>
+#include <VK/VulkanContext.h>
 #include <VK/Fence.h>
 #include <VK/Semaphore.h>
 
@@ -7,28 +8,42 @@ namespace sy
 {
 	namespace vk
 	{
-		FrameTracker::FrameTracker(const VulkanRHI& vulkanRHI)
-			: vulkanRHI(vulkanRHI)
+		FrameTracker::FrameTracker(VulkanContext& vulkanContext)
+			: vulkanContext(vulkanContext)
 		{
-			for (size_t frameIdx = 0; frameIdx < NumMaxInFlightFrames; ++frameIdx)
-			{
-				frames[frameIdx] = {
-					.InFlightFrameIndex = frameIdx,
-					.RenderFence = std::make_unique<Fence>(std::format("Render Fence {}", frameIdx), vulkanRHI),
-					.UploadFence = std::make_unique<Fence>(std::format("Upload Fence {}", frameIdx), vulkanRHI, false),
-					.RenderSemaphore = std::make_unique<Semaphore>(std::format("Render Semaphore {}", frameIdx),
-						vulkanRHI),
-					.PresentSemaphore = std::make_unique<Semaphore>(std::format("Present Semaphore {}", frameIdx),
-						vulkanRHI),
-					.UploadSemaphore = std::make_unique<Semaphore>(std::format("Upload Semaphore {}", frameIdx),
-						vulkanRHI),
-				};
-			}
 		}
 
 		FrameTracker::~FrameTracker()
 		{
 			/* Empty */
+		}
+
+		void FrameTracker::Startup()
+		{
+			const auto& vulkanRHI = vulkanContext.GetRHI();
+			size_t frameIdx = 0;
+			for (auto& frame : frames)
+			{
+				frame.InFlightFrameIndex = frameIdx,
+				frame.RenderFence = std::make_unique<Fence>(std::format("Render Fence {}", frameIdx), vulkanContext);
+				frame.UploadFence = std::make_unique<Fence>(std::format("Upload Fence {}", frameIdx), vulkanContext, false);
+				frame.RenderSemaphore = std::make_unique<Semaphore>(std::format("Render Semaphore {}", frameIdx), vulkanContext);
+				frame.PresentSemaphore = std::make_unique<Semaphore>(std::format("Present Semaphore {}", frameIdx), vulkanContext);
+				frame.UploadSemaphore = std::make_unique<Semaphore>(std::format("Upload Semaphore {}", frameIdx), vulkanContext);
+				++frameIdx;
+			}
+		}
+
+		void FrameTracker::Shutdown()
+		{
+			for (auto& frame : frames)
+			{
+				frame.RenderFence.reset();
+				frame.UploadFence.reset();
+				frame.RenderSemaphore.reset();
+				frame.PresentSemaphore.reset();
+				frame.UploadSemaphore.reset();
+			}
 		}
 
 		void FrameTracker::BeginFrame()
@@ -77,5 +92,6 @@ namespace sy
 		{
 			return *frames[GetCurrentInFlightFrameIndex()].UploadSemaphore;
 		}
+
 	} // namespace vk
 } // namespace sy

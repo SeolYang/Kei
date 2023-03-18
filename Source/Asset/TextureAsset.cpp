@@ -36,7 +36,7 @@ namespace sy::asset
 	std::unique_ptr<vk::Texture> LoadTexture2DFromAsset(
 		const std::string_view name,
 		const AssetData<vk::Texture>& assetData,
-		const vk::VulkanContext& vulkanContext)
+		vk::VulkanContext& vulkanContext)
 	{
 		const auto& blob = assetData.GetBlob();
 		const auto metadata = QueryMetadata(assetData);
@@ -52,7 +52,7 @@ namespace sy::asset
 	Handle<vk::Texture> LoadTexture2DFromAsset(
 		const Handle<AssetData<vk::Texture>> assetDataHandle,
 		HandleManager& handleManager,
-		const vk::VulkanContext& vulkanContext)
+		vk::VulkanContext& vulkanContext)
 	{
 		if (!assetDataHandle)
 		{
@@ -73,7 +73,7 @@ namespace sy::asset
 	}
 
 	Handle<vk::Texture> LoadTexture2DFromAsset(const fs::path& path,
-		HandleManager& handleManager, const vk::VulkanContext& vulkanContext)
+		HandleManager& handleManager, vk::VulkanContext& vulkanContext)
 	{
 		return LoadTexture2DFromAsset(LoadOrCreateAssetData<vk::Texture>(path, handleManager), handleManager,
 			vulkanContext);

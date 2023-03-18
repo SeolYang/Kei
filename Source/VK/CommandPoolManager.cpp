@@ -8,15 +8,21 @@ namespace sy
 {
 	namespace vk
 	{
-		CommandPoolManager::CommandPoolManager(const VulkanRHI& vulkanRHI, const FrameTracker& frameTracker)
-			: vulkanRHI(vulkanRHI), frameTracker(frameTracker)
+		CommandPoolManager::CommandPoolManager(VulkanContext& vulkanContext, const FrameTracker& frameTracker)
+			: vulkanContext(vulkanContext), frameTracker(frameTracker)
 		{
 		}
 
 		CommandPoolManager::~CommandPoolManager()
 		{
-			spdlog::trace("Cleanup command pools...");
-			RWLock lock(cmdPoolMutex);
+		}
+
+		void CommandPoolManager::Startup()
+		{
+		}
+
+		void CommandPoolManager::Shutdown()
+		{
 			for (auto& cmdPoolVec : cmdPools)
 			{
 				cmdPoolVec.clear();
@@ -32,7 +38,7 @@ namespace sy
 				RWLock lock(cmdPoolMutex);
 				for (size_t inFlightFrameIdx = 0; inFlightFrameIdx < NumMaxInFlightFrames; ++inFlightFrameIdx)
 				{
-					auto* newCmdPool = new CommandPool(vulkanRHI, queueType);
+					auto* newCmdPool = new CommandPool(vulkanContext, queueType);
 					localCmdPools[queueType][inFlightFrameIdx] = newCmdPool;
 					cmdPools[inFlightFrameIdx].emplace_back(newCmdPool);
 				}
@@ -54,5 +60,6 @@ namespace sy
 		{
 			/* Empty */
 		}
+
 	} // namespace vk
 } // namespace sy

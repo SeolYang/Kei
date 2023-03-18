@@ -5,7 +5,6 @@ namespace sy::vk
 {
 	class ShaderModule;
 	class VertexInputBuilder;
-
 	class GraphicsPipelineBuilder
 	{
 	public:

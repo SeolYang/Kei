@@ -1,5 +1,6 @@
 #pragma once
 #include <PCH.h>
+#include <VK/VulkanWrapper.h>
 
 namespace sy::window
 {
@@ -8,13 +9,11 @@ namespace sy::window
 
 namespace sy::vk
 {
-	class VulkanRHI;
 	class Semaphore;
-
 	class Swapchain : public VulkanWrapper<VkSwapchainKHR>
 	{
 	public:
-		Swapchain(const window::Window& window, const VulkanRHI& vulkanRHI);
+		Swapchain(const window::Window& window, VulkanContext& vulkanContext);
 		~Swapchain() override = default;
 
 		void AcquireNext(const Semaphore& presentSemaphore);

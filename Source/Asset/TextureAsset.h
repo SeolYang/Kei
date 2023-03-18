@@ -42,6 +42,6 @@ namespace sy::asset
 	}
 
 	Handle<vk::Texture> LoadTexture2DFromAsset(const fs::path& path, HandleManager& handleManager,
-		const vk::VulkanContext& vulkanContext);
+		vk::VulkanContext& vulkanContext);
 	bool ConvertTexture2D(const fs::path& input);
 } // namespace sy::asset

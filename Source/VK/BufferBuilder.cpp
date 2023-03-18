@@ -22,7 +22,7 @@ namespace sy::vk
 		return std::make_unique<Buffer>(*this);
 	}
 
-	BufferBuilder BufferBuilder::UniformBufferTemplate(const VulkanContext& vulkanContext)
+	BufferBuilder BufferBuilder::UniformBufferTemplate(VulkanContext& vulkanContext)
 	{
 		return BufferBuilder{ vulkanContext }
 			.SetUsage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
@@ -30,7 +30,7 @@ namespace sy::vk
 			.SetTargetInitialState(EBufferState::General);
 	}
 
-	BufferBuilder BufferBuilder::StorageBufferTemplate(const VulkanContext& vulkanContext)
+	BufferBuilder BufferBuilder::StorageBufferTemplate(VulkanContext& vulkanContext)
 	{
 		return BufferBuilder{ vulkanContext }
 			.SetUsage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)
@@ -38,14 +38,14 @@ namespace sy::vk
 			.SetTargetInitialState(EBufferState::General);
 	}
 
-	BufferBuilder BufferBuilder::StagingBufferTemplate(const VulkanContext& vulkanContext)
+	BufferBuilder BufferBuilder::StagingBufferTemplate(VulkanContext& vulkanContext)
 	{
 		return BufferBuilder{ vulkanContext }
 			.SetUsage(VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
 			.SetMemoryUsage(VMA_MEMORY_USAGE_CPU_ONLY);
 	}
 
-	BufferBuilder BufferBuilder::VertexBufferTemplate(const VulkanContext& vulkanContext)
+	BufferBuilder BufferBuilder::VertexBufferTemplate(VulkanContext& vulkanContext)
 	{
 		return BufferBuilder{ vulkanContext }
 			.SetUsage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)
@@ -53,7 +53,7 @@ namespace sy::vk
 			.SetTargetInitialState(EBufferState::VertexBuffer);
 	}
 
-	BufferBuilder BufferBuilder::IndexBufferTemplate(const VulkanContext& vulkanContext)
+	BufferBuilder BufferBuilder::IndexBufferTemplate(VulkanContext& vulkanContext)
 	{
 		return BufferBuilder{ vulkanContext }
 			.SetUsage(VK_BUFFER_USAGE_INDEX_BUFFER_BIT)

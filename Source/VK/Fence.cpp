@@ -6,8 +6,8 @@ namespace sy
 {
 	namespace vk
 	{
-		Fence::Fence(const std::string_view name, const VulkanRHI& vulkanRHI, const bool bIsSignaled)
-			: VulkanWrapper<VkFence>(name, vulkanRHI, VK_OBJECT_TYPE_FENCE)
+		Fence::Fence(const std::string_view name, VulkanContext& vulkanContext, const bool bIsSignaled)
+			: VulkanWrapper<VkFence>(name, vulkanContext, VK_OBJECT_TYPE_FENCE)
 		{
 			const VkFenceCreateInfo createInfo{
 				.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
@@ -16,11 +16,11 @@ namespace sy
 			};
 
 			NativeHandle handle = VK_NULL_HANDLE;
-			VK_ASSERT(vkCreateFence(vulkanRHI.GetDevice(), &createInfo, nullptr, &handle), "Failed to create fence.");
+			VK_ASSERT(vkCreateFence(GetRHI().GetDevice(), &createInfo, nullptr, &handle), "Failed to create fence.");
 
 			UpdateHandle(
 				handle,
-				SY_VK_WRAPPER_DELETER(rhi) {
+				[handle](const VulkanRHI& rhi) {
 					vkDestroyFence(rhi.GetDevice(), handle, nullptr);
 				});
 		}

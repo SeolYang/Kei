@@ -5,11 +5,10 @@ namespace sy::vk
 {
 	class VulkanContext;
 	class Texture;
-
 	class TextureBuilder
 	{
 	public:
-		explicit TextureBuilder(const VulkanContext& vulkanContext)
+		explicit TextureBuilder(VulkanContext& vulkanContext)
 			: vulkanContext(vulkanContext)
 		{
 		}
@@ -132,13 +131,13 @@ namespace sy::vk
 		std::unique_ptr<Texture> Build() const;
 
 	public:
-		static TextureBuilder Texture2DShaderResourceTemplate(const VulkanContext& vulkanContext);
-		static TextureBuilder Texture2DRenderTargetTemplate(const VulkanContext& vulkanContext);
-		static TextureBuilder Texture2DDepthStencilTemplate(const VulkanContext& vulkanContext);
+		static TextureBuilder Texture2DShaderResourceTemplate(VulkanContext& vulkanContext);
+		static TextureBuilder Texture2DRenderTargetTemplate(VulkanContext& vulkanContext);
+		static TextureBuilder Texture2DDepthStencilTemplate(VulkanContext& vulkanContext);
 
 	private:
 		friend class Texture;
-		const VulkanContext& vulkanContext;
+		VulkanContext& vulkanContext;
 		std::string name = "Texture";
 		std::optional<VkImageType> type = std::nullopt;
 		std::optional<VkImageUsageFlags> usage = std::nullopt;

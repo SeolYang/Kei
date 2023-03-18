@@ -3,9 +3,8 @@
 
 namespace sy::vk
 {
-	class VulkanRHI;
+	class VulkanContext;
 	class PushConstantBuilder;
-
 	class PipelineLayoutCache : public NonCopyable
 	{
 	public:
@@ -31,14 +30,17 @@ namespace sy::vk
 		};
 
 	public:
-		explicit PipelineLayoutCache(const VulkanRHI& vulkanRHI);
+		explicit PipelineLayoutCache(VulkanContext& vulkanContext);
 		~PipelineLayoutCache() override;
+
+		void Startup();
+		void Shutdown();
 
 		VkPipelineLayout Request(std::span<VkDescriptorSetLayout> descriptorSetLayouts,
 			const PushConstantBuilder& pushConstantBuilder);
 
 	private:
-		const VulkanRHI& vulkanRHI;
+		VulkanContext& vulkanContext;
 		robin_hood::unordered_map<PipelineLayoutInfo, VkPipelineLayout, PipelineLayoutHash> cache;
 	};
 } // namespace sy::vk

@@ -16,7 +16,7 @@ namespace sy
 	namespace vk
 	{
 		Texture::Texture(const TextureBuilder& builder)
-			: VulkanWrapper(builder.name, builder.vulkanContext.GetRHI(), VK_OBJECT_TYPE_IMAGE)
+			: VulkanWrapper(builder.name, builder.vulkanContext, VK_OBJECT_TYPE_IMAGE)
 			, type(*builder.type)
 			, usage(*builder.usage | (builder.dataToTransfer.has_value() ? VK_IMAGE_USAGE_TRANSFER_DST_BIT : 0))
 			, format(builder.format)
@@ -65,7 +65,7 @@ namespace sy
 
 			UpdateHandle(
 				handle,
-				SY_VK_WRAPPER_DELETER(rhi) {
+				[handle, allocation = allocation](const VulkanRHI& rhi) {
 					vmaDestroyImage(rhi.GetAllocator(), handle, allocation);
 				});
 

@@ -5,11 +5,10 @@ namespace sy::vk
 {
 	class VulkanContext;
 	class Buffer;
-
 	class BufferBuilder
 	{
 	public:
-		explicit BufferBuilder(const VulkanContext& vulkanContext)
+		explicit BufferBuilder(VulkanContext& vulkanContext)
 			: vulkanContext(vulkanContext)
 		{
 		}
@@ -90,15 +89,15 @@ namespace sy::vk
 
 	public:
 		/** Template builders for less verbose. */
-		static BufferBuilder UniformBufferTemplate(const VulkanContext& vulkanContext);
-		static BufferBuilder StorageBufferTemplate(const VulkanContext& vulkanContext);
-		static BufferBuilder StagingBufferTemplate(const VulkanContext& vulkanContext);
-		static BufferBuilder VertexBufferTemplate(const VulkanContext& vulkanContext);
-		static BufferBuilder IndexBufferTemplate(const VulkanContext& vulkanContext);
+		static BufferBuilder UniformBufferTemplate(VulkanContext& vulkanContext);
+		static BufferBuilder StorageBufferTemplate(VulkanContext& vulkanContext);
+		static BufferBuilder StagingBufferTemplate(VulkanContext& vulkanContext);
+		static BufferBuilder VertexBufferTemplate(VulkanContext& vulkanContext);
+		static BufferBuilder IndexBufferTemplate(VulkanContext& vulkanContext);
 
 	private:
 		friend Buffer;
-		const VulkanContext& vulkanContext;
+		VulkanContext& vulkanContext;
 		std::string name = "Buffer";
 		size_t size = 1;
 		EBufferState targetInitialState = EBufferState::None;

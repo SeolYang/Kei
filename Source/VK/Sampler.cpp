@@ -8,7 +8,7 @@
 namespace sy::vk
 {
 	Sampler::Sampler(const SamplerBuilder& builder)
-		: VulkanWrapper<VkSampler>(builder.name, builder.vulkanContext.GetRHI(), VK_OBJECT_TYPE_SAMPLER)
+		: VulkanWrapper<VkSampler>(builder.name, builder.vulkanContext, VK_OBJECT_TYPE_SAMPLER)
 		, minFilter(builder.minFilter)
 		, magFilter(builder.magFilter)
 		, mipmapMode(builder.mipmapMode)
@@ -31,7 +31,7 @@ namespace sy::vk
 		VK_ASSERT(vkCreateSampler(GetRHI().GetDevice(), &samplerCreateInfo, nullptr, &handle), "Failed to create sampler {}.", builder.name);
 
 		UpdateHandle(
-			handle, SY_VK_WRAPPER_DELETER(rhi) {
+			handle, [handle](const VulkanRHI& rhi) {
 				vkDestroySampler(rhi.GetDevice(), handle, nullptr);
 			});
 	}

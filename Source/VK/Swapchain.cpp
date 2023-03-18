@@ -1,5 +1,6 @@
 #include <PCH.h>
 #include <Window/Window.h>
+#include <VK/VulkanContext.h>
 #include <VK/VulkanRHI.h>
 #include <VK/Swapchain.h>
 #include <Vk/Semaphore.h>
@@ -8,11 +9,12 @@ namespace sy
 {
 	namespace vk
 	{
-		Swapchain::Swapchain(const window::Window& window, const VulkanRHI& vulkanRHI)
-			: VulkanWrapper<VkSwapchainKHR>("Swapchain", vulkanRHI, VK_OBJECT_TYPE_SWAPCHAIN_KHR)
+		Swapchain::Swapchain(const window::Window& window, VulkanContext& vulkanContext)
+			: VulkanWrapper<VkSwapchainKHR>("Swapchain", vulkanContext, VK_OBJECT_TYPE_SWAPCHAIN_KHR)
 			, window(window)
 			, currentImageIdx(0)
 		{
+			const auto& vulkanRHI = vulkanContext.GetRHI();
 			vkb::SwapchainBuilder swapchainBuilder{
 				vulkanRHI.GetPhysicalDevice(),
 				vulkanRHI.GetDevice(),
@@ -37,7 +39,7 @@ namespace sy
 
 			const auto handle = vkbSwapchain.swapchain;
 			UpdateHandle(
-				handle, [=, imageViewsClone = std::vector{ imageViews }](const VulkanRHI& rhi) {
+				handle, [handle, imageViewsClone = std::vector{ imageViews }](const VulkanRHI& rhi) {
 					const auto device = rhi.GetDevice();
 					for (const auto imageView : imageViewsClone)
 					{

@@ -1,12 +1,12 @@
 #pragma once
 #include <PCH.h>
+#include <VK/VulkanWrapper.h>
 
 namespace sy::vk
 {
 	constexpr std::string_view LinearSamplerRepeat = "LinearSamplerRepeat";
 
 	class SamplerBuilder;
-
 	class Sampler : public VulkanWrapper<VkSampler>
 	{
 	public:

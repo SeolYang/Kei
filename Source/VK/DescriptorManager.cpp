@@ -1,5 +1,6 @@
 #include <PCH.h>
 #include <VK/DescriptorManager.h>
+#include <VK/VulkanContext.h>
 #include <VK/FrameTracker.h>
 #include <VK/VulkanRHI.h>
 #include <VK/Buffer.h>
@@ -11,8 +12,16 @@ namespace sy
 {
 	namespace vk
 	{
-		DescriptorManager::DescriptorManager(const vk::VulkanRHI& vulkanRHI, const FrameTracker& frameTracker)
-			: vulkanRHI(vulkanRHI), frameTracker(frameTracker)
+		DescriptorManager::DescriptorManager(VulkanContext& vulkanContext, const FrameTracker& frameTracker)
+			: vulkanContext(vulkanContext), frameTracker(frameTracker)
+		{
+		}
+
+		DescriptorManager::~DescriptorManager()
+		{
+		}
+
+		void DescriptorManager::Startup()
 		{
 			const auto poolSizeBuilder = DescriptorPoolSizeBuilder{}
 											 .AddDescriptors(vk::EDescriptorType::CombinedImageSampler, 1000)
@@ -77,6 +86,7 @@ namespace sy
 				.pBindings = bindings.data()
 			};
 
+			const auto& vulkanRHI = vulkanContext.GetRHI();
 			spdlog::trace("Creating Bindless descriptor set layout...");
 			VK_ASSERT(vkCreateDescriptorSetLayout(vulkanRHI.GetDevice(), &bindlessLayoutInfo, nullptr, &bindlessLayout),
 				"Failed to create bindless descriptor set layout.");
@@ -109,8 +119,9 @@ namespace sy
 			}
 		}
 
-		DescriptorManager::~DescriptorManager()
+		void DescriptorManager::Shutdown()
 		{
+			const auto& vulkanRHI = vulkanContext.GetRHI();
 			vkDestroyDescriptorPool(vulkanRHI.GetDevice(), descriptorPoolPackage.DescriptorPool, nullptr);
 			vkDestroyDescriptorSetLayout(vulkanRHI.GetDevice(), bindlessLayout, nullptr);
 		}
@@ -155,7 +166,7 @@ namespace sy
 
 				if (!combinedWriteDescriptorSets.empty())
 				{
-					vkUpdateDescriptorSets(vulkanRHI.GetDevice(),
+					vkUpdateDescriptorSets(vulkanContext.GetRHI().GetDevice(),
 						static_cast<uint32_t>(combinedWriteDescriptorSets.size()),
 						combinedWriteDescriptorSets.data(), 0, nullptr);
 					bufferWriteDescriptors.clear();
@@ -310,5 +321,6 @@ namespace sy
 
 			return RequestDescriptor(*texture, *view, *sampler, expectedState, bIsCombinedSampler);
 		}
+
 	} // namespace vk
 } // namespace sy

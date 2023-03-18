@@ -7,8 +7,8 @@ namespace sy
 {
 	namespace vk
 	{
-		CommandPool::CommandPool(const VulkanRHI& vulkanRHI, const EQueueType queueType)
-			: VulkanWrapper<VkCommandPool>("Unknown Pool", vulkanRHI, VK_OBJECT_TYPE_COMMAND_POOL)
+		CommandPool::CommandPool(VulkanContext& vulkanContext, const EQueueType queueType)
+			: VulkanWrapper<VkCommandPool>("Unknown Pool", vulkanContext, VK_OBJECT_TYPE_COMMAND_POOL)
 			, queueType(queueType)
 			, offsetPool(1, 16)
 		{
@@ -28,6 +28,7 @@ namespace sy
 					break;
 			}
 
+			const auto& vulkanRHI = GetRHI();
 			const auto queueFamilyIdx = vulkanRHI.GetQueueFamilyIndex(queueType);
 			const VkCommandPoolCreateInfo cmdPoolCreateInfo{
 				.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
@@ -41,7 +42,7 @@ namespace sy
 
 			UpdateHandle(
 				handle,
-				SY_VK_WRAPPER_DELETER(rhi) {
+				[handle](const VulkanRHI& rhi) {
 					vkDestroyCommandPool(rhi.GetDevice(), handle, nullptr);
 				});
 		}
@@ -53,7 +54,7 @@ namespace sy
 
 			if (allocatedSlot.Offset >= cmdBuffers.size())
 			{
-				cmdBuffers.emplace_back(std::make_unique<CommandBuffer>(name, GetRHI(), *this));
+				cmdBuffers.emplace_back(std::make_unique<CommandBuffer>(name, GetContext(), *this));
 			}
 
 			cmdBuffers[allocatedSlot.Offset]->Reset();

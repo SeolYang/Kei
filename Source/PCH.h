@@ -107,7 +107,6 @@
 
 /** Internal - Vulkan */
 #include <VK/VulkanTypes.h>
-#include <VK/VulkanWrapper.hpp>
 #include <VK/Synchronization.h>
 
 /** Internal - Math */
