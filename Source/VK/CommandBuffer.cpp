@@ -12,27 +12,26 @@ namespace sy
 	namespace vk
 	{
 		CommandBuffer::CommandBuffer(const std::string_view name, const VulkanRHI& vulkanRHI, const CommandPool& cmdPool)
-			: VulkanWrapper<VkCommandBuffer>(name, vulkanRHI, VK_OBJECT_TYPE_COMMAND_BUFFER,
-				VK_DESTROY_LAMBDA_SIGNATURE(VkCommandBuffer){})
+			: VulkanWrapper<VkCommandBuffer>(name, vulkanRHI, VK_OBJECT_TYPE_COMMAND_BUFFER)
 			, queueType(cmdPool.GetQueueType())
 		{
 			const VkCommandBufferAllocateInfo allocInfo{
 				.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
 				.pNext = nullptr,
-				.commandPool = cmdPool.GetNativeHandle(),
+				.commandPool = cmdPool.GetNative(),
 				.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
 				.commandBufferCount = 1
 			};
 
-			Native_t handle = VK_NULL_HANDLE;
+			NativeHandle handle = VK_NULL_HANDLE;
 			VK_ASSERT(vkAllocateCommandBuffers(vulkanRHI.GetDevice(), &allocInfo, &handle),
 				"Failed to creating command buffer.");
-			UpdateHandle(handle);
+			UpdateHandle(handle, SY_VK_WRAPPER_EMPTY_DELETER);
 		}
 
 		void CommandBuffer::Reset() const
 		{
-			vkResetCommandBuffer(GetNativeHandle(), 0);
+			vkResetCommandBuffer(GetNative(), 0);
 		}
 
 		void CommandBuffer::Begin() const
@@ -44,23 +43,23 @@ namespace sy
 				.pInheritanceInfo = nullptr
 			};
 
-			VK_ASSERT(vkBeginCommandBuffer(GetNativeHandle(), &beginInfo), "Faeild to begin command buffer {}.",
+			VK_ASSERT(vkBeginCommandBuffer(GetNative(), &beginInfo), "Faeild to begin command buffer {}.",
 				GetName());
 		}
 
 		void CommandBuffer::End() const
 		{
-			VK_ASSERT(vkEndCommandBuffer(GetNativeHandle()), "Failed to end command buffer {}.", GetName());
+			VK_ASSERT(vkEndCommandBuffer(GetNative()), "Failed to end command buffer {}.", GetName());
 		}
 
 		void CommandBuffer::BeginRendering(const VkRenderingInfo& renderingInfo) const
 		{
-			vkCmdBeginRendering(GetNativeHandle(), &renderingInfo);
+			vkCmdBeginRendering(GetNative(), &renderingInfo);
 		}
 
 		void CommandBuffer::EndRendering() const
 		{
-			vkCmdEndRendering(GetNativeHandle());
+			vkCmdEndRendering(GetNative());
 		}
 
 		void CommandBuffer::ChangeState(const EBufferState srcState, const EBufferState dstState,
@@ -77,7 +76,7 @@ namespace sy
 		void CommandBuffer::ChangeState(const EBufferState srcState, const EBufferState dstState,
 			const Buffer& buffer) const
 		{
-			ChangeState(srcState, dstState, buffer.GetNativeHandle(), 0, buffer.GetAlignedSize());
+			ChangeState(srcState, dstState, buffer.GetNative(), 0, buffer.GetAlignedSize());
 		}
 
 		void CommandBuffer::ChangeState(const ETextureState srcState, const ETextureState dstState,
@@ -98,7 +97,7 @@ namespace sy
 		void CommandBuffer::ChangeState(const ETextureState srcState, const ETextureState dstState,
 			const Texture& texture) const
 		{
-			ChangeState(srcState, dstState, texture.GetNativeHandle(), FormatToImageAspect(texture.GetFormat()),
+			ChangeState(srcState, dstState, texture.GetNative(), FormatToImageAspect(texture.GetFormat()),
 				texture.GetMipLevels(), 0, 1, 0);
 		}
 
@@ -119,7 +118,7 @@ namespace sy
 					dstAccess.PipelineStage, dstAccess.Access,
 					srcAccess.ImageLayout, dstAccess.ImageLayout,
 					VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED,
-					texture.GetNativeHandle(), VkImageSubresourceRange{ FormatToImageAspect(texture.GetFormat()), transition.SubResourceRange.MipLevel, transition.SubResourceRange.MipLevelCount, transition.SubResourceRange.ArrayLayer, transition.SubResourceRange.ArrayLayerCount });
+					texture.GetNative(), VkImageSubresourceRange{ FormatToImageAspect(texture.GetFormat()), transition.SubResourceRange.MipLevel, transition.SubResourceRange.MipLevelCount, transition.SubResourceRange.ArrayLayer, transition.SubResourceRange.ArrayLayerCount });
 			}
 
 			const std::vector<BufferStateTransition> bufferStateTransitions = resourceStateTracker.FlushBufferTransitions();
@@ -135,7 +134,7 @@ namespace sy
 					srcAccess.PipelineStage, srcAccess.Access,
 					dstAccess.PipelineStage, dstAccess.Access,
 					VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED,
-					buffer.GetNativeHandle(), 0, buffer.GetAlignedSize());
+					buffer.GetNative(), 0, buffer.GetAlignedSize());
 			}
 
 			PipelineBarrier({}, bufferBarriers, imageBarriers);
@@ -143,7 +142,7 @@ namespace sy
 
 		void CommandBuffer::BindPipeline(const Pipeline& pipeline) const
 		{
-			vkCmdBindPipeline(GetNativeHandle(), pipeline.GetBindPoint(), pipeline.GetNativeHandle());
+			vkCmdBindPipeline(GetNative(), pipeline.GetBindPoint(), pipeline.GetNative());
 		}
 
 		void CommandBuffer::BindDescriptorSet(VkDescriptorSet descriptorSet, const Pipeline& pipeline) const
@@ -151,7 +150,7 @@ namespace sy
 			const VkDescriptorSet descriptorSets[] = {
 				descriptorSet,
 			};
-			vkCmdBindDescriptorSets(GetNativeHandle(), pipeline.GetBindPoint(), pipeline.GetLayout(), 0, 1,
+			vkCmdBindDescriptorSets(GetNative(), pipeline.GetBindPoint(), pipeline.GetLayout(), 0, 1,
 				descriptorSets, 0, nullptr);
 		}
 
@@ -163,7 +162,7 @@ namespace sy
 			std::transform(buffers.begin(), buffers.end(),
 				handles.begin(),
 				[](const Buffer& buffer) {
-					return buffer.GetNativeHandle();
+					return buffer.GetNative();
 				});
 
 			BindVertexBuffers(firstBinding, handles, offsets);
@@ -172,44 +171,44 @@ namespace sy
 		void CommandBuffer::BindVertexBuffers(const uint32_t firstBinding, const std::span<VkBuffer> buffers,
 			const std::span<size_t> offsets) const
 		{
-			vkCmdBindVertexBuffers(GetNativeHandle(), firstBinding, static_cast<uint32_t>(buffers.size()),
+			vkCmdBindVertexBuffers(GetNative(), firstBinding, static_cast<uint32_t>(buffers.size()),
 				buffers.data(), offsets.data());
 		}
 
 		void CommandBuffer::BindIndexBuffer(const Buffer& indexBuffer, const size_t offset) const
 		{
-			BindIndexBuffer(indexBuffer.GetNativeHandle(), offset);
+			BindIndexBuffer(indexBuffer.GetNative(), offset);
 		}
 
 		void CommandBuffer::BindIndexBuffer(const VkBuffer indexBuffer, const size_t offset) const
 		{
-			vkCmdBindIndexBuffer(GetNativeHandle(), indexBuffer, offset, VK_INDEX_TYPE_UINT32);
+			vkCmdBindIndexBuffer(GetNative(), indexBuffer, offset, VK_INDEX_TYPE_UINT32);
 		}
 
 		void CommandBuffer::PushConstants(const Pipeline& pipeline, const VkShaderStageFlags shaderStageFlags,
 			const uint32_t offset,
 			const uint32_t size, const void* values) const
 		{
-			vkCmdPushConstants(GetNativeHandle(), pipeline.GetLayout(), shaderStageFlags, offset, size, values);
+			vkCmdPushConstants(GetNative(), pipeline.GetLayout(), shaderStageFlags, offset, size, values);
 		}
 
 		void CommandBuffer::Draw(const uint32_t vertexCount, const uint32_t instanceCount, const uint32_t firstVertex,
 			const uint32_t firstInstance) const
 		{
-			vkCmdDraw(GetNativeHandle(), vertexCount, instanceCount, firstVertex, firstInstance);
+			vkCmdDraw(GetNative(), vertexCount, instanceCount, firstVertex, firstInstance);
 		}
 
 		void CommandBuffer::DrawIndexed(const uint32_t indexCount, const uint32_t instanceCount,
 			const uint32_t firstIndex,
 			const int32_t vertexOffset, const uint32_t firstInstance) const
 		{
-			vkCmdDrawIndexed(GetNativeHandle(), indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+			vkCmdDrawIndexed(GetNative(), indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 		}
 
 		void CommandBuffer::CopyBufferToImage(const Buffer& srcBuffer, const Texture& dstTexture,
 			const std::span<VkBufferImageCopy> regions) const
 		{
-			vkCmdCopyBufferToImage(GetNativeHandle(), srcBuffer.GetNativeHandle(), dstTexture.GetNativeHandle(),
+			vkCmdCopyBufferToImage(GetNative(), srcBuffer.GetNative(), dstTexture.GetNative(),
 				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, static_cast<uint32_t>(regions.size()),
 				regions.data());
 		}
@@ -242,7 +241,7 @@ namespace sy
 				.size = sizeofData
 			};
 
-			vkCmdCopyBuffer(GetNativeHandle(), srcBuffer.GetNativeHandle(), dstBuffer.GetNativeHandle(), 1,
+			vkCmdCopyBuffer(GetNative(), srcBuffer.GetNative(), dstBuffer.GetNative(), 1,
 				&bufferCopy);
 		}
 
@@ -317,7 +316,7 @@ namespace sy
 				.pImageMemoryBarriers = imageMemoryBarriers.data()
 			};
 
-			vkCmdPipelineBarrier2(GetNativeHandle(), &dependencyInfo);
+			vkCmdPipelineBarrier2(GetNative(), &dependencyInfo);
 		}
 	} // namespace vk
 } // namespace sy

@@ -36,9 +36,10 @@ namespace sy
 
 			std::vector<VkDescriptorBindingFlags> bindingFlags;
 			bindingFlags.resize(nativePoolSizes.size());
-			std::fill(bindingFlags.begin(), bindingFlags.end(),
-				VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT_EXT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT);
-			bindingFlags.back() |= VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT_EXT;
+
+			constexpr auto flags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT_EXT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT;
+			std::fill(bindingFlags.begin(), bindingFlags.end(), flags);
+			bindingFlags.back() = (flags | VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT_EXT);
 
 			std::vector<VkDescriptorSetLayoutBinding> bindings;
 			bindings.resize(nativePoolSizes.size());
@@ -260,8 +261,8 @@ namespace sy
 
 				const auto [pipelineStage, accessFlag, layout] = QueryAccessPattern(expectedState);
 				const VkDescriptorImageInfo descriptorImageInfo{
-					.sampler = sampler.GetNativeHandle(),
-					.imageView = view.GetNativeHandle(),
+					.sampler = sampler.GetNative(),
+					.imageView = view.GetNative(),
 					.imageLayout = layout
 				};
 				imageInfos.emplace_back(descriptorImageInfo);

@@ -16,8 +16,7 @@ namespace sy
 	namespace vk
 	{
 		Texture::Texture(const TextureBuilder& builder)
-			: VulkanWrapper(builder.name, builder.vulkanContext.GetRHI(), VK_OBJECT_TYPE_IMAGE,
-				VK_DESTROY_LAMBDA_SIGNATURE(VkImage){})
+			: VulkanWrapper(builder.name, builder.vulkanContext.GetRHI(), VK_OBJECT_TYPE_IMAGE)
 			, type(*builder.type)
 			, usage(*builder.usage | (builder.dataToTransfer.has_value() ? VK_IMAGE_USAGE_TRANSFER_DST_BIT : 0))
 			, format(builder.format)
@@ -57,11 +56,18 @@ namespace sy
 
 			const auto& vulkanContext = builder.vulkanContext;
 			const auto& vulkanRHI = vulkanContext.GetRHI();
-			const auto allocator = vulkanRHI.GetAllocator();
-			Native_t handle = VK_NULL_HANDLE;
-			VK_ASSERT(vmaCreateImage(allocator, &imageCreateInfo, &allocationCreateInfo, &handle, &allocation, nullptr),
+			NativeHandle handle = VK_NULL_HANDLE;
+			VK_ASSERT(vmaCreateImage(vulkanRHI.GetAllocator(),
+						  &imageCreateInfo, &allocationCreateInfo,
+						  &handle, &allocation,
+						  nullptr),
 				"Failed to create image {}.", builder.name);
-			UpdateHandle(handle);
+
+			UpdateHandle(
+				handle,
+				SY_VK_WRAPPER_DELETER(rhi) {
+					vmaDestroyImage(rhi.GetAllocator(), handle, allocation);
+				});
 
 			const bool bRequiredDataTransfer = builder.dataToTransfer.has_value();
 			const bool bRequiredStateChange = initialState != ETextureState::None;
@@ -104,16 +110,6 @@ namespace sy
 				cmdBuffer->End();
 
 				vulkanRHI.SubmitImmediateTo(*cmdBuffer);
-			}
-		}
-
-		Texture::~Texture()
-		{
-			if (allocation != VK_NULL_HANDLE)
-			{
-				const auto& vulkanRHI = GetRHI();
-				const auto handle = GetNativeHandle();
-				vmaDestroyImage(vulkanRHI.GetAllocator(), handle, allocation);
 			}
 		}
 	} // namespace vk

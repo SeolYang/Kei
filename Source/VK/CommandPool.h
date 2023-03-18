@@ -17,7 +17,7 @@ namespace sy::vk
 
 	public:
 		CommandPool(const VulkanRHI& vulkanRHI, EQueueType queueType);
-		virtual ~CommandPool() override = default;
+		~CommandPool() override = default;
 
 		ManagedCommandBuffer RequestCommandBuffer(std::string_view name);
 

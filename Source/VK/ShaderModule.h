@@ -10,7 +10,7 @@ namespace sy::vk
 	public:
 		ShaderModule(std::string_view name, const VulkanRHI& vulkanRHI, std::string_view filePath,
 			VkShaderStageFlagBits shaderType, std::string_view entryPoint);
-		virtual ~ShaderModule() override = default;
+		~ShaderModule() override = default;
 
 		[[nodiscard]] auto GetShaderType() const
 		{

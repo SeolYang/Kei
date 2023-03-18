@@ -15,7 +15,7 @@ namespace sy::vk
 	{
 	public:
 		explicit Texture(const TextureBuilder& builder);
-		~Texture() override;
+		~Texture() override = default;
 
 		[[nodiscard]] auto GetImageType() const
 		{

@@ -100,7 +100,7 @@ namespace sy
 			shaderStages.emplace_back(
 				VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
 				nullptr, 0,
-				shaderModule.GetShaderType(), shaderModule.GetNativeHandle(),
+				shaderModule.GetShaderType(), shaderModule.GetNative(),
 				shaderModule.GetEntryPoint().data(),
 				nullptr);
 
@@ -448,7 +448,7 @@ namespace sy
 				"Shader is not a type of compute shader.");
 			shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 			shaderStage.pNext = nullptr;
-			shaderStage.module = shaderModule.GetNativeHandle();
+			shaderStage.module = shaderModule.GetNative();
 			shaderStage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
 			return *this;
 		}

@@ -7,10 +7,7 @@ namespace sy::vk
 {
 	TextureView::TextureView(const std::string_view name, const VulkanRHI& vulkanRHI, const Texture& texture,
 		const VkImageViewType viewType, const TextureSubResourceRange subResourceRange)
-		: VulkanWrapper<VkImageView>(
-			name, vulkanRHI, VK_OBJECT_TYPE_IMAGE_VIEW, VK_DESTROY_LAMBDA_SIGNATURE(VkImageView) {
-				vkDestroyImageView(vulkanRHI.GetDevice(), handle, nullptr);
-			})
+		: VulkanWrapper<VkImageView>(name, vulkanRHI, VK_OBJECT_TYPE_IMAGE_VIEW)
 		, viewType(viewType)
 		, subResourceRange(subResourceRange)
 	{
@@ -20,7 +17,7 @@ namespace sy::vk
 			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 			.pNext = nullptr,
 			.flags = 0,
-			.image = texture.GetNativeHandle(),
+			.image = texture.GetNative(),
 			.viewType = viewType,
 			.format = format,
 			.subresourceRange = VkImageSubresourceRange{
@@ -31,10 +28,14 @@ namespace sy::vk
 				.layerCount = subResourceRange.ArrayLayerCount }
 		};
 
-		Native_t handle = VK_NULL_HANDLE;
+		NativeHandle handle = VK_NULL_HANDLE;
 		VK_ASSERT(vkCreateImageView(vulkanRHI.GetDevice(), &viewCreateInfo, nullptr, &handle),
 			"Failed to create image view {}.", name);
-		UpdateHandle(handle);
+
+		UpdateHandle(
+			handle, SY_VK_WRAPPER_DELETER(rhi) {
+				vkDestroyImageView(rhi.GetDevice(), handle, nullptr);
+			});
 	}
 
 	TextureView::TextureView(const std::string_view name, const VulkanRHI& vulkanRHI, const Texture& texture,

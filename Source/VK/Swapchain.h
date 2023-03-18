@@ -15,7 +15,7 @@ namespace sy::vk
 	{
 	public:
 		Swapchain(const window::Window& window, const VulkanRHI& vulkanRHI);
-		virtual ~Swapchain() override;
+		~Swapchain() override = default;
 
 		void AcquireNext(const Semaphore& presentSemaphore);
 
@@ -49,10 +49,10 @@ namespace sy::vk
 
 	private:
 		const window::Window& window;
-		std::vector<VkImage> images;
-		std::vector<VkImageView> imageViews;
-		VkFormat format;
+		std::vector<VkImage> images = {};
+		std::vector<VkImageView> imageViews = {};
+		VkFormat format = VK_FORMAT_UNDEFINED;
 
-		uint32_t currentImageIdx;
+		uint32_t currentImageIdx = 0;
 	};
 } // namespace sy::vk

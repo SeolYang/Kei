@@ -8,11 +8,7 @@ namespace sy
 	namespace vk
 	{
 		CommandPool::CommandPool(const VulkanRHI& vulkanRHI, const EQueueType queueType)
-			: VulkanWrapper<VkCommandPool>(
-				"Unknown Pool", vulkanRHI, VK_OBJECT_TYPE_COMMAND_POOL,
-				VK_DESTROY_LAMBDA_SIGNATURE(VkCommandPool) {
-					vkDestroyCommandPool(vulkanRHI.GetDevice(), handle, nullptr);
-				})
+			: VulkanWrapper<VkCommandPool>("Unknown Pool", vulkanRHI, VK_OBJECT_TYPE_COMMAND_POOL)
 			, queueType(queueType)
 			, offsetPool(1, 16)
 		{
@@ -40,16 +36,14 @@ namespace sy
 				.queueFamilyIndex = queueFamilyIdx
 			};
 
-			const size_t threadId =
-				std::hash<std::thread::id>{}(std::this_thread::get_id());
-			// spdlog::trace("Creating command pool for thread {} and queue family {};
-			// Dependent on In-flight frames {}/{}.", threadId, queueFamilyIdx,
-			// (inFlightFrameIdx + 1), NumMaxInFlightFrames);
-			Native_t handle = VK_NULL_HANDLE;
-			VK_ASSERT(vkCreateCommandPool(vulkanRHI.GetDevice(), &cmdPoolCreateInfo,
-						  nullptr, &handle),
-				"Failed to create vulkan command queue from create info.");
-			UpdateHandle(handle);
+			NativeHandle handle = VK_NULL_HANDLE;
+			VK_ASSERT(vkCreateCommandPool(vulkanRHI.GetDevice(), &cmdPoolCreateInfo, nullptr, &handle), "Failed to create vulkan command queue from create info.");
+
+			UpdateHandle(
+				handle,
+				SY_VK_WRAPPER_DELETER(rhi) {
+					vkDestroyCommandPool(rhi.GetDevice(), handle, nullptr);
+				});
 		}
 
 		ManagedCommandBuffer CommandPool::RequestCommandBuffer(std::string_view name)
@@ -59,8 +53,7 @@ namespace sy
 
 			if (allocatedSlot.Offset >= cmdBuffers.size())
 			{
-				cmdBuffers.emplace_back(
-					std::make_unique<CommandBuffer>(name, GetRHI(), *this));
+				cmdBuffers.emplace_back(std::make_unique<CommandBuffer>(name, GetRHI(), *this));
 			}
 
 			cmdBuffers[allocatedSlot.Offset]->Reset();
@@ -75,9 +68,7 @@ namespace sy
 		void CommandPool::Reset() const
 		{
 			const auto& vulkanRHI = GetRHI();
-			const auto handle = GetNativeHandle();
-			vkResetCommandPool(vulkanRHI.GetDevice(), handle,
-				VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
+			vkResetCommandPool(vulkanRHI.GetDevice(), GetNative(), VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
 		}
 
 		void CommandPool::BeginFrame()
@@ -87,6 +78,7 @@ namespace sy
 				offsetPool.Deallocate(deallocation.slot);
 			}
 			pendingDeallocations.clear();
+
 			Reset();
 		}
 	} // namespace vk

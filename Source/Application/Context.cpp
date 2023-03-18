@@ -28,7 +28,6 @@ namespace sy::app
 
 	Context::~Context()
 	{
-		Cleanup();
 	}
 
 	void Context::Startup(const int argc, char** argv)
@@ -136,14 +135,14 @@ namespace sy::app
 	{
 		vulkanContext->GetRHI().WaitForDeviceIdle();
 
-		spdlog::info("Clean-up Handle Manager.");
-		handleManager.reset();
+		spdlog::info("Clean-up Resource State Tracker.");
+		resourceStateTracker.reset();
 
 		spdlog::info("Clean-up Renderer sub-context.");
 		renderer.reset();
 
-		spdlog::info("Clean-up Resource State Tracker.");
-		resourceStateTracker.reset();
+		spdlog::info("Clean-up Handle Manager.");
+		handleManager.reset();
 
 		spdlog::info("Clean-up Vulkan context.");
 		vulkanContext.reset();
@@ -151,7 +150,7 @@ namespace sy::app
 		spdlog::info("Clean-up Window sub-context");
 		window.reset();
 
-		spdlog::info("Clean-up Cmd Line Parser sub-context");
+		spdlog::info("Clean-up Command Line Parser sub-context");
 		cmdLineParser.reset();
 	}
 
@@ -182,5 +181,7 @@ namespace sy::app
 			timer->End();
 		}
 		spdlog::info("Main loop finished.");
+
+		Cleanup();
 	}
 } // namespace sy::app

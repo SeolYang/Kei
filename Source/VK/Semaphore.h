@@ -9,6 +9,6 @@ namespace sy::vk
 	{
 	public:
 		Semaphore(std::string_view name, const VulkanRHI& vulkanRHI);
-		virtual ~Semaphore() = default;
+		~Semaphore() = default;
 	};
 } // namespace sy::vk

@@ -9,7 +9,7 @@ namespace sy::vk
 	{
 	public:
 		explicit Buffer(const BufferBuilder& builder);
-		virtual ~Buffer() override;
+		~Buffer() override = default;
 
 		[[nodiscard]] auto GetAlignedSize() const
 		{
@@ -33,7 +33,7 @@ namespace sy::vk
 
 		[[nodiscard]] auto GetDescriptorInfo(const size_t offset = 0) const
 		{
-			return VkDescriptorBufferInfo{ GetNativeHandle(), offset, GetAlignedSize() };
+			return VkDescriptorBufferInfo{ GetNative(), offset, GetAlignedSize() };
 		}
 
 		[[nodiscard]] const VmaAllocation& GetAllocation() const

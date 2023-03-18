@@ -70,12 +70,12 @@ namespace sy
 			const auto queue = GetQueue(queueType);
 			SY_ASSERT(queue != VK_NULL_HANDLE, "Invalid queue submission request.");
 
-			VK_ASSERT(vkQueueSubmit(queue, 1, &submitInfo, fence.GetNativeHandle()), "Failed to submit to queue.");
+			VK_ASSERT(vkQueueSubmit(queue, 1, &submitInfo, fence.GetNative()), "Failed to submit to queue.");
 		}
 
 		void VulkanRHI::SubmitTo(const CommandBuffer& cmdBuffer, const Fence& fence) const
 		{
-			const auto cmdBufferHandle = cmdBuffer.GetNativeHandle();
+			const auto cmdBufferHandle = cmdBuffer.GetNative();
 			const VkSubmitInfo submitInfo{
 				.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
 				.pNext = nullptr,
@@ -146,8 +146,8 @@ namespace sy
 		void VulkanRHI::Present(const Swapchain& swapchain, const Semaphore& waitSemaphore) const
 		{
 			const auto swapchainImageIdx = swapchain.GetCurrentImageIndex();
-			const auto waitSemaphoreNative = waitSemaphore.GetNativeHandle();
-			const auto swapchainNative = swapchain.GetNativeHandle();
+			const auto waitSemaphoreNative = waitSemaphore.GetNative();
+			const auto swapchainNative = swapchain.GetNative();
 			const VkPresentInfoKHR presentInfo{
 				.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
 				.pNext = nullptr,

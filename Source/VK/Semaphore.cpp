@@ -7,11 +7,7 @@ namespace sy
 	namespace vk
 	{
 		Semaphore::Semaphore(const std::string_view name, const VulkanRHI& vulkanRHI)
-			: VulkanWrapper<VkSemaphore>(
-				name, vulkanRHI, VK_OBJECT_TYPE_SEMAPHORE,
-				VK_DESTROY_LAMBDA_SIGNATURE(VkSemaphore) {
-					vkDestroySemaphore(vulkanRHI.GetDevice(), handle, nullptr);
-				})
+			: VulkanWrapper<VkSemaphore>(name, vulkanRHI, VK_OBJECT_TYPE_SEMAPHORE)
 		{
 			const VkSemaphoreCreateInfo createInfo{
 				.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
@@ -19,9 +15,13 @@ namespace sy
 				.flags = 0
 			};
 
-			Native_t handle = VK_NULL_HANDLE;
+			NativeHandle handle = VK_NULL_HANDLE;
 			vkCreateSemaphore(vulkanRHI.GetDevice(), &createInfo, nullptr, &handle);
-			UpdateHandle(handle);
+
+			UpdateHandle(
+				handle, SY_VK_WRAPPER_DELETER(rhi) {
+					vkDestroySemaphore(rhi.GetDevice(), handle, nullptr);
+				});
 		}
 	} // namespace vk
 } // namespace sy

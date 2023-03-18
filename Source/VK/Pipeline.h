@@ -13,6 +13,7 @@ namespace sy::vk
 	public:
 		Pipeline(std::string_view name, const VulkanRHI& vulkanRHI, const GraphicsPipelineBuilder& builder);
 		Pipeline(std::string_view name, const VulkanRHI& vulkanRHI, const ComputePipelineBuilder& builder);
+		~Pipeline() override = default;
 
 		[[nodiscard]] auto GetPipelineType() const
 		{

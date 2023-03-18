@@ -9,7 +9,7 @@ namespace sy::vk
 	{
 	public:
 		Fence(std::string_view name, const VulkanRHI& vulkanRHI, bool bIsSignaled = true);
-		virtual ~Fence() override = default;
+		~Fence() override = default;
 
 		void Wait() const;
 		void Reset() const;

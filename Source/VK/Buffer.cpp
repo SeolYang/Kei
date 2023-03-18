@@ -33,10 +33,8 @@ namespace sy
 		}
 
 		Buffer::Buffer(const BufferBuilder& builder)
-			: VulkanWrapper(builder.name, builder.vulkanContext.GetRHI(),
-				VK_OBJECT_TYPE_BUFFER)
-			, alignedSize(CalculateAlignedBufferSize(builder.vulkanContext,
-				  builder.size, *builder.usage))
+			: VulkanWrapper(builder.name, builder.vulkanContext.GetRHI(), VK_OBJECT_TYPE_BUFFER)
+			, alignedSize(CalculateAlignedBufferSize(builder.vulkanContext, builder.size, *builder.usage))
 			, usage(*builder.usage | (builder.dataToTransfer.has_value() ? VK_BUFFER_USAGE_TRANSFER_DST_BIT : 0))
 			, memoryUsage(*builder.memoryUsage)
 			, initialState(builder.targetInitialState)
@@ -56,12 +54,17 @@ namespace sy
 
 			const auto& vulkanContext = builder.vulkanContext;
 			const auto& vulkanRHI = vulkanContext.GetRHI();
-			Native_t handle = VK_NULL_HANDLE;
+
+			NativeHandle handle = VK_NULL_HANDLE;
 			VK_ASSERT(
-				vmaCreateBuffer(vulkanRHI.GetAllocator(), &createInfo,
-					&allocationCreateInfo, &handle, &allocation, nullptr),
+				vmaCreateBuffer(vulkanRHI.GetAllocator(), &createInfo, &allocationCreateInfo, &handle, &allocation, nullptr),
 				"Failed to create buffer {}.", builder.name);
-			UpdateHandle(handle);
+
+			UpdateHandle(
+				handle,
+				SY_VK_WRAPPER_DELETER(rhi) {
+					vmaDestroyBuffer(rhi.GetAllocator(), handle, allocation);
+				});
 
 			const bool bRequiredDataTransfer = builder.dataToTransfer.has_value();
 			const bool bRequiredStateChange = initialState != EBufferState::None;
@@ -100,12 +103,6 @@ namespace sy
 
 				vulkanRHI.SubmitImmediateTo(*cmdBuffer);
 			}
-		}
-
-		Buffer::~Buffer()
-		{
-			const VulkanRHI& context = GetRHI();
-			vmaDestroyBuffer(context.GetAllocator(), GetNativeHandle(), allocation);
 		}
 	} // namespace vk
 } // namespace sy

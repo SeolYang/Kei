@@ -80,6 +80,7 @@ namespace sy::render
 	Renderer::~Renderer()
 	{
 		/* Empty */
+		depthStencil.reset();
 	}
 
 	void Renderer::Render()

@@ -15,7 +15,7 @@ namespace sy::vk
 	{
 	public:
 		CommandBuffer(std::string_view name, const VulkanRHI& vulkanRHI, const CommandPool& cmdPool);
-		virtual ~CommandBuffer() override = default;
+		~CommandBuffer() override = default;
 
 		[[nodiscard]] EQueueType GetQueueType() const
 		{
