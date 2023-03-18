@@ -22,6 +22,125 @@ namespace sy
 		{
 		}
 
+		void VulkanRHI::Startup()
+		{
+			spdlog::info("Startup Vulkan RHI.");
+			volkInitialize();
+
+			vkb::InstanceBuilder instanceBuilder;
+			auto instanceBuilderRes = instanceBuilder.set_app_name(window.GetTitle().data())
+#ifdef _DEBUG
+										  .request_validation_layers()
+										  .use_default_debug_messenger()
+#endif
+										  .require_api_version(1, 3, 0)
+										  .build();
+
+			const auto vkbInstance = instanceBuilderRes.value();
+			instance = vkbInstance.instance;
+			debugMessenger = vkbInstance.debug_messenger;
+
+			volkLoadInstance(instance);
+
+			SDL_Vulkan_CreateSurface(&window.GetSDLWindow(), instance, &surface);
+
+			vkb::PhysicalDeviceSelector physicalDeviceSelector{ vkbInstance };
+			auto vkbPhysicalDevice = physicalDeviceSelector.set_minimum_version(1, 3)
+										 .set_surface(surface)
+										 .add_required_extension(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME)
+										 .add_required_extension(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
+										 .add_required_extension(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME)
+										 .add_required_extension(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME)
+										 .select()
+										 .value();
+
+			physicalDevice = vkbPhysicalDevice.physical_device;
+			gpuProperties = vkbPhysicalDevice.properties;
+			gpuName = gpuProperties.deviceName;
+			spdlog::trace("\n----------- GPU Properties -----------\n* Device Name: {}\n* GPU Vendor ID: {}\n* API Version: {}\n* Driver Version: {}\n* Device ID: {}\n* Max Bound Descriptor Sets: {}\n* Min Uniform Buffer Offset Alignment: {}\n* Min Storage Buffer Offset Alignment: {}\n* Max Frame Buffer Extent: {}x{}\n* Max Memory Allocation Count: {}\n* Max Sampler Allocation Count: {}\n",
+				gpuName,
+				gpuProperties.vendorID,
+				gpuProperties.apiVersion,
+				gpuProperties.driverVersion,
+				gpuProperties.deviceID,
+				gpuProperties.limits.maxBoundDescriptorSets,
+				gpuProperties.limits.minUniformBufferOffsetAlignment,
+				gpuProperties.limits.minStorageBufferOffsetAlignment,
+				gpuProperties.limits.maxFramebufferWidth,
+				gpuProperties.limits.maxFramebufferHeight,
+				gpuProperties.limits.maxMemoryAllocationCount,
+				gpuProperties.limits.maxSamplerAllocationCount);
+
+			vkb::DeviceBuilder deviceBuilder{ vkbPhysicalDevice };
+			VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures{
+				.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
+				.pNext = nullptr,
+				.dynamicRendering = VK_TRUE
+			};
+
+			VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures{
+				.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES,
+				.pNext = nullptr,
+				.descriptorBindingUniformBufferUpdateAfterBind = VK_TRUE,
+				.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE,
+				.descriptorBindingStorageImageUpdateAfterBind = VK_TRUE,
+				.descriptorBindingStorageBufferUpdateAfterBind = VK_TRUE,
+				.descriptorBindingPartiallyBound = VK_TRUE,
+				.descriptorBindingVariableDescriptorCount = VK_TRUE,
+				.runtimeDescriptorArray = VK_TRUE,
+			};
+
+			VkPhysicalDeviceSynchronization2Features synchronization2Features{
+				.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES,
+				.pNext = nullptr,
+				.synchronization2 = true
+			};
+
+			auto vkbDeviceRes =
+				deviceBuilder.add_pNext(&dynamicRenderingFeatures)
+					.add_pNext(&descriptorIndexingFeatures)
+					.add_pNext(&synchronization2Features)
+					.build();
+			SY_ASSERT(vkbDeviceRes.has_value(), "Failed to create device using GPU {}.", gpuName);
+			auto& vkbDevice = vkbDeviceRes.value();
+			device = vkbDevice.device;
+			spdlog::trace("Succeed to create logical device using GPU {}.", gpuName);
+
+			const VmaVulkanFunctions vkFunctions{
+				.vkGetInstanceProcAddr = vkGetInstanceProcAddr,
+				.vkGetDeviceProcAddr = vkGetDeviceProcAddr
+			};
+
+			const VmaAllocatorCreateInfo allocatorInfo{
+				.physicalDevice = physicalDevice,
+				.device = device,
+				.pVulkanFunctions = &vkFunctions,
+				.instance = instance,
+			};
+			VK_ASSERT(vmaCreateAllocator(&allocatorInfo, &allocator),
+				"Failed to create vulkan memory allocator instance.");
+
+			InitQueues(vkbDevice);
+		}
+
+		void VulkanRHI::Shutdown()
+		{
+			spdlog::info("Shutdown Vulkan RHI.");
+			WaitAllQueuesForIdle();
+			{
+				vmaDestroyAllocator(allocator);
+				allocator = VK_NULL_HANDLE;
+				vkDestroyDevice(device, nullptr);
+				device = VK_NULL_HANDLE;
+				vkDestroySurfaceKHR(instance, surface, nullptr);
+				surface = VK_NULL_HANDLE;
+				vkb::destroy_debug_utils_messenger(instance, debugMessenger, nullptr);
+				debugMessenger = VK_NULL_HANDLE;
+				vkDestroyInstance(instance, nullptr);
+				instance = VK_NULL_HANDLE;
+			}
+		}
+
 		uint32_t VulkanRHI::GetQueueFamilyIndex(const EQueueType queueType) const
 		{
 			switch (queueType)
@@ -218,129 +337,6 @@ namespace sy
 				VK_ASSERT(vkSetDebugUtilsObjectNameEXT(device, &nameInfo), "Failed to set object name {}", name);
 			}
 #endif
-		}
-
-		void VulkanRHI::Startup()
-		{
-			volkInitialize();
-
-			vkb::InstanceBuilder instanceBuilder;
-			auto instanceBuilderRes = instanceBuilder.set_app_name(window.GetTitle().data())
-#ifdef _DEBUG
-										  .request_validation_layers()
-										  .use_default_debug_messenger()
-#endif
-										  .require_api_version(1, 3, 0)
-										  .build();
-
-			const auto vkbInstance = instanceBuilderRes.value();
-			instance = vkbInstance.instance;
-			debugMessenger = vkbInstance.debug_messenger;
-
-			volkLoadInstance(instance);
-
-			SDL_Vulkan_CreateSurface(&window.GetSDLWindow(), instance, &surface);
-
-			vkb::PhysicalDeviceSelector physicalDeviceSelector{ vkbInstance };
-			auto vkbPhysicalDevice = physicalDeviceSelector.set_minimum_version(1, 3)
-										 .set_surface(surface)
-										 .add_required_extension(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME)
-										 .add_required_extension(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
-										 .add_required_extension(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME)
-										 .add_required_extension(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME)
-										 .select()
-										 .value();
-
-			physicalDevice = vkbPhysicalDevice.physical_device;
-			gpuProperties = vkbPhysicalDevice.properties;
-			gpuName = gpuProperties.deviceName;
-			spdlog::trace("\n----------- GPU Properties -----------\n* Device Name: {}\n* GPU Vendor ID: {}\n* API Version: {}\n* Driver Version: {}\n* Device ID: {}\n* Max Bound Descriptor Sets: {}\n* Min Uniform Buffer Offset Alignment: {}\n* Min Storage Buffer Offset Alignment: {}\n* Max Frame Buffer Extent: {}x{}\n* Max Memory Allocation Count: {}\n* Max Sampler Allocation Count: {}\n",
-				gpuName,
-				gpuProperties.vendorID,
-				gpuProperties.apiVersion,
-				gpuProperties.driverVersion,
-				gpuProperties.deviceID,
-				gpuProperties.limits.maxBoundDescriptorSets,
-				gpuProperties.limits.minUniformBufferOffsetAlignment,
-				gpuProperties.limits.minStorageBufferOffsetAlignment,
-				gpuProperties.limits.maxFramebufferWidth,
-				gpuProperties.limits.maxFramebufferHeight,
-				gpuProperties.limits.maxMemoryAllocationCount,
-				gpuProperties.limits.maxSamplerAllocationCount);
-
-			vkb::DeviceBuilder deviceBuilder{ vkbPhysicalDevice };
-			VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures{
-				.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
-				.pNext = nullptr,
-				.dynamicRendering = VK_TRUE
-			};
-
-			VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures{
-				.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES,
-				.pNext = nullptr,
-				.descriptorBindingUniformBufferUpdateAfterBind = VK_TRUE,
-				.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE,
-				.descriptorBindingStorageImageUpdateAfterBind = VK_TRUE,
-				.descriptorBindingStorageBufferUpdateAfterBind = VK_TRUE,
-				.descriptorBindingPartiallyBound = VK_TRUE,
-				.descriptorBindingVariableDescriptorCount = VK_TRUE,
-				.runtimeDescriptorArray = VK_TRUE,
-			};
-
-			VkPhysicalDeviceSynchronization2Features synchronization2Features{
-				.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES,
-				.pNext = nullptr,
-				.synchronization2 = true
-			};
-
-			auto vkbDeviceRes =
-				deviceBuilder.add_pNext(&dynamicRenderingFeatures)
-					.add_pNext(&descriptorIndexingFeatures)
-					.add_pNext(&synchronization2Features)
-					.build();
-			SY_ASSERT(vkbDeviceRes.has_value(), "Failed to create device using GPU {}.", gpuName);
-			auto& vkbDevice = vkbDeviceRes.value();
-			device = vkbDevice.device;
-			spdlog::trace("Succeed to create logical device using GPU {}.", gpuName);
-
-			const VmaVulkanFunctions vkFunctions{
-				.vkGetInstanceProcAddr = vkGetInstanceProcAddr,
-				.vkGetDeviceProcAddr = vkGetDeviceProcAddr
-			};
-
-			const VmaAllocatorCreateInfo allocatorInfo{
-				.physicalDevice = physicalDevice,
-				.device = device,
-				.pVulkanFunctions = &vkFunctions,
-				.instance = instance,
-			};
-			VK_ASSERT(vmaCreateAllocator(&allocatorInfo, &allocator),
-				"Failed to create vulkan memory allocator instance.");
-			spdlog::trace("VMA instance successfully created.");
-
-			InitQueues(vkbDevice);
-		}
-
-		void VulkanRHI::Shutdown()
-		{
-			WaitAllQueuesForIdle();
-			{
-				vmaDestroyAllocator(allocator);
-				allocator = VK_NULL_HANDLE;
-				spdlog::trace("Cleanup swap chain...");
-
-				spdlog::trace("Cleanup vulkan logical device...");
-				vkDestroyDevice(device, nullptr);
-				device = VK_NULL_HANDLE;
-				spdlog::trace("Cleanup vulkan surface...");
-				vkDestroySurfaceKHR(instance, surface, nullptr);
-				surface = VK_NULL_HANDLE;
-				vkb::destroy_debug_utils_messenger(instance, debugMessenger, nullptr);
-				debugMessenger = VK_NULL_HANDLE;
-				spdlog::trace("Cleanup vulkan instance...");
-				vkDestroyInstance(instance, nullptr);
-				instance = VK_NULL_HANDLE;
-			}
 		}
 
 		void VulkanRHI::InitQueues(const vkb::Device& vkbDevice)

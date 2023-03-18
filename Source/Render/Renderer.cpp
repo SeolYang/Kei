@@ -110,6 +110,7 @@ namespace sy::render
 
 	void Renderer::Startup()
 	{
+		spdlog::info("Startup Renderer.");
 		const auto windowExtent = window.GetExtent();
 		const auto& frameTracker = vulkanContext.GetFrameTracker();
 		const auto& vulkanRHI = vulkanContext.GetRHI();
@@ -171,6 +172,7 @@ namespace sy::render
 
 	void Renderer::Shutdown()
 	{
+		spdlog::info("Shutdown Renderer.");
 		renderPass.reset();
 		depthStencilView.reset();
 		depthStencil.reset();

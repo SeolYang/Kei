@@ -2,7 +2,7 @@
 #include <Application/Context.h>
 #include <Core/CommandLineParser.h>
 #include <Window/Window.h>
-#include <Core/Utils.h>
+#include <Window/WindowBuilder.h>
 #include <VK/VulkanContext.h>
 #include <VK/ResourceStateTracker.h>
 #include <VK/Texture.h>
@@ -11,17 +11,17 @@
 #include <VK/SamplerBuilder.h>
 #include <VK/DescriptorManager.h>
 #include <VK/VulkanRHI.h>
+#include <VK/TextureBuilder.h>
 #include <Render/Renderer.h>
 #include <Render/Material.h>
 #include <Asset/AssetConverter.h>
 #include <Game/World.h>
 #include <Game/GameContext.h>
-#include <VK/TextureBuilder.h>
 
 namespace sy::app
 {
-	Context::Context(CommandLineParser& cmdLineParser, window::Window& window)
-		: cmdLineParser(cmdLineParser), window(window), timer(std::make_unique<Timer>()), handleManager(std::make_unique<HandleManager>()), vulkanContext(std::make_unique<vk::VulkanContext>(window)), renderer(std::make_unique<render::Renderer>(window, *vulkanContext, *handleManager))
+	Context::Context(CommandLineParser& cmdLineParser, const window::WindowBuilder& windowBuilder)
+		: cmdLineParser(cmdLineParser), window(windowBuilder.Build()), timer(std::make_unique<Timer>()), handleManager(std::make_unique<HandleManager>()), vulkanContext(std::make_unique<vk::VulkanContext>(*window)), renderer(std::make_unique<render::Renderer>(*window, *vulkanContext, *handleManager))
 	{
 	}
 
@@ -36,6 +36,7 @@ namespace sy::app
 		{
 			asset::ConvertAssets(cmdLineParser.GetAssetPath());
 		}
+		spdlog::info("Startup Context.");
 
 		spdlog::info("Initializing SDL.");
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
@@ -44,6 +45,7 @@ namespace sy::app
 		}
 
 		timer->Startup();
+		window->Startup();
 		vulkanContext->Startup();
 		handleManager->Startup();
 		InitDefaultEngineResources();
@@ -52,11 +54,13 @@ namespace sy::app
 
 	void Context::Shutdown()
 	{
+		spdlog::info("Shutdown Context.");
 		vulkanContext->GetRHI().WaitForDeviceIdle();
 
 		renderer->Shutdown();
 		handleManager->Shutdown();
 		vulkanContext->Shutdown();
+		window->Shutdown();
 		timer->Shutdown();
 	}
 

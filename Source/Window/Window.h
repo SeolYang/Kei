@@ -3,10 +3,11 @@
 
 namespace sy::window
 {
+	class WindowBuilder;
 	class Window
 	{
 	public:
-		Window(std::string_view title, Extent2D<uint32_t> extent);
+		explicit Window(const WindowBuilder& builder);
 		~Window() = default;
 
 		Window(const window::Window&) = delete;

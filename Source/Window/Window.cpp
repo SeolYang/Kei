@@ -1,15 +1,17 @@
 #include <PCH.h>
 #include <Window/Window.h>
+#include <Window/WindowBuilder.h>
 
 namespace sy::window
 {
-	Window::Window(const std::string_view title, const Extent2D<uint32_t> extent)
-		: title(title), extent(extent), window(nullptr)
+	Window::Window(const WindowBuilder& builder)
+		: title(builder.title), extent(builder.extent), window(nullptr)
 	{
 	}
 
 	void Window::Startup()
 	{
+		spdlog::info("Startup Window.");
 		SY_ASSERT(extent.IsValid(), "Extent may contains non-valid values.");
 
 		constexpr SDL_WindowFlags windowFlags = SDL_WINDOW_VULKAN;
@@ -26,6 +28,7 @@ namespace sy::window
 
 	void Window::Shutdown()
 	{
+        spdlog::info("Shutdown Window.");
 		if (window != nullptr)
 		{
 			SDL_DestroyWindow(window);

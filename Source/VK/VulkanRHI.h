@@ -17,19 +17,14 @@ namespace sy::vk
 	class DescriptorPool;
 	class Buffer;
 	class FrameTracker;
-	class VulkanRHI
+	class VulkanRHI : public Subsystem
 	{
 	public:
 		VulkanRHI(VulkanContext& vulkanContext, const window::Window& window);
 		~VulkanRHI();
 
-		VulkanRHI(const VulkanRHI&) = delete;
-		VulkanRHI(VulkanRHI&&) = delete;
-		VulkanRHI& operator=(const VulkanRHI&) = delete;
-		VulkanRHI& operator=(VulkanRHI&&) = delete;
-
-		void Startup();
-		void Shutdown();
+		void Startup() override;
+		void Shutdown() override;
 
 		[[nodiscard]] VkPhysicalDevice GetPhysicalDevice() const
 		{

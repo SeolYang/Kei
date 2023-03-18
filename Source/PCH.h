@@ -97,6 +97,7 @@
 
 /** Internal - Core */
 #include <Core/Types.h>
+#include <Core/Subsystem.h>
 #include <Core/Extent.h>
 #include <Core/Assert.h>
 #include <Core/Pool.hpp>

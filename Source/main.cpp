@@ -1,8 +1,7 @@
 #include <PCH.h>
 #include <Application/Context.h>
 #include <Core/CommandLineParser.h>
-#include <Window/Window.h>
-#include <Asset/ModelAsset.h>
+#include <Window/WindowBuilder.h>
 #include <catch.hpp>
 
 int main(int argc, char** argv)
@@ -25,17 +24,14 @@ int main(int argc, char** argv)
 
 	using namespace sy;
 	const auto cmdLineParser = std::make_unique<CommandLineParser>(argc, argv);
-	const auto window = std::make_unique<window::Window>("Test", Extent2D<uint32_t>{ 1280, 720 });
 	app::Context context{
 		*cmdLineParser,
-		*window
+		window::WindowBuilder{}
 	};
 
-	window->Startup();
 	context.Startup();
 	context.Run();
 	context.Shutdown();
-	window->Shutdown();
 
 	return 0;
 }

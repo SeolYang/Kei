@@ -3,45 +3,47 @@
 
 namespace sy
 {
-	class Timer final : public NonCopyable
+	class Timer final : public Subsystem
 	{
 	public:
-		void Startup() noexcept
+		void Startup() override
 		{
+			spdlog::info("Startup Timer.");
 			Begin();
 		}
 
-		void Shutdown()
+		void Shutdown() override
 		{
 			/** Empty */
+			spdlog::info("Startup Timer.");
 		}
 
-		void Begin() noexcept
+		void Begin()
 		{
 			begin = chrono::high_resolution_clock::now();
 		}
 
-		void End() noexcept
+		void End()
 		{
 			deltaTime = (chrono::high_resolution_clock::now() - begin);
 		}
 
-		[[nodiscard]] uint64_t GetDeltaTimeNanos() const noexcept
+		[[nodiscard]] uint64_t GetDeltaTimeNanos() const
 		{
 			return deltaTime.count();
 		}
 
-		[[nodiscard]] uint64_t GetDeltaTimeMillis() const noexcept
+		[[nodiscard]] uint64_t GetDeltaTimeMillis() const
 		{
 			return chrono::duration_cast<chrono::milliseconds>(deltaTime).count();
 		}
 
-		[[nodiscard]] double GetDeltaTimeF64() const noexcept
+		[[nodiscard]] double GetDeltaTimeF64() const
 		{
 			return GetDeltaTimeNanos() * 1e-09;
 		}
 
-		[[nodiscard]] float GetDeltaTime() const noexcept
+		[[nodiscard]] float GetDeltaTime() const
 		{
 			return static_cast<float>(GetDeltaTimeF64());
 		}

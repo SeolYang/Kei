@@ -23,6 +23,7 @@ namespace sy
 
 		void DescriptorManager::Startup()
 		{
+			spdlog::info("Startup Descriptor Manager.");
 			const auto poolSizeBuilder = DescriptorPoolSizeBuilder{}
 											 .AddDescriptors(vk::EDescriptorType::CombinedImageSampler, 1000)
 											 .AddDescriptors(vk::EDescriptorType::UniformBuffer, 1000)
@@ -121,6 +122,7 @@ namespace sy
 
 		void DescriptorManager::Shutdown()
 		{
+			spdlog::info("Shutdown Descriptor Manager.");
 			const auto& vulkanRHI = vulkanContext.GetRHI();
 			vkDestroyDescriptorPool(vulkanRHI.GetDevice(), descriptorPoolPackage.DescriptorPool, nullptr);
 			vkDestroyDescriptorSetLayout(vulkanRHI.GetDevice(), bindlessLayout, nullptr);

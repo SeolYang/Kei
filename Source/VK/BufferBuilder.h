@@ -13,7 +13,7 @@ namespace sy::vk
 		{
 		}
 
-		BufferBuilder& SetName(const std::string& name)
+		BufferBuilder& SetName(const std::string_view name)
 		{
 			this->name = name;
 			return *this;

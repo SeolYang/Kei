@@ -20,6 +20,7 @@ namespace sy
 
 		void FrameTracker::Startup()
 		{
+			spdlog::info("Startup Frame Tracker.");
 			const auto& vulkanRHI = vulkanContext.GetRHI();
 			size_t frameIdx = 0;
 			for (auto& frame : frames)
@@ -36,6 +37,7 @@ namespace sy
 
 		void FrameTracker::Shutdown()
 		{
+			spdlog::info("Shutdown Frame Tracker.");
 			for (auto& frame : frames)
 			{
 				frame.RenderFence.reset();

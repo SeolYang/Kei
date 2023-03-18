@@ -136,6 +136,9 @@
     <ClCompile Include="..\Source\Game\World.cpp">
       <Filter>Source\Game</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Window\WindowBuilder.cpp">
+      <Filter>Source\Window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Asset\AssetConverter.h">
@@ -314,6 +317,12 @@
     </ClInclude>
     <ClInclude Include="..\Source\Core\HandleManager.h">
       <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\Subsystem.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Window\WindowBuilder.h">
+      <Filter>Source\Window</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

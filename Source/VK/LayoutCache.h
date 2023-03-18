@@ -5,7 +5,7 @@ namespace sy::vk
 {
 	class VulkanContext;
 	class PushConstantBuilder;
-	class PipelineLayoutCache : public NonCopyable
+	class PipelineLayoutCache : public Subsystem
 	{
 	public:
 		struct PipelineLayoutInfo
@@ -33,8 +33,8 @@ namespace sy::vk
 		explicit PipelineLayoutCache(VulkanContext& vulkanContext);
 		~PipelineLayoutCache() override;
 
-		void Startup();
-		void Shutdown();
+		void Startup() override;
+		void Shutdown() override;
 
 		VkPipelineLayout Request(std::span<VkDescriptorSetLayout> descriptorSetLayouts,
 			const PushConstantBuilder& pushConstantBuilder);

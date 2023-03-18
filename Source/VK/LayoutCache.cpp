@@ -17,10 +17,12 @@ namespace sy::vk
 
 	void PipelineLayoutCache::Startup()
 	{
+		spdlog::info("Startup Pipeline Layout Cache.");
 	}
 
 	void PipelineLayoutCache::Shutdown()
 	{
+		spdlog::info("Shutdown Pipeline Layout Cache.");
 		const auto device = vulkanContext.GetRHI().GetDevice();
 		for (auto& cacheInfo : cache)
 		{

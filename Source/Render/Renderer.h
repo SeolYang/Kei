@@ -30,7 +30,7 @@ namespace sy::render
 	class Mesh;
 	class SimpleRenderPass;
 	/** @todo Renderer to RenderContext? */
-	class Renderer final : public NonCopyable
+	class Renderer final : public Subsystem
 	{
 	public:
 		Renderer(const window::Window& window, vk::VulkanContext& vulkanContext, HandleManager& handleManager);

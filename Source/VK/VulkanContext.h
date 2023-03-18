@@ -14,14 +14,14 @@ namespace sy::vk
 	class FrameTracker;
 	class PipelineLayoutCache;
 	class Swapchain;
-	class VulkanContext
+	class VulkanContext : public Subsystem
 	{
 	public:
 		VulkanContext(const window::Window& window);
 		~VulkanContext();
 
-		void Startup();
-		void Shutdown();
+		void Startup() override;
+		void Shutdown() override;
 
 		[[nodiscard]] VulkanRHI& GetRHI() const;
 		[[nodiscard]] FrameTracker& GetFrameTracker() const;

@@ -20,6 +20,7 @@ namespace sy::vk
 
 	void VulkanContext::Startup()
 	{
+		spdlog::info("Startup Vulkan Context.");
 		vulkanRHI->Startup();
 		frameTracker->Startup();
 		cmdPoolManager->Startup();
@@ -31,6 +32,7 @@ namespace sy::vk
 
 	void VulkanContext::Shutdown()
 	{
+		spdlog::info("Shutdown Vulkan Context.");
 		vulkanRHI->WaitForDeviceIdle();
 
 		pipelineLayoutCache->Shutdown();

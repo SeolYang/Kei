@@ -24,20 +24,21 @@ namespace sy::game
 namespace sy::window
 {
 	class Window;
-}
+	class WindowBuilder;
+} // namespace sy::window
 
 namespace sy::app
 {
-	class Context final : public NonCopyable
+	class Context final : public Subsystem
 	{
 	public:
-		Context(CommandLineParser& cmdLineParser, window::Window& window);
+		Context(CommandLineParser& cmdLineParser, const window::WindowBuilder& windowBuilder);
 		~Context() override;
 
 		void Run();
 
-		void Startup();
-		void Shutdown();
+		void Startup() override;
+		void Shutdown() override;
 
 	private:
 		void InitializeLogger();
@@ -45,7 +46,7 @@ namespace sy::app
 
 	private:
 		CommandLineParser& cmdLineParser;
-		window::Window& window;
+		std::unique_ptr<window::Window> window;
 		std::unique_ptr<Timer> timer;
 		std::unique_ptr<HandleManager> handleManager;
 		std::unique_ptr<vk::VulkanContext> vulkanContext;

@@ -63,6 +63,7 @@
     <ClCompile Include="..\Source\VK\VulkanContext.cpp" />
     <ClCompile Include="..\Source\VK\VulkanTypes.cpp" />
     <ClCompile Include="..\Source\Window\Window.cpp" />
+    <ClCompile Include="..\Source\Window\WindowBuilder.cpp" />
     <ClCompile Include="..\ThirdParty\volk\volk.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Test|x64'">NotUsing</PrecompiledHeader>
@@ -86,6 +87,7 @@
     <ClInclude Include="..\Source\Core\Assert.h" />
     <ClInclude Include="..\Source\Core\HandleManager.h" />
     <ClInclude Include="..\Source\Core\Pool.hpp" />
+    <ClInclude Include="..\Source\Core\Subsystem.h" />
     <ClInclude Include="..\Source\Core\Timer.h" />
     <ClInclude Include="..\Source\Core\Types.h" />
     <ClInclude Include="..\Source\Core\Utils.h" />
@@ -128,6 +130,7 @@
     <ClInclude Include="..\Source\VK\VulkanTypes.h" />
     <ClInclude Include="..\Source\VK\VulkanWrapper.h" />
     <ClInclude Include="..\Source\Window\Window.h" />
+    <ClInclude Include="..\Source\Window\WindowBuilder.h" />
     <ClInclude Include="..\ThirdParty\volk\volk.h" />
   </ItemGroup>
   <ItemGroup>

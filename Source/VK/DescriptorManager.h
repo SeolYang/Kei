@@ -9,7 +9,7 @@ namespace sy::vk
 	class TextureView;
 	class Sampler;
 	class FrameTracker;
-	class DescriptorManager final : public NonCopyable
+	class DescriptorManager final : public Subsystem
 	{
 	public:
 		struct DescriptorPoolSize
@@ -100,8 +100,8 @@ namespace sy::vk
 		DescriptorManager(VulkanContext& vulkanContext, const FrameTracker& frameTracker);
 		virtual ~DescriptorManager() override;
 
-		void Startup();
-		void Shutdown();
+		void Startup() override;
+		void Shutdown() override;
 
 		void BeginFrame();
 		void EndFrame();

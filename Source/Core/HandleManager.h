@@ -367,7 +367,7 @@ namespace sy
 	template <typename T>
 	using Handle = typename HandleMap<T>::Handle;
 
-	class HandleManager
+	class HandleManager : public Subsystem
 	{
 	private:
 		using UntypedHandleMap = std::pair<void*, std::function<void(void*)>>;
@@ -386,13 +386,14 @@ namespace sy
 		HandleManager(HandleManager&&) noexcept = delete;
 		HandleManager& operator=(HandleManager&&) noexcept = delete;
 
-		void Startup()
+		void Startup() override
 		{
-			/** Empty */
+			spdlog::info("Startup Handle Manager.");
 		}
 
-		void Shutdown()
+		void Shutdown() override
 		{
+			spdlog::info("Shutdown Handle Manager.");
 			for (auto& element : table)
 			{
 				UntypedHandleMap& value = element.second;
