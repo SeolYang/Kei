@@ -1,6 +1,6 @@
 #include <PCH.h>
 #include <Application/Context.h>
-#include <Asset/AssetConverter.h>
+#include <Core/Constants.h>
 #include <Core/CommandLineParser.h>
 #include <Game/GameContext.h>
 #include <Game/World.h>
@@ -42,7 +42,7 @@ void Context::Startup()
     InitializeLogger();
     if (cmdLineParser.ShouldConvertAssets())
     {
-        asset::ConvertAssets(cmdLineParser.GetAssetPath());
+        //asset::ConvertAssets(cmdLineParser.GetAssetPath());
     }
     spdlog::info("Startup Context.");
 
@@ -110,7 +110,7 @@ void Context::InitDefaultEngineResources()
 
     auto defaultTexBuilder =
         vk::TextureBuilder::Texture2DShaderResourceTemplate(*vulkanContext)
-            .SetName("DefaultWhite")
+            .SetName(core::constants::res::DefaultWhiteTexture)
             .SetExtent(Extent2D<uint32_t>{2, 2})
             .SetFormat(VK_FORMAT_R8G8B8A8_SRGB);
 
@@ -118,28 +118,29 @@ void Context::InitDefaultEngineResources()
         defaultTexBuilder
             .SetDataToTransfer(std::span{white.data(), white.size()})
             .Build());
-    defaultWhiteTex.SetAlias(vk::DefaultWhiteTexture);
+    defaultWhiteTex.SetAlias(core::constants::res::DefaultWhiteTexture);
 
     constexpr std::array black = {0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff};
 
     auto defaultBlackTex = handleManager->Add(
-        defaultTexBuilder.SetName("DefaultBlack")
+        defaultTexBuilder.SetName(core::constants::res::DefaultBlackTexture)
             .SetDataToTransfer(std::span{white.data(), white.size()})
             .Build());
 
-    defaultBlackTex.SetAlias(vk::DefaultBlackTexture);
+    defaultBlackTex.SetAlias(core::constants::res::DefaultBlackTexture);
 
     auto linearSampler = handleManager->Add(vk::SamplerBuilder{*vulkanContext}
-                                                .SetName(vk::LinearSamplerRepeat)
+                                                .SetName(core::constants::res::TrilinearRepeatSampler)
                                                 .Build());
 
-    linearSampler.SetAlias(vk::LinearSamplerRepeat);
+    linearSampler.SetAlias(core::constants::res::TrilinearRepeatSampler);
 
     const auto defaultWhiteTexView = handleManager->Add<vk::TextureView>(
-        std::format("{}_View", vk::DefaultWhiteTexture),
+        std::format("{}_View", core::constants::res::DefaultWhiteTexture),
         *vulkanContext,
         *defaultWhiteTex,
         VK_IMAGE_VIEW_TYPE_2D);
+	defaultWhiteTex.SetAlias(core::constants::res::DefaultWhiteTexture);
 
     auto& descriptorManager = vulkanContext->GetDescriptorManager();
 
@@ -150,10 +151,11 @@ void Context::InitDefaultEngineResources()
             defaultWhiteTexView,
             linearSampler,
             vk::ETextureState::AnyShaderReadSampledImage));
+	defaultWhiteDescriptor.SetAlias(core::constants::res::DefaultWhiteTexture);
 
     auto defaultMaterial =
         handleManager->Add<render::Material>(defaultWhiteDescriptor);
-    defaultMaterial.SetAlias(render::DefaultMaterial);
+    defaultMaterial.SetAlias(core::constants::res::DefaultMaterialInstance);
 }
 
 void Context::Run()

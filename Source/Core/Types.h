@@ -61,11 +61,6 @@ public:
         return name;
     }
 
-    [[nodiscard]] std::string& GetName()
-    {
-        return name;
-    }
-
 private:
     std::string name;
 };
@@ -79,5 +74,25 @@ public:
 
 protected:
     NonCopyable() = default;
+};
+
+template <typename T>
+struct Range
+{
+public:
+    template <typename C>
+    RefOptional<C> CastTo(uint8_t* base) const
+    {
+        if (base == nullptr)
+        {
+            return std::nullopt;
+        }
+
+        return *(reinterpret_cast<C*>(base + Offset));
+    }
+
+public:
+    T Offset = {};
+    T Size   = {};
 };
 } // namespace sy

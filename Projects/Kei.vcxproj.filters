@@ -1,12 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\Source\Asset\Asset.cpp">
-      <Filter>Source\Asset</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Asset\AssetConverter.cpp">
-      <Filter>Source\Asset</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Audio\AudioContext.cpp">
       <Filter>Source\Audio</Filter>
     </ClCompile>
@@ -112,15 +106,6 @@
     <ClCompile Include="..\Source\Window\Window.cpp">
       <Filter>Source\Window</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Asset\MaterialAsset.cpp">
-      <Filter>Source\Asset</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Asset\ModelAsset.cpp">
-      <Filter>Source\Asset</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Asset\TextureAsset.cpp">
-      <Filter>Source\Asset</Filter>
-    </ClCompile>
     <ClCompile Include="..\ThirdParty\volk\volk.c">
       <Filter>Thirdparty\volk</Filter>
     </ClCompile>
@@ -139,14 +124,26 @@
     <ClCompile Include="..\Source\Window\WindowBuilder.cpp">
       <Filter>Source\Window</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Asset\Asset.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\TextureAsset.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\ModelAsset.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\MaterialAsset.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\ModelImporter.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\TextureImporter.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Source\Asset\AssetConverter.h">
-      <Filter>Source\Asset</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Asset\Asset.h">
-      <Filter>Source\Asset</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Audio\AudioContext.h">
       <Filter>Source\Audio</Filter>
     </ClInclude>
@@ -191,9 +188,6 @@
     </ClInclude>
     <ClInclude Include="..\Source\Game\GameContext.h">
       <Filter>Source\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Component\HierarchyComponent.h">
-      <Filter>Source\Component</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\VK\DescriptorManager.h">
       <Filter>Source\VK</Filter>
@@ -288,15 +282,6 @@
     <ClInclude Include="..\Source\Window\Window.h">
       <Filter>Source\Window</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Asset\ModelAsset.h">
-      <Filter>Source\Asset</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Asset\MaterialAsset.h">
-      <Filter>Source\Asset</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Asset\TextureAsset.h">
-      <Filter>Source\Asset</Filter>
-    </ClInclude>
     <ClInclude Include="..\ThirdParty\volk\volk.h">
       <Filter>Thirdparty\volk</Filter>
     </ClInclude>
@@ -320,6 +305,30 @@
     </ClInclude>
     <ClInclude Include="..\Source\Window\WindowBuilder.h">
       <Filter>Source\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\Asset.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\TextureAsset.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\ModelAsset.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\Constants.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\MaterialAsset.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\ModelImporter.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\TextureImporter.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\Constants.h">
+      <Filter>Source\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

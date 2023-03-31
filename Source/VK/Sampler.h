@@ -4,8 +4,6 @@
 
 namespace sy::vk
 {
-constexpr std::string_view LinearSamplerRepeat = "LinearSamplerRepeat";
-
 class SamplerBuilder;
 class Sampler : public VulkanWrapper<VkSampler>
 {

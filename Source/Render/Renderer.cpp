@@ -150,7 +150,7 @@ void Renderer::Startup()
     vk::PushConstantBuilder pushConstantBuilder;
     pushConstantBuilder.Add<PushConstants>(VK_SHADER_STAGE_ALL_GRAPHICS);
 
-    const vk::VertexInputBuilder vertexInputLayout = BuildVertexInputLayout<VertexPTN>();
+    const vk::VertexInputBuilder vertexInputLayout = BuildVertexInputLayout<VertexPT0N>();
     vk::GraphicsPipelineBuilder  basicPipelineBuilder;
     basicPipelineBuilder.SetDefault()
         .AddShaderStage(*triVert)
@@ -163,7 +163,7 @@ void Renderer::Startup()
 
     basicPipeline = std::make_unique<vk::Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
-    staticMeshes    = asset::LoadModel("Homura", "Assets/Models/homura/homura_v1.MODEL", handleManager, vulkanContext);
+    //staticMeshes    = asset::LoadModel("Homura", "Assets/Models/homura/homura_v1.MODEL", handleManager, vulkanContext);
     const auto proj = math::PerspectiveYFlipped(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
     viewProjMat     = proj * glm::lookAt(glm::vec3{1.5f, 160.f, -150.f}, {0.f, 70.f, 0.f}, {0.f, 1.f, 0.f});
 

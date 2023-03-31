@@ -121,4 +121,129 @@ consteval TypeHashType Hash()
 
 template <typename T>
 constexpr TypeHashType TypeHash = Hash<T>();
+
+/** Files */
+inline bool SaveJsonToFile(const fs::path& path, const nlohmann::json& json, const bool bReadableFormat = true, const bool bTruncExistFile = true)
+{
+    if (!path.empty())
+    {
+        std::ofstream output{path, std::ios::out | (bTruncExistFile ? std::ios::trunc : std::ios::app)};
+        if (output.is_open())
+        {
+            output << json.dump(bReadableFormat ? 4 : -1);
+            output.close();
+            return true;
+        }
+        else
+        {
+            SY_ASSERT(false, "Failed to open output stream to {}", path.string());
+        }
+    }
+    else
+    {
+        SY_ASSERT(false, "Trying to save to unspecified path.");
+    }
+
+    return false;
+}
+
+inline json LoadJsonFromFile(const fs::path& path)
+{
+    if (!path.empty())
+    {
+        std::ifstream input{path, std::ios::in};
+        if (input.is_open())
+        {
+            std::stringstream ss;
+            ss << input.rdbuf();
+            return json::parse(ss.str());
+        }
+        else
+        {
+            SY_ASSERT(false, "Failed to open input stream from {}", path.string());
+        }
+    }
+    else
+    {
+        SY_ASSERT(false, "Trying to laod from unspecified path.");
+    }
+
+    return {};
+}
+
+inline void SaveBlobToFile(const fs::path& path, const std::span<const uint8_t> blob)
+{
+	if (blob.size() > 0 && !path.empty())
+	{
+        std::ofstream output{path, std::ios::out | std::ios::trunc | std::ios::binary};
+		if (!output.is_open())
+		{
+            spdlog::error("Failed to open {}", path.string());
+		}
+		else
+		{
+            output.write(reinterpret_cast<const char*>(blob.data()), blob.size());
+            output.close();
+		}
+	}
+}
+
+inline std::vector<uint8_t> LoadBlobFromFile(const fs::path& path)
+{
+    std::vector<uint8_t> blob;
+
+	if (!path.empty())
+	{
+        std::ifstream input{path, std::ios::in | std::ios::binary};
+        if (!input.is_open())
+        {
+            spdlog::error("Failed to open {}", path.string());
+        }
+        else
+        {
+            input.seekg(0, std::ios::end);
+            const size_t sizeAsBytes = input.tellg();
+            input.seekg(0, std::ios::beg);
+
+            blob.resize(sizeAsBytes);
+            input.read(reinterpret_cast<char*>(blob.data()), blob.size());
+            input.close();
+        }
+	}
+
+    return blob;
+}
+
+template <typename T>
+T ResolveEnumFromJson(const nlohmann::json& json, const std::string_view key, const T fallback)
+{
+    const auto itr = json.find(key);
+
+	if (itr == json.end())
+	{
+        spdlog::error("Failed to retrive enumeration from json[{}], return fallback {}.", key, magic_enum::enum_name<T>(fallback));
+		return fallback;
+	}
+
+    const std::string enumStr = *itr;
+    const auto        enumOpt = magic_enum::enum_cast<T>(enumStr);
+	if (!enumOpt)
+	{
+        spdlog::error("Failed to cast {} to given enum type {}.", enumStr, magic_enum::enum_type_name<T>());
+        return fallback;
+	}
+
+	return *enumOpt;
+}
+
+template <typename T>
+inline auto VecToConstSpan(const std::vector<T>& target)
+{
+    return std::span<const T>{reinterpret_cast<const std::remove_const_t<T>*>(target.data()), target.size()};
+}
+
+inline size_t ImageBlobBytesSize(const size_t width, const size_t height, const size_t channels, const size_t bytesPerChannel)
+{
+    return width * height * channels * bytesPerChannel;
+}
 } // namespace sy

@@ -15,7 +15,7 @@ public:
     void Shutdown() override
     {
         /** Empty */
-        spdlog::info("Startup Timer.");
+        spdlog::info("Shutdown Timer.");
     }
 
     void Begin()

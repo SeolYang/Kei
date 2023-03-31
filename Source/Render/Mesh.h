@@ -15,6 +15,8 @@ class Material;
 class Mesh : public NamedType
 {
 public:
+    Mesh(std::string_view name, size_t numVertices, std::unique_ptr<vk::Buffer> vertexBuffer, size_t numIndices, std::unique_ptr<vk::Buffer> indexBuffer, Handle<Material> material = {});
+
     template <typename VertexType, typename IndexType = render::IndexType>
     static std::unique_ptr<Mesh> Create(const std::string_view name, vk::VulkanContext& vulkanContext, const std::span<const VertexType> vertices, const std::span<const IndexType> indices)
     {
@@ -32,6 +34,8 @@ public:
                                               vertices.size(), vertexBufferBuilder.Build(),
                                               indices.size(), indexBufferBuilder.Build()));
     }
+
+    ~Mesh() override;
 
     [[nodiscard]] const vk::Buffer& GetVertexBuffer() const
     {
@@ -53,10 +57,7 @@ public:
         return numIndices;
     }
 
-    ~Mesh() override;
-
-private:
-    Mesh(std::string_view name, size_t numVertices, std::unique_ptr<vk::Buffer> vertexBuffer, size_t numIndices, std::unique_ptr<vk::Buffer> indexBuffer);
+	[[nodiscard]] Handle<Material> GetMaterial() const { return material; }
 
 private:
     std::unique_ptr<vk::Buffer> vertexBuffer;
@@ -64,5 +65,8 @@ private:
 
     const size_t numVertices;
     const size_t numIndices;
+
+	// #todo Add Handle to Material
+    Handle<Material> material;
 };
 } // namespace sy::render

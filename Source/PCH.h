@@ -76,14 +76,16 @@
 
 /** nlohmann-json */
 #include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 /** stduuid */
-// #include <uuid.h>
+#include <stduuid/uuid.h>
 
 /** magic-enum */
 #include <magic_enum.hpp>
 
 /** assimp */
+#include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <assimp/cimport.h>

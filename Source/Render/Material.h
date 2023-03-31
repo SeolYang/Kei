@@ -1,5 +1,6 @@
 #pragma once
 #include <PCH.h>
+#include <Render/Constants.h>
 
 namespace sy::vk
 {
@@ -8,8 +9,6 @@ class Pipeline;
 
 namespace sy::render
 {
-constexpr std::string_view DefaultMaterial = "DefaultMaterial";
-
 class Material
 {
 public:

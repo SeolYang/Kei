@@ -1,83 +1,85 @@
 #include <PCH.h>
 #include <Asset/MaterialAsset.h>
 #include <Asset/TextureAsset.h>
-#include <Render/Material.h>
-#include <VK/Texture.h>
-#include <VK/TextureView.h>
-#include <VK/Sampler.h>
-#include <VK/VulkanContext.h>
-#include <VK/DescriptorManager.h>
 
 namespace sy::asset
 {
-struct MaterialMetadata
+Material::Material(const fs::path& path, const RefOptional<HandleManager> handleManager, const RefOptional<vk::VulkanContext> vulkanContext) :
+    Asset(path),
+    handleManager(handleManager),
+    vulkanContext(vulkanContext)
 {
-    std::string BaseTexture = vk::DefaultWhiteTexture.data();
-    /// ...
-};
-
-constexpr std::string_view MATERIAL_METADATA_BASE_TEXTURE = "BaseTexture";
-
-MaterialMetadata QueryMetadata(const AssetData<render::Material>& assetData)
-{
-    const nlohmann::json& metadataJson = assetData.GetMetadata();
-    MaterialMetadata      result;
-
-    result.BaseTexture = metadataJson[MATERIAL_METADATA_BASE_TEXTURE];
-    return result;
+    EnableIgnoreBlob();
 }
 
-Handle<render::Material> LoadMaterialFromAsset(
-    const fs::path&    path,
-    HandleManager&     handleManager,
-    vk::VulkanContext& vulkanContext)
+
+json Material::Serialize() const
 {
-    std::string pathStr = path.string();
-    auto        handle  = handleManager.QueryAlias<render::Material>(pathStr);
-    if (handle)
+    json root                                   = Asset::Serialize();
+    root[constants::metadata::key::BaseTexture] = baseTexturePath.string();
+    return root;
+}
+
+void Material::Deserialize(const json& root)
+{
+    Asset::Deserialize(root);
+    const std::string baseTexturePathStr = root[constants::metadata::key::BaseTexture];
+    baseTexturePath                      = baseTexturePathStr;
+}
+
+bool Material::InitializeBlob(const std::vector<uint8_t> blob)
+{
+    return true;
+}
+
+void Material::EndDeserialize()
+{
+    if (!handleManager)
     {
-        return handle;
+        SY_ASSERT(false, "Trying to initialize model without HandleManager.");
+        return;
     }
 
-    const auto assetDataHandle = LoadOrCreateAssetData<render::Material>(path, handleManager);
-    if (!assetDataHandle)
+    if (!vulkanContext)
     {
-        SY_ASSERT(false, " Failed to load material asset from {}.", pathStr);
-        return {};
+        SY_ASSERT(false, "Trying to initialize model without VulkanContext.");
+        return;
     }
 
-    auto&      descriptorManager = vulkanContext.GetDescriptorManager();
-    const auto metadata          = QueryMetadata(*assetDataHandle);
+    auto& handleManager = this->handleManager->get();
+    auto& vulkanContext = this->vulkanContext->get();
 
-    const auto baseTexHandle     = LoadTexture2DFromAsset(metadata.BaseTexture, handleManager, vulkanContext);
-    const auto baseTexViewHandle = handleManager.Add<vk::TextureView>(
-        std::format("{}_View", metadata.BaseTexture),
-        vulkanContext, *baseTexHandle,
-        VK_IMAGE_VIEW_TYPE_2D);
+    Handle<vk::Descriptor> baseTextureDescriptor = {};
+    {
+        const std::string baseTexturePathStr = baseTexturePath.string();
+        auto              baseTextureAsset   = handleManager.QueryAlias<asset::Texture>(baseTexturePathStr);
+        /** #fallback #1: Attempt to load new texture asset from file. */
+        if (!baseTextureAsset)
+        {
+            baseTextureAsset =
+                handleManager.Add<asset::Texture>(baseTexturePathStr,
+                                                  handleManager,
+                                                  vulkanContext);
 
-    const auto linearSampler = handleManager.QueryAlias<vk::Sampler>(vk::LinearSamplerRepeat);
+            if (!baseTextureAsset->Initialize())
+            {
+                baseTextureAsset.DestroySelf();
+            }
+            else
+            {
+                baseTextureAsset.SetAlias(baseTexturePathStr);
+            }
+        }
 
-    handle = handleManager.Add<render::Material>(
-        handleManager.Add<vk::Descriptor>(descriptorManager.RequestDescriptor(handleManager,
-                                                                              baseTexHandle, baseTexViewHandle,
-                                                                              linearSampler,
-                                                                              vk::ETextureState::AnyShaderReadSampledImage)));
-    handle.SetAlias(pathStr);
-    return handle;
-}
-
-nlohmann::json ToMetadata(const MaterialMetadata metadata)
-{
-    nlohmann::json result;
-    result[MATERIAL_METADATA_BASE_TEXTURE] = metadata.BaseTexture;
-    return result;
-}
-
-void CreateMaterial(const fs::path& path)
-{
-    fs::create_directory(path.parent_path());
-    const MaterialMetadata            metadata;
-    const AssetData<render::Material> assetData{path, ToMetadata(metadata), {}};
-    assetData.SaveMetadata();
+        if (baseTextureAsset)
+        {
+            baseTextureDescriptor = baseTextureAsset->GetDescriptor();
+        }
+        /** #fallback #2: Attempt to load default texture descriptor from engine. */
+        else
+        {
+            baseTextureDescriptor = handleManager.QueryAlias<vk::Descriptor>(core::constants::res::DefaultWhiteTexture);
+        }
+    }
 }
 } // namespace sy::asset

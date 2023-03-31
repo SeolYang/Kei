@@ -3,6 +3,7 @@
 
 namespace sy::component
 {
+// #RemoveAfterEntt
 struct TransformComponent
 {
     glm::vec3 Position;

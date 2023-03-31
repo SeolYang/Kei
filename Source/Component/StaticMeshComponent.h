@@ -9,6 +9,7 @@ class Material;
 
 namespace sy::component
 {
+// #RemoveAfterEntt
 struct StaticMeshComponent
 {
     Handle<render::Mesh>     Mesh;

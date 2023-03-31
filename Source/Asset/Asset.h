@@ -1,131 +1,69 @@
 #pragma once
 #include <PCH.h>
+#include <Asset/Constants.h>
 
 namespace sy::asset
 {
-/**
-* Asset.Texture is metadata of asset.
-* Asset.Texture.bin is blob of asset.
-*/
-enum class EAsset
+inline fs::path ConvertToExtensionless(fs::path path)
 {
-    Texture,
-    Model,
-    Material,
-    Unknown
-};
-
-inline fs::path PathToBlobPath(const fs::path& path)
-{
-    fs::path newPath = path;
-    newPath.concat(".blob");
-    return newPath;
+    return path.replace_extension();
 }
 
-template <typename T>
-class AssetData : public NonCopyable
+inline fs::path ConvertToAssetPath(fs::path path)
+{
+    return path.replace_extension(constants::fs::ext::Asset);
+}
+
+inline fs::path ConvertToBlobPath(fs::path path)
+{
+    return path.replace_extension(constants::fs::ext::Blob);
+}
+
+class Asset : public NonCopyable, public NamedType
 {
 public:
-    AssetData(const fs::path& path) :
-        AssetData(path, LoadMetadata(path), LoadBlob(path))
-    {
-    }
+    explicit Asset(const fs::path& path);
 
-    AssetData(const fs::path& path, const nlohmann::json metadata, std::vector<char> blob) :
-        path(path), metadata(metadata), blob(std::move(blob))
-    {
-    }
+    virtual size_t GetTypeHash() const = 0;
 
-    [[nodiscard]] fs::path GetPath() const
-    {
-        return path;
-    }
+    [[nodiscard]] explicit operator bool() const { return bInitialized; }
 
-    [[nodiscard]] const nlohmann::json& GetMetadata() const
-    {
-        return metadata;
-    }
+    [[nodiscard]] const fs::path& GetOriginPath() const { return originPath; }
+    [[nodiscard]] const fs::path& GetPath() const { return assetPath; }
+    [[nodiscard]] const fs::path& GetBlobPath() const { return blobPath; }
+    [[nodiscard]] const fs::path& GetExtensionlessPath() const { return extensionlessPath; }
 
-    [[nodiscard]] const std::vector<char>& GetBlob() const
-    {
-        return blob;
-    }
 
-    void SaveMetadata() const
-    {
-        const fs::path& path = GetPath();
-        std::ofstream   outFileStream;
-        outFileStream.open(path, std::ios::out | std::ios::trunc);
-        if (outFileStream.is_open())
-        {
-            const std::string jsonStr = metadata.dump(4, ' ');
-            outFileStream.write(jsonStr.data(), jsonStr.size());
-            outFileStream.close();
-        }
-    }
+    bool Initialize();
 
-    void SaveBlob() const
-    {
-        const fs::path blobPath = PathToBlobPath(GetPath());
-        std::ofstream  outFileStream;
-        outFileStream.open(blobPath, std::ios::binary | std::ios::out | std::ios::trunc);
-        if (outFileStream.is_open())
-        {
-            const auto& blob = GetBlob();
-            outFileStream.write(blob.data(), blob.size());
-            outFileStream.close();
-        }
-    }
+    [[nodiscard]] virtual json Serialize() const;
+    virtual void               Deserialize(const json& root);
+
+protected:
+    void EnableIgnoreBlob() { bIgnoreBlob = true; }
+    /** #consideration : Take into account usage of '.ktx' format for texture. */
+    void MarkAsExternalFormat() { bIsExternalFormat = true; }
+    void MarkAsInitialized() { bInitialized = true; }
+
+    virtual void BeginInit() {}
+    virtual void EndInit() {}
+    virtual void BeginDeserialize() {}
+    virtual void EndDeserialize() {}
+    virtual void BeginInitBlob() {}
+    virtual void EndInitBlob() {}
+    virtual void BeginInitExternal() {}
+    virtual void EndInitExternal() {}
+
+    virtual bool InitializeBlob(std::vector<uint8_t> blob) = 0;
+    virtual bool InitializeExternal() { return false; }
 
 private:
-    static nlohmann::json LoadMetadata(const fs::path& path)
-    {
-        std::ifstream inFileStream;
-        inFileStream.open(path);
-        if (!inFileStream.is_open())
-        {
-            spdlog::warn("Failed to load asset file from {}.", path.string());
-            return {};
-        }
-
-        const std::string jsonStr = InputFileStreamToString(inFileStream);
-        return nlohmann::json::parse(jsonStr);
-    }
-
-    static std::vector<char> LoadBlob(const fs::path& path)
-    {
-        const auto        blobPath = PathToBlobPath(path);
-        std::vector<char> buffer;
-        std::ifstream     inFileStream;
-        inFileStream.open(blobPath, std::ios::binary);
-
-        if (inFileStream.is_open())
-        {
-            const auto size = QuerySizeOfStream(inFileStream);
-            buffer.resize(size);
-            inFileStream.read(buffer.data(), size);
-        }
-
-        return buffer;
-    }
-
-private:
-    fs::path          path;
-    nlohmann::json    metadata;
-    std::vector<char> blob;
+    bool           bIgnoreBlob       = false;
+    bool           bIsExternalFormat = false;
+    bool           bInitialized      = false;
+    const fs::path originPath;
+    const fs::path extensionlessPath;
+    const fs::path assetPath;
+    const fs::path blobPath;
 };
-
-template <typename T>
-Handle<AssetData<T>> LoadOrCreateAssetData(const fs::path& path, HandleManager& handleManager)
-{
-    const auto pathStr = path.string();
-    auto       handle  = handleManager.QueryAlias<AssetData<T>>(pathStr);
-    if (!handle)
-    {
-        handle = handleManager.Add<AssetData<T>>(pathStr);
-        handle.SetAlias(pathStr);
-    }
-
-    return handle;
-}
 } // namespace sy::asset

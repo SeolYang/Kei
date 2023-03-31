@@ -23,6 +23,8 @@ public:
 
     VkPipelineVertexInputStateCreateInfo Build() const;
 
+    const auto& GetAttributes() const { return vertexInputAttributeDescriptions; }
+
 private:
     std::vector<VkVertexInputBindingDescription>   vertexInputBindingDescriptions;
     std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;

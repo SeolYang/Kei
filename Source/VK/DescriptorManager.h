@@ -117,8 +117,10 @@ public:
     }
 
     Descriptor RequestDescriptor(const Buffer& buffer, bool bIsDynamic = false);
+	// #deprecated
     Descriptor RequestDescriptor(HandleManager& handleManager, Handle<Buffer> handle, bool bIsDynamic = false);
     Descriptor RequestDescriptor(const Texture& texture, const TextureView& view, const Sampler& sampler, ETextureState expectedState, bool bIsCombinedSampler = true);
+	// #deprecated
     Descriptor RequestDescriptor(HandleManager& handleManager, Handle<Texture> texture, Handle<TextureView> view, Handle<Sampler> sampler, ETextureState expectedState, bool bIsCombinedSampler = true);
 
 private:

@@ -12,11 +12,15 @@
             }                                                                                \
         while (0)
 #else
-#    define SY_ASSERT(CONDITION, ...) \
-        do                            \
-        {                             \
-            (void)sizeof(CONDITION);  \
-        } while (0)
+#    define SY_ASSERT(CONDITION, ...)                                                        \
+        do                                                                                   \
+        {                                                                                    \
+            if (!(CONDITION))                                                                \
+            {                                                                                \
+                spdlog::critical(FORMAT_STR, __VA_ARGS__);                                   \
+            }
+}
+while (0)
 #endif
 
 #if defined(_DEBUG) || defined(DEUG)
