@@ -20,8 +20,10 @@
 #include <VK/TextureBuilder.h>
 #include <Window/Window.h>
 #include <Math/MathUtils.h>
-#include <Asset/ModelAsset.h>
 #include <VK/ResourceStateTracker.h>
+#include <Asset/ModelAsset.h>
+#include <Asset/ModelImporter.h>
+#include <Asset/TextureImporter.h>
 
 namespace sy::render
 {
@@ -57,8 +59,7 @@ void Renderer::Render()
         renderPass->SetSwapchain(swapchain, clearColorValue);
         renderPass->SetDepthStencilView(*depthStencilView);
 
-        const auto model = glm::rotate(glm::rotate(glm::mat4(1.f), glm::radians(-90.f), {1.f, 0.f, 0.f}),
-                                       elapsedTime, {0.f, 0.f, 1.f});
+        const auto model = glm::rotate(glm::mat4(1.f), elapsedTime, {0.f, 1.f, 0.f});
         renderPass->SetTransformData({viewProjMat * model});
         renderPass->UpdateBuffers();
 
@@ -67,8 +68,8 @@ void Renderer::Render()
         renderPass->Begin(vk::EQueueType::Graphics);
         for (const auto& mesh : staticMeshes)
         {
-            renderPass->SetMesh(mesh.Mesh);
-            renderPass->SetTextureDescriptor(mesh.Material->BaseTexture);
+            renderPass->SetMesh(mesh);
+            renderPass->SetTextureDescriptor(mesh->GetMaterial()->BaseTexture);
             renderPass->Render();
         }
         renderPass->End();
@@ -163,9 +164,18 @@ void Renderer::Startup()
 
     basicPipeline = std::make_unique<vk::Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
-    //staticMeshes    = asset::LoadModel("Homura", "Assets/Models/homura/homura_v1.MODEL", handleManager, vulkanContext);
-    const auto proj = math::PerspectiveYFlipped(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
-    viewProjMat     = proj * glm::lookAt(glm::vec3{1.5f, 160.f, -150.f}, {0.f, 70.f, 0.f}, {0.f, 1.f, 0.f});
+    //asset::ModelImportConfig config{.bFlipUVs = true, .bPretransformVertices = true};
+    //asset::ModelImporter::Import("Assets/Models/homura/homura.fbx", config);
+    //asset::TextureImporter::Import("Assets/Textures/Hair.png", {});
+    //asset::TextureImporter::Import("Assets/Textures/Costume.png", {});
+    //asset::TextureImporter::Import("Assets/Textures/Other.png", {});
+    //asset::TextureImporter::Import("Assets/Textures/Body.png", {});
+    auto model = handleManager.Add<asset::Model>("Assets/Models/homura/homura.fbx", handleManager, vulkanContext);
+    SY_ASSERT(model->Initialize(), "Failed to init model.");
+    staticMeshes = model->GetMeshes();
+
+    const auto proj = glm::perspective(glm::radians(90.f), 16.f / 9.f, 0.1f, 1000.f);
+    viewProjMat     = proj * glm::lookAt(glm::vec3{0, 100.f, -80.f}, {0.f, 80.0f, 0.f}, {0.f, 1.f, 0.f});
 
     renderPass = std::make_unique<SimpleRenderPass>("Simple Render Pass", vulkanContext, *basicPipeline);
 }

@@ -2,8 +2,6 @@
 #include <Application/Context.h>
 #include <Core/CommandLineParser.h>
 #include <Window/WindowBuilder.h>
-#include <Asset/TextureImporter.h>
-#include <Asset/ModelImporter.h>
 #include <catch.hpp>
 
 int main(int argc, char** argv)
@@ -32,10 +30,6 @@ int main(int argc, char** argv)
     app::Context context{*cmdLineParser, window::WindowBuilder{}};
 
     context.Startup();
-    asset::TextureImporter::Import("Assets/Textures/Body.png", {});
-    asset::ModelImporter::Import("Assets/Models/homura/homura.fbx",
-                                 {
-                                 });
     context.Run();
     context.Shutdown();
 

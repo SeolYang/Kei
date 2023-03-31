@@ -5,10 +5,10 @@ namespace sy::asset
 {
 struct ModelImportConfig
 {
-    const bool          bGenMaterialPerMesh  = true;
+    const bool          bGenMaterialPerMesh  = false;
     render::EVertexType VertexType           = render::EVertexType::PT0N;
     const bool          bEnableCompression   = true;
-    const bool          bEnableOptimization  = true;
+    const bool          bEnableOptimization  = false;
     const bool          bConvertToLeftHanded = false;
     const bool          bFlipWingdingOrder   = false;
     const bool          bFlipUVs             = false;

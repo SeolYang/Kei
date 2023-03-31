@@ -82,15 +82,16 @@ bool Model::InitializeBlob(const std::vector<uint8_t> blob)
             const size_t sizeOfVertex = SizeOfVertex(GetVertexType());
 
             std::vector<uint8_t> meshVerticesBlob;
-            meshVerticesBlob.resize(sizeOfVertex * meshData.NumVertices);
             std::vector<uint8_t> meshIndicesBlob;
-            meshIndicesBlob.resize(sizeof(render::IndexType) * meshData.NumIndices);
 
             const auto meshVerticesBlobSubspan = verticesBlobSpan.subspan(meshData.VerticesBlobRange.Offset, meshData.VerticesBlobRange.Size);
             const auto meshIndicesBlobSubspan  = indicesBlobSpan.subspan(meshData.IndicesBlobRange.Offset, meshData.IndicesBlobRange.Size);
 
             if (IsCompressed())
             {
+                meshVerticesBlob.resize(sizeOfVertex * meshData.NumVertices);
+                meshIndicesBlob.resize(sizeof(render::IndexType) * meshData.NumIndices);
+
                 int result = meshopt_decodeVertexBuffer(
                     meshVerticesBlob.data(),
                     meshData.NumVertices, sizeOfVertex,
@@ -125,13 +126,13 @@ bool Model::InitializeBlob(const std::vector<uint8_t> blob)
                 meshData.NumVertices,
                 vk::BufferBuilder::VertexBufferTemplate(vulkanContext)
                     .SetName(std::format("{}_VertexBuffer", formattedMeshName))
-                    .SetDataToTransfer(VecToConstSpan(meshVerticesBlob))
+                    .SetDataToTransferWithSize(VecToConstSpan(meshVerticesBlob))
                     .Build(),
 
                 meshData.NumIndices,
                 vk::BufferBuilder::IndexBufferTemplate(vulkanContext)
-                    .SetName(std::format("{}_IndexBuffer"))
-                    .SetDataToTransfer(VecToConstSpan(meshIndicesBlob))
+                    .SetName(std::format("{}_IndexBuffer", formattedMeshName))
+                    .SetDataToTransferWithSize(VecToConstSpan(meshIndicesBlob))
                     .Build(),
 
                 material);
@@ -182,7 +183,7 @@ void Model::Deserialize(const json& root)
     size_t idx = 0;
     for (const auto& serializeMeshData : serializeMeshDataList)
     {
-        meshDataList[idx].Deserialize(root);
+        meshDataList[idx].Deserialize(serializeMeshData);
         ++idx;
     }
 
@@ -196,7 +197,8 @@ nlohmann::json Model::Mesh::Serialize() const
     namespace predefined_key = asset::constants::metadata::key;
 
     nlohmann::json root;
-    root[predefined_key::MaterialAsset] = this->MaterialAssetPath;
+    root[predefined_key::Name]          = Name;
+    root[predefined_key::MaterialAsset] = this->MaterialAssetPath.string();
 
     json serializedVerticesRange;
     serializedVerticesRange[predefined_key::Offset] = this->VerticesBlobRange.Offset;
@@ -211,7 +213,6 @@ nlohmann::json Model::Mesh::Serialize() const
     root[predefined_key::NumVertices] = NumVertices;
     root[predefined_key::NumIndices]  = NumIndices;
 
-	root[predefined_key::Name] = Name;
     return root;
 }
 

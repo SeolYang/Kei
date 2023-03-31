@@ -64,6 +64,7 @@
 #include <taskflow/taskflow.hpp>
 
 /** glm */
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -74,11 +75,11 @@
 /** lz4 compression */
 #include <lz4.h>
 
-/** nlohmann-json */
+/** json */
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
-/** stduuid */
+/** std-uuid */
 #include <stduuid/uuid.h>
 
 /** magic-enum */

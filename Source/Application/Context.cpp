@@ -140,7 +140,7 @@ void Context::InitDefaultEngineResources()
         *vulkanContext,
         *defaultWhiteTex,
         VK_IMAGE_VIEW_TYPE_2D);
-	defaultWhiteTex.SetAlias(core::constants::res::DefaultWhiteTexture);
+    defaultWhiteTex.SetAlias(core::constants::res::DefaultWhiteTexture);
 
     auto& descriptorManager = vulkanContext->GetDescriptorManager();
 
@@ -151,7 +151,7 @@ void Context::InitDefaultEngineResources()
             defaultWhiteTexView,
             linearSampler,
             vk::ETextureState::AnyShaderReadSampledImage));
-	defaultWhiteDescriptor.SetAlias(core::constants::res::DefaultWhiteTexture);
+    defaultWhiteDescriptor.SetAlias(core::constants::res::DefaultWhiteTexture);
 
     auto defaultMaterial =
         handleManager->Add<render::Material>(defaultWhiteDescriptor);

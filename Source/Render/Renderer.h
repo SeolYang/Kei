@@ -64,6 +64,6 @@ private:
     glm::mat4 viewProjMat;
     float     elapsedTime;
 
-    std::vector<component::StaticMeshComponent> staticMeshes;
+    std::span<const Handle<render::Mesh>> staticMeshes;
 };
 } // namespace sy::render

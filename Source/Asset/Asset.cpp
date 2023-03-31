@@ -20,60 +20,62 @@ bool Asset::Initialize()
         return false;
     }
 
-	BeginInit();
-	{
-        if (!fs::exists(assetPath))
+    BeginInit();
+    {
+        if (!bIsExternalFormat)
         {
-            spdlog::error("Asset {} doest not exist.", assetPath.string());
-            return false;
-        }
-
-        BeginDeserialize();
-        {
-            const json root = LoadJsonFromFile(assetPath);
-            Deserialize(root);
-        }
-        EndDeserialize();
-
-        if (!bIgnoreBlob)
-        {
-            if (!fs::exists(blobPath))
+            if (!fs::exists(assetPath))
             {
-                spdlog::error("Blob {} does not exist.", blobPath.string());
+                spdlog::error("Asset {} doest not exist.", assetPath.string());
                 return false;
             }
 
-			BeginInitBlob();
-			{
-                const auto blob = LoadBlobFromFile(blobPath);
-                if (!InitializeBlob(blob))
+            BeginDeserialize();
+            {
+                const json root = LoadJsonFromFile(assetPath);
+                Deserialize(root);
+            }
+            EndDeserialize();
+
+            if (!bIgnoreBlob)
+            {
+                if (!fs::exists(blobPath))
                 {
-                    spdlog::error("Failed to initialize blob {}.", blobPath.string());
+                    spdlog::error("Blob {} does not exist.", blobPath.string());
                     return false;
                 }
-			}
-            EndInitBlob();
-        }
 
-		if (bIsExternalFormat)
-		{
-			if (!fs::exists(originPath))
-			{
+                BeginInitBlob();
+                {
+                    const auto blob = LoadBlobFromFile(blobPath);
+                    if (!InitializeBlob(blob))
+                    {
+                        spdlog::error("Failed to initialize blob {}.", blobPath.string());
+                        return false;
+                    }
+                }
+                EndInitBlob();
+            }
+        }
+        else
+        {
+            if (!fs::exists(originPath))
+            {
                 spdlog::error("External asset {} does not exist.", originPath.string());
                 return false;
-			}
+            }
 
-			BeginInitExternal();
-			{
-				if (!InitializeExternal())
-				{
+            BeginInitExternal();
+            {
+                if (!InitializeExternal())
+                {
                     spdlog::error("Failed to initialize external asset {}.", assetPath.string());
                     return false;
-				}
-			}
+                }
+            }
             EndInitExternal();
-		}
-	}
+        }
+    }
     EndInit();
 
     MarkAsInitialized();

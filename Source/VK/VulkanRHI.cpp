@@ -57,6 +57,7 @@ void VulkanRHI::Startup()
                                  .add_required_extension(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
                                  .add_required_extension(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME)
                                  .add_required_extension(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME)
+                                 .add_required_extension(VK_KHR_MAINTENANCE1_EXTENSION_NAME)
                                  .select()
                                  .value();
 

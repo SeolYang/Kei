@@ -1,6 +1,7 @@
 #include <PCH.h>
 #include <Asset/MaterialAsset.h>
 #include <Asset/TextureAsset.h>
+#include <Render/Material.h>
 
 namespace sy::asset
 {
@@ -10,8 +11,12 @@ Material::Material(const fs::path& path, const RefOptional<HandleManager> handle
     vulkanContext(vulkanContext)
 {
     EnableIgnoreBlob();
+    MarkAsExternalFormat();
 }
 
+Material::~Material()
+{
+}
 
 json Material::Serialize() const
 {
@@ -32,18 +37,26 @@ bool Material::InitializeBlob(const std::vector<uint8_t> blob)
     return true;
 }
 
-void Material::EndDeserialize()
+bool Material::InitializeExternal()
 {
+	if (!fs::exists(GetOriginPath()))
+	{
+        SY_ASSERT(false, "Material {} does not exist.", GetOriginPath().string());
+        return false;
+	}
+
+	Deserialize(LoadJsonFromFile(GetOriginPath()));
+
     if (!handleManager)
     {
         SY_ASSERT(false, "Trying to initialize model without HandleManager.");
-        return;
+        return false;
     }
 
     if (!vulkanContext)
     {
         SY_ASSERT(false, "Trying to initialize model without VulkanContext.");
-        return;
+        return false;
     }
 
     auto& handleManager = this->handleManager->get();
@@ -81,5 +94,11 @@ void Material::EndDeserialize()
             baseTextureDescriptor = handleManager.QueryAlias<vk::Descriptor>(core::constants::res::DefaultWhiteTexture);
         }
     }
+
+	this->material = handleManager.Add<render::Material>(baseTextureDescriptor);
+    this->material.SetAlias(GetExtensionlessPath().string());
+
+	return true;
 }
+
 } // namespace sy::asset

@@ -22,9 +22,10 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
     const size_t sizeOfIndex  = sizeof(render::IndexType);
 
     uint32_t importFlags = aiProcess_Triangulate;
-    importFlags |= (config.bFlipWingdingOrder || config.bConvertToLeftHanded ? aiProcess_FlipWindingOrder : 0);
-    importFlags |= (config.bFlipUVs || config.bConvertToLeftHanded ? aiProcess_FlipUVs : 0);
-    importFlags |= (config.bMakeLeftHanded || config.bConvertToLeftHanded ? aiProcess_MakeLeftHanded : 0);
+    importFlags |= (config.bFlipWingdingOrder ? aiProcess_FlipWindingOrder : 0);
+    importFlags |= (config.bFlipUVs ? aiProcess_FlipUVs : 0);
+    importFlags |= (config.bMakeLeftHanded ? aiProcess_MakeLeftHanded : 0);
+    importFlags |= (config.bConvertToLeftHanded ? aiProcess_ConvertToLeftHanded : 0);
     importFlags |= (config.bGenUVCoords ? aiProcess_GenUVCoords : 0);
     importFlags |= (config.bGenNormals ? aiProcess_GenNormals : 0);
     importFlags |= (config.bGenSmoothNormals ? aiProcess_GenSmoothNormals : 0);
@@ -72,14 +73,13 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
         meshIndicesBlob.resize(sizeof(render::IndexType) * numMeshIndices);
 
         /** Process Mesh vertices */
+        uint8_t* verticesBase = meshVerticesBlob.data();
         for (size_t vIdx = 0; vIdx < numMeshVertices; ++vIdx)
         {
-            const size_t vertexByteOffset = +vIdx * sizeOfVertex;
-            uint8_t*     vertexBase       = meshVerticesBlob.data() + vertexByteOffset;
             if (const auto colorAttributeRange = QueryRangeOfVertexAttribute(config.VertexType, render::EVertexAttributeType::Color);
                 colorAttributeRange)
             {
-                if (const auto colorAttribute = colorAttributeRange->CastTo<glm::vec4>(vertexBase);
+                if (const auto colorAttribute = colorAttributeRange->CastTo<glm::vec4>(verticesBase);
                     colorAttribute)
                 {
                     glm::vec4& color = colorAttribute->get();
@@ -93,7 +93,7 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
             if (const auto posAttributeRange = QueryRangeOfVertexAttribute(config.VertexType, render::EVertexAttributeType::Position);
                 posAttributeRange)
             {
-                if (const auto posAttribute = posAttributeRange->CastTo<glm::vec3>(vertexBase);
+                if (const auto posAttribute = posAttributeRange->CastTo<glm::vec3>(verticesBase);
                     posAttribute)
                 {
                     glm::vec3& pos = posAttribute->get();
@@ -106,7 +106,7 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
             if (const auto texCoords0AttributeRange = QueryRangeOfVertexAttribute(config.VertexType, render::EVertexAttributeType::TexCoords0);
                 texCoords0AttributeRange)
             {
-                if (const auto texCoords0Attribute = texCoords0AttributeRange->CastTo<glm::vec2>(vertexBase);
+                if (const auto texCoords0Attribute = texCoords0AttributeRange->CastTo<glm::vec2>(verticesBase);
                     texCoords0Attribute)
                 {
                     glm::vec2& texCoords = texCoords0Attribute->get();
@@ -118,7 +118,7 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
             if (const auto normalAttributeRange = QueryRangeOfVertexAttribute(config.VertexType, render::EVertexAttributeType::Normal);
                 normalAttributeRange)
             {
-                if (const auto normalAttribute = normalAttributeRange->CastTo<glm::vec3>(vertexBase))
+                if (const auto normalAttribute = normalAttributeRange->CastTo<glm::vec3>(verticesBase))
                 {
                     glm::vec3& normal = normalAttribute->get();
                     normal.x          = mesh->mNormals[vIdx].x;
@@ -130,7 +130,7 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
             if (const auto bitangentAttributeRange = QueryRangeOfVertexAttribute(config.VertexType, render::EVertexAttributeType::Bitangent);
                 bitangentAttributeRange)
             {
-                if (const auto bitangentAttribute = bitangentAttributeRange->CastTo<glm::vec3>(vertexBase);
+                if (const auto bitangentAttribute = bitangentAttributeRange->CastTo<glm::vec3>(verticesBase);
                     bitangentAttribute)
                 {
                     glm::vec3& bitangent = bitangentAttribute->get();
@@ -143,7 +143,7 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
             if (const auto tangentAttributeRange = QueryRangeOfVertexAttribute(config.VertexType, render::EVertexAttributeType::Tangent);
                 tangentAttributeRange)
             {
-                if (const auto tangentAttribute = tangentAttributeRange->CastTo<glm::vec3>(vertexBase);
+                if (const auto tangentAttribute = tangentAttributeRange->CastTo<glm::vec3>(verticesBase);
                     tangentAttribute)
                 {
                     glm::vec3& tangent = tangentAttribute->get();
@@ -152,9 +152,12 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
                     tangent.z          = mesh->mTangents[vIdx].z;
                 }
             }
+
+            verticesBase += sizeOfVertex;
         }
 
         /** Process Mesh indices */
+        uint8_t* indicesBase = meshIndicesBlob.data();
         for (size_t fIdx = 0; fIdx < mesh->mNumFaces; ++fIdx)
         {
             const auto& face = mesh->mFaces[fIdx];
@@ -162,12 +165,12 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
             SY_ASSERT(face.mNumIndices == NumIndicesPerTriangulatedFace, "Model isn't triangulated.");
             for (size_t idx = 0; idx < NumIndicesPerTriangulatedFace; ++idx)
             {
-                const size_t        indexOffset = TriangulatedNumFacesToNumIndices(fIdx + idx);
-                uint8_t*            indexBase   = meshIndicesBlob.data();
-                const Range<size_t> indexRange{indexOffset, sizeof(render::IndexType)};
+                const Range<size_t> indexRange{0, sizeof(render::IndexType)};
 
-                auto& index = indexRange.CastTo<render::IndexType>(indexBase)->get();
+                auto& index = indexRange.CastTo<render::IndexType>(indicesBase)->get();
                 index       = face.mIndices[idx];
+
+                indicesBase += sizeof(render::IndexType);
             }
         }
 
