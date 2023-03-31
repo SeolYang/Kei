@@ -29,7 +29,16 @@ public:
 
     /** Rasterization State */
 
+	/** 
+	* Deal with flipped y-axis in vulkan coordinate system.
+	* https://www.saschawillems.de/blog/2019/03/29/flipping-the-vulkan-viewport/
+	*/
     GraphicsPipelineBuilder& AddViewport(VkViewport viewport);
+
+	/** 
+	* Deal with flipped y-axis in vulkan coordinate system.
+	* https://www.saschawillems.de/blog/2019/03/29/flipping-the-vulkan-viewport/
+	*/
     GraphicsPipelineBuilder& AddViewport(float x, float y, float width, float height, float minDepth, float maxDepth);
 
     GraphicsPipelineBuilder& AddScissor(VkRect2D scissor);

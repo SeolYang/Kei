@@ -132,6 +132,8 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetPatchControlPoints(uint32_t
 
 GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddViewport(VkViewport viewport)
 {
+    viewport.y += viewport.height;
+    viewport.height *= -1.f;
     viewports.emplace_back(viewport);
     ++viewportState.viewportCount;
     viewportState.pViewports = viewports.data();
@@ -140,7 +142,7 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddViewport(VkViewport viewpor
 
 GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddViewport(float x, float y, float width, float height, float minDepth, float maxDepth)
 {
-    viewports.emplace_back(x, y, width, height, minDepth, maxDepth);
+    viewports.emplace_back(x, y + height, width, -height, minDepth, maxDepth);
     ++viewportState.viewportCount;
     viewportState.pViewports = viewports.data();
     return *this;
