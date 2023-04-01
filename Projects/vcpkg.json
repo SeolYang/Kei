@@ -2,31 +2,27 @@
     "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
     "name": "kei",
     "version": "0.0.1",
-    "dependencies": [
-      "vulkan-headers",
-      "vulkan",
-      "vulkan-memory-allocator",
-      {
-        "name" : "sdl2",
-        "features": ["vulkan"]
-      },
-      "vk-bootstrap",
-      "spirv-reflect",
-      "imgui",
-      "tinygltf",
-      "assimp",
-      "meshoptimizer",
-      "stb",
-      "glm",
-      "robin-hood-hashing",
-      "nlohmann-json",
-      "magic-enum",
-      "spdlog",
-      "entt",
-      "lz4",
-      "sdl2-mixer",
-      "taskflow",
-      "catch2",
-      "stduuid"
-    ]
-  }
+  "dependencies": [
+    "vulkan-memory-allocator",
+    {
+      "name": "sdl2",
+      "features": [ "vulkan" ]
+    },
+    "vk-bootstrap",
+    "imgui",
+    "assimp",
+    "meshoptimizer",
+    "stb",
+    "glm",
+    "robin-hood-hashing",
+    "nlohmann-json",
+    "magic-enum",
+    "spdlog",
+    "entt",
+    "sdl2-mixer",
+    "catch2",
+    "stduuid",
+    "spirv-headers",
+    "spirv-reflect"
+  ]
+}

@@ -43,6 +43,7 @@
 #include <vk_mem_alloc.h>
 
 /** Spirv-reflect */
+#define SPIRV_REFLECT_USE_SYSTEM_SPIRV_H
 #include <spirv_reflect.h>
 
 /** robinhood hash */
@@ -60,9 +61,6 @@
 /** entt */
 #include <entt/entt.hpp>
 
-/** taskflow */
-#include <taskflow/taskflow.hpp>
-
 /** glm */
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
@@ -71,9 +69,6 @@
 
 /** stbi */
 #include <stb_image.h>
-
-/** lz4 compression */
-#include <lz4.h>
 
 /** json */
 #include <nlohmann/json.hpp>
@@ -94,9 +89,6 @@ using json = nlohmann::json;
 
 /** mesh optimizer */
 #include <meshoptimizer.h>
-
-/** Tiny gltf */
-#include <tiny_gltf.h>
 
 /** Internal - Core */
 #include <Core/Types.h>

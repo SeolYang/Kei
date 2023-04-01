@@ -1,4 +1,5 @@
 #include <PCH.h>
+#include <encoder/basisu_enc.h>
 #include <Asset/TextureImporter.h>
 #include <Asset/TextureAsset.h>
 
