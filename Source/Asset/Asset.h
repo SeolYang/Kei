@@ -33,7 +33,6 @@ public:
     [[nodiscard]] const fs::path& GetBlobPath() const { return blobPath; }
     [[nodiscard]] const fs::path& GetExtensionlessPath() const { return extensionlessPath; }
 
-
     bool Initialize();
 
     [[nodiscard]] virtual json Serialize() const;
@@ -43,6 +42,7 @@ protected:
     void EnableIgnoreBlob() { bIgnoreBlob = true; }
     /** #consideration : Take into account usage of '.ktx' format for texture. */
     void MarkAsExternalFormat() { bIsExternalFormat = true; }
+    void AllowUsingMetadataForExternalFormat() { bAllowUsingMetadataForExternalFormat = true; }
     void MarkAsInitialized() { bInitialized = true; }
 
     virtual void BeginInit() {}
@@ -60,6 +60,7 @@ protected:
 private:
     bool           bIgnoreBlob       = false;
     bool           bIsExternalFormat = false;
+    bool           bAllowUsingMetadataForExternalFormat = false;
     bool           bInitialized      = false;
     const fs::path originPath;
     const fs::path extensionlessPath;

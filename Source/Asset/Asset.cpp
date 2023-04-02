@@ -22,8 +22,9 @@ bool Asset::Initialize()
 
     BeginInit();
     {
-        if (!bIsExternalFormat)
-        {
+        const bool bRequiredDeserialization = !bIsExternalFormat || bAllowUsingMetadataForExternalFormat;
+		if (bRequiredDeserialization)
+		{
             if (!fs::exists(assetPath))
             {
                 spdlog::error("Asset {} doest not exist.", assetPath.string());
@@ -36,7 +37,10 @@ bool Asset::Initialize()
                 Deserialize(root);
             }
             EndDeserialize();
+		}
 
+        if (!bIsExternalFormat)
+        {
             if (!bIgnoreBlob)
             {
                 if (!fs::exists(blobPath))

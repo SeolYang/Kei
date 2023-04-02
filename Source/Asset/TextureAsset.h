@@ -2,6 +2,7 @@
 #include <PCH.h>
 #include <Asset/Asset.h>
 #include <Core/Constants.h>
+#include <Asset/TextureAssetEnums.h>
 
 namespace sy::vk
 {
@@ -13,23 +14,6 @@ class Sampler;
 
 namespace sy::asset
 {
-enum class ETextureCompressionMode
-{
-    BC4,  /** Recommend to 'Gray-scale'		#NotImplementedYet */
-    BC5,  /** Recommend to 'Normal Map'		#NotImplementedYet */
-    BC6H, /** Recommend to 'HDR Texture'	#NotImplementedYet */
-    BC7,  /** Recommend to 'Texture'		#NotImplementedYet */
-    ETC2, /** Recommend to 'Texture'		#NotImplementedYet */
-    None,
-};
-
-enum class ETextureCompressionQuality
-{
-    Low,
-    Medium,
-    High
-};
-
 class Texture : public Asset
 {
 public:
@@ -38,15 +22,17 @@ public:
 
     [[nodiscard]] size_t GetTypeHash() const override { return TypeHash<Texture>; }
 
-    [[nodiscard]] auto GetDescriptor() const { return descriptor; }
-    [[nodiscard]] auto GetCompressionMode() const { return compressionMode; }
-    [[nodiscard]] auto GetCompressionQuality() const { return compressionQuality; }
-    [[nodiscard]] auto GetExtent() const { return extent; }
-    [[nodiscard]] auto GetFormat() const { return format; }
+    [[nodiscard]] auto             GetDescriptor() const { return descriptor; }
+    [[nodiscard]] auto             GetCompressionMode() const { return compressionMode; }
+    [[nodiscard]] auto             GetCompressionQuality() const { return compressionQuality; }
+    [[nodiscard]] auto             GetQuality() const { return quality; }
+    [[nodiscard]] auto             GetExtent() const { return extent; }
+    [[nodiscard]] auto             GetFormat() const { return format; }
     [[nodiscard]] std::string_view GetSamplerAlias() const { return sampler.GetAlias(); }
 
     void SetCompressionMode(const ETextureCompressionMode mode) { this->compressionMode = mode; }
     void SetCompressQuality(const ETextureCompressionQuality quality) { this->compressionQuality = quality; }
+    void SetQuality(const ETextureQuality quality) { this->quality = quality; }
     void SetExtent(const Extent2D<uint32_t> extent) { this->extent = extent; }
     void SetFormat(const VkFormat format) { this->format = format; }
     void SetSampler(const std::string_view sampler) { this->samplerAlias = sampler; }
@@ -61,6 +47,7 @@ private:
     /** Metadata */
     ETextureCompressionMode    compressionMode    = ETextureCompressionMode::None;
     ETextureCompressionQuality compressionQuality = ETextureCompressionQuality::High;
+    ETextureQuality            quality            = ETextureQuality::High;
     Extent2D<uint32_t>         extent             = Extent2D<uint32_t>{1, 1};
     VkFormat                   format             = VK_FORMAT_UNDEFINED;
     std::string_view           samplerAlias       = core::constants::res::TrilinearRepeatSampler;

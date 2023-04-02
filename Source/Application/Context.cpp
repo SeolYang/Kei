@@ -1,14 +1,4 @@
 #include <PCH.h>
-#include "transcoder/basisu.h"
-#include "transcoder/basisu_transcoder_internal.h"
-#include "encoder/basisu_enc.h"
-#include "encoder/basisu_etc.h"
-#include "encoder/basisu_gpu_texture.h"
-#include "encoder/basisu_frontend.h"
-#include "encoder/basisu_backend.h"
-#include "encoder/basisu_comp.h"
-#include "transcoder/basisu_transcoder.h"
-#include "encoder/basisu_ssim.h"
 #include <Application/Context.h>
 #include <Core/Constants.h>
 #include <Core/CommandLineParser.h>

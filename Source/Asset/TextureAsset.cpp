@@ -13,6 +13,8 @@ Texture::Texture(const fs::path& path, RefOptional<HandleManager> handleManager,
     handleManager(handleManager),
     vulkanContext(vulkanContext)
 {
+    MarkAsExternalFormat();
+    AllowUsingMetadataForExternalFormat();
 }
 
 json Texture::Serialize() const
@@ -23,6 +25,7 @@ json Texture::Serialize() const
     // #todo Unified method to serialization method.
     root[predefined_key::CompressionMode]    = magic_enum::enum_name(compressionMode);
     root[predefined_key::CompressionQuality] = magic_enum::enum_name(compressionQuality);
+    root[predefined_key::Quality]            = magic_enum::enum_name(quality);
     root[predefined_key::Extent]             = std::make_pair(extent.width, extent.height);
     root[predefined_key::Format]             = magic_enum::enum_name(format);
     root[predefined_key::Sampler]            = this->samplerAlias;
@@ -44,7 +47,12 @@ void Texture::Deserialize(const json& root)
     this->compressionQuality = ResolveEnumFromJson(
         root,
         predefined_key::CompressionQuality,
-        ETextureCompressionQuality::Medium);
+        ETextureCompressionQuality::High);
+
+	this->quality = ResolveEnumFromJson(
+		root, 
+		predefined_key::Quality,
+		ETextureQuality::High);
 
     const std::pair<decltype(extent.width), decltype(extent.height)> extentPair = root[predefined_key::Extent];
 

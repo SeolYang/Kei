@@ -330,6 +330,9 @@
     <ClInclude Include="..\Source\Core\Constants.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Asset\TextureAssetEnums.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Assets\Shaders\tri.vert">

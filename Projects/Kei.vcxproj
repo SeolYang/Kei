@@ -79,6 +79,7 @@
     <ClInclude Include="..\Source\Asset\ModelAsset.h" />
     <ClInclude Include="..\Source\Asset\ModelImporter.h" />
     <ClInclude Include="..\Source\Asset\TextureAsset.h" />
+    <ClInclude Include="..\Source\Asset\TextureAssetEnums.h" />
     <ClInclude Include="..\Source\Asset\TextureImporter.h" />
     <ClInclude Include="..\Source\Audio\AudioContext.h" />
     <ClInclude Include="..\Source\Component\StaticMeshComponent.h" />
@@ -197,13 +198,17 @@
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <VcpkgInstalledDir>vcpkg_installed</VcpkgInstalledDir>
+    <VcpkgInstalledDir>vcpkg_dir</VcpkgInstalledDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'" Label="Vcpkg">
-    <VcpkgInstalledDir>vcpkg_installed</VcpkgInstalledDir>
+    <VcpkgInstalledDir>vcpkg_dir</VcpkgInstalledDir>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <VcpkgInstalledDir>vcpkg_installed</VcpkgInstalledDir>
+    <VcpkgInstalledDir>vcpkg_dir</VcpkgInstalledDir>
+    <VcpkgUseMD>
+    </VcpkgUseMD>
+    <VcpkgTriplet>
+    </VcpkgTriplet>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -215,18 +220,20 @@
       <PrecompiledHeaderFile>PCH.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source;$(SolutionDir)..\Thirdparty\volk;$(Vulkan_SDK)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source;$(Vulkan_SDK)\include;$(SolutionDir)..\Thirdparty\volk;$(SolutionDir)..\Thirdparty\libktx</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(VcpkgManifestRoot)\vcpkg_installed\x64-windows\lib\manual-link</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\Thirdparty\libktx\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ktx.lib;SDL2Maind.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(ProjectDir)..\Assets" "$(TargetDir)Assets" /e /d /r /i /y</Command>
+      <Command>xcopy "$(ProjectDir)..\Assets" "$(TargetDir)Assets" /e /d /r /i /y
+xcopy "$(ProjectDir)..\Thirdparty\libktx\$(Configuration)\ktx.dll" "$(TargetDir)" /e /d /r /i /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'">
@@ -239,18 +246,19 @@
       <PrecompiledHeaderFile>PCH.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source;$(SolutionDir)..\Thirdparty\volk;$(Vulkan_SDK)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source;$(Vulkan_SDK)\include;$(SolutionDir)..\Thirdparty\volk;$(SolutionDir)..\Thirdparty\libktx</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(VcpkgManifestRoot)\vcpkg_installed\x64-windows\lib\manual-link</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VcpkgManifestRoot)\vcpkg_installed\x64-windows\lib\manual-link;$(ProjectDir)..\Thirdparty\libktx\Debug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2main.lib;ktx.lib;Catch2Main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(ProjectDir)..\Assets" "$(TargetDir)Assets" /e /d /r /i /y</Command>
+      <Command>xcopy "$(ProjectDir)..\Assets" "$(TargetDir)Assets" /e /d /r /i /y
+xcopy "$(ProjectDir)..\Thirdparty\libktx\Debug\ktx.dll" "$(TargetDir)" /e /d /r /i /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -265,7 +273,7 @@
       <PrecompiledHeaderFile>PCH.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source;$(SolutionDir)..\Thirdparty\volk;$(Vulkan_SDK)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source;$(Vulkan_SDK)\include;$(SolutionDir)..\Thirdparty\volk;$(SolutionDir)..\Thirdparty\libktx</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -273,12 +281,14 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(VcpkgManifestRoot)\vcpkg_installed\x64-windows\lib\manual-link</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\Thirdparty\libktx\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ktx.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(ProjectDir)..\Assets" "$(TargetDir)Assets" /e /d /r /i /y</Command>
+      <Command>xcopy "$(ProjectDir)..\Assets" "$(TargetDir)Assets" /e /d /r /i /y
+xcopy "$(ProjectDir)..\Thirdparty\libktx\$(Configuration)\ktx.dll" "$(TargetDir)" /e /d /r /i /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
