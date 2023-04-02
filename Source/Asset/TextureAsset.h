@@ -41,7 +41,8 @@ public:
     void               Deserialize(const nlohmann::json& serializedMetadata) override;
 
 private:
-    bool InitializeBlob(std::vector<uint8_t> blob) override;
+    bool InitializeBlob(std::span<const uint8_t> blob);
+    bool InitializeExternal() override;
 
 private:
     /** Metadata */

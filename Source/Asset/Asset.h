@@ -54,7 +54,7 @@ protected:
     virtual void BeginInitExternal() {}
     virtual void EndInitExternal() {}
 
-    virtual bool InitializeBlob(std::vector<uint8_t> blob) = 0;
+    virtual bool InitializeBlob(std::vector<uint8_t> blob) { return false; }
     virtual bool InitializeExternal() { return false; }
 
 private:

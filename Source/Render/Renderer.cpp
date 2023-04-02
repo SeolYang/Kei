@@ -168,10 +168,10 @@ void Renderer::Startup()
     //asset::ModelImporter::Import("Assets/Models/homura/homura.fbx", config);
     //asset::TextureImporter::Import("Assets/Textures/Hair.png", {});
     //asset::TextureImporter::Import("Assets/Textures/Costume.png", {});
-    asset::TextureImporter::Import("Assets/Textures/Other.png", {});
+    //asset::TextureImporter::Import("Assets/Textures/Other.png", {});
     //asset::TextureImporter::Import("Assets/Textures/Body.png", {});
     auto model = handleManager.Add<asset::Model>("Assets/Models/homura/homura.fbx", handleManager, vulkanContext);
-    //SY_ASSERT(model->Initialize(), "Failed to init model.");
+    SY_ASSERT(model->Initialize(), "Failed to init model.");
     staticMeshes = model->GetMeshes();
 
     const auto proj = glm::perspective(glm::radians(90.f), 16.f / 9.f, 0.1f, 1000.f);

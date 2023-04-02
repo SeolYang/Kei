@@ -5,6 +5,7 @@
 #include <VK/TextureView.h>
 #include <VK/Sampler.h>
 #include <VK/DescriptorManager.h>
+#include <ktx.h>
 
 namespace sy::asset
 {
@@ -49,10 +50,10 @@ void Texture::Deserialize(const json& root)
         predefined_key::CompressionQuality,
         ETextureCompressionQuality::High);
 
-	this->quality = ResolveEnumFromJson(
-		root, 
-		predefined_key::Quality,
-		ETextureQuality::High);
+    this->quality = ResolveEnumFromJson(
+        root,
+        predefined_key::Quality,
+        ETextureQuality::High);
 
     const std::pair<decltype(extent.width), decltype(extent.height)> extentPair = root[predefined_key::Extent];
 
@@ -67,7 +68,7 @@ void Texture::Deserialize(const json& root)
     this->samplerAlias = root[predefined_key::Sampler];
 }
 
-bool Texture::InitializeBlob(std::vector<uint8_t> blob)
+bool Texture::InitializeBlob(const std::span<const uint8_t> blob)
 {
     if (!handleManager)
     {
@@ -91,7 +92,7 @@ bool Texture::InitializeBlob(std::vector<uint8_t> blob)
             .SetName(name)
             .SetFormat(this->format)
             .SetExtent(extent)
-            .SetDataToTransfer(VecToConstSpan(blob))
+            .SetDataToTransfer(blob)
             .Build());
 
     if (!this->texture)
@@ -106,12 +107,12 @@ bool Texture::InitializeBlob(std::vector<uint8_t> blob)
         *(this->texture),
         VK_IMAGE_VIEW_TYPE_2D);
 
-	this->sampler = handleManager.QueryAlias<vk::Sampler>(samplerAlias);
-	if (!this->sampler)
-	{
+    this->sampler = handleManager.QueryAlias<vk::Sampler>(samplerAlias);
+    if (!this->sampler)
+    {
         /** #fallback #1 : Attempt to load engine default trilinear sampler. */
         this->sampler = handleManager.QueryAlias<vk::Sampler>(core::constants::res::TrilinearRepeatSampler);
-	}
+    }
 
     auto& descriptorManager = vulkanContext.GetDescriptorManager();
     this->descriptor        = handleManager.Add<vk::Descriptor>(
@@ -123,4 +124,62 @@ bool Texture::InitializeBlob(std::vector<uint8_t> blob)
 
     return this->texture.IsValid();
 }
+
+bool Texture::InitializeExternal()
+{
+    using UniqueKtxTexture2 = std::unique_ptr<ktxTexture2, std::function<void(ktxTexture2*)>>;
+    UniqueKtxTexture2 externalTexture;
+    {
+        const std::string pathStr = GetOriginPath().string();
+
+        ktxTexture2*           raw    = nullptr;
+        const ktx_error_code_e result = ktxTexture_CreateFromNamedFile(
+            pathStr.c_str(),
+            KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT,
+            reinterpret_cast<ktxTexture**>(&raw));
+        if (result != KTX_SUCCESS)
+        {
+            spdlog::error("Failed to load ktx texture from {}. Error: {}", pathStr, magic_enum::enum_name<ktx_error_code_e>(result));
+            return false;
+        }
+
+		externalTexture = UniqueKtxTexture2(raw, [](ktxTexture2* ptr) {
+            ktxTexture_Destroy(ktxTexture(ptr));
+        });
+    }
+
+	ktx_transcode_fmt_e targetFormat = KTX_TTF_RGBA32;
+	switch (compressionMode)
+	{
+        case ETextureCompressionMode::BC1:
+            targetFormat = KTX_TTF_BC1_RGB;
+            break;
+        case ETextureCompressionMode::BC3:
+            targetFormat = KTX_TTF_BC3_RGBA;
+            break;
+        case ETextureCompressionMode::BC7:
+            targetFormat = KTX_TTF_BC7_RGBA;
+            break;
+        case ETextureCompressionMode::BC4:
+            targetFormat = KTX_TTF_BC4_R;
+            break;
+        case ETextureCompressionMode::BC5:
+            targetFormat = KTX_TTF_BC5_RG;
+            break;
+	}
+
+	// #todo check support format
+
+	if (ktxTexture2_NeedsTranscoding(externalTexture.get()))
+	{
+		ktxTexture2_TranscodeBasis(externalTexture.get(), targetFormat, 0);
+	}
+
+	const VkFormat format = static_cast<VkFormat>(externalTexture->vkFormat);
+    SetFormat(format);
+
+	return InitializeBlob({reinterpret_cast<const uint8_t*>(externalTexture->pData),
+                           externalTexture->dataSize});
+}
+
 } // namespace sy::asset

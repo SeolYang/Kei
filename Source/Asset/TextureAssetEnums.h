@@ -4,10 +4,11 @@ namespace sy::asset
 {
 enum class ETextureCompressionMode
 {
-    BC4,  /** Recommend to 'Gray-scale'		#NotImplementedYet */
-    BC5,  /** Recommend to 'Normal Map'		#NotImplementedYet */
-    BC6H, /** Recommend to 'HDR Texture'	#NotImplementedYet */
-    BC7,  /** Recommend to 'Texture'		#NotImplementedYet */
+	BC1,
+	BC3,
+    BC4,  /** Recommend to 'Gray-scale' */
+    BC5,  /** Recommend to 'Normal Map' */
+    BC7,  /** Recommend to 'Texture' */
     None,
 };
 
