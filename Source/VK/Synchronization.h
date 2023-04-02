@@ -326,7 +326,7 @@ static AccessPattern QueryAccessPattern(const ETextureState pattern)
         case ETextureState::TransferRead:
             return {
                 VK_PIPELINE_STAGE_2_TRANSFER_BIT,
-                VK_ACCESS_2_SHADER_READ_BIT,
+                VK_ACCESS_2_TRANSFER_READ_BIT,
                 VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL};
 
         case ETextureState::HostRead:
@@ -723,7 +723,7 @@ static AccessPattern QueryAccessPattern(const EBufferState pattern)
         case EBufferState::TransferRead:
             return {
                 VK_PIPELINE_STAGE_2_TRANSFER_BIT,
-                VK_ACCESS_2_SHADER_READ_BIT,
+                VK_ACCESS_2_TRANSFER_READ_BIT,
                 VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL};
 
         case EBufferState::HostRead:

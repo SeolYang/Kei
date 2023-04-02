@@ -30,4 +30,5 @@ constexpr std::string_view IndicesBlobRange   = "IndicesBlobRange";
 constexpr std::string_view NumVertices        = "NumVertices";
 constexpr std::string_view NumIndices         = "NumIndices";
 constexpr std::string_view Quality            = "Quality";
+constexpr std::string_view GenMips            = "GenerateMips";
 } // namespace sy::asset::constants::metadata::key

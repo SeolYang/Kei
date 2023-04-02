@@ -90,7 +90,7 @@ Buffer::Buffer(const BufferBuilder& builder) :
 
             if (bRequiredStateChange)
             {
-                cmdBuffer->ChangeState(EBufferState::None, initialState, *this);
+                cmdBuffer->ChangeBufferState(EBufferState::None, initialState, *this);
             }
         }
         cmdBuffer->End();

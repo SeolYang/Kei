@@ -175,6 +175,11 @@ bool TextureImporter::Import(const fs::path& path, const TextureImportConfig con
     newTexture->SetCompressionMode(config.TargetCompressionMode);
     newTexture->SetCompressQuality(config.TargetCompressionQuality);
     newTexture->SetQuality(config.TargetQuality);
+	if (config.bGenerateMips)
+	{
+        newTexture->GenerateMips();
+	}
+
     SaveJsonToFile(newTexture->GetPath(), newTexture->Serialize());
     return true;
 }

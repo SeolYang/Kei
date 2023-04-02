@@ -40,7 +40,7 @@ SimpleRenderPass::SimpleRenderPass(const std::string_view name,
         auto& graphicsCmdPool   = cmdPoolManager.RequestCommandPool(vk::EQueueType::Graphics);
         auto  graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Simple Render Pass Initial Sync");
         graphicsCmdBuffer->Begin();
-        graphicsCmdBuffer->ChangeState(vk::EBufferState::None, vk::EBufferState::VertexShaderReadUniformBuffer,
+        graphicsCmdBuffer->ChangeBufferState(vk::EBufferState::None, vk::EBufferState::VertexShaderReadUniformBuffer,
                                        *transformBuffers[idx]);
         graphicsCmdBuffer->End();
 
@@ -56,7 +56,7 @@ SimpleRenderPass::SimpleRenderPass(const std::string_view name,
 void SimpleRenderPass::OnBegin()
 {
     const auto& graphicsCmdBuffer = GetCommandBuffer();
-    graphicsCmdBuffer.ChangeState(vk::ETextureState::None, vk::ETextureState::ColorAttachmentWrite, swapchainImage,
+    graphicsCmdBuffer.ChangeTextureState(vk::ETextureState::None, vk::ETextureState::ColorAttachmentWrite, swapchainImage,
                                   VK_IMAGE_ASPECT_COLOR_BIT);
 
     std::array colorAttachmentInfos = {swapchainAttachmentInfo};
@@ -109,7 +109,7 @@ void SimpleRenderPass::OnEnd()
 {
     const auto& graphicsCmdBuffer = GetCommandBuffer();
     graphicsCmdBuffer.EndRendering();
-    graphicsCmdBuffer.ChangeState(vk::ETextureState::ColorAttachmentWrite, vk::ETextureState::Present,
+    graphicsCmdBuffer.ChangeTextureState(vk::ETextureState::ColorAttachmentWrite, vk::ETextureState::Present,
                                   swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
 }
 

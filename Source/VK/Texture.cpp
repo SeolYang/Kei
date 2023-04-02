@@ -8,17 +8,14 @@
 #include <VK/CommandBuffer.h>
 #include <VK/CommandPoolManager.h>
 #include <VK/FrameTracker.h>
+#include <VK/VulkanContext.h>
 
-#include "VulkanContext.h"
-
-namespace sy
-{
-namespace vk
+namespace sy::vk
 {
 Texture::Texture(const TextureBuilder& builder) :
     VulkanWrapper(builder.name, builder.vulkanContext, VK_OBJECT_TYPE_IMAGE),
     type(*builder.type),
-    usage(*builder.usage | (builder.dataToTransfer.has_value() ? VK_IMAGE_USAGE_TRANSFER_DST_BIT : 0)),
+    usage(*builder.usage | (builder.dataToTransfer.has_value() ? VK_IMAGE_USAGE_TRANSFER_DST_BIT : 0) | (builder.bGenerateMips ? VK_IMAGE_USAGE_TRANSFER_SRC_BIT : 0)),
     format(builder.format),
     memoryUsage(*builder.memoryUsage),
     memoryProperty(builder.memoryProperty),
@@ -27,8 +24,8 @@ Texture::Texture(const TextureBuilder& builder) :
     samples(builder.samples),
     tiling(builder.tiling),
     initialState(builder.targetInitialState),
-    bGenerateMips(builder.bGenerateMips && math::IsPowOfTwo(extent)),
-    mips(bGenerateMips ? static_cast<uint32_t>(std::log2(extent.width)) : builder.mips)
+    bGenerateMips(builder.bGenerateMips),
+    mips(bGenerateMips ? static_cast<uint32_t>(std::log2(extent.width)) + 1 : builder.mips)
 {
     const VkImageCreateInfo imageCreateInfo{
         .sType     = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -68,8 +65,7 @@ Texture::Texture(const TextureBuilder& builder) :
         });
 
     const bool bRequiredDataTransfer = builder.dataToTransfer.has_value();
-    const bool bRequiredStateChange  = initialState != ETextureState::None;
-    if (bRequiredDataTransfer || bRequiredStateChange)
+    if (bRequiredDataTransfer)
     {
         auto&      cmdPoolManager = vulkanContext.GetCommandPoolManager();
         auto&      cmdPool        = cmdPoolManager.RequestCommandPool(EQueueType::Graphics);
@@ -78,9 +74,9 @@ Texture::Texture(const TextureBuilder& builder) :
         std::unique_ptr<Buffer> stagingBuffer = nullptr;
         cmdBuffer->Begin();
         {
-            auto localState = ETextureState::None;
             if (bRequiredDataTransfer)
             {
+                auto currentState = ETextureState::None;
                 stagingBuffer = BufferBuilder::StagingBufferTemplate(builder.vulkanContext)
                                     .SetName("Staging Buffer-To Texture")
                                     .SetSize(builder.dataToTransfer->size_bytes())
@@ -91,18 +87,10 @@ Texture::Texture(const TextureBuilder& builder) :
                             builder.dataToTransfer->size());
                 vulkanRHI.Unmap(*stagingBuffer);
 
-                cmdBuffer->ChangeState(localState, ETextureState::TransferWrite, *this);
-                localState = ETextureState::TransferWrite;
+                cmdBuffer->ChangeTextureState(ETextureState::None, ETextureState::TransferWrite, *this);
+                currentState = ETextureState::TransferWrite;
                 cmdBuffer->CopyBufferToImageSimple(*stagingBuffer, *this);
-            }
-
-            if (bRequiredStateChange)
-            {
-                cmdBuffer->ChangeState(localState, initialState, *this);
-            }
-            else if (localState != ETextureState::None)
-            {
-                cmdBuffer->ChangeState(localState, ETextureState::None, *this);
+                cmdBuffer->ChangeTextureState(currentState, initialState, *this);
             }
         }
         cmdBuffer->End();
@@ -110,5 +98,4 @@ Texture::Texture(const TextureBuilder& builder) :
         vulkanRHI.SubmitImmediateTo(*cmdBuffer);
     }
 }
-} // namespace vk
-} // namespace sy
+} // namespace sy::vk

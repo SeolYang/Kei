@@ -221,7 +221,7 @@ T ResolveEnumFromJson(const nlohmann::json& json, const std::string_view key, co
 
 	if (itr == json.end())
 	{
-        spdlog::error("Failed to retrive enumeration from json[{}], return fallback {}.", key, magic_enum::enum_name<T>(fallback));
+        spdlog::error("Failed to retrive enumeration from json[key:{}], return fallback value: {}.", key, magic_enum::enum_name<T>(fallback));
 		return fallback;
 	}
 
@@ -234,6 +234,20 @@ T ResolveEnumFromJson(const nlohmann::json& json, const std::string_view key, co
 	}
 
 	return *enumOpt;
+}
+
+template <typename T>
+T ResolveValueFromJson(const json& json, const std::string_view key, const T fallback)
+{
+    const auto itr = json.find(key);
+
+    if (itr == json.end())
+    {
+        spdlog::error("Failed to find value from json[key:{}], return fallback value: {}.", key, fallback);
+        return fallback;
+    }
+
+	return *itr;
 }
 
 template <typename T>

@@ -7,9 +7,7 @@
 #include <VK/Texture.h>
 #include <VK/ResourceStateTracker.h>
 
-namespace sy
-{
-namespace vk
+namespace sy::vk
 {
 CommandBuffer::CommandBuffer(const std::string_view name, VulkanContext& vulkanContext, const CommandPool& cmdPool) :
     VulkanWrapper<VkCommandBuffer>(name, vulkanContext, VK_OBJECT_TYPE_COMMAND_BUFFER), queueType(cmdPool.GetQueueType())
@@ -59,7 +57,7 @@ void CommandBuffer::EndRendering() const
     vkCmdEndRendering(GetNative());
 }
 
-void CommandBuffer::ChangeState(const EBufferState srcState, const EBufferState dstState, const VkBuffer buffer, const size_t offset, const size_t size) const
+void CommandBuffer::ChangeBufferState(const EBufferState srcState, const EBufferState dstState, const VkBuffer buffer, const size_t offset, const size_t size) const
 {
     const AccessPattern srcAccess = QueryAccessPattern(srcState);
     const AccessPattern dstAccess = QueryAccessPattern(dstState);
@@ -69,12 +67,15 @@ void CommandBuffer::ChangeState(const EBufferState srcState, const EBufferState 
         buffer, offset, size);
 }
 
-void CommandBuffer::ChangeState(const EBufferState srcState, const EBufferState dstState, const Buffer& buffer) const
+void CommandBuffer::ChangeBufferState(const EBufferState srcState, const EBufferState dstState, const Buffer& buffer) const
 {
-    ChangeState(srcState, dstState, buffer.GetNative(), 0, buffer.GetAlignedSize());
+    ChangeBufferState(
+        srcState, dstState,
+        buffer.GetNative(),
+        0, buffer.GetAlignedSize());
 }
 
-void CommandBuffer::ChangeState(const ETextureState srcState, const ETextureState dstState, const VkImage image, const VkImageAspectFlags aspectMask, const uint32_t mipLevelCount, const uint32_t baseMipLevel, const uint32_t arrayLayerCount, const uint32_t baseArrayLayer) const
+void CommandBuffer::ChangeTextureState(const ETextureState srcState, const ETextureState dstState, const VkImage image, const VkImageAspectFlags aspectMask, const uint32_t mipLevelCount, const uint32_t baseMipLevel, const uint32_t arrayLayerCount, const uint32_t baseArrayLayer) const
 {
     const AccessPattern srcAccess = QueryAccessPattern(srcState);
     const AccessPattern dstAccess = QueryAccessPattern(dstState);
@@ -86,10 +87,22 @@ void CommandBuffer::ChangeState(const ETextureState srcState, const ETextureStat
         aspectMask, mipLevelCount, baseMipLevel, arrayLayerCount, baseArrayLayer);
 }
 
-void CommandBuffer::ChangeState(const ETextureState srcState, const ETextureState dstState, const Texture& texture) const
+void CommandBuffer::ChangeTextureState(const ETextureState srcState, const ETextureState dstState, const Texture& texture) const
 {
-    ChangeState(srcState, dstState, texture.GetNative(), FormatToImageAspect(texture.GetFormat()),
-                texture.GetMipLevels(), 0, 1, 0);
+    ChangeTextureState(
+        srcState, dstState,
+        texture.GetNative(), FormatToImageAspect(texture.GetFormat()),
+        texture.GetMipLevels(), 0,
+        texture.GetArrayLayers(), 0);
+}
+
+void CommandBuffer::ChangeTextureState(const ETextureState srcState, const ETextureState dstState, const Texture& texture, const uint32_t mipLevelCount, uint32_t baseMipLevel, const uint32_t arrayLayerCount, const uint32_t baseArrayLayer) const
+{
+    ChangeTextureState(
+        srcState, dstState,
+        texture.GetNative(), FormatToImageAspect(texture.GetFormat()),
+        mipLevelCount, baseMipLevel,
+        arrayLayerCount, baseArrayLayer);
 }
 
 void CommandBuffer::FlushStateTransitions(ResourceStateTracker& resourceStateTracker) const
@@ -303,5 +316,14 @@ void CommandBuffer::PipelineBarrier(std::span<VkMemoryBarrier2>       memoryBarr
 
     vkCmdPipelineBarrier2(GetNative(), &dependencyInfo);
 }
-} // namespace vk
-} // namespace sy
+
+void CommandBuffer::BlitTexture(const Texture& src, const Texture& dst, VkImageBlit blit, VkFilter filter)
+{
+    vkCmdBlitImage(
+        GetNative(),
+        src.GetNative(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        dst.GetNative(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        1, &blit,
+        filter);
+}
+} // namespace sy::vk

@@ -29,10 +29,12 @@ public:
     void EndRendering() const;
 
     /** Synchronizations */
-    void ChangeState(EBufferState srcState, EBufferState dstState, VkBuffer buffer, size_t offset, size_t size) const;
-    void ChangeState(EBufferState srcState, EBufferState dstState, const Buffer& buffer) const;
-    void ChangeState(ETextureState srcState, ETextureState dstState, VkImage image, VkImageAspectFlags aspectMask, uint32_t mipLevelCount = 1, uint32_t baseMipLevel = 0, uint32_t arrayLayerCount = 1, uint32_t baseArrayLayer = 0) const;
-    void ChangeState(ETextureState srcState, ETextureState dstState, const Texture& texture) const;
+    void ChangeBufferState(EBufferState srcState, EBufferState dstState, VkBuffer buffer, size_t offset, size_t size) const;
+    void ChangeBufferState(EBufferState srcState, EBufferState dstState, const Buffer& buffer) const;
+
+    void ChangeTextureState(ETextureState srcState, ETextureState dstState, VkImage image, VkImageAspectFlags aspectMask, uint32_t mipLevelCount = 1, uint32_t baseMipLevel = 0, uint32_t arrayLayerCount = 1, uint32_t baseArrayLayer = 0) const;
+    void ChangeTextureState(ETextureState srcState, ETextureState dstState, const Texture& texture) const;
+    void ChangeTextureState(ETextureState srcState, ETextureState dstState, const Texture& texture, uint32_t mipLevelCount, uint32_t baseMipLevel, uint32_t arrayLayerCount, uint32_t baseArrayLayer) const;
 
     void FlushStateTransitions(ResourceStateTracker& resourceStateTracker) const;
 
@@ -60,6 +62,7 @@ public:
     void CopyBufferToImage(const Buffer& srcBuffer, const Texture& dstTexture, std::span<VkBufferImageCopy> copySubresourceRegions) const;
     void CopyBufferToImageSimple(const Buffer& srcBuffer, const Texture& dstTexture) const;
     void CopyBufferSimple(const Buffer& srcBuffer, size_t srcOffset, const Buffer& dstBuffer, size_t dstOffset, const size_t sizeofData) const;
+    void BlitTexture(const Texture& src, const Texture& dst, VkImageBlit blit, VkFilter filter = VK_FILTER_LINEAR);
 
 private:
     void BufferMemoryBarrier(VkPipelineStageFlags2 srcStage, VkPipelineStageFlags2 dstStage, VkAccessFlags2 srcAccess, VkAccessFlags2 dstAccess, VkBuffer buffer, size_t offset, size_t size) const;
