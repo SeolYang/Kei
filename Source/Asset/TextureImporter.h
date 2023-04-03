@@ -2,12 +2,17 @@
 #include <PCH.h>
 #include <Asset/TextureAssetEnums.h>
 
+namespace sy::vk
+{
+class VulkanContext;
+}
+
 namespace sy::asset
 {
 struct TextureImportConfig
 {
     /** Generate full pyramid mips from original texture. */
-    const bool                       bGenerateMips            = false;
+    const bool                       bGenerateMipsWhenImport  = false;
     const ETextureCompressionMode    TargetCompressionMode    = ETextureCompressionMode::BC7;
     const ETextureCompressionQuality TargetCompressionQuality = ETextureCompressionQuality::Medium;
     const ETextureQuality            TargetQuality            = ETextureQuality::Medium;
@@ -17,7 +22,7 @@ struct TextureImportConfig
 class TextureImporter
 {
 public:
-    static bool Import(const fs::path& path, TextureImportConfig config);
+    static bool Import2D(vk::VulkanContext& vulkanContext, const fs::path& path, TextureImportConfig config);
 
 private:
     TextureImporter()  = default;

@@ -15,7 +15,7 @@ namespace sy::vk
 Texture::Texture(const TextureBuilder& builder) :
     VulkanWrapper(builder.name, builder.vulkanContext, VK_OBJECT_TYPE_IMAGE),
     type(*builder.type),
-    usage(*builder.usage | (builder.dataToTransfer.has_value() ? VK_IMAGE_USAGE_TRANSFER_DST_BIT : 0) | (builder.bGenerateMips ? VK_IMAGE_USAGE_TRANSFER_SRC_BIT : 0)),
+    usage(*builder.usage | (builder.dataToTransfer.has_value() ? VK_IMAGE_USAGE_TRANSFER_DST_BIT : 0)),
     format(builder.format),
     memoryUsage(*builder.memoryUsage),
     memoryProperty(builder.memoryProperty),
@@ -24,8 +24,7 @@ Texture::Texture(const TextureBuilder& builder) :
     samples(builder.samples),
     tiling(builder.tiling),
     initialState(builder.targetInitialState),
-    bGenerateMips(builder.bGenerateMips),
-    mips(bGenerateMips ? static_cast<uint32_t>(std::log2(extent.width)) + 1 : builder.mips)
+    mips(builder.mips)
 {
     const VkImageCreateInfo imageCreateInfo{
         .sType     = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -65,7 +64,8 @@ Texture::Texture(const TextureBuilder& builder) :
         });
 
     const bool bRequiredDataTransfer = builder.dataToTransfer.has_value();
-    if (bRequiredDataTransfer)
+    const bool bRequiredStateTransfer = builder.targetInitialState != ETextureState::None;
+    if (bRequiredDataTransfer || bRequiredStateTransfer)
     {
         auto&      cmdPoolManager = vulkanContext.GetCommandPoolManager();
         auto&      cmdPool        = cmdPoolManager.RequestCommandPool(EQueueType::Graphics);
@@ -74,10 +74,10 @@ Texture::Texture(const TextureBuilder& builder) :
         std::unique_ptr<Buffer> stagingBuffer = nullptr;
         cmdBuffer->Begin();
         {
+            auto currentState = ETextureState::None;
             if (bRequiredDataTransfer)
             {
-                auto currentState = ETextureState::None;
-                stagingBuffer = BufferBuilder::StagingBufferTemplate(builder.vulkanContext)
+                stagingBuffer     = BufferBuilder::StagingBufferTemplate(builder.vulkanContext)
                                     .SetName("Staging Buffer-To Texture")
                                     .SetSize(builder.dataToTransfer->size_bytes())
                                     .Build();
@@ -89,9 +89,18 @@ Texture::Texture(const TextureBuilder& builder) :
 
                 cmdBuffer->ChangeTextureState(ETextureState::None, ETextureState::TransferWrite, *this);
                 currentState = ETextureState::TransferWrite;
-                cmdBuffer->CopyBufferToImageSimple(*stagingBuffer, *this);
-                cmdBuffer->ChangeTextureState(currentState, initialState, *this);
+
+				if (builder.copyInfos.empty())
+				{
+                    cmdBuffer->CopyBufferToImageSimple(*stagingBuffer, *this);
+				}
+				else
+				{
+                    cmdBuffer->CopyBufferToImage(*stagingBuffer, *this, builder.copyInfos);
+				}
             }
+
+            cmdBuffer->ChangeTextureState(currentState, initialState, *this);
         }
         cmdBuffer->End();
 

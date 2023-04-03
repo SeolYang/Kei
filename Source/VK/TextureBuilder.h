@@ -63,13 +63,8 @@ public:
 
     TextureBuilder& SetMips(const uint32_t mips)
     {
-        SY_ASSERT(!bGenerateMips, "Builder configured to generate mip maps.");
         SY_ASSERT(mips > 0, "Texture must have at least one mips.");
-        if (!bGenerateMips)
-        {
-            this->mips = mips;
-        }
-
+        this->mips = mips;
         return *this;
     }
 
@@ -117,15 +112,11 @@ public:
         return *this;
     }
 
-    /**
-		 * @warning This property can result in ignoring mips(level) property when build texture.
-		 * @warning This property can be ignored when a extent of texture is not properly set up as power of 2.
-		 */
-    TextureBuilder& SetGenerateMips(const bool bGenerateMips)
-    {
-        this->bGenerateMips = bGenerateMips;
+	TextureBuilder& AddCopyInfo(const VkBufferImageCopy copyInfo)
+	{
+        copyInfos.push_back(copyInfo);
         return *this;
-    }
+	}
 
     std::unique_ptr<Texture> Build() const;
 
@@ -150,6 +141,6 @@ private:
     VkImageTiling                           tiling             = VK_IMAGE_TILING_OPTIMAL;
     ETextureState                           targetInitialState = ETextureState::None;
     std::optional<std::span<const uint8_t>> dataToTransfer     = std::nullopt;
-    bool                                    bGenerateMips      = false;
+    std::vector<VkBufferImageCopy>          copyInfos;
 };
 } // namespace sy::vk

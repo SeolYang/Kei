@@ -22,8 +22,6 @@
 #include <Math/MathUtils.h>
 #include <VK/ResourceStateTracker.h>
 #include <Asset/ModelAsset.h>
-#include <Asset/ModelImporter.h>
-#include <Asset/TextureImporter.h>
 
 namespace sy::render
 {
@@ -164,12 +162,6 @@ void Renderer::Startup()
 
     basicPipeline = std::make_unique<vk::Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
-    //asset::ModelImportConfig config{.bFlipUVs = true, .bPretransformVertices = true};
-    //asset::ModelImporter::Import("Assets/Models/homura/homura.fbx", config);
-    //asset::TextureImporter::Import("Assets/Textures/Hair.png", {});
-    //asset::TextureImporter::Import("Assets/Textures/Costume.png", {.bGenerateMips = true});
-    //asset::TextureImporter::Import("Assets/Textures/Other.png", {});
-    //asset::TextureImporter::Import("Assets/Textures/Body.png", {});
     auto model = handleManager.Add<asset::Model>("Assets/Models/homura/homura.fbx", handleManager, vulkanContext);
     SY_ASSERT(model->Initialize(), "Failed to init model.");
     staticMeshes = model->GetMeshes();

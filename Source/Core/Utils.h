@@ -60,9 +60,9 @@ std::vector<char> ToBytes(const std::span<const T> data)
 
 /************************ Helpers ************************/
 template <typename T>
-[[nodiscard]] bool FlagsContains(T flags, T flag) noexcept
+[[nodiscard]] bool ContainsBitFlag(T flags, T flag) noexcept
 {
-    return (flags & flag) != 0;
+    return (flags & flag) == flag;
 }
 
 template <typename T, size_t N>
@@ -173,27 +173,27 @@ inline json LoadJsonFromFile(const fs::path& path)
 
 inline void SaveBlobToFile(const fs::path& path, const std::span<const uint8_t> blob)
 {
-	if (blob.size() > 0 && !path.empty())
-	{
+    if (blob.size() > 0 && !path.empty())
+    {
         std::ofstream output{path, std::ios::out | std::ios::trunc | std::ios::binary};
-		if (!output.is_open())
-		{
+        if (!output.is_open())
+        {
             spdlog::error("Failed to open {}", path.string());
-		}
-		else
-		{
+        }
+        else
+        {
             output.write(reinterpret_cast<const char*>(blob.data()), blob.size());
             output.close();
-		}
-	}
+        }
+    }
 }
 
 inline std::vector<uint8_t> LoadBlobFromFile(const fs::path& path)
 {
     std::vector<uint8_t> blob;
 
-	if (!path.empty())
-	{
+    if (!path.empty())
+    {
         std::ifstream input{path, std::ios::in | std::ios::binary};
         if (!input.is_open())
         {
@@ -209,7 +209,7 @@ inline std::vector<uint8_t> LoadBlobFromFile(const fs::path& path)
             input.read(reinterpret_cast<char*>(blob.data()), blob.size());
             input.close();
         }
-	}
+    }
 
     return blob;
 }
@@ -219,21 +219,21 @@ T ResolveEnumFromJson(const nlohmann::json& json, const std::string_view key, co
 {
     const auto itr = json.find(key);
 
-	if (itr == json.end())
-	{
+    if (itr == json.end())
+    {
         spdlog::error("Failed to retrive enumeration from json[key:{}], return fallback value: {}.", key, magic_enum::enum_name<T>(fallback));
-		return fallback;
-	}
+        return fallback;
+    }
 
     const std::string enumStr = *itr;
     const auto        enumOpt = magic_enum::enum_cast<T>(enumStr);
-	if (!enumOpt)
-	{
+    if (!enumOpt)
+    {
         spdlog::error("Failed to cast {} to given enum type {}.", enumStr, magic_enum::enum_type_name<T>());
         return fallback;
-	}
+    }
 
-	return *enumOpt;
+    return *enumOpt;
 }
 
 template <typename T>
@@ -247,7 +247,7 @@ T ResolveValueFromJson(const json& json, const std::string_view key, const T fal
         return fallback;
     }
 
-	return *itr;
+    return *itr;
 }
 
 template <typename T>
@@ -259,5 +259,40 @@ inline auto VecToConstSpan(const std::vector<T>& target)
 inline size_t ImageBlobBytesSize(const size_t width, const size_t height, const size_t channels, const size_t bytesPerChannel)
 {
     return width * height * channels * bytesPerChannel;
+}
+
+template <typename T>
+T CalculateMaximumMipCountFromExtent(const Extent3D<T> extent)
+{
+    const T maxDim = std::max<T>(std::max<T>(extent.width, extent.height), extent.depth);
+    return static_cast<T>(std::floor(std::log2(maxDim))) + 1;
+}
+
+template <typename T>
+T CalculateMaximumMipCountFromExtent(const Extent2D<T> extent)
+{
+    const T maxDim = std::max<T>(extent.width, extent.height);
+    return static_cast<T>(std::floor(std::log2(maxDim))) + 1;
+}
+
+template <typename T>
+T CalculateMipSize(const T baseMipSize, const size_t mipLevel)
+{
+    return std::max<T>(1, baseMipSize >> mipLevel);
+}
+
+template <typename T>
+Extent2D<T> CalculateMipExtent(const Extent2D<T> baseMipExtent, const size_t mipLevel)
+{
+    return {CalculateMipSize(baseMipExtent.width, mipLevel),
+            CalculateMipSize(baseMipExtent.height, mipLevel)};
+}
+
+template <typename T>
+Extent3D<T> CalculateMipExtent(const Extent3D<T> baseMipExtent, const size_t mipLevel)
+{
+    return {CalculateMipSize(baseMipExtent.width, mipLevel),
+            CalculateMipSize(baseMipExtent.height, mipLevel),
+            CalculateMipSize(baseMipExtent.depth, mipLevel)};
 }
 } // namespace sy

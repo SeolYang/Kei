@@ -40,6 +40,12 @@ public:
     void Startup() override;
     void Shutdown() override;
 
+    window::Window&    GetWindow() const;
+    Timer&             GetTimer() const;
+    HandleManager&     GetHandleManager() const;
+    vk::VulkanContext& GetVulkanContext() const;
+    render::Renderer&  GetRenderer() const;
+
 private:
     void InitializeLogger();
     void InitDefaultEngineResources();

@@ -74,6 +74,8 @@ public:
 
     [[nodiscard]] void* Map(const Buffer& buffer) const;
     void                Unmap(const Buffer& buffer) const;
+	[[nodiscard]] void* Map(const Texture& texture) const;
+	void                Unmap(const Texture& texture) const;
 
     void SetObjectName(uint64_t object, VkObjectType objectType, std::string_view name) const;
 
@@ -82,6 +84,8 @@ public:
     {
         SetObjectName(reinterpret_cast<uint64_t>(object.GetNativeHandle()), object.GetType(), object.GetName());
     }
+
+	bool IsFormatSupportFeatures(VkFormat format, VkFormatFeatureFlagBits2 featureFlag, bool bIsOptimalTiling = true) const;
 
 private:
     void InitQueues(const vkb::Device& vkbDevice);

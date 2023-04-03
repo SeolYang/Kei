@@ -17,6 +17,10 @@
 #include <VK/VulkanRHI.h>
 #include <Window/Window.h>
 #include <Window/WindowBuilder.h>
+// #test
+#include <Asset/ModelAsset.h>
+#include <Asset/ModelImporter.h>
+#include <Asset/TextureImporter.h>
 
 namespace sy::app
 {
@@ -58,6 +62,14 @@ void Context::Startup()
     handleManager->Startup();
     InitDefaultEngineResources();
     renderer->Startup();
+
+	// #test
+	//asset::ModelImportConfig config{.bFlipUVs = true, .bPretransformVertices = true};
+    //asset::ModelImporter::Import("Assets/Models/homura/homura.fbx", config);
+    /*asset::TextureImporter::Import2D(*vulkanContext, "Assets/Textures/Hair.png", {.bGenerateMipsWhenImport = true});
+    asset::TextureImporter::Import2D(*vulkanContext, "Assets/Textures/Costume.png", {.bGenerateMipsWhenImport = true});
+    asset::TextureImporter::Import2D(*vulkanContext, "Assets/Textures/Other.png", {.bGenerateMipsWhenImport = true});
+    asset::TextureImporter::Import2D(*vulkanContext, "Assets/Textures/Body.png", {.bGenerateMipsWhenImport = true});*/
 }
 
 void Context::Shutdown()
@@ -185,5 +197,30 @@ void Context::Run()
         timer->End();
     }
     spdlog::info("Main loop finished.");
+}
+
+window::Window& Context::GetWindow() const
+{
+    return *window;
+}
+
+Timer& Context::GetTimer() const
+{
+    return *timer;
+}
+
+HandleManager& Context::GetHandleManager() const
+{
+    return *handleManager;
+}
+
+vk::VulkanContext& Context::GetVulkanContext() const
+{
+    return *vulkanContext;
+}
+
+render::Renderer& Context::GetRenderer() const
+{
+    return *renderer;
 }
 } // namespace sy::app

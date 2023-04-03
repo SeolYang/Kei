@@ -31,7 +31,6 @@ json Texture::Serialize() const
     root[predefined_key::Extent]             = std::make_pair(extent.width, extent.height);
     root[predefined_key::Format]             = magic_enum::enum_name(format);
     root[predefined_key::Sampler]            = this->samplerAlias;
-    root[predefined_key::GenMips]            = this->bGenerateMips;
 
     return root;
 }
@@ -70,10 +69,6 @@ void Texture::Deserialize(const json& root)
     this->samplerAlias = ResolveValueFromJson(
         root, predefined_key::Sampler,
         core::constants::res::TrilinearRepeatSampler);
-
-    this->bGenerateMips = ResolveValueFromJson(
-        root, predefined_key::GenMips,
-        false);
 }
 
 bool Texture::InitializeExternal()
@@ -126,8 +121,7 @@ bool Texture::InitializeExternal()
         ktxTexture2_TranscodeBasis(externalTexture.get(), targetFormat, 0);
     }
 
-    const VkFormat format = static_cast<VkFormat>(externalTexture->vkFormat);
-    SetFormat(format);
+    SetFormat(static_cast<VkFormat>(externalTexture->vkFormat));
 
     if (!handleManager)
     {
@@ -146,18 +140,41 @@ bool Texture::InitializeExternal()
 
     const auto name = GetName();
 
-    // #todo into account mips, see "KTX-Software/vkloader.c/ktxTexture_VkUploadEx"
-    this->texture = handleManager.Add<vk::Texture>(
-        vk::TextureBuilder::Texture2DShaderResourceTemplate(vulkanContext)
-            .SetName(name)
-            .SetFormat(this->format)
-            .SetExtent(extent)
-            .SetDataToTransfer(std::span{
-                reinterpret_cast<const uint8_t*>(externalTexture->pData),
-                externalTexture->dataSize})
-            .SetTargetInitialState(vk::ETextureState::AnyShaderReadSampledImage)
-            .Build());
+    auto textureBuilder = vk::TextureBuilder::Texture2DShaderResourceTemplate(vulkanContext)
+                              .SetName(name)
+                              .SetFormat(this->format)
+                              .SetExtent(extent)
+                              .SetDataToTransfer(std::span{
+                                  reinterpret_cast<const uint8_t*>(externalTexture->pData),
+                                  externalTexture->dataSize})
+                              .SetTargetInitialState(vk::ETextureState::AnyShaderReadSampledImage)
+                              .SetMips(externalTexture->numLevels)
+                              .SetArrayLayers(externalTexture->numLayers);
 
+    const uint32_t mipLevels = externalTexture->numLevels;
+    if (mipLevels > 1)
+    {
+        const auto baseExtent = extent;
+        for (uint32_t mip = 0; mip < externalTexture->numLevels; ++mip)
+        {
+            const auto mipExtent       = CalculateMipExtent(baseExtent, mip);
+            size_t     mipBufferOffset = 0;
+            ktxTexture_GetImageOffset(ktxTexture(externalTexture.get()), mip, 0, 0, &mipBufferOffset);
+            const VkBufferImageCopy copyInfo{
+                .bufferOffset     = mipBufferOffset,
+                .imageSubresource = {
+                    .aspectMask     = vk::FormatToImageAspect(format),
+                    .mipLevel       = mip,
+                    .baseArrayLayer = 0,
+                    .layerCount     = 1},
+                .imageExtent = {mipExtent.width, mipExtent.height, 1}};
+
+			textureBuilder.AddCopyInfo(copyInfo);
+        }
+    }
+
+    // #todo into account mips, see "KTX-Software/vkloader.c/ktxTexture_VkUploadEx"
+    this->texture = handleManager.Add<vk::Texture>(textureBuilder.Build());
     if (!this->texture)
     {
         return false;

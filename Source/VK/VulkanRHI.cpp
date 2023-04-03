@@ -7,6 +7,7 @@
 #include <VK/Semaphore.h>
 #include <VK/Fence.h>
 #include <VK/Buffer.h>
+#include <VK/Texture.h>
 #include <VK/FrameTracker.h>
 
 namespace sy
@@ -321,6 +322,19 @@ void VulkanRHI::Unmap(const Buffer& buffer) const
     vmaUnmapMemory(allocator, buffer.GetAllocation());
 }
 
+void* VulkanRHI::Map(const Texture& texture) const
+{
+    void* data;
+    vmaMapMemory(allocator, texture.GetAllocation(), &data);
+    return data;
+}
+
+void VulkanRHI::Unmap(const Texture& texture) const
+{
+    vmaUnmapMemory(allocator, texture.GetAllocation());
+}
+
+
 void VulkanRHI::SetObjectName(const uint64_t object, const VkObjectType objectType, const std::string_view name) const
 {
 #if defined(DEBUG) || defined(_DEBUG)
@@ -365,5 +379,17 @@ void VulkanRHI::InitQueues(const vkb::Device& vkbDevice)
     presentQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::present).value();
     spdlog::trace("Present Queue successfully acquired. Family Index: {}.", presentQueueFamilyIdx);
 }
+
+bool VulkanRHI::IsFormatSupportFeatures(VkFormat format, VkFormatFeatureFlagBits2 featureFlag, bool bIsOptimalTiling /*= true*/) const
+{
+    VkFormatProperties2 props;
+    props.sType = VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2;
+    props.pNext = nullptr;
+    vkGetPhysicalDeviceFormatProperties2(physicalDevice, format, &props);
+    return ContainsBitFlag<uint64_t>(
+        bIsOptimalTiling ? props.formatProperties.optimalTilingFeatures : props.formatProperties.linearTilingFeatures,
+        featureFlag);
+}
+
 } // namespace vk
 } // namespace sy

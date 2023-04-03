@@ -59,9 +59,10 @@ public:
     void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) const;
 
     /** Memory Transfer */
-    void CopyBufferToImage(const Buffer& srcBuffer, const Texture& dstTexture, std::span<VkBufferImageCopy> copySubresourceRegions) const;
+    void CopyBufferToImage(const Buffer& srcBuffer, const Texture& dstTexture, std::span<const VkBufferImageCopy> copySubresourceRegions) const;
     void CopyBufferToImageSimple(const Buffer& srcBuffer, const Texture& dstTexture) const;
     void CopyBufferSimple(const Buffer& srcBuffer, size_t srcOffset, const Buffer& dstBuffer, size_t dstOffset, const size_t sizeofData) const;
+    void CopyImageToBuffer(const Texture& srcTexture, const Buffer& dstBuffer) const;
     void BlitTexture(const Texture& src, const Texture& dst, VkImageBlit blit, VkFilter filter = VK_FILTER_LINEAR);
 
 private:

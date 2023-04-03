@@ -202,7 +202,7 @@ void CommandBuffer::DrawIndexed(const uint32_t indexCount, const uint32_t instan
     vkCmdDrawIndexed(GetNative(), indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 
-void CommandBuffer::CopyBufferToImage(const Buffer& srcBuffer, const Texture& dstTexture, const std::span<VkBufferImageCopy> regions) const
+void CommandBuffer::CopyBufferToImage(const Buffer& srcBuffer, const Texture& dstTexture, const std::span<const VkBufferImageCopy> regions) const
 {
     vkCmdCopyBufferToImage(GetNative(), srcBuffer.GetNative(), dstTexture.GetNative(),
                            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, static_cast<uint32_t>(regions.size()),
@@ -217,7 +217,7 @@ void CommandBuffer::CopyBufferToImageSimple(const Buffer& srcBuffer, const Textu
         .bufferRowLength   = 0,
         .bufferImageHeight = 0,
         .imageSubresource  = {
-             .aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
+             .aspectMask     = FormatToImageAspect(dstTexture.GetFormat()),
              .mipLevel       = 0,
              .baseArrayLayer = 0,
              .layerCount     = 1},
@@ -236,6 +236,23 @@ void CommandBuffer::CopyBufferSimple(const Buffer& srcBuffer, const size_t srcOf
 
     vkCmdCopyBuffer(GetNative(), srcBuffer.GetNative(), dstBuffer.GetNative(), 1,
                     &bufferCopy);
+}
+
+void CommandBuffer::CopyImageToBuffer(const Texture& srcTexture, const Buffer& dstBuffer) const
+{
+	const auto              imageExtent = srcTexture.GetExtent();
+    const VkBufferImageCopy imgCopy{
+        .bufferOffset      = 0,
+        .bufferRowLength   = 0,
+        .bufferImageHeight = 0,
+        .imageSubresource  = {
+             .aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
+             .mipLevel       = 0,
+             .baseArrayLayer = 0,
+             .layerCount     = 1},
+        .imageExtent = {imageExtent.width, imageExtent.height, imageExtent.depth}};
+
+    vkCmdCopyImageToBuffer(GetNative(), srcTexture.GetNative(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstBuffer.GetNative(), 1, &imgCopy);
 }
 
 void CommandBuffer::ImageMemoryBarrier(const VkPipelineStageFlags2 srcStage,
@@ -317,7 +334,7 @@ void CommandBuffer::PipelineBarrier(std::span<VkMemoryBarrier2>       memoryBarr
     vkCmdPipelineBarrier2(GetNative(), &dependencyInfo);
 }
 
-void CommandBuffer::BlitTexture(const Texture& src, const Texture& dst, VkImageBlit blit, VkFilter filter)
+void CommandBuffer::BlitTexture(const Texture& src, const Texture& dst, const VkImageBlit blit, const VkFilter filter)
 {
     vkCmdBlitImage(
         GetNative(),

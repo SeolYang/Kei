@@ -252,8 +252,8 @@ xcopy "$(ProjectDir)..\Thirdparty\libktx\$(Configuration)\ktx.dll" "$(TargetDir)
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(VcpkgManifestRoot)\vcpkg_installed\x64-windows\lib\manual-link;$(ProjectDir)..\Thirdparty\libktx\Debug</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2main.lib;ktx.lib;Catch2Main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\Thirdparty\libktx\Debug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2mainD.lib;ktx.lib;Catch2MainD.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>

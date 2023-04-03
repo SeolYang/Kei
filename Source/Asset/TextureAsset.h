@@ -29,7 +29,6 @@ public:
     [[nodiscard]] auto             GetExtent() const { return extent; }
     [[nodiscard]] auto             GetFormat() const { return format; }
     [[nodiscard]] std::string_view GetSamplerAlias() const { return sampler.GetAlias(); }
-    [[nodiscard]] auto             IsGenerateMips() const { return bGenerateMips; }
 
     void SetCompressionMode(const ETextureCompressionMode mode) { this->compressionMode = mode; }
     void SetCompressQuality(const ETextureCompressionQuality quality) { this->compressionQuality = quality; }
@@ -37,7 +36,6 @@ public:
     void SetExtent(const Extent2D<uint32_t> extent) { this->extent = extent; }
     void SetFormat(const VkFormat format) { this->format = format; }
     void SetSampler(const std::string_view sampler) { this->samplerAlias = sampler; }
-    void GenerateMips() { this->bGenerateMips = true; }
 
     [[nodiscard]] json Serialize() const override;
     void               Deserialize(const nlohmann::json& serializedMetadata) override;
@@ -53,7 +51,6 @@ private:
     Extent2D<uint32_t>         extent             = Extent2D<uint32_t>{1, 1};
     VkFormat                   format             = VK_FORMAT_UNDEFINED;
     std::string_view           samplerAlias       = core::constants::res::TrilinearRepeatSampler;
-    bool                       bGenerateMips      = false;
 
     /** Engine Instances */
     RefOptional<HandleManager>     handleManager = std::nullopt;

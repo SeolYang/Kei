@@ -32,6 +32,11 @@ TEST_CASE("Extent3D", "[extent_3d]")
         extent = {300, 400, 500};
         REQUIRE((extent.width == 300 && extent.height == 400 && extent.depth == 500));
         REQUIRE(extent.IsValid());
+
+		extent = {4096,
+                  4096,
+                  2048};
+        REQUIRE(CalculateMaximumMipCountFromExtent(extent) == 13);
     }
 }
 
@@ -134,6 +139,6 @@ TEST_CASE("Utilities", "[utils]")
     SECTION("Flags")
     {
         constexpr VkCommandBufferUsageFlags tempFlagBits = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT | VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
-        REQUIRE(sy::FlagsContains<VkCommandBufferUsageFlags>(tempFlagBits, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT));
+        REQUIRE(sy::ContainsBitFlag<VkCommandBufferUsageFlags>(tempFlagBits, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT));
     }
 }
