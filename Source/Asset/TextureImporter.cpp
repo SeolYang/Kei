@@ -121,18 +121,14 @@ bool TextureImporter::Import2D(vk::VulkanContext& vulkanContext, const fs::path&
     ktxCreateInfo.baseDepth        = 1;
     ktxCreateInfo.isArray          = KTX_FALSE;
     ktxCreateInfo.generateMipmaps  = false;
-    ktxCreateInfo.numLevels        = config.bGenerateMipsWhenImport ? mipCounts : 1;
+    ktxCreateInfo.numLevels        = config.IsGenerateMipsWhenImport() ? mipCounts : 1;
     ktxCreateInfo.numLayers        = 1;
     ktxCreateInfo.numFaces         = 1;
     ktxCreateInfo.numDimensions    = 2;
 
-    const uint32_t compressionLevel = TextureCompressionQualityToLevel(config.TargetCompressionQuality);
-    const uint32_t qualityLevel     = TextureQualityToLevel(config.TargetQuality);
-    const size_t   srcLevel         = 0;
-    const size_t   srcLayer         = 0;
-    const size_t   srcFaceSlice     = 0;
+    const uint32_t compressionLevel = TextureCompressionQualityToLevel(config.GetTargetCompressionQuality());
+    const uint32_t qualityLevel     = TextureQualityToLevel(config.GetTargetQuality());
     ktxResult      result           = {};
-
     {
         ktxTexture2* acquiredKtxTexture = nullptr;
 
@@ -152,7 +148,7 @@ bool TextureImporter::Import2D(vk::VulkanContext& vulkanContext, const fs::path&
     }
 
     const size_t blobSize = ImageBlobBytesSize(width, height, channels, bytesPerChannel);
-    result                = ktxTexture_SetImageFromMemory(ktxTexture(newKtxTexture.get()), srcLevel, srcLayer, srcFaceSlice, image.get(),
+    result                = ktxTexture_SetImageFromMemory(ktxTexture(newKtxTexture.get()), 0, 0, 0, image.get(),
                                                           blobSize);
     if (result != KTX_SUCCESS)
     {
@@ -160,7 +156,7 @@ bool TextureImporter::Import2D(vk::VulkanContext& vulkanContext, const fs::path&
         return false;
     }
 
-    if (config.bGenerateMipsWhenImport)
+    if (config.IsGenerateMipsWhenImport())
     {
         auto& vulkanRHI     = vulkanContext.GetRHI();
 
@@ -256,7 +252,7 @@ bool TextureImporter::Import2D(vk::VulkanContext& vulkanContext, const fs::path&
 
                 const uint8_t* mappedTexture = reinterpret_cast<const uint8_t*>(vulkanRHI.Map(*readback));
                 result = ktxTexture_SetImageFromMemory(ktxTexture(newKtxTexture.get()),
-                                                       mip, srcLayer, srcFaceSlice,
+                                                       mip, 0, 0,
                                                        mappedTexture,
                                                        textureSizeBytes);
                 if (result != KTX_SUCCESS)
@@ -295,9 +291,9 @@ bool TextureImporter::Import2D(vk::VulkanContext& vulkanContext, const fs::path&
     auto newTexture = std::make_unique<Texture>(path);
     newTexture->SetExtent(Extent2D<uint32_t>{(uint32_t)width, (uint32_t)height});
     newTexture->SetFormat(format);
-    newTexture->SetCompressionMode(config.TargetCompressionMode);
-    newTexture->SetCompressQuality(config.TargetCompressionQuality);
-    newTexture->SetQuality(config.TargetQuality);
+    newTexture->SetCompressionMode(config.GetTargetCompressionMode());
+    newTexture->SetCompressQuality(config.GetTargetCompressionQuality());
+    newTexture->SetQuality(config.GetTargetQuality());
 
     SaveJsonToFile(newTexture->GetPath(), newTexture->Serialize());
     return true;

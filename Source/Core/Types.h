@@ -40,59 +40,9 @@ const T& Unwrap(const CRefOptional<T>& optional)
 
 using RWLock       = std::unique_lock<std::shared_mutex>;
 using ReadOnlyLock = std::shared_lock<std::shared_mutex>;
-
-struct NamedType
-{
-public:
-    NamedType(const std::string_view name) :
-        name(name)
-    {
-    }
-
-    virtual ~NamedType() = default;
-
-    void SetName(const std::string_view name)
-    {
-        this->name = name;
-    }
-
-    [[nodiscard]] std::string_view GetName() const
-    {
-        return name;
-    }
-
-private:
-    std::string name;
-};
-
-class NonCopyable
-{
-public:
-    virtual ~NonCopyable()                    = default;
-    NonCopyable(const NonCopyable&)           = delete;
-    NonCopyable& operator=(const NonCopyable) = delete;
-
-protected:
-    NonCopyable() = default;
-};
-
-template <typename T>
-struct Range
-{
-public:
-    template <typename C>
-    RefOptional<C> CastTo(uint8_t* base) const
-    {
-        if (base == nullptr)
-        {
-            return std::nullopt;
-        }
-
-        return *(reinterpret_cast<C*>(base + Offset));
-    }
-
-public:
-    T Offset = {};
-    T Size   = {};
-};
 } // namespace sy
+
+#include <Core/NonCopyable.h>
+#include <Core/NamedType.h>
+#include <Core/Range.h>
+#include <Core/Serializable.h>

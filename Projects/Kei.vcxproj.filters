@@ -333,6 +333,24 @@
     <ClInclude Include="..\Source\Asset\TextureAssetEnums.h">
       <Filter>Source\Asset</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Asset\AssetConverter.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\AssetConfig.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\NamedType.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\NonCopyable.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\Serializable.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\Range.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Assets\Shaders\tri.vert">

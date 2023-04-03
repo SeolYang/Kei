@@ -18,19 +18,19 @@ inline size_t    TriangulatedNumFacesToNumIndices(const size_t numFaces)
 bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
 {
     bool         bSucceed     = true;
-    const size_t sizeOfVertex = render::SizeOfVertex(config.VertexType);
+    const size_t sizeOfVertex = render::SizeOfVertex(config.GetVertexType());
     const size_t sizeOfIndex  = sizeof(render::IndexType);
 
     uint32_t importFlags = aiProcess_Triangulate;
-    importFlags |= (config.bFlipWingdingOrder ? aiProcess_FlipWindingOrder : 0);
-    importFlags |= (config.bFlipUVs ? aiProcess_FlipUVs : 0);
-    importFlags |= (config.bMakeLeftHanded ? aiProcess_MakeLeftHanded : 0);
-    importFlags |= (config.bConvertToLeftHanded ? aiProcess_ConvertToLeftHanded : 0);
-    importFlags |= (config.bGenUVCoords ? aiProcess_GenUVCoords : 0);
-    importFlags |= (config.bGenNormals ? aiProcess_GenNormals : 0);
-    importFlags |= (config.bGenSmoothNormals ? aiProcess_GenSmoothNormals : 0);
-    importFlags |= (config.bCalcTagentSpace ? aiProcess_CalcTangentSpace : 0);
-    importFlags |= (config.bPretransformVertices ? aiProcess_PreTransformVertices : 0);
+    importFlags |= (config.IsFlipWindingOrder() ? aiProcess_FlipWindingOrder : 0);
+    importFlags |= (config.IsFlipTextureCoordinates() ? aiProcess_FlipUVs : 0);
+    importFlags |= (config.IsMakeLeftHanded() ? aiProcess_MakeLeftHanded : 0);
+    importFlags |= (config.IsConvertToLeftHanded() ? aiProcess_ConvertToLeftHanded : 0);
+    importFlags |= (config.IsGenerateTextureCoordinates() ? aiProcess_GenUVCoords : 0);
+    importFlags |= (config.IsGenerateNormals() ? aiProcess_GenNormals : 0);
+    importFlags |= (config.IsGenerateSmoothNormals() ? aiProcess_GenSmoothNormals : 0);
+    importFlags |= (config.IsCalculateTangentSpace() ? aiProcess_CalcTangentSpace : 0);
+    importFlags |= (config.IsPretransformVertices() ? aiProcess_PreTransformVertices : 0);
 
     Assimp::Importer importer;
     std::string      pathStr = path.string();
@@ -74,9 +74,10 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
 
         /** Process Mesh vertices */
         uint8_t* verticesBase = meshVerticesBlob.data();
+        const auto targetModelVertexType = config.GetVertexType();
         for (size_t vIdx = 0; vIdx < numMeshVertices; ++vIdx)
         {
-            if (const auto colorAttributeRange = QueryRangeOfVertexAttribute(config.VertexType, render::EVertexAttributeType::Color);
+            if (const auto colorAttributeRange = QueryRangeOfVertexAttribute(targetModelVertexType, render::EVertexAttributeType::Color);
                 colorAttributeRange)
             {
                 if (const auto colorAttribute = colorAttributeRange->CastTo<glm::vec4>(verticesBase);
@@ -90,7 +91,7 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
                 }
             }
 
-            if (const auto posAttributeRange = QueryRangeOfVertexAttribute(config.VertexType, render::EVertexAttributeType::Position);
+            if (const auto posAttributeRange = QueryRangeOfVertexAttribute(targetModelVertexType, render::EVertexAttributeType::Position);
                 posAttributeRange)
             {
                 if (const auto posAttribute = posAttributeRange->CastTo<glm::vec3>(verticesBase);
@@ -103,7 +104,7 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
                 }
             }
 
-            if (const auto texCoords0AttributeRange = QueryRangeOfVertexAttribute(config.VertexType, render::EVertexAttributeType::TexCoords0);
+            if (const auto texCoords0AttributeRange = QueryRangeOfVertexAttribute(targetModelVertexType, render::EVertexAttributeType::TexCoords0);
                 texCoords0AttributeRange)
             {
                 if (const auto texCoords0Attribute = texCoords0AttributeRange->CastTo<glm::vec2>(verticesBase);
@@ -115,7 +116,7 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
                 }
             }
 
-            if (const auto normalAttributeRange = QueryRangeOfVertexAttribute(config.VertexType, render::EVertexAttributeType::Normal);
+            if (const auto normalAttributeRange = QueryRangeOfVertexAttribute(targetModelVertexType, render::EVertexAttributeType::Normal);
                 normalAttributeRange)
             {
                 if (const auto normalAttribute = normalAttributeRange->CastTo<glm::vec3>(verticesBase))
@@ -127,7 +128,7 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
                 }
             }
 
-            if (const auto bitangentAttributeRange = QueryRangeOfVertexAttribute(config.VertexType, render::EVertexAttributeType::Bitangent);
+            if (const auto bitangentAttributeRange = QueryRangeOfVertexAttribute(targetModelVertexType, render::EVertexAttributeType::Bitangent);
                 bitangentAttributeRange)
             {
                 if (const auto bitangentAttribute = bitangentAttributeRange->CastTo<glm::vec3>(verticesBase);
@@ -140,7 +141,7 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
                 }
             }
 
-            if (const auto tangentAttributeRange = QueryRangeOfVertexAttribute(config.VertexType, render::EVertexAttributeType::Tangent);
+            if (const auto tangentAttributeRange = QueryRangeOfVertexAttribute(targetModelVertexType, render::EVertexAttributeType::Tangent);
                 tangentAttributeRange)
             {
                 if (const auto tangentAttribute = tangentAttributeRange->CastTo<glm::vec3>(verticesBase);
@@ -175,7 +176,7 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
         }
 
         /** Compress Vertices and Indices of proceed meshes.*/
-        if (config.bEnableCompression)
+        if (config.IsCompressionEnabled())
         {
             /** Vertex Compression */
             {
@@ -220,7 +221,7 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
 
         const std::string materialPath = std::format("{}_{}.material", newModel->GetExtensionlessPath().string(), meshName);
 
-        if (config.bGenMaterialPerMesh)
+        if (config.IsGenerateMaterialPerMesh())
         {
             auto newMaterial = std::make_unique<Material>(materialPath);
             SaveJsonToFile(materialPath, newMaterial->Serialize());
@@ -228,7 +229,7 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
 
         newModel->EmplaceMeshData(
             meshName,
-            config.bGenMaterialPerMesh ? materialPath :
+            config.IsGenerateMaterialPerMesh() ? materialPath :
                                          core::constants::res::DefaultMaterialInstance,
             verticesBlobRange,
             indicesBlobRange,
@@ -249,11 +250,11 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
     if (bSucceed)
     {
         /** Setup Asset Metadata */
-        if (config.bEnableCompression)
+        if (config.IsCompressionEnabled())
         {
             newModel->EnableCompression();
         }
-        newModel->SetVertexType(config.VertexType);
+        newModel->SetVertexType(config.GetVertexType());
         newModel->SetVerticesBlobSize(modelVerticesBlob.size());
         newModel->SetIndicesBlobSize(modelIndicesBlob.size());
         SaveJsonToFile(newModel->GetPath(), newModel->Serialize());

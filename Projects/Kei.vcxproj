@@ -74,6 +74,8 @@
   <ItemGroup>
     <ClInclude Include="..\Source\Application\Context.h" />
     <ClInclude Include="..\Source\Asset\Asset.h" />
+    <ClInclude Include="..\Source\Asset\AssetConfig.h" />
+    <ClInclude Include="..\Source\Asset\AssetConverter.h" />
     <ClInclude Include="..\Source\Asset\Constants.h" />
     <ClInclude Include="..\Source\Asset\MaterialAsset.h" />
     <ClInclude Include="..\Source\Asset\ModelAsset.h" />
@@ -89,7 +91,11 @@
     <ClInclude Include="..\Source\Core\Extent.h" />
     <ClInclude Include="..\Source\Core\Assert.h" />
     <ClInclude Include="..\Source\Core\HandleManager.h" />
+    <ClInclude Include="..\Source\Core\NamedType.h" />
+    <ClInclude Include="..\Source\Core\NonCopyable.h" />
     <ClInclude Include="..\Source\Core\Pool.hpp" />
+    <ClInclude Include="..\Source\Core\Range.h" />
+    <ClInclude Include="..\Source\Core\Serializable.h" />
     <ClInclude Include="..\Source\Core\Subsystem.h" />
     <ClInclude Include="..\Source\Core\Timer.h" />
     <ClInclude Include="..\Source\Core\Types.h" />

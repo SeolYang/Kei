@@ -19,7 +19,7 @@ inline fs::path ConvertToBlobPath(fs::path path)
     return path.replace_extension(constants::fs::ext::Blob);
 }
 
-class Asset : public NonCopyable, public NamedType
+class Asset : public NonCopyable, public NamedType, public Serializable
 {
 public:
     explicit Asset(const fs::path& path);
@@ -35,8 +35,8 @@ public:
 
     bool Initialize();
 
-    [[nodiscard]] virtual json Serialize() const;
-    virtual void               Deserialize(const json& root);
+    [[nodiscard]] json Serialize() const override;
+    void               Deserialize(const json& root) override;
 
 protected:
     void EnableIgnoreBlob() { bIgnoreBlob = true; }
@@ -58,10 +58,10 @@ protected:
     virtual bool InitializeExternal() { return false; }
 
 private:
-    bool           bIgnoreBlob       = false;
-    bool           bIsExternalFormat = false;
+    bool           bIgnoreBlob                          = false;
+    bool           bIsExternalFormat                    = false;
     bool           bAllowUsingMetadataForExternalFormat = false;
-    bool           bInitialized      = false;
+    bool           bInitialized                         = false;
     const fs::path originPath;
     const fs::path extensionlessPath;
     const fs::path assetPath;
