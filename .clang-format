@@ -32,7 +32,7 @@ AlignConsecutiveMacros: true
 
 
 # If true, aligns consecutive assignments.
-AlignConsecutiveAssignments: true
+AlignConsecutiveAssignments: false
 # true:
 # int aaaa = 12;
 # int b    = 23;
@@ -40,7 +40,7 @@ AlignConsecutiveAssignments: true
 
 
 # If true, aligns consecutive declarations.
-AlignConsecutiveDeclarations: true
+AlignConsecutiveDeclarations: false
 # true:
 # int         aaaa = 12;
 # float       b = 23;
