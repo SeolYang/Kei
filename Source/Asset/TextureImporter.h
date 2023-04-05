@@ -1,6 +1,7 @@
 #pragma once
 #include <PCH.h>
 #include <Asset/TextureAssetEnums.h>
+#include <Asset/AssetImportConfig.h>
 
 namespace sy::vk
 {
@@ -9,7 +10,7 @@ class VulkanContext;
 
 namespace sy::asset
 {
-struct TextureImportConfig : public Serializable
+struct TextureImportConfig : public AssetImportConfig
 {
     TextureImportConfig& SetGenerateMipsWhenImport(const bool enable)
     {

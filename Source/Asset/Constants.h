@@ -56,5 +56,5 @@ constexpr std::string_view CalculateTangentSpace      = "CalculateTangentSpace";
 constexpr std::string_view PretransformVertices       = "PretransformVertices";
 constexpr std::string_view GenerateMipsWhenImport     = "GenerateMipsWhenImport";
 constexpr std::string_view Configuration              = "Configuration";
-constexpr std::string_view RequireReimportAsset       = "RequiredReimportAsset";
+constexpr std::string_view ReadyToImport              = "ReadyToImport";
 } // namespace sy::asset::constants::metadata::key

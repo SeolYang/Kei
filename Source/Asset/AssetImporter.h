@@ -39,8 +39,16 @@ static std::optional<EAssetType> FileExtensionToAssetType(std::string_view exten
     return found != extAssetMap.end() ? std::optional<EAssetType>{found->second} : std::nullopt;
 }
 
+class AssetImportConfig;
 class AssetImporter
 {
+private:
+    struct ImportTarget
+    {
+        std::string Path;
+        EAssetType  AssetType;
+    };
+
 public:
     AssetImporter(vk::VulkanContext& vulkanContext, bool bForceResetOnExecute);
     ~AssetImporter() = default;
@@ -53,13 +61,13 @@ private:
     void ForceResetOnExecute();
 
     void                       ImportAssetsFromRootAssetDirectory();
-    void                       ExtractRegularFilesInRootAssetDirectory();
+    void                       ExtractRegularFilesFromRootAssetDirectory();
     void                       ExtractImportTargetsFromRegularFiles();
     void                       UpdateUnseenImportTargetsToConfigMap();
     static json                GetSerializedDefaultConfig(EAssetType assetType);
-    void                       FilteringImportTargets();
+    void                       FilteringReadyToImportTargets();
     void                       ImportTargetAssets();
-    void                       ImportAsset(const std::string_view path, const EAssetType assetType, json& config);
+    void                       ImportAsset(const ImportTarget& importTarget, json& config);
     void                       ImportTextureAsset(const fs::path& path, const json& serializedConfig);
     void                       ImportModelAsset(const fs::path& path, const json& serializedConfig);
     static TextureImportConfig DeserializeTextureImportConfig(const json& serializedConfig);
@@ -69,11 +77,11 @@ private:
     void ExportAssetImportConfigs();
 
 private:
-    vk::VulkanContext&                              vulkanContext;
-    fs::path                                        root;
-    const bool                                      bForceResetOnExecute = false;
-    std::vector<fs::path>                           regularFiles;
-    std::vector<std::pair<std::string, EAssetType>> importTargets;
-    json                                            serializedImportConfigMap;
+    vk::VulkanContext&        vulkanContext;
+    fs::path                  root;
+    const bool                bForceResetOnExecute = false;
+    std::vector<fs::path>     regularFiles;
+    std::vector<ImportTarget> importTargets;
+    json                      serializedImportConfigMap;
 };
 } // namespace sy::asset

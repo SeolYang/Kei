@@ -33,14 +33,14 @@ void AssetImporter::ForceResetOnExecute()
 void AssetImporter::ImportAssetsFromRootAssetDirectory()
 {
     spdlog::info("Import Assets from asset root.");
-    ExtractRegularFilesInRootAssetDirectory();
+    ExtractRegularFilesFromRootAssetDirectory();
     ExtractImportTargetsFromRegularFiles();
     UpdateUnseenImportTargetsToConfigMap();
-    FilteringImportTargets();
+    FilteringReadyToImportTargets();
     ImportTargetAssets();
 }
 
-void AssetImporter::ExtractRegularFilesInRootAssetDirectory()
+void AssetImporter::ExtractRegularFilesFromRootAssetDirectory()
 {
     const fs::recursive_directory_iterator directoryItr{constants::path::AssetRootRelative};
     for (const auto& entry : directoryItr)
@@ -61,7 +61,7 @@ void AssetImporter::ExtractImportTargetsFromRegularFiles()
         const auto        assetType          = FileExtensionToAssetType(NormalizeExtension(regularFilePath.extension().string()));
         if (assetType)
         {
-            importTargets.emplace_back(std::make_pair(regularFilePathStr, *assetType));
+            importTargets.emplace_back(regularFilePathStr, *assetType);
         }
     }
 }
@@ -70,11 +70,9 @@ void AssetImporter::UpdateUnseenImportTargetsToConfigMap()
 {
     for (const auto& importTarget : importTargets)
     {
-        const auto& importTargetPath      = importTarget.first;
-        const auto  importTargetAssetType = importTarget.second;
-        if (!serializedImportConfigMap.contains(importTargetPath))
+        if (!serializedImportConfigMap.contains(importTarget.Path))
         {
-            serializedImportConfigMap[importTargetPath] = GetSerializedDefaultConfig(importTargetAssetType);
+            serializedImportConfigMap[importTarget.Path] = GetSerializedDefaultConfig(importTarget.AssetType);
         }
     }
 }
@@ -93,17 +91,16 @@ json AssetImporter::GetSerializedDefaultConfig(const EAssetType assetType)
             break;
     }
 
-    serializedConfig[constants::metadata::key::RequireReimportAsset] = true;
     return serializedConfig;
 }
 
-void AssetImporter::FilteringImportTargets()
+void AssetImporter::FilteringReadyToImportTargets()
 {
     importTargets.erase(std::remove_if(importTargets.begin(), importTargets.end(),
                                        [this](const auto& importTarget) {
-                                           const json& config                  = serializedImportConfigMap[importTarget.first];
-                                           const bool  bIsNotNecessaryToImport = !ResolveValueFromJson(config, constants::metadata::key::RequireReimportAsset, true);
-                                           return bIsNotNecessaryToImport;
+                                           const json& config                  = serializedImportConfigMap[importTarget.Path];
+                                           const bool  bIsReadyToImport = !ResolveValueFromJson(config, constants::metadata::key::ReadyToImport, true);
+                                           return bIsReadyToImport;
                                        }),
                         importTargets.end());
 }
@@ -114,24 +111,21 @@ void AssetImporter::ImportTargetAssets()
     // #todo Impl as Multi-threaded
     for (const auto& importTarget : importTargets)
     {
-        const auto& path      = importTarget.first;
-        const auto  assetType = importTarget.second;
-        auto&       config    = serializedImportConfigMap[path];
-        ImportAsset(path, assetType, config);
+        ImportAsset(importTarget, serializedImportConfigMap[importTarget.Path]);
     }
 }
 
-void AssetImporter::ImportAsset(const std::string_view path, const EAssetType assetType, json& config)
+void AssetImporter::ImportAsset(const ImportTarget& importTarget, json& config)
 {
     auto begin = chrono::high_resolution_clock::now();
-    switch (assetType)
+    switch (importTarget.AssetType)
     {
         case EAssetType::Texture:
-            ImportTextureAsset(path, config);
+            ImportTextureAsset(importTarget.Path, config);
             break;
 
         case EAssetType::Model:
-            ImportModelAsset(path, config);
+            ImportModelAsset(importTarget.Path, config);
             break;
     }
 
@@ -143,7 +137,6 @@ void AssetImporter::ImportAsset(const std::string_view path, const EAssetType as
 void AssetImporter::ImportTextureAsset(const fs::path& path, const json& serializedConfig)
 {
     spdlog::info("Import Texture Asset \"{}\"...", path.string());
-
     if (!TextureImporter::Import2D(vulkanContext,
                                    path,
                                    DeserializeTextureImportConfig(serializedConfig)))
@@ -155,7 +148,6 @@ void AssetImporter::ImportTextureAsset(const fs::path& path, const json& seriali
 void AssetImporter::ImportModelAsset(const fs::path& path, const json& serializedConfig)
 {
     spdlog::info("Import Model Asset \"{}\"...", path.string());
-
     if (!ModelImporter::Import(path,
                                DeserializeModelImportConfig(serializedConfig)))
     {
@@ -179,7 +171,7 @@ ModelImportConfig AssetImporter::DeserializeModelImportConfig(const json& serial
 
 void AssetImporter::FinalizeAssetImport(json& config)
 {
-    config[constants::metadata::key::RequireReimportAsset] = false;
+    config[constants::metadata::key::ReadyToImport] = false;
 }
 
 void AssetImporter::ExportAssetImportConfigs()

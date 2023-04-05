@@ -274,7 +274,7 @@ json ModelImportConfig::Serialize() const
 {
     namespace key = constants::metadata::key;
 
-    json root;
+    json root                             = AssetImportConfig::Serialize();
     root[key::VertexType]                 = magic_enum::enum_name(vertexType);
     root[key::GenerateMaterialPerMesh]    = bGenMaterialPerMesh;
     root[key::Compression]                = bEnableCompression;
@@ -294,6 +294,7 @@ void ModelImportConfig::Deserialize(const json& root)
 {
     namespace key = constants::metadata::key;
 
+    AssetImportConfig::Deserialize(root);
     vertexType            = ResolveEnumFromJson(root, key::VertexType, render::EVertexType::PT0N);
     bGenMaterialPerMesh   = ResolveValueFromJson(root, key::GenerateMaterialPerMesh, false);
     bEnableCompression    = ResolveValueFromJson(root, key::Compression, false);

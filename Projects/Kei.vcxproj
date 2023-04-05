@@ -17,6 +17,7 @@
   <ItemGroup>
     <ClCompile Include="..\Source\Application\Context.cpp" />
     <ClCompile Include="..\Source\Asset\Asset.cpp" />
+    <ClCompile Include="..\Source\Asset\AssetImportConfig.cpp" />
     <ClCompile Include="..\Source\Asset\AssetImporter.cpp" />
     <ClCompile Include="..\Source\Asset\MaterialAsset.cpp" />
     <ClCompile Include="..\Source\Asset\ModelAsset.cpp" />
@@ -75,6 +76,7 @@
   <ItemGroup>
     <ClInclude Include="..\Source\Application\Context.h" />
     <ClInclude Include="..\Source\Asset\Asset.h" />
+    <ClInclude Include="..\Source\Asset\AssetImportConfig.h" />
     <ClInclude Include="..\Source\Asset\AssetImporter.h" />
     <ClInclude Include="..\Source\Asset\Constants.h" />
     <ClInclude Include="..\Source\Asset\MaterialAsset.h" />

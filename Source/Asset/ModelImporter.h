@@ -1,9 +1,10 @@
 #pragma once
 #include <PCH.h>
+#include <Asset/AssetImportConfig.h>
 
 namespace sy::asset
 {
-struct ModelImportConfig : public Serializable
+struct ModelImportConfig : public AssetImportConfig
 {
 public:
     ModelImportConfig& SetVertexType(const render::EVertexType type)
