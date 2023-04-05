@@ -162,7 +162,8 @@ void Renderer::Startup()
 
     basicPipeline = std::make_unique<vk::Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
-    auto model = handleManager.Add<asset::Model>("Assets/Models/homura/homura.fbx", handleManager, vulkanContext);
+    //auto model = handleManager.Add<asset::Model>("Assets/Models/rubber_duck/scene.gltf", handleManager, vulkanContext);
+	auto model = handleManager.Add<asset::Model>("Assets/Models/homura/homura.fbx", handleManager, vulkanContext);
     SY_ASSERT(model->Initialize(), "Failed to init model.");
     staticMeshes = model->GetMeshes();
 

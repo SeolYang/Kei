@@ -73,7 +73,7 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
         meshIndicesBlob.resize(sizeof(render::IndexType) * numMeshIndices);
 
         /** Process Mesh vertices */
-        uint8_t* verticesBase = meshVerticesBlob.data();
+        uint8_t*   verticesBase          = meshVerticesBlob.data();
         const auto targetModelVertexType = config.GetVertexType();
         for (size_t vIdx = 0; vIdx < numMeshVertices; ++vIdx)
         {
@@ -230,7 +230,7 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
         newModel->EmplaceMeshData(
             meshName,
             config.IsGenerateMaterialPerMesh() ? materialPath :
-                                         core::constants::res::DefaultMaterialInstance,
+                                                 core::constants::res::DefaultMaterialInstance,
             verticesBlobRange,
             indicesBlobRange,
             numMeshVertices,
@@ -269,4 +269,43 @@ bool ModelImporter::Import(const fs::path& path, const ModelImportConfig config)
     importer.FreeScene();
     return bSucceed;
 }
+
+json ModelImportConfig::Serialize() const
+{
+    namespace key = constants::metadata::key;
+
+    json root;
+    root[key::VertexType]                 = magic_enum::enum_name(vertexType);
+    root[key::GenerateMaterialPerMesh]    = bGenMaterialPerMesh;
+    root[key::Compression]                = bEnableCompression;
+    root[key::ConvertToLeftHanded]        = bConvertToLeftHanded;
+    root[key::FlipWindingOrder]           = bFlipWingdingOrder;
+    root[key::FlipTextureCoordinates]     = bFlipUVs;
+    root[key::MakedLeftHanded]            = bMakeLeftHanded;
+    root[key::GenerateTextureCoordinates] = bGenUVCoords;
+    root[key::GenerateNormals]            = bGenNormals;
+    root[key::GenerateSmoothNormals]      = bGenSmoothNormals;
+    root[key::CalculateTangentSpace]      = bCalcTagentSpace;
+    root[key::PretransformVertices]       = bPretransformVertices;
+    return root;
+}
+
+void ModelImportConfig::Deserialize(const json& root)
+{
+    namespace key = constants::metadata::key;
+
+    vertexType            = ResolveEnumFromJson(root, key::VertexType, render::EVertexType::PT0N);
+    bGenMaterialPerMesh   = ResolveValueFromJson(root, key::GenerateMaterialPerMesh, false);
+    bEnableCompression    = ResolveValueFromJson(root, key::Compression, false);
+    bConvertToLeftHanded  = ResolveValueFromJson(root, key::ConvertToLeftHanded, false);
+    bFlipWingdingOrder    = ResolveValueFromJson(root, key::FlipWindingOrder, false);
+    bFlipUVs              = ResolveValueFromJson(root, key::FlipTextureCoordinates, false);
+    bMakeLeftHanded       = ResolveValueFromJson(root, key::MakedLeftHanded, false);
+    bGenUVCoords          = ResolveValueFromJson(root, key::GenerateTextureCoordinates, false);
+    bGenNormals           = ResolveValueFromJson(root, key::GenerateNormals, false);
+    bGenSmoothNormals     = ResolveValueFromJson(root, key::GenerateSmoothNormals, false);
+    bCalcTagentSpace      = ResolveValueFromJson(root, key::CalculateTangentSpace, false);
+    bPretransformVertices = ResolveValueFromJson(root, key::PretransformVertices, false);
+}
+
 } // namespace sy::asset

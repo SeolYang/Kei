@@ -158,7 +158,7 @@ bool TextureImporter::Import2D(vk::VulkanContext& vulkanContext, const fs::path&
 
     if (config.IsGenerateMipsWhenImport())
     {
-        auto& vulkanRHI     = vulkanContext.GetRHI();
+        auto& vulkanRHI = vulkanContext.GetRHI();
 
         if (vulkanRHI.IsFormatSupportFeatures(format,
                                               VK_FORMAT_FEATURE_2_BLIT_SRC_BIT | VK_FORMAT_FEATURE_2_BLIT_DST_BIT))
@@ -251,10 +251,10 @@ bool TextureImporter::Import2D(vk::VulkanContext& vulkanContext, const fs::path&
                 vulkanRHI.SubmitImmediateTo(*cmdBuffer);
 
                 const uint8_t* mappedTexture = reinterpret_cast<const uint8_t*>(vulkanRHI.Map(*readback));
-                result = ktxTexture_SetImageFromMemory(ktxTexture(newKtxTexture.get()),
-                                                       mip, 0, 0,
-                                                       mappedTexture,
-                                                       textureSizeBytes);
+                result                       = ktxTexture_SetImageFromMemory(ktxTexture(newKtxTexture.get()),
+                                                                             mip, 0, 0,
+                                                                             mappedTexture,
+                                                                             textureSizeBytes);
                 if (result != KTX_SUCCESS)
                 {
                     spdlog::warn("Failed to set mip texture {} to ktx texture from memory. Error: {}", mip, magic_enum::enum_name<ktx_error_code_e>(result));
@@ -298,4 +298,28 @@ bool TextureImporter::Import2D(vk::VulkanContext& vulkanContext, const fs::path&
     SaveJsonToFile(newTexture->GetPath(), newTexture->Serialize());
     return true;
 }
+
+json TextureImportConfig::Serialize() const
+{
+    namespace key = constants::metadata::key;
+
+    json root;
+    root[key::GenerateMipsWhenImport] = bGenerateMipsWhenImport;
+    root[key::CompressionMode]        = magic_enum::enum_name(targetCompressionMode);
+    root[key::CompressionQuality]     = magic_enum::enum_name(targetCompressionQuality);
+    root[key::Quality]                = magic_enum::enum_name(targetQuality);
+
+    return root;
+}
+
+void TextureImportConfig::Deserialize(const json& root)
+{
+    namespace key = constants::metadata::key;
+
+    bGenerateMipsWhenImport  = ResolveValueFromJson(root, key::GenerateMipsWhenImport, false);
+    targetCompressionMode    = ResolveEnumFromJson(root, key::CompressionMode, ETextureCompressionMode::BC7);
+    targetCompressionQuality = ResolveEnumFromJson(root, key::CompressionQuality, ETextureCompressionQuality::Medium);
+    targetQuality            = ResolveEnumFromJson(root, key::Quality, ETextureQuality::Medium);
+}
+
 } // namespace sy::asset

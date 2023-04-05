@@ -33,7 +33,7 @@ TEST_CASE("Extent3D", "[extent_3d]")
         REQUIRE((extent.width == 300 && extent.height == 400 && extent.depth == 500));
         REQUIRE(extent.IsValid());
 
-		extent = {4096,
+        extent = {4096,
                   4096,
                   2048};
         REQUIRE(CalculateMaximumMipCountFromExtent(extent) == 13);
@@ -140,5 +140,9 @@ TEST_CASE("Utilities", "[utils]")
     {
         constexpr VkCommandBufferUsageFlags tempFlagBits = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT | VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
         REQUIRE(sy::ContainsBitFlag<VkCommandBufferUsageFlags>(tempFlagBits, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT));
+
+        std::string ExtensionWithOutNormalize = ".GLtf";
+        std::string normalizeExtension        = sy::NormalizeExtension(ExtensionWithOutNormalize);
+        REQUIRE(normalizeExtension == "gltf");
     }
 }

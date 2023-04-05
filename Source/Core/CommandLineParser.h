@@ -18,10 +18,16 @@ public:
         return assetPath;
     }
 
-    [[nodiscard]] auto ShouldConvertAssets() const noexcept
+    [[nodiscard]] auto IsImportAssetEnabled() const noexcept
     {
-        return bShouldConvertAssets;
+        return bImportAssets;
     }
+
+    [[nodiscard]] auto IsForceReimportAssetsEnabled() const noexcept
+    {
+        return bForceReimportAssets;
+    }
+
 
 private:
     bool Argument(const char* argument);
@@ -29,6 +35,7 @@ private:
 private:
     fs::path executablePath;
     fs::path assetPath;
-    bool     bShouldConvertAssets = false;
+    bool     bImportAssets        = false;
+    bool     bForceReimportAssets = false;
 };
 } // namespace sy

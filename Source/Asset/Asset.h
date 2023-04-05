@@ -11,12 +11,12 @@ inline fs::path ConvertToExtensionless(fs::path path)
 
 inline fs::path ConvertToAssetPath(fs::path path)
 {
-    return path.replace_extension(constants::fs::ext::Asset);
+    return path.replace_extension(constants::ext::Asset);
 }
 
 inline fs::path ConvertToBlobPath(fs::path path)
 {
-    return path.replace_extension(constants::fs::ext::Blob);
+    return path.replace_extension(constants::ext::Blob);
 }
 
 class Asset : public NonCopyable, public NamedType, public Serializable

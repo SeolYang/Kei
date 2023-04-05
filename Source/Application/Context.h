@@ -49,6 +49,7 @@ public:
 private:
     void InitializeLogger();
     void InitDefaultEngineResources();
+    void ExecuteAssetImportProcess();
 
 private:
     CommandLineParser&                 cmdLineParser;

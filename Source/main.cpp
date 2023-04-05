@@ -6,6 +6,7 @@
 
 int main(int argc, char** argv)
 {
+#ifdef RUN_TESTS
     bool           bUnitTestRequired = false;
     Catch::Session session;
     const auto     cli =
@@ -24,7 +25,7 @@ int main(int argc, char** argv)
         const auto numOfFailedTestCase = session.run();
         return numOfFailedTestCase;
     }
-
+#else
     using namespace sy;
     const auto   cmdLineParser = std::make_unique<CommandLineParser>(argc, argv);
     app::Context context{*cmdLineParser, window::WindowBuilder{}};
@@ -34,4 +35,5 @@ int main(int argc, char** argv)
     context.Shutdown();
 
     return 0;
+#endif
 }

@@ -3,8 +3,9 @@
 
 namespace sy::asset
 {
-struct ModelImportConfig
+struct ModelImportConfig : public Serializable
 {
+public:
     ModelImportConfig& SetVertexType(const render::EVertexType type)
     {
         vertexType = type;
@@ -90,10 +91,13 @@ struct ModelImportConfig
     [[nodiscard]] bool IsCalculateTangentSpace() const { return bCalcTagentSpace; }
     [[nodiscard]] bool IsPretransformVertices() const { return bPretransformVertices; }
 
+	json Serialize() const override;
+    void Deserialize(const json& root) override;
+
 private:
     render::EVertexType vertexType           = render::EVertexType::PT0N;
     bool                bGenMaterialPerMesh  = false;
-    bool                bEnableCompression   = true;
+    bool                bEnableCompression   = false;
     bool                bConvertToLeftHanded = false;
     bool                bFlipWingdingOrder   = false;
     bool                bFlipUVs             = false;

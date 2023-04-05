@@ -9,7 +9,7 @@ class VulkanContext;
 
 namespace sy::asset
 {
-struct TextureImportConfig
+struct TextureImportConfig : public Serializable
 {
     TextureImportConfig& SetGenerateMipsWhenImport(const bool enable)
     {
@@ -39,6 +39,9 @@ struct TextureImportConfig
     [[nodiscard]] auto GetTargetCompressionMode() const { return targetCompressionMode; }
     [[nodiscard]] auto GetTargetCompressionQuality() const { return targetCompressionQuality; }
     [[nodiscard]] auto GetTargetQuality() const { return targetQuality; }
+	
+	json Serialize() const override;
+    void Deserialize(const json& root) override;
 
 private:
     /** Generate full pyramid mips from original texture. */

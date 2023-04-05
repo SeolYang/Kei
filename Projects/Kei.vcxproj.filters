@@ -142,6 +142,9 @@
     <ClCompile Include="..\Source\Asset\TextureImporter.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Asset\AssetImporter.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Audio\AudioContext.h">
@@ -333,10 +336,7 @@
     <ClInclude Include="..\Source\Asset\TextureAssetEnums.h">
       <Filter>Source\Asset</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Asset\AssetConverter.h">
-      <Filter>Source\Asset</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Asset\AssetConfig.h">
+    <ClInclude Include="..\Source\Asset\AssetImporter.h">
       <Filter>Source\Asset</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Core\NamedType.h">

@@ -17,10 +17,7 @@
 #include <VK/VulkanRHI.h>
 #include <Window/Window.h>
 #include <Window/WindowBuilder.h>
-// #test
-#include <Asset/ModelAsset.h>
-#include <Asset/ModelImporter.h>
-#include <Asset/TextureImporter.h>
+#include <Asset/AssetImporter.h>
 
 namespace sy::app
 {
@@ -44,10 +41,6 @@ Context::~Context()
 void Context::Startup()
 {
     InitializeLogger();
-    if (cmdLineParser.ShouldConvertAssets())
-    {
-        //asset::ConvertAssets(cmdLineParser.GetAssetPath());
-    }
     spdlog::info("Startup Context.");
 
     spdlog::info("Initializing SDL.");
@@ -60,10 +53,15 @@ void Context::Startup()
     window->Startup();
     vulkanContext->Startup();
     handleManager->Startup();
+
     InitDefaultEngineResources();
+    ExecuteAssetImportProcess();
+
     renderer->Startup();
 
 	// #test
+    //asset::ModelImportConfig rubberDuckConfig;
+    //asset::ModelImporter::Import("Assets/Models/rubber_duck/scene.gltf", rubberDuckConfig);
 	//asset::ModelImportConfig config{.bFlipUVs = true, .bPretransformVertices = true};
     //asset::ModelImporter::Import("Assets/Models/homura/homura.fbx", config);
     /*asset::TextureImporter::Import2D(*vulkanContext, "Assets/Textures/Hair.png", {.bGenerateMipsWhenImport = true});
@@ -110,7 +108,7 @@ void Context::InitializeLogger()
 #if defined(_DEBUG) || defined(DEBUG)
     spdlog::set_level(spdlog::level::trace);
 #else
-    spdlog::set_level(spdlog::level::warn);
+    spdlog::set_level(spdlog::level::trace);
 #endif
 
     spdlog::info("Logger initialized: output : {}", logFilePathAnsi);
@@ -170,6 +168,15 @@ void Context::InitDefaultEngineResources()
     defaultMaterial.SetAlias(core::constants::res::DefaultMaterialInstance);
 }
 
+void Context::ExecuteAssetImportProcess()
+{
+	if (cmdLineParser.IsImportAssetEnabled() || cmdLineParser.IsForceReimportAssetsEnabled())
+	{
+        asset::AssetImporter importer(*vulkanContext, cmdLineParser.IsForceReimportAssetsEnabled());
+        importer.Execute();
+	}
+}
+
 void Context::Run()
 {
     spdlog::info("Startup main loop.");
@@ -223,4 +230,6 @@ render::Renderer& Context::GetRenderer() const
 {
     return *renderer;
 }
+
+
 } // namespace sy::app

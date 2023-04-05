@@ -151,16 +151,23 @@ inline json LoadJsonFromFile(const fs::path& path)
 {
     if (!path.empty())
     {
-        std::ifstream input{path, std::ios::in};
-        if (input.is_open())
+        if (fs::exists(path))
         {
-            std::stringstream ss;
-            ss << input.rdbuf();
-            return json::parse(ss.str());
+            std::ifstream input{path, std::ios::in};
+            if (input.is_open())
+            {
+                std::stringstream ss;
+                ss << input.rdbuf();
+                return json::parse(ss.str());
+            }
+            else
+            {
+                SY_ASSERT(false, "Failed to open input stream from {}", path.string());
+            }
         }
         else
         {
-            SY_ASSERT(false, "Failed to open input stream from {}", path.string());
+            spdlog::warn("File {} does not exist.", path.string());
         }
     }
     else
@@ -294,5 +301,21 @@ Extent3D<T> CalculateMipExtent(const Extent3D<T> baseMipExtent, const size_t mip
     return {CalculateMipSize(baseMipExtent.width, mipLevel),
             CalculateMipSize(baseMipExtent.height, mipLevel),
             CalculateMipSize(baseMipExtent.depth, mipLevel)};
+}
+
+static std::string NormalizeExtension(std::string extension)
+{
+    if (extension.size() > 1)
+    {
+        if (extension[0] == '.')
+        {
+            extension = extension.substr(1);
+        }
+
+        std::transform(extension.begin(), extension.end(), extension.begin(),
+                       [](unsigned char c) { return std::tolower(c); });
+    }
+
+    return extension;
 }
 } // namespace sy

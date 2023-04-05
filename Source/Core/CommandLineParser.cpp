@@ -22,12 +22,19 @@ CommandLineParser::CommandLineParser(int argc, char** argv)
 
 bool CommandLineParser::Argument(const char* argument)
 {
-    if (lstrcmpA(argument, "-convert_assets") == 0)
+    if (lstrcmpA(argument, "-import_assets") == 0)
     {
-        spdlog::info("Convert assets : enabled");
-        bShouldConvertAssets = true;
+        spdlog::info("Enabled: Import Assets");
+        bImportAssets = true;
         return true;
     }
+
+	if (lstrcmpA(argument, "-force_reimport_assets") == 0)
+	{
+        spdlog::info("Enabled: Force re-import assets");
+        bForceReimportAssets = true;
+        return true;
+	}
 
     return false;
 }
