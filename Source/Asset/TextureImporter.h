@@ -31,12 +31,9 @@ private:
     void ReadbackGeneratedMipsToBuffer();
     void SetGeneratedMipsToKtxTextureFromReadbackBuffers();
     void CompressKtxTexture();
-    void ExportKtxTexture();
+    void ExportKtxTextureToFile();
     void CreateTextureAsset();
-    void ExportTextureAsset();
-
-public:
-    //static bool Import2D(vk::VulkanContext& vulkanContext, const fs::path& path, TextureImportConfig config);
+    void ExportTextureAssetToFile();
 
 private:
     bool bImported = false;

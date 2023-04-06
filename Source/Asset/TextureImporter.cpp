@@ -38,9 +38,9 @@ void TextureImporter::Import()
     ReadbackGeneratedMipsToBuffer();
     SetGeneratedMipsToKtxTextureFromReadbackBuffers();
     CompressKtxTexture();
-    ExportKtxTexture();
+    ExportKtxTextureToFile();
     CreateTextureAsset();
-    ExportTextureAsset();
+    ExportTextureAssetToFile();
 }
 
 void TextureImporter::LoadRawImageFromFile()
@@ -129,7 +129,7 @@ void TextureImporter::ReadbackGeneratedMipsToBuffer()
 void TextureImporter::SetGeneratedMipsToKtxTextureFromReadbackBuffers()
 {
     auto& vulkanRHI = vulkanContext.GetRHI();
-    size_t mipLevel = 1;
+    uint32_t mipLevel = 1;
     for (const auto& readbackBuffer : generatedMipReadbackBuffers)
     {
         const uint8_t* mappedBuffer = reinterpret_cast<const uint8_t*>(vulkanRHI.Map(*readbackBuffer));
@@ -157,13 +157,10 @@ void TextureImporter::CompressKtxTexture()
     basisParams.uastc = KTX_FALSE;
 
     const auto result = ktxTexture2_CompressBasisEx(ktxTextureFromRawImage.get(), &basisParams);
-    if (result != KTX_SUCCESS)
-    {
-        spdlog::error("Failed to compress texture. Error: {}", magic_enum::enum_name<ktx_error_code_e>(result));
-    }
+    SY_ASSERT(result == KTX_SUCCESS, "Failed to compress texture. Error: {}", magic_enum::enum_name<ktx_error_code_e>(result));
 }
 
-void TextureImporter::ExportKtxTexture()
+void TextureImporter::ExportKtxTextureToFile()
 {
     fs::path ktxOutputPath = targetPath;
     ktxOutputPath.replace_extension("ktx");
@@ -184,7 +181,7 @@ void TextureImporter::CreateTextureAsset()
     }
 }
 
-void TextureImporter::ExportTextureAsset()
+void TextureImporter::ExportTextureAssetToFile()
 {
     if (newTexture != nullptr)
     {
