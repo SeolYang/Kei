@@ -8,7 +8,7 @@
 #include <VK/Buffer.h>
 #include <VK/Texture.h>
 #include <VK/TextureView.h>
-#include <VK/DescriptorManager.h>
+#include <VK/DescriptorAllocator.h>
 #include <VK/FrameTracker.h>
 #include <VK/Swapchain.h>
 #include <VK/Semaphore.h>
@@ -25,7 +25,7 @@ SimpleRenderPass::SimpleRenderPass(const std::string_view name,
 {
     auto& cmdPoolAllocator = vulkanContext.GetCommandPoolAllocator();
     const auto& frameTracker = vulkanContext.GetFrameTracker();
-    auto& descriptorManager = vulkanContext.GetDescriptorManager();
+    auto& descriptorAllocator = vulkanContext.GetDescriptorAllocator();
 
     vk::BufferBuilder transformBufferBuilder{vulkanContext};
     transformBufferBuilder.SetUsage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
@@ -49,7 +49,7 @@ SimpleRenderPass::SimpleRenderPass(const std::string_view name,
         uploadFence.Wait();
         uploadFence.Reset();
 
-        transformBufferIndices[idx] = descriptorManager.RequestDescriptor(*transformBuffers[idx]);
+        transformBufferIndices[idx] = descriptorAllocator.RequestDescriptor(*transformBuffers[idx]);
     }
 }
 
@@ -76,11 +76,11 @@ void SimpleRenderPass::OnBegin()
         .pStencilAttachment = depthAttachmentInfos.data()};
 
     const auto& vulkanContext = GetVulkanContext();
-    const auto& descriptorManager = vulkanContext.GetDescriptorManager();
+    const auto& descriptorAllocator = vulkanContext.GetDescriptorAllocator();
     const auto& pipeline = GetPipeline();
     graphicsCmdBuffer.BeginRendering(renderingInfo);
     graphicsCmdBuffer.BindPipeline(pipeline);
-    graphicsCmdBuffer.BindDescriptorSet(descriptorManager.GetDescriptorSet(), pipeline);
+    graphicsCmdBuffer.BindDescriptorSet(descriptorAllocator.GetDescriptorSet(), pipeline);
 }
 
 void SimpleRenderPass::Render()

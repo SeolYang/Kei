@@ -6,7 +6,7 @@
 #include <Game/World.h>
 #include <Render/Material.h>
 #include <Render/Renderer.h>
-#include <VK/DescriptorManager.h>
+#include <VK/DescriptorAllocator.h>
 #include <VK/ResourceStateTracker.h>
 #include <VK/Sampler.h>
 #include <VK/SamplerBuilder.h>
@@ -22,7 +22,7 @@
 namespace sy::app
 {
 Context::Context(
-    CommandLineParser&           cmdLineParser,
+    CommandLineParser& cmdLineParser,
     const window::WindowBuilder& windowBuilder) :
     cmdLineParser(cmdLineParser),
     window(windowBuilder.Build()),
@@ -59,10 +59,10 @@ void Context::Startup()
 
     renderer->Startup();
 
-	// #test
+    // #test
     //asset::ModelImportConfig rubberDuckConfig;
     //asset::ModelImporter::Import("Assets/Models/rubber_duck/scene.gltf", rubberDuckConfig);
-	//asset::ModelImportConfig config{.bFlipUVs = true, .bPretransformVertices = true};
+    //asset::ModelImportConfig config{.bFlipUVs = true, .bPretransformVertices = true};
     //asset::ModelImporter::Import("Assets/Models/homura/homura.fbx", config);
     /*asset::TextureImporter::Import2D(*vulkanContext, "Assets/Textures/Hair.png", {.bGenerateMipsWhenImport = true});
     asset::TextureImporter::Import2D(*vulkanContext, "Assets/Textures/Costume.png", {.bGenerateMipsWhenImport = true});
@@ -84,8 +84,8 @@ void Context::Shutdown()
 
 void Context::InitializeLogger()
 {
-    const auto        currentTime = std::chrono::system_clock::now();
-    const auto        localTime   = std::chrono::current_zone()->to_local(currentTime);
+    const auto currentTime = std::chrono::system_clock::now();
+    const auto localTime = std::chrono::current_zone()->to_local(currentTime);
     const std::string fileName =
         std::format("LOG_{:%F_%H_%M_%S}.log", localTime);
 
@@ -94,7 +94,7 @@ void Context::InitializeLogger()
     const auto consoleSink =
         std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
     const auto logFilePathAnsi = WStringToAnsi(logFilePath.c_str());
-    const auto fileSink        = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
+    const auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
         logFilePathAnsi,
         true);
 
@@ -152,10 +152,10 @@ void Context::InitDefaultEngineResources()
         VK_IMAGE_VIEW_TYPE_2D);
     defaultWhiteTex.SetAlias(core::constants::res::DefaultWhiteTexture);
 
-    auto& descriptorManager = vulkanContext->GetDescriptorManager();
+    auto& descriptorAllocator = vulkanContext->GetDescriptorAllocator();
 
     auto defaultWhiteDescriptor =
-        handleManager->Add<vk::Descriptor>(descriptorManager.RequestDescriptor(
+        handleManager->Add<vk::Descriptor>(descriptorAllocator.RequestDescriptor(
             *handleManager,
             defaultWhiteTex,
             defaultWhiteTexView,
@@ -170,18 +170,18 @@ void Context::InitDefaultEngineResources()
 
 void Context::ExecuteAssetImportProcess()
 {
-	if (cmdLineParser.IsImportAssetEnabled() || cmdLineParser.IsForceReimportAssetsEnabled())
-	{
+    if (cmdLineParser.IsImportAssetEnabled() || cmdLineParser.IsForceReimportAssetsEnabled())
+    {
         asset::AssetImporter importer(*vulkanContext, cmdLineParser.IsForceReimportAssetsEnabled());
         importer.Execute();
-	}
+    }
 }
 
 void Context::Run()
 {
     spdlog::info("Startup main loop.");
     SDL_Event ev;
-    bool      bExit = false;
+    bool bExit = false;
 
     while (!bExit)
     {

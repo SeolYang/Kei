@@ -1,5 +1,5 @@
 #include <PCH.h>
-#include <VK/DescriptorManager.h>
+#include <VK/DescriptorAllocator.h>
 #include <VK/VulkanContext.h>
 #include <VK/FrameTracker.h>
 #include <VK/VulkanRHI.h>
@@ -12,16 +12,16 @@ namespace sy
 {
 namespace vk
 {
-DescriptorManager::DescriptorManager(VulkanContext& vulkanContext, const FrameTracker& frameTracker) :
+DescriptorAllocator::DescriptorAllocator(VulkanContext& vulkanContext, const FrameTracker& frameTracker) :
     vulkanContext(vulkanContext), frameTracker(frameTracker)
 {
 }
 
-DescriptorManager::~DescriptorManager()
+DescriptorAllocator::~DescriptorAllocator()
 {
 }
 
-void DescriptorManager::Startup()
+void DescriptorAllocator::Startup()
 {
     spdlog::info("Startup Descriptor Manager.");
     const auto poolSizeBuilder = DescriptorPoolSizeBuilder{}
@@ -114,7 +114,7 @@ void DescriptorManager::Startup()
     }
 }
 
-void DescriptorManager::Shutdown()
+void DescriptorAllocator::Shutdown()
 {
     spdlog::info("Shutdown Descriptor Manager.");
     const auto& vulkanRHI = vulkanContext.GetRHI();
@@ -122,7 +122,7 @@ void DescriptorManager::Shutdown()
     vkDestroyDescriptorSetLayout(vulkanRHI.GetDevice(), bindlessLayout, nullptr);
 }
 
-void DescriptorManager::BeginFrame()
+void DescriptorAllocator::BeginFrame()
 {
     auto& pendingList = pendingDeallocations[frameTracker.GetCurrentInFlightFrameIndex()];
     for (const Allocation& allocation : pendingList)
@@ -132,7 +132,7 @@ void DescriptorManager::BeginFrame()
     pendingList.clear();
 }
 
-void DescriptorManager::EndFrame()
+void DescriptorAllocator::EndFrame()
 {
     const bool bHasBufferDescriptorToUpdate = !bufferWriteDescriptors.empty();
     const bool bHasImageDescriptorToUpdate  = !imageWriteDescriptors.empty();
@@ -174,7 +174,7 @@ void DescriptorManager::EndFrame()
     }
 }
 
-Descriptor DescriptorManager::RequestDescriptor(const vk::Buffer& buffer, const bool bIsDynamic)
+Descriptor DescriptorAllocator::RequestDescriptor(const vk::Buffer& buffer, const bool bIsDynamic)
 {
     const auto descriptorType    = vk::BufferUsageToDescriptorType(buffer.GetUsage(), bIsDynamic);
     const auto descriptorBinding = ToUnderlying(descriptorType);
@@ -218,7 +218,7 @@ Descriptor DescriptorManager::RequestDescriptor(const vk::Buffer& buffer, const 
         }};
 }
 
-Descriptor DescriptorManager::RequestDescriptor(HandleManager& handleManager, const Handle<Buffer> handle, bool bIsDynamic)
+Descriptor DescriptorAllocator::RequestDescriptor(HandleManager& handleManager, const Handle<Buffer> handle, bool bIsDynamic)
 {
     SY_ASSERT(handle, "Invalid Buffer Handle");
     if (!handle)
@@ -230,7 +230,7 @@ Descriptor DescriptorManager::RequestDescriptor(HandleManager& handleManager, co
     return RequestDescriptor(*handle, bIsDynamic);
 }
 
-Descriptor DescriptorManager::RequestDescriptor(const vk::Texture& texture, const TextureView& view, const Sampler& sampler, const ETextureState expectedState, const bool bIsCombinedSampler)
+Descriptor DescriptorAllocator::RequestDescriptor(const vk::Texture& texture, const TextureView& view, const Sampler& sampler, const ETextureState expectedState, const bool bIsCombinedSampler)
 {
     const auto descriptorType    = vk::ImageUsageToDescriptorType(texture.GetUsage(), bIsCombinedSampler);
     const auto descriptorBinding = ToUnderlying(descriptorType);
@@ -279,7 +279,7 @@ Descriptor DescriptorManager::RequestDescriptor(const vk::Texture& texture, cons
         }};
 }
 
-Descriptor DescriptorManager::RequestDescriptor(HandleManager& handleManager, const Handle<Texture> texture, const Handle<TextureView> view, const Handle<Sampler> sampler, const ETextureState expectedState, const bool bIsCombinedSampler)
+Descriptor DescriptorAllocator::RequestDescriptor(HandleManager& handleManager, const Handle<Texture> texture, const Handle<TextureView> view, const Handle<Sampler> sampler, const ETextureState expectedState, const bool bIsCombinedSampler)
 {
     SY_ASSERT(texture, "Invalid Texture Handle.");
     SY_ASSERT(view, "Invalid Texture View Handle.");

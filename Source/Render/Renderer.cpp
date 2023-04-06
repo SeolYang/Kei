@@ -13,7 +13,7 @@
 #include <VK/PipelineBuilder.h>
 #include <VK/LayoutCache.h>
 #include <VK/TextureView.h>
-#include <VK/DescriptorManager.h>
+#include <VK/DescriptorAllocator.h>
 #include <VK/FrameTracker.h>
 #include <VK/PushConstantBuilder.h>
 #include <VK/Texture.h>
@@ -114,7 +114,7 @@ void Renderer::Startup()
     const auto& frameTracker = vulkanContext.GetFrameTracker();
     const auto& vulkanRHI = vulkanContext.GetRHI();
     auto& cmdPoolAllocator = vulkanContext.GetCommandPoolAllocator();
-    auto& descriptorManager = vulkanContext.GetDescriptorManager();
+    auto& descriptorAllocator = vulkanContext.GetDescriptorAllocator();
     auto& pipelineLayoutCache = vulkanContext.GetPipelineLayoutCache();
 
     depthStencil = vk::TextureBuilder::Texture2DDepthStencilTemplate(vulkanContext)
@@ -143,7 +143,7 @@ void Renderer::Startup()
         "main");
 
     std::array descriptorSetLayouts = {
-        descriptorManager.GetDescriptorSetLayout(),
+        descriptorAllocator.GetDescriptorSetLayout(),
     };
 
     vk::PushConstantBuilder pushConstantBuilder;

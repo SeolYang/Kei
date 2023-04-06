@@ -7,7 +7,7 @@ class VulkanRHI;
 class VulkanContext;
 class CommandPoolAllocator;
 class CommandBuffer;
-class DescriptorManager;
+class DescriptorAllocator;
 class FrameTracker;
 class Pipeline;
 } // namespace sy::vk

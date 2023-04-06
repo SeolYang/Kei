@@ -9,7 +9,7 @@ class Texture;
 class TextureView;
 class Sampler;
 class FrameTracker;
-class DescriptorManager final : public Subsystem
+class DescriptorAllocator final : public Subsystem
 {
 public:
     struct DescriptorPoolSize
@@ -97,8 +97,8 @@ public:
     };
 
 public:
-    DescriptorManager(VulkanContext& vulkanContext, const FrameTracker& frameTracker);
-    virtual ~DescriptorManager() override;
+    DescriptorAllocator(VulkanContext& vulkanContext, const FrameTracker& frameTracker);
+    virtual ~DescriptorAllocator() override;
 
     void Startup() override;
     void Shutdown() override;

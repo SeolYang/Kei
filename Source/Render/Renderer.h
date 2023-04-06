@@ -17,7 +17,7 @@ class PipelineLayoutCache;
 class ResourceStateTracker;
 class FrameTracker;
 class CommandPoolAllocator;
-class DescriptorManager;
+class DescriptorAllocator;
 } // namespace sy::vk
 
 namespace sy::window

@@ -10,7 +10,7 @@ namespace sy::vk
 {
 class VulkanRHI;
 class CommandPoolAllocator;
-class DescriptorManager;
+class DescriptorAllocator;
 class FrameTracker;
 class PipelineLayoutCache;
 class Swapchain;
@@ -26,7 +26,7 @@ public:
     [[nodiscard]] VulkanRHI& GetRHI() const;
     [[nodiscard]] FrameTracker& GetFrameTracker() const;
     [[nodiscard]] CommandPoolAllocator& GetCommandPoolAllocator() const;
-    [[nodiscard]] DescriptorManager& GetDescriptorManager() const;
+    [[nodiscard]] DescriptorAllocator& GetDescriptorAllocator() const;
     [[nodiscard]] PipelineLayoutCache& GetPipelineLayoutCache() const;
     [[nodiscard]] Swapchain& GetSwapchain() const;
 
@@ -46,7 +46,7 @@ private:
     std::unique_ptr<VulkanRHI> vulkanRHI;
     std::unique_ptr<FrameTracker> frameTracker;
     std::unique_ptr<CommandPoolAllocator> cmdPoolAllocator;
-    std::unique_ptr<DescriptorManager> descriptorManager;
+    std::unique_ptr<DescriptorAllocator> descriptorAllocator;
     std::unique_ptr<PipelineLayoutCache> pipelineLayoutCache;
     std::vector<VulkanObjectDeleter> deferredObjectDeallocations;
 

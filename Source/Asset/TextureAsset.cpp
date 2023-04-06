@@ -4,7 +4,7 @@
 #include <VK/TextureBuilder.h>
 #include <VK/TextureView.h>
 #include <VK/Sampler.h>
-#include <VK/DescriptorManager.h>
+#include <VK/DescriptorAllocator.h>
 #include <ktx.h>
 #include <ktxvulkan.h>
 
@@ -194,9 +194,9 @@ bool Texture::InitializeExternal()
         this->sampler = handleManager.QueryAlias<vk::Sampler>(core::constants::res::TrilinearRepeatSampler);
     }
 
-    auto& descriptorManager = vulkanContext.GetDescriptorManager();
+    auto& descriptorAllocator = vulkanContext.GetDescriptorAllocator();
     this->descriptor        = handleManager.Add<vk::Descriptor>(
-        descriptorManager.RequestDescriptor(
+        descriptorAllocator.RequestDescriptor(
             *(this->texture),
             *(this->textureView),
             *(this->sampler),

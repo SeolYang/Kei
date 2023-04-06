@@ -2,7 +2,7 @@
 #include <VK/VulkanContext.h>
 #include <VK/VulkanRHI.h>
 #include <VK/CommandPoolAllocator.h>
-#include <VK/DescriptorManager.h>
+#include <VK/DescriptorAllocator.h>
 #include <VK/FrameTracker.h>
 #include <VK/LayoutCache.h>
 #include <VK/Swapchain.h>
@@ -14,7 +14,7 @@ VulkanContext::VulkanContext(const window::Window& window) :
     vulkanRHI(std::make_unique<VulkanRHI>(*this, window)),
     frameTracker(std::make_unique<FrameTracker>(*this)),
     cmdPoolAllocator(std::make_unique<CommandPoolAllocator>(*this, *frameTracker)),
-    descriptorManager(std::make_unique<DescriptorManager>(*this, *frameTracker)),
+    descriptorAllocator(std::make_unique<DescriptorAllocator>(*this, *frameTracker)),
     pipelineLayoutCache(std::make_unique<PipelineLayoutCache>(*this))
 {
 }
@@ -29,7 +29,7 @@ void VulkanContext::Startup()
     vulkanRHI->Startup();
     frameTracker->Startup();
     cmdPoolAllocator->Startup();
-    descriptorManager->Startup();
+    descriptorAllocator->Startup();
     pipelineLayoutCache->Startup();
 
     swapchain = std::make_unique<Swapchain>(window, *this);
@@ -41,7 +41,7 @@ void VulkanContext::Shutdown()
     vulkanRHI->WaitForDeviceIdle();
 
     pipelineLayoutCache->Shutdown();
-    descriptorManager->Shutdown();
+    descriptorAllocator->Shutdown();
     cmdPoolAllocator->Shutdown();
     frameTracker->Shutdown();
     swapchain.reset();
@@ -54,9 +54,9 @@ CommandPoolAllocator& VulkanContext::GetCommandPoolAllocator() const
     return *cmdPoolAllocator;
 }
 
-DescriptorManager& VulkanContext::GetDescriptorManager() const
+DescriptorAllocator& VulkanContext::GetDescriptorAllocator() const
 {
-    return *descriptorManager;
+    return *descriptorAllocator;
 }
 
 VulkanRHI& VulkanContext::GetRHI() const
@@ -89,12 +89,12 @@ void VulkanContext::BeginRender()
     frameTracker->WaitForInFlightRenderFence();
     FlushDeferredDeallocations();
     cmdPoolAllocator->BeginFrame();
-    descriptorManager->BeginFrame();
+    descriptorAllocator->BeginFrame();
 }
 
 void VulkanContext::EndRender()
 {
-    descriptorManager->EndFrame();
+    descriptorAllocator->EndFrame();
     cmdPoolAllocator->EndFrame();
 }
 
