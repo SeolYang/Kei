@@ -10,6 +10,8 @@ class RawImage;
 namespace sy::vk
 {
 class VulkanContext;
+class Texture;
+class Buffer;
 }
 
 namespace sy::asset

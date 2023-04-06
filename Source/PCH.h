@@ -89,7 +89,10 @@ using json = nlohmann::json;
 #include <Core/Utils.h>
 #include <Core/HandleManager.h>
 
-#include <VK/VulkanTypes.h>
+#include <VK/VulkanEnums.h>
+#include <VK/VulkanStructures.h>
+#include <VK/VulkanUtils.h>
+#include <VK/VulkanConstants.h>
 #include <VK/Synchronization.h>
 
 #include <Math/MathUtils.h>

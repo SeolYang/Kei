@@ -67,7 +67,7 @@
     <ClCompile Include="..\Source\VK\VertexInputBuilder.cpp" />
     <ClCompile Include="..\Source\VK\VulkanRHI.cpp" />
     <ClCompile Include="..\Source\VK\VulkanContext.cpp" />
-    <ClCompile Include="..\Source\VK\VulkanTypes.cpp" />
+    <ClCompile Include="..\Source\VK\VulkanUtils.cpp" />
     <ClCompile Include="..\Source\Window\Window.cpp" />
     <ClCompile Include="..\Source\Window\WindowBuilder.cpp" />
     <ClCompile Include="..\ThirdParty\volk\volk.c">
@@ -142,9 +142,12 @@
     <ClInclude Include="..\Source\VK\TextureBuilder.h" />
     <ClInclude Include="..\Source\VK\TextureView.h" />
     <ClInclude Include="..\Source\VK\VertexInputBuilder.h" />
+    <ClInclude Include="..\Source\VK\VulkanConstants.h" />
+    <ClInclude Include="..\Source\VK\VulkanEnums.h" />
     <ClInclude Include="..\Source\VK\VulkanRHI.h" />
     <ClInclude Include="..\Source\VK\VulkanContext.h" />
-    <ClInclude Include="..\Source\VK\VulkanTypes.h" />
+    <ClInclude Include="..\Source\VK\VulkanStructures.h" />
+    <ClInclude Include="..\Source\VK\VulkanUtils.h" />
     <ClInclude Include="..\Source\VK\VulkanWrapper.h" />
     <ClInclude Include="..\Source\Window\Window.h" />
     <ClInclude Include="..\Source\Window\WindowBuilder.h" />

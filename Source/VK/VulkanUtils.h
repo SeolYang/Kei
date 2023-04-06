@@ -1,64 +1,9 @@
 #pragma once
 #include <PCH.h>
+#include <VK/VulkanEnums.h>
 
 namespace sy::vk
 {
-class Buffer;
-class Texture;
-class TextureView;
-class VulkanRHI;
-
-using Descriptor = OffsetSlotPtr;
-class CommandBuffer;
-using ManagedCommandBuffer = std::unique_ptr<CommandBuffer, std::function<void(CommandBuffer*)>>;
-using VulkanObjectDeleter  = std::function<void(const VulkanRHI&)>;
-
-constexpr uint32_t MaxBindlessResourcesPerDescriptor = 2048;
-constexpr size_t   NumMaxInFlightFrames              = 2;
-
-struct TextureSubResourceRange
-{
-    uint32_t MipLevel        = 0;
-    uint32_t MipLevelCount   = 1;
-    uint32_t ArrayLayer      = 0;
-    uint32_t ArrayLayerCount = 1;
-};
-
-struct TextureSubResource
-{
-    uint32_t MipLevel   = 0;
-    uint32_t ArrayLayer = 0;
-};
-
-enum class EQueueType
-{
-    Graphics,
-    Compute,
-    Transfer,
-    Present
-};
-
-enum class EPipelineType
-{
-    Graphics,
-    Compute,
-    RayTracing
-};
-
-enum class EDescriptorType : uint8_t
-{
-    Sampler = 0,
-    SampledImage,
-    CombinedImageSampler,
-    StorageImage,
-    UniformBuffer,
-    StorageBuffer,
-    InputAttachment,
-    UniformBufferDynamic,
-    StorageBufferDynamic,
-    EnumMax
-};
-
 constexpr static VkPipelineBindPoint ToNative(const EPipelineType type)
 {
     switch (type)
@@ -107,7 +52,7 @@ constexpr static auto DescriptorTypeToImageUsage(const EDescriptorType descripto
 }
 
 constexpr static auto BufferUsageToDescriptorType(const VkBufferUsageFlags bufferUsageFlags,
-                                                  bool                     bIsDynamic = false)
+                                                  bool bIsDynamic = false)
 {
     switch (bufferUsageFlags)
     {
@@ -122,7 +67,7 @@ constexpr static auto BufferUsageToDescriptorType(const VkBufferUsageFlags buffe
 }
 
 constexpr static auto ImageUsageToDescriptorType(const VkImageUsageFlags imageUsageFlags,
-                                                 const bool              bIsCombinedSampler = true)
+                                                 const bool bIsCombinedSampler = true)
 {
     if ((imageUsageFlags & VK_IMAGE_USAGE_STORAGE_BIT) == VK_IMAGE_USAGE_STORAGE_BIT)
     {
@@ -434,11 +379,11 @@ constexpr static uint8_t ToNumberOfComponents(const VkFormat format)
 }
 
 constexpr static VkImageSubresourceRange ImageSubresourceRange(
-    const VkImageAspectFlags aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
-    const uint32_t           baseMipLevel   = 0,
-    const uint32_t           levelCount     = 1,
-    const uint32_t           baseArrayLayer = 0,
-    const uint32_t           layerCount     = 1)
+    const VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+    const uint32_t baseMipLevel = 0,
+    const uint32_t levelCount = 1,
+    const uint32_t baseArrayLayer = 0,
+    const uint32_t layerCount = 1)
 {
     return {
         aspectMask,
@@ -448,7 +393,7 @@ constexpr static VkImageSubresourceRange ImageSubresourceRange(
         layerCount};
 }
 
-VkRenderingAttachmentInfo DepthAttachmentInfo(const TextureView& depthStencil, float depthClearValue = 1.f, uint8_t stencilClearValue = 0);
+VkRenderingAttachmentInfo DepthAttachmentInfo(const class TextureView& depthStencil, float depthClearValue = 1.f, uint8_t stencilClearValue = 0);
 
 constexpr static bool IsDepthStencilFormat(const VkFormat format)
 {
@@ -523,4 +468,4 @@ inline VkFormat EstimateFormat(const size_t channels, const size_t bytesPerChann
 
     return VK_FORMAT_UNDEFINED;
 }
-} // namespace sy::vk
+}

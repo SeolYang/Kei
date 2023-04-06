@@ -58,16 +58,6 @@ void Context::Startup()
     ExecuteAssetImportProcess();
 
     renderer->Startup();
-
-    // #test
-    //asset::ModelImportConfig rubberDuckConfig;
-    //asset::ModelImporter::Import("Assets/Models/rubber_duck/scene.gltf", rubberDuckConfig);
-    //asset::ModelImportConfig config{.bFlipUVs = true, .bPretransformVertices = true};
-    //asset::ModelImporter::Import("Assets/Models/homura/homura.fbx", config);
-    /*asset::TextureImporter::Import2D(*vulkanContext, "Assets/Textures/Hair.png", {.bGenerateMipsWhenImport = true});
-    asset::TextureImporter::Import2D(*vulkanContext, "Assets/Textures/Costume.png", {.bGenerateMipsWhenImport = true});
-    asset::TextureImporter::Import2D(*vulkanContext, "Assets/Textures/Other.png", {.bGenerateMipsWhenImport = true});
-    asset::TextureImporter::Import2D(*vulkanContext, "Assets/Textures/Body.png", {.bGenerateMipsWhenImport = true});*/
 }
 
 void Context::Shutdown()

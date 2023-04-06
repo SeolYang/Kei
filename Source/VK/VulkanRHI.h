@@ -15,6 +15,7 @@ class CommandPool;
 class Fence;
 class Semaphore;
 class DescriptorPool;
+class Texture;
 class Buffer;
 class FrameTracker;
 class VulkanRHI : public Subsystem
