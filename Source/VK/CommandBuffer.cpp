@@ -334,7 +334,7 @@ void CommandBuffer::PipelineBarrier(std::span<VkMemoryBarrier2>       memoryBarr
     vkCmdPipelineBarrier2(GetNative(), &dependencyInfo);
 }
 
-void CommandBuffer::BlitTexture(const Texture& src, const Texture& dst, const VkImageBlit blit, const VkFilter filter)
+void CommandBuffer::BlitTexture(const Texture& src, const Texture& dst, const VkImageBlit blit, const VkFilter filter) const
 {
     vkCmdBlitImage(
         GetNative(),

@@ -48,18 +48,19 @@ void RawImage::LoadImageDataFromFile(std::string_view pathStr)
         stbi_image_free(ptr);
     };
 
+	int dummy;
     switch (bytesPerChannel)
     {
         case 1:
-            data = RawImageDataUniquePtr(reinterpret_cast<uint8_t*>(stbi_load(pathStr.data(), nullptr, nullptr, nullptr, 0)),
+            data = RawImageDataUniquePtr(reinterpret_cast<uint8_t*>(stbi_load(pathStr.data(), &dummy, &dummy, &dummy, 0)),
                                          StbiDeleter);
             break;
         case 2:
-            data = RawImageDataUniquePtr(reinterpret_cast<uint8_t*>(stbi_load_16(pathStr.data(), nullptr, nullptr, nullptr, 0)),
+            data = RawImageDataUniquePtr(reinterpret_cast<uint8_t*>(stbi_load_16(pathStr.data(), &dummy, &dummy, &dummy, 0)),
                                          StbiDeleter);
             break;
         case 4:
-            data = RawImageDataUniquePtr(reinterpret_cast<uint8_t*>(stbi_loadf(pathStr.data(), nullptr, nullptr, nullptr, 0)),
+            data = RawImageDataUniquePtr(reinterpret_cast<uint8_t*>(stbi_loadf(pathStr.data(), &dummy, &dummy, &dummy, 0)),
                                          StbiDeleter);
             break;
     }

@@ -23,9 +23,11 @@
     <ClCompile Include="..\Source\Asset\ModelAsset.cpp" />
     <ClCompile Include="..\Source\Asset\ModelImporter.cpp" />
     <ClCompile Include="..\Source\Asset\TextureAsset.cpp" />
+    <ClCompile Include="..\Source\Asset\TextureImportConfig.cpp" />
     <ClCompile Include="..\Source\Asset\TextureImporter.cpp" />
     <ClCompile Include="..\Source\Audio\AudioContext.cpp" />
     <ClCompile Include="..\Source\Core\CommandLineParser.cpp" />
+    <ClCompile Include="..\Source\Core\RawImage.cpp" />
     <ClCompile Include="..\Source\Game\GameContext.cpp" />
     <ClCompile Include="..\Source\Game\World.cpp" />
     <ClCompile Include="..\Source\main.cpp" />
@@ -41,6 +43,7 @@
     <ClCompile Include="..\Source\Render\RenderPass.cpp" />
     <ClCompile Include="..\Source\Render\RenderPasses\SimpleRenderPass.cpp" />
     <ClCompile Include="..\Source\Tests\CoreUnitTest.cpp" />
+    <ClCompile Include="..\Source\VK\MipmapGenerator.cpp" />
     <ClCompile Include="..\Source\VK\Buffer.cpp" />
     <ClCompile Include="..\Source\VK\BufferBuilder.cpp" />
     <ClCompile Include="..\Source\VK\CommandBuffer.cpp" />
@@ -84,6 +87,7 @@
     <ClInclude Include="..\Source\Asset\ModelImporter.h" />
     <ClInclude Include="..\Source\Asset\TextureAsset.h" />
     <ClInclude Include="..\Source\Asset\TextureAssetEnums.h" />
+    <ClInclude Include="..\Source\Asset\TextureImportConfig.h" />
     <ClInclude Include="..\Source\Asset\TextureImporter.h" />
     <ClInclude Include="..\Source\Audio\AudioContext.h" />
     <ClInclude Include="..\Source\Component\StaticMeshComponent.h" />
@@ -97,6 +101,7 @@
     <ClInclude Include="..\Source\Core\NonCopyable.h" />
     <ClInclude Include="..\Source\Core\Pool.hpp" />
     <ClInclude Include="..\Source\Core\Range.h" />
+    <ClInclude Include="..\Source\Core\RawImage.h" />
     <ClInclude Include="..\Source\Core\Serializable.h" />
     <ClInclude Include="..\Source\Core\Subsystem.h" />
     <ClInclude Include="..\Source\Core\Timer.h" />
@@ -113,6 +118,7 @@
     <ClInclude Include="..\Source\Render\RenderPass.h" />
     <ClInclude Include="..\Source\Render\RenderPasses\SimpleRenderPass.h" />
     <ClInclude Include="..\Source\Render\Vertex.h" />
+    <ClInclude Include="..\Source\VK\MipmapGenerator.h" />
     <ClInclude Include="..\Source\VK\Buffer.h" />
     <ClInclude Include="..\Source\VK\BufferBuilder.h" />
     <ClInclude Include="..\Source\VK\CommandBuffer.h" />

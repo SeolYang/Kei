@@ -2,6 +2,7 @@
 #include <ktx.h>
 #include <Asset/TextureImporter.h>
 #include <Asset/TextureAsset.h>
+#include <Core/RawImage.h>
 #include <VK/VulkanContext.h>
 #include <VK/VulkanRHI.h>
 #include <VK/Texture.h>
@@ -11,315 +12,184 @@
 #include <VK/CommandPoolManager.h>
 #include <VK/CommandPool.h>
 #include <VK/CommandBuffer.h>
+#include <VK/MipmapGenerator.h>
 
 namespace sy::asset
 {
-VkFormat FindProperFormatForTextures(const size_t channels, const size_t bytesPerChannel)
+TextureImporter::TextureImporter(vk::VulkanContext& vulkanContext, const fs::path& path, const TextureImportConfig config) :
+    vulkanContext(vulkanContext),
+    targetPath(path),
+    targetPathStr(path.string()),
+    config(config),
+    rawImage(std::make_unique<RawImage>())
 {
-    const size_t bitsPerChannel = bytesPerChannel * 8;
-    if (channels == 1)
-    {
-        if (bitsPerChannel == 8)
-        {
-            return VK_FORMAT_R8_UNORM;
-        }
-        else if (bitsPerChannel == 16)
-        {
-            return VK_FORMAT_R16_UNORM;
-        }
-    }
-    else if (channels == 2)
-    {
-        if (bitsPerChannel == 8)
-        {
-            return VK_FORMAT_R8G8_UNORM;
-        }
-        else if (bitsPerChannel == 16)
-        {
-            return VK_FORMAT_R16G16_UNORM;
-        }
-    }
-    else if (channels == 3)
-    {
-        if (bitsPerChannel == 8)
-        {
-            return VK_FORMAT_R8G8B8_UNORM;
-        }
-        else if (bitsPerChannel == 16)
-        {
-            return VK_FORMAT_R16G16B16_UNORM;
-        }
-    }
-    else if (channels == 4)
-    {
-        if (bitsPerChannel == 8)
-        {
-            return VK_FORMAT_R8G8B8A8_UNORM;
-        }
-        else if (bitsPerChannel == 16)
-        {
-            return VK_FORMAT_R16G16B16A16_UNORM;
-        }
-    }
-
-    return VK_FORMAT_UNDEFINED;
 }
 
-bool TextureImporter::Import2D(vk::VulkanContext& vulkanContext, const fs::path& path, const TextureImportConfig config)
+TextureImporter::~TextureImporter()
 {
-    const std::string pathStr = path.string();
-    if (!fs::exists(path))
+}
+
+void TextureImporter::Import()
+{
+    LoadRawImageFromFile();
+    CreateKtxTextureFromRawImage();
+    SetBaseMipToKtxTexture();
+    GenerateMips();
+    ReadbackGeneratedMipsToBuffer();
+    SetGeneratedMipsToKtxTextureFromReadbackBuffers();
+    CompressKtxTexture();
+    ExportKtxTexture();
+    CreateTextureAsset();
+    ExportTextureAsset();
+}
+
+void TextureImporter::LoadRawImageFromFile()
+{
+    SY_ASSERT(rawImage->LoadFromFile(targetPath), "Failed load raw image from {}.", targetPathStr);
+}
+
+void TextureImporter::CreateKtxTextureFromRawImage()
+{
+    const auto imageExtent = rawImage->GetExtent();
+    ktxTextureCreateInfo createInfo{
+        .glInternalformat = 0,
+        .vkFormat = static_cast<uint32_t>(rawImage->GetEstimatedFormat()),
+        .baseWidth = imageExtent.width,
+        .baseHeight = imageExtent.height,
+        .baseDepth = imageExtent.depth,
+        .numDimensions = 2,
+        .numLevels = config.IsGenerateMipsWhenImport() ? CalculateMaximumMipCountFromExtent(rawImage->GetExtent()) : 1,
+        .numLayers = 1,
+        .numFaces = 1,
+        .isArray = KTX_FALSE,
+        .generateMipmaps = KTX_FALSE};
+
+    ktxTexture2* acquiredKtxTexture = nullptr;
+    ktxResult result = ktxTexture2_Create(&createInfo,
+                                          KTX_TEXTURE_CREATE_ALLOC_STORAGE,
+                                          &acquiredKtxTexture);
+
+	SY_ASSERT(result == KTX_SUCCESS, "Failed to create ktx texture. Error : {}", magic_enum::enum_name(result));
+    ktxTextureFromRawImage = KTXTexture2UniquePtr(acquiredKtxTexture, [](ktxTexture2* ptr) {
+        ktxTexture_Destroy(ktxTexture(ptr));
+    });
+}
+
+void TextureImporter::SetBaseMipToKtxTexture()
+{
+    const auto rawImageDataSpan = rawImage->GetDataSpan();
+    const auto result = ktxTexture_SetImageFromMemory(ktxTexture(ktxTextureFromRawImage.get()),
+                                                      0, 0, 0,
+                                                      rawImageDataSpan.data(),
+                                                      static_cast<uint32_t>(rawImageDataSpan.size()));
+    SY_ASSERT(result == KTX_SUCCESS, "Failed to set base mip to ktx texture.");
+}
+
+void TextureImporter::GenerateMips()
+{
+    const bool bValidTexture = rawImage != nullptr;
+    const bool bGenerateMipsEnabled = config.IsGenerateMipsWhenImport();
+    if (bValidTexture && bGenerateMipsEnabled)
     {
-        spdlog::error("Texture asset {} does not exist.", pathStr);
-        return false;
+        const vk::MipmapGenerator generator(vulkanContext, *rawImage);
+        generatedMips = generator.Generate();
     }
+}
 
-    int width    = 0;
-    int height   = 0;
-    int channels = 0;
+void TextureImporter::ReadbackGeneratedMipsToBuffer()
+{
+    generatedMipReadbackBuffers.reserve(generatedMips.size());
 
-    static constexpr auto StbiDeleter = [](uint8_t* ptr) {
-        stbi_image_free(ptr);
-    };
-    std::unique_ptr<uint8_t, std::function<void(uint8_t*)>> image;
-
-    size_t     bytesPerChannel = 1;
-    const bool bIs16BitsImage  = stbi_is_16_bit(pathStr.c_str());
-    const bool bIsHDR          = stbi_is_hdr(pathStr.c_str());
-    if (bIs16BitsImage)
+    auto& vulkanRHI = vulkanContext.GetRHI();
+    auto& cmdPoolManager = vulkanContext.GetCommandPoolManager();
+    auto& cmdPool = cmdPoolManager.RequestCommandPool(vk::EQueueType::Graphics);
+    for (const auto& generatedMip : generatedMips)
     {
-        image = std::unique_ptr<uint8_t, std::function<void(uint8_t*)>>(
-            reinterpret_cast<uint8_t*>(stbi_load_16(pathStr.c_str(), &width, &height, &channels, 0)),
-            StbiDeleter);
+        const auto extent = generatedMip->GetExtent();
+        const size_t textureSizeBytes = ImageBlobBytesSize(extent.width, extent.height, rawImage->GetNumChannels(), rawImage->GetBytesPerChannel());
+
+        vk::BufferBuilder readbackBuilder{vulkanContext};
+        auto readback = readbackBuilder
+                            .SetMemoryUsage(VMA_MEMORY_USAGE_GPU_TO_CPU)
+                            .SetMemoryProperty(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
+                            .SetSize(textureSizeBytes)
+                            .SetUsage(VK_BUFFER_USAGE_TRANSFER_DST_BIT)
+                            .Build();
+
+        const auto cmdBuffer = cmdPool.RequestCommandBuffer("Mip Transfer Command Buffer");
+        cmdBuffer->Begin();
+        cmdBuffer->CopyImageToBuffer(*generatedMip, *readback);
+        cmdBuffer->End();
+        vulkanRHI.SubmitImmediateTo(*cmdBuffer);
+
+        generatedMipReadbackBuffers.emplace_back(std::move(readback));
     }
-    else if (bIsHDR)
+}
+
+void TextureImporter::SetGeneratedMipsToKtxTextureFromReadbackBuffers()
+{
+    auto& vulkanRHI = vulkanContext.GetRHI();
+    size_t mipLevel = 1;
+    for (const auto& readbackBuffer : generatedMipReadbackBuffers)
     {
-        spdlog::error("Not supported format. {}", pathStr);
-        return false;
-    }
-    else
-    {
-        image = std::unique_ptr<uint8_t, std::function<void(uint8_t*)>>(
-            reinterpret_cast<uint8_t*>(stbi_load(pathStr.c_str(), &width, &height, &channels, 0)),
-            StbiDeleter);
-    }
-
-    if (image == nullptr)
-    {
-        return false;
-    }
-
-    const uint32_t mipCounts = CalculateMaximumMipCountFromExtent(Extent3D<int>{width, height, 1});
-    const VkFormat format    = FindProperFormatForTextures(channels, bytesPerChannel);
-    /** #todo Extend to more generalized import process */
-    std::unique_ptr<ktxTexture2, std::function<void(ktxTexture2*)>> newKtxTexture;
-    ktxTextureCreateInfo                                            ktxCreateInfo;
-    ktxCreateInfo.glInternalformat = 0;
-    ktxCreateInfo.vkFormat         = format;
-    ktxCreateInfo.baseWidth        = width;
-    ktxCreateInfo.baseHeight       = height;
-    ktxCreateInfo.baseDepth        = 1;
-    ktxCreateInfo.isArray          = KTX_FALSE;
-    ktxCreateInfo.generateMipmaps  = false;
-    ktxCreateInfo.numLevels        = config.IsGenerateMipsWhenImport() ? mipCounts : 1;
-    ktxCreateInfo.numLayers        = 1;
-    ktxCreateInfo.numFaces         = 1;
-    ktxCreateInfo.numDimensions    = 2;
-
-    const uint32_t compressionLevel = TextureCompressionQualityToLevel(config.GetTargetCompressionQuality());
-    const uint32_t qualityLevel     = TextureQualityToLevel(config.GetTargetQuality());
-    ktxResult      result           = {};
-    {
-        ktxTexture2* acquiredKtxTexture = nullptr;
-
-        result = ktxTexture2_Create(&ktxCreateInfo,
-                                    KTX_TEXTURE_CREATE_ALLOC_STORAGE,
-                                    &acquiredKtxTexture);
-
+        const uint8_t* mappedBuffer = reinterpret_cast<const uint8_t*>(vulkanRHI.Map(*readbackBuffer));
+        const auto result = ktxTexture_SetImageFromMemory(ktxTexture(ktxTextureFromRawImage.get()),
+                                                          mipLevel, 0, 0,
+                                                          mappedBuffer,
+                                                          static_cast<uint32_t>(readbackBuffer->GetAlignedSize()));
         if (result != KTX_SUCCESS)
         {
-            spdlog::error("Failed t o create ktx texture. Error: {}", magic_enum::enum_name<ktx_error_code_e>(result));
-            return false;
+            spdlog::warn("Failed to set mip texture {} to ktx texture from memory. Error: {}", mipLevel, magic_enum::enum_name<ktx_error_code_e>(result));
         }
 
-        newKtxTexture = std::unique_ptr<ktxTexture2, std::function<void(ktxTexture2*)>>(acquiredKtxTexture, [](ktxTexture2* ptr) {
-            ktxTexture_Destroy(ktxTexture(ptr));
-        });
+        vulkanRHI.Unmap(*readbackBuffer);
+        ++mipLevel;
     }
+}
 
-    const size_t blobSize = ImageBlobBytesSize(width, height, channels, bytesPerChannel);
-    result                = ktxTexture_SetImageFromMemory(ktxTexture(newKtxTexture.get()), 0, 0, 0, image.get(),
-                                                          blobSize);
-    if (result != KTX_SUCCESS)
-    {
-        spdlog::error("Failed to set iamge to ktx texture from memory. Error: {}", magic_enum::enum_name<ktx_error_code_e>(result));
-        return false;
-    }
+void TextureImporter::CompressKtxTexture()
+{
+    ktxBasisParams basisParams = {0};
+    basisParams.structSize = sizeof(ktxBasisParams);
+    basisParams.compressionLevel = TextureCompressionQualityToLevel(config.GetTargetCompressionQuality());
+    basisParams.qualityLevel = TextureQualityToLevel(config.GetTargetQuality());
+    basisParams.threadCount = std::thread::hardware_concurrency();
+    basisParams.uastc = KTX_FALSE;
 
-    if (config.IsGenerateMipsWhenImport())
-    {
-        auto& vulkanRHI = vulkanContext.GetRHI();
-
-        if (vulkanRHI.IsFormatSupportFeatures(format,
-                                              VK_FORMAT_FEATURE_2_BLIT_SRC_BIT | VK_FORMAT_FEATURE_2_BLIT_DST_BIT))
-        {
-            std::vector<std::unique_ptr<vk::Texture>> generatedMips;
-            generatedMips.reserve(mipCounts);
-            const Extent3D<uint32_t> baseExtent{width, height, 1};
-
-            for (uint32_t mip = 0; mip < mipCounts; ++mip)
-            {
-                vk::TextureBuilder builder{vulkanContext};
-                builder.SetExtent(CalculateMipExtent(baseExtent, mip))
-                    .SetType(VK_IMAGE_TYPE_2D)
-                    .SetFormat(format)
-                    .SetUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT)
-                    .SetMemoryUsage(VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE)
-                    .SetTiling(VK_IMAGE_TILING_OPTIMAL)
-                    .SetTargetInitialState(vk::ETextureState::TransferRead);
-
-                if (mip == 0)
-                {
-                    builder.SetDataToTransfer(std::span{reinterpret_cast<const uint8_t*>(image.get()), blobSize});
-                }
-
-                generatedMips.emplace_back(builder.Build());
-            }
-
-            auto& cmdPoolManager = vulkanContext.GetCommandPoolManager();
-            auto& cmdPool        = cmdPoolManager.RequestCommandPool(vk::EQueueType::Graphics);
-            {
-                const auto cmdBuffer = cmdPool.RequestCommandBuffer("Mip Transfer Command Buffer");
-                /** Blit based mipmap generation. */
-                cmdBuffer->Begin();
-                for (uint32_t mip = 1; mip < mipCounts; ++mip)
-                {
-                    const auto& currentMip = *generatedMips[mip];
-                    const auto& prevMip    = *generatedMips[mip - 1];
-
-                    VkImageBlit imageBlit;
-                    ZeroMemory(&imageBlit, sizeof(VkImageBlit));
-
-                    const auto prevMipExtent            = CalculateMipExtent(baseExtent, mip - 1);
-                    imageBlit.srcSubresource.aspectMask = vk::FormatToImageAspect(format);
-                    imageBlit.srcSubresource.layerCount = 1;
-                    imageBlit.srcSubresource.mipLevel   = 0;
-                    imageBlit.srcOffsets[1].x           = prevMipExtent.width;
-                    imageBlit.srcOffsets[1].y           = prevMipExtent.height;
-                    imageBlit.srcOffsets[1].z           = prevMipExtent.depth;
-
-                    const auto mipExtent                = CalculateMipExtent(baseExtent, mip);
-                    imageBlit.dstSubresource.aspectMask = imageBlit.srcSubresource.aspectMask;
-                    imageBlit.dstSubresource.layerCount = 1;
-                    imageBlit.dstSubresource.mipLevel   = 0;
-                    imageBlit.dstOffsets[1].x           = mipExtent.width;
-                    imageBlit.dstOffsets[1].y           = mipExtent.height;
-                    imageBlit.dstOffsets[1].z           = mipExtent.depth;
-
-                    cmdBuffer->ChangeTextureState(
-                        vk::ETextureState::TransferRead,
-                        vk::ETextureState::TransferWrite,
-                        currentMip);
-                    cmdBuffer->BlitTexture(prevMip, currentMip, imageBlit);
-                    cmdBuffer->ChangeTextureState(
-                        vk::ETextureState::TransferWrite,
-                        vk::ETextureState::TransferRead,
-                        currentMip);
-                }
-                cmdBuffer->End();
-                vulkanRHI.SubmitImmediateTo(*cmdBuffer);
-            }
-
-            for (uint32_t mip = 1; mip < mipCounts; ++mip)
-            {
-                const auto&  mipTexture       = *generatedMips[mip];
-                const auto   extent           = mipTexture.GetExtent();
-                const size_t textureSizeBytes = ImageBlobBytesSize(extent.width, extent.height, channels, bytesPerChannel);
-
-                vk::BufferBuilder readbackBuilder{vulkanContext};
-                auto              readback = readbackBuilder
-                                    .SetMemoryUsage(VMA_MEMORY_USAGE_GPU_TO_CPU)
-                                    .SetMemoryProperty(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
-                                    .SetSize(textureSizeBytes)
-                                    .SetUsage(VK_BUFFER_USAGE_TRANSFER_DST_BIT)
-                                    .Build();
-
-                const auto cmdBuffer = cmdPool.RequestCommandBuffer("Mip Transfer Command Buffer");
-                cmdBuffer->Begin();
-                cmdBuffer->CopyImageToBuffer(*generatedMips[mip], *readback);
-                cmdBuffer->End();
-                vulkanRHI.SubmitImmediateTo(*cmdBuffer);
-
-                const uint8_t* mappedTexture = reinterpret_cast<const uint8_t*>(vulkanRHI.Map(*readback));
-                result                       = ktxTexture_SetImageFromMemory(ktxTexture(newKtxTexture.get()),
-                                                                             mip, 0, 0,
-                                                                             mappedTexture,
-                                                                             textureSizeBytes);
-                if (result != KTX_SUCCESS)
-                {
-                    spdlog::warn("Failed to set mip texture {} to ktx texture from memory. Error: {}", mip, magic_enum::enum_name<ktx_error_code_e>(result));
-                }
-
-                vulkanRHI.Unmap(*readback);
-            }
-        }
-        else
-        {
-            SY_ASSERT(false, "Format {} does not support blit features.", magic_enum::enum_name<VkFormat>(format));
-        }
-    }
-
-    /* Compressio **/
-    ktxBasisParams basisParams   = {0};
-    basisParams.structSize       = sizeof(ktxBasisParams);
-    basisParams.compressionLevel = compressionLevel;
-    basisParams.qualityLevel     = qualityLevel;
-    basisParams.threadCount      = std::thread::hardware_concurrency();
-    basisParams.uastc            = KTX_FALSE;
-
-    result = ktxTexture2_CompressBasisEx(newKtxTexture.get(), &basisParams);
+    const auto result = ktxTexture2_CompressBasisEx(ktxTextureFromRawImage.get(), &basisParams);
     if (result != KTX_SUCCESS)
     {
         spdlog::error("Failed to compress texture. Error: {}", magic_enum::enum_name<ktx_error_code_e>(result));
-        return false;
     }
+}
 
-    fs::path ktxOutputPath = path;
+void TextureImporter::ExportKtxTexture()
+{
+    fs::path ktxOutputPath = targetPath;
     ktxOutputPath.replace_extension("ktx");
-    ktxTexture_WriteToNamedFile(ktxTexture(newKtxTexture.get()), ktxOutputPath.string().c_str());
-
-    auto newTexture = std::make_unique<Texture>(path);
-    newTexture->SetExtent(Extent2D<uint32_t>{(uint32_t)width, (uint32_t)height});
-    newTexture->SetFormat(format);
-    newTexture->SetCompressionMode(config.GetTargetCompressionMode());
-    newTexture->SetCompressQuality(config.GetTargetCompressionQuality());
-    newTexture->SetQuality(config.GetTargetQuality());
-
-    SaveJsonToFile(newTexture->GetPath(), newTexture->Serialize());
-    return true;
+    ktxTexture_WriteToNamedFile(ktxTexture(ktxTextureFromRawImage.get()), ktxOutputPath.string().c_str());
 }
 
-json TextureImportConfig::Serialize() const
+void TextureImporter::CreateTextureAsset()
 {
-    namespace key = constants::metadata::key;
-
-    json root                         = AssetImportConfig::Serialize();
-    root[key::GenerateMipsWhenImport] = bGenerateMipsWhenImport;
-    root[key::CompressionMode]        = magic_enum::enum_name(targetCompressionMode);
-    root[key::CompressionQuality]     = magic_enum::enum_name(targetCompressionQuality);
-    root[key::Quality]                = magic_enum::enum_name(targetQuality);
-
-    return root;
+    if (rawImage != nullptr)
+    {
+        const auto extent = rawImage->GetExtent();
+        newTexture = std::make_unique<Texture>(targetPath);
+        newTexture->SetExtent(Extent2D{extent.width, extent.height});
+        newTexture->SetFormat(rawImage->GetEstimatedFormat());
+        newTexture->SetCompressionMode(config.GetTargetCompressionMode());
+        newTexture->SetCompressQuality(config.GetTargetCompressionQuality());
+        newTexture->SetQuality(config.GetTargetQuality());
+    }
 }
 
-void TextureImportConfig::Deserialize(const json& root)
+void TextureImporter::ExportTextureAsset()
 {
-    namespace key = constants::metadata::key;
-
-    AssetImportConfig::Deserialize(root);
-    bGenerateMipsWhenImport  = ResolveValueFromJson(root, key::GenerateMipsWhenImport, false);
-    targetCompressionMode    = ResolveEnumFromJson(root, key::CompressionMode, ETextureCompressionMode::BC7);
-    targetCompressionQuality = ResolveEnumFromJson(root, key::CompressionQuality, ETextureCompressionQuality::Medium);
-    targetQuality            = ResolveEnumFromJson(root, key::Quality, ETextureQuality::Medium);
+    if (newTexture != nullptr)
+    {
+        SaveJsonToFile(newTexture->GetPath(), newTexture->Serialize());
+    }
 }
+
 } // namespace sy::asset

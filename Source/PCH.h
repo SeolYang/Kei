@@ -34,7 +34,6 @@
 #include <fstream>
 #include <concurrent_queue.h>
 
-/** Vulkan Headers */
 #define VK_USE_PLATFORM_WIN32_KHR
 #define VK_NO_PROTOTYPES
 #include <vulkan/vulkan.h>
@@ -42,55 +41,45 @@
 #include <VkBootstrap.h>
 #include <vk_mem_alloc.h>
 
-/** Spirv-reflect */
 #define SPIRV_REFLECT_USE_SYSTEM_SPIRV_H
 #include <spirv_reflect.h>
 
-/** robinhood hash */
 #include <robin_hood.h>
 
-/** SDL2 */
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
 #include <SDL2/SDL_mixer.h>
 
-/** spdlog */
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 
-/** entt */
 #include <entt/entt.hpp>
 
-/** glm */
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-/** stbi */
 #include <stb_image.h>
 
-/** json */
+#include <ktx.h>
+using KTXTexture2UniquePtr = std::unique_ptr<ktxTexture2, std::function<void(ktxTexture2*)>>;
+
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
-/** std-uuid */
 #include <stduuid/uuid.h>
 
-/** magic-enum */
 #include <magic_enum.hpp>
 
-/** assimp */
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <assimp/cimport.h>
 #include <assimp/version.h>
 
-/** mesh optimizer */
 #include <meshoptimizer.h>
 
-/** Internal - Core */
 #include <Core/Types.h>
 #include <Core/Subsystem.h>
 #include <Core/Extent.h>
@@ -100,13 +89,10 @@ using json = nlohmann::json;
 #include <Core/Utils.h>
 #include <Core/HandleManager.h>
 
-/** Internal - Vulkan */
 #include <VK/VulkanTypes.h>
 #include <VK/Synchronization.h>
 
-/** Internal - Math */
 #include <Math/MathUtils.h>
 
-/** Internal - Render */
 #include <Render/Vertex.h>
 #include <Render/Mesh.h>

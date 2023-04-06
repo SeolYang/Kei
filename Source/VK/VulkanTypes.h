@@ -472,4 +472,55 @@ constexpr static VkImageAspectFlags FormatToImageAspect(const VkFormat format)
 
     return VK_IMAGE_ASPECT_COLOR_BIT;
 }
+
+inline VkFormat EstimateFormat(const size_t channels, const size_t bytesPerChannel)
+{
+    const size_t bitsPerChannel = bytesPerChannel * 8;
+    if (channels == 1)
+    {
+        if (bitsPerChannel == 8)
+        {
+            return VK_FORMAT_R8_UNORM;
+        }
+        else if (bitsPerChannel == 16)
+        {
+            return VK_FORMAT_R16_UNORM;
+        }
+    }
+    else if (channels == 2)
+    {
+        if (bitsPerChannel == 8)
+        {
+            return VK_FORMAT_R8G8_UNORM;
+        }
+        else if (bitsPerChannel == 16)
+        {
+            return VK_FORMAT_R16G16_UNORM;
+        }
+    }
+    else if (channels == 3)
+    {
+        if (bitsPerChannel == 8)
+        {
+            return VK_FORMAT_R8G8B8_UNORM;
+        }
+        else if (bitsPerChannel == 16)
+        {
+            return VK_FORMAT_R16G16B16_UNORM;
+        }
+    }
+    else if (channels == 4)
+    {
+        if (bitsPerChannel == 8)
+        {
+            return VK_FORMAT_R8G8B8A8_UNORM;
+        }
+        else if (bitsPerChannel == 16)
+        {
+            return VK_FORMAT_R16G16B16A16_UNORM;
+        }
+    }
+
+    return VK_FORMAT_UNDEFINED;
+}
 } // namespace sy::vk

@@ -137,12 +137,8 @@ void AssetImporter::ImportAsset(const ImportTarget& importTarget, json& config)
 void AssetImporter::ImportTextureAsset(const fs::path& path, const json& serializedConfig)
 {
     spdlog::info("Import Texture Asset \"{}\"...", path.string());
-    if (!TextureImporter::Import2D(vulkanContext,
-                                   path,
-                                   DeserializeTextureImportConfig(serializedConfig)))
-    {
-        spdlog::error("Failed to import Texture Asset \"{}\".", path.string());
-    }
+    TextureImporter importer{vulkanContext, path, DeserializeTextureImportConfig(serializedConfig)};
+    importer.Import();
 }
 
 void AssetImporter::ImportModelAsset(const fs::path& path, const json& serializedConfig)

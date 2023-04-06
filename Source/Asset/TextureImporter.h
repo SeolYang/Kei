@@ -1,7 +1,11 @@
 #pragma once
 #include <PCH.h>
-#include <Asset/TextureAssetEnums.h>
-#include <Asset/AssetImportConfig.h>
+#include <Asset/TextureImportConfig.h>
+
+namespace sy
+{
+class RawImage;
+}
 
 namespace sy::vk
 {
@@ -10,56 +14,41 @@ class VulkanContext;
 
 namespace sy::asset
 {
-struct TextureImportConfig : public AssetImportConfig
-{
-    TextureImportConfig& SetGenerateMipsWhenImport(const bool enable)
-    {
-        bGenerateMipsWhenImport = enable;
-        return *this;
-    }
-
-    TextureImportConfig& SetTargetCompressionMode(ETextureCompressionMode mode)
-    {
-        targetCompressionMode = mode;
-        return *this;
-    }
-
-    TextureImportConfig& SetTargetCompressionQuality(const ETextureCompressionQuality quality)
-    {
-        targetCompressionQuality = quality;
-        return *this;
-    }
-
-    TextureImportConfig& SetTargetQuality(const ETextureQuality quality)
-    {
-        targetQuality = quality;
-        return *this;
-    }
-
-    [[nodiscard]] auto IsGenerateMipsWhenImport() const { return bGenerateMipsWhenImport; }
-    [[nodiscard]] auto GetTargetCompressionMode() const { return targetCompressionMode; }
-    [[nodiscard]] auto GetTargetCompressionQuality() const { return targetCompressionQuality; }
-    [[nodiscard]] auto GetTargetQuality() const { return targetQuality; }
-	
-	json Serialize() const override;
-    void Deserialize(const json& root) override;
-
-private:
-    /** Generate full pyramid mips from original texture. */
-    bool                       bGenerateMipsWhenImport  = false;
-    ETextureCompressionMode    targetCompressionMode    = ETextureCompressionMode::BC7;
-    ETextureCompressionQuality targetCompressionQuality = ETextureCompressionQuality::Medium;
-    ETextureQuality            targetQuality            = ETextureQuality::Medium;
-};
-
-
-class TextureImporter
+class Texture;
+class TextureImporter : public NonCopyable
 {
 public:
-    static bool Import2D(vk::VulkanContext& vulkanContext, const fs::path& path, TextureImportConfig config);
+    TextureImporter(vk::VulkanContext& vulkanContext, const fs::path& path, TextureImportConfig config);
+    ~TextureImporter();
+
+    void Import();
 
 private:
-    TextureImporter()  = delete;
-    ~TextureImporter() = delete;
+    void LoadRawImageFromFile();
+    void CreateKtxTextureFromRawImage();
+    void SetBaseMipToKtxTexture();
+    void GenerateMips();
+    void ReadbackGeneratedMipsToBuffer();
+    void SetGeneratedMipsToKtxTextureFromReadbackBuffers();
+    void CompressKtxTexture();
+    void ExportKtxTexture();
+    void CreateTextureAsset();
+    void ExportTextureAsset();
+
+public:
+    //static bool Import2D(vk::VulkanContext& vulkanContext, const fs::path& path, TextureImportConfig config);
+
+private:
+    bool bImported = false;
+    vk::VulkanContext& vulkanContext;
+    const fs::path& targetPath;
+    const std::string targetPathStr;
+    const TextureImportConfig config;
+
+    std::unique_ptr<RawImage> rawImage;
+    KTXTexture2UniquePtr ktxTextureFromRawImage;
+    std::vector<std::unique_ptr<vk::Texture>> generatedMips;
+    std::vector<std::unique_ptr<vk::Buffer>> generatedMipReadbackBuffers;
+    std::unique_ptr<Texture> newTexture;
 };
 } // namespace sy::asset
