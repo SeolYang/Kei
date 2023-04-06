@@ -16,7 +16,7 @@ class Fence;
 class PipelineLayoutCache;
 class ResourceStateTracker;
 class FrameTracker;
-class CommandPoolManager;
+class CommandPoolAllocator;
 class DescriptorManager;
 } // namespace sy::vk
 

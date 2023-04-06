@@ -1,7 +1,7 @@
 #include <PCH.h>
 #include <VK/VulkanContext.h>
 #include <VK/VulkanRHI.h>
-#include <VK/CommandPoolManager.h>
+#include <VK/CommandPoolAllocator.h>
 #include <VK/DescriptorManager.h>
 #include <VK/FrameTracker.h>
 #include <VK/LayoutCache.h>
@@ -13,7 +13,7 @@ VulkanContext::VulkanContext(const window::Window& window) :
     window(window),
     vulkanRHI(std::make_unique<VulkanRHI>(*this, window)),
     frameTracker(std::make_unique<FrameTracker>(*this)),
-    cmdPoolManager(std::make_unique<CommandPoolManager>(*this, *frameTracker)),
+    cmdPoolAllocator(std::make_unique<CommandPoolAllocator>(*this, *frameTracker)),
     descriptorManager(std::make_unique<DescriptorManager>(*this, *frameTracker)),
     pipelineLayoutCache(std::make_unique<PipelineLayoutCache>(*this))
 {
@@ -28,7 +28,7 @@ void VulkanContext::Startup()
     spdlog::info("Startup Vulkan Context.");
     vulkanRHI->Startup();
     frameTracker->Startup();
-    cmdPoolManager->Startup();
+    cmdPoolAllocator->Startup();
     descriptorManager->Startup();
     pipelineLayoutCache->Startup();
 
@@ -42,16 +42,16 @@ void VulkanContext::Shutdown()
 
     pipelineLayoutCache->Shutdown();
     descriptorManager->Shutdown();
-    cmdPoolManager->Shutdown();
+    cmdPoolAllocator->Shutdown();
     frameTracker->Shutdown();
     swapchain.reset();
     FlushDeferredDeallocations();
     vulkanRHI->Shutdown();
 }
 
-CommandPoolManager& VulkanContext::GetCommandPoolManager() const
+CommandPoolAllocator& VulkanContext::GetCommandPoolAllocator() const
 {
-    return *cmdPoolManager;
+    return *cmdPoolAllocator;
 }
 
 DescriptorManager& VulkanContext::GetDescriptorManager() const
@@ -88,14 +88,14 @@ void VulkanContext::BeginRender()
 {
     frameTracker->WaitForInFlightRenderFence();
     FlushDeferredDeallocations();
-    cmdPoolManager->BeginFrame();
+    cmdPoolAllocator->BeginFrame();
     descriptorManager->BeginFrame();
 }
 
 void VulkanContext::EndRender()
 {
     descriptorManager->EndFrame();
-    cmdPoolManager->EndFrame();
+    cmdPoolAllocator->EndFrame();
 }
 
 void VulkanContext::EnqueueDeferredDeallocation(VulkanObjectDeleter deleter)

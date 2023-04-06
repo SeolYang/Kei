@@ -7,11 +7,11 @@ class VulkanRHI;
 class CommandPool;
 class CommandBuffer;
 class FrameTracker;
-class CommandPoolManager final : public NonCopyable
+class CommandPoolAllocator final : public NonCopyable
 {
 public:
-    CommandPoolManager(VulkanContext& vulkanContext, const FrameTracker& frameTracker);
-    virtual ~CommandPoolManager() override;
+    CommandPoolAllocator(VulkanContext& vulkanContext, const FrameTracker& frameTracker);
+    virtual ~CommandPoolAllocator() override;
 
     void Startup();
     void Shutdown();
@@ -22,7 +22,7 @@ public:
     void EndFrame();
 
 private:
-    VulkanContext&      vulkanContext;
+    VulkanContext& vulkanContext;
     const FrameTracker& frameTracker;
 
     std::shared_mutex cmdPoolMutex;

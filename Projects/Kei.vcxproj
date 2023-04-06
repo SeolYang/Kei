@@ -48,7 +48,7 @@
     <ClCompile Include="..\Source\VK\BufferBuilder.cpp" />
     <ClCompile Include="..\Source\VK\CommandBuffer.cpp" />
     <ClCompile Include="..\Source\VK\CommandPool.cpp" />
-    <ClCompile Include="..\Source\VK\CommandPoolManager.cpp" />
+    <ClCompile Include="..\Source\VK\CommandPoolAllocator.cpp" />
     <ClCompile Include="..\Source\VK\DescriptorManager.cpp" />
     <ClCompile Include="..\Source\VK\Fence.cpp" />
     <ClCompile Include="..\Source\VK\FrameTracker.cpp" />
@@ -123,7 +123,7 @@
     <ClInclude Include="..\Source\VK\BufferBuilder.h" />
     <ClInclude Include="..\Source\VK\CommandBuffer.h" />
     <ClInclude Include="..\Source\VK\CommandPool.h" />
-    <ClInclude Include="..\Source\VK\CommandPoolManager.h" />
+    <ClInclude Include="..\Source\VK\CommandPoolAllocator.h" />
     <ClInclude Include="..\Source\VK\DescriptorManager.h" />
     <ClInclude Include="..\Source\VK\Fence.h" />
     <ClInclude Include="..\Source\VK\FrameTracker.h" />

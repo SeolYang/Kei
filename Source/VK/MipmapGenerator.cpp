@@ -2,7 +2,7 @@
 #include <VK/MipmapGenerator.h>
 #include <VK/VulkanContext.h>
 #include <VK/VulkanRHI.h>
-#include <VK/CommandPoolManager.h>
+#include <VK/CommandPoolAllocator.h>
 #include <VK/CommandPool.h>
 #include <VK/CommandBuffer.h>
 #include <VK/TextureBuilder.h>
@@ -61,8 +61,8 @@ std::vector<std::unique_ptr<sy::vk::Texture>> MipmapGenerator::CreateMipTextures
 void MipmapGenerator::GenerateMips(const std::vector<std::unique_ptr<vk::Texture>>& textures) const
 {
     auto& vulkanRHI = vulkanContext.GetRHI();
-    auto& cmdPoolManager = vulkanContext.GetCommandPoolManager();
-    auto& cmdPool = cmdPoolManager.RequestCommandPool(vk::EQueueType::Graphics);
+    auto& cmdPoolAllocator = vulkanContext.GetCommandPoolAllocator();
+    auto& cmdPool = cmdPoolAllocator.RequestCommandPool(vk::EQueueType::Graphics);
     const auto cmdBuffer = cmdPool.RequestCommandBuffer("Mip Transfer Command Buffer");
 
     cmdBuffer->Begin();

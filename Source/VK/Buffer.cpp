@@ -3,7 +3,7 @@
 #include <VK/BufferBuilder.h>
 #include <VK/CommandBuffer.h>
 #include <VK/CommandPool.h>
-#include <VK/CommandPoolManager.h>
+#include <VK/CommandPoolAllocator.h>
 #include <VK/Fence.h>
 #include <VK/FrameTracker.h>
 #include <VK/VulkanContext.h>
@@ -64,8 +64,8 @@ Buffer::Buffer(const BufferBuilder& builder) :
     const bool bRequiredStateChange  = initialState != EBufferState::None;
     if (bRequiredDataTransfer || bRequiredStateChange)
     {
-        auto&      cmdPoolManager = vulkanContext.GetCommandPoolManager();
-        auto&      cmdPool        = cmdPoolManager.RequestCommandPool(EQueueType::Graphics);
+        auto&      cmdPoolAllocator = vulkanContext.GetCommandPoolAllocator();
+        auto&      cmdPool        = cmdPoolAllocator.RequestCommandPool(EQueueType::Graphics);
         const auto cmdBuffer =
             cmdPool.RequestCommandBuffer("Buffer Transfer Command Buffer");
 

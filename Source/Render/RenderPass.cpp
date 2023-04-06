@@ -1,7 +1,7 @@
 #include <PCH.h>
 #include <Render/RenderPass.h>
 #include <VK/VulkanContext.h>
-#include <VK/CommandPoolManager.h>
+#include <VK/CommandPoolAllocator.h>
 #include <VK/CommandPool.h>
 #include <VK/CommandBuffer.h>
 
@@ -14,9 +14,9 @@ RenderPass::RenderPass(std::string_view name, vk::VulkanContext& vulkanContext, 
 
 void RenderPass::Begin(const vk::EQueueType queueType)
 {
-    auto& cmdPoolManager  = vulkanContext.GetCommandPoolManager();
-    auto& graphicsCmdPool = cmdPoolManager.RequestCommandPool(queueType);
-    currentCmdBuffer      = graphicsCmdPool.RequestCommandBuffer(std::format("{}_CommandBuffer", GetName()));
+    auto& cmdPoolAllocator = vulkanContext.GetCommandPoolAllocator();
+    auto& graphicsCmdPool = cmdPoolAllocator.RequestCommandPool(queueType);
+    currentCmdBuffer = graphicsCmdPool.RequestCommandBuffer(std::format("{}_CommandBuffer", GetName()));
     currentCmdBuffer->Begin();
     OnBegin();
 }

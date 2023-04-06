@@ -9,7 +9,7 @@
 #include <VK/TextureBuilder.h>
 #include <VK/Buffer.h>
 #include <VK/BufferBuilder.h>
-#include <VK/CommandPoolManager.h>
+#include <VK/CommandPoolAllocator.h>
 #include <VK/CommandPool.h>
 #include <VK/CommandBuffer.h>
 #include <VK/MipmapGenerator.h>
@@ -69,7 +69,7 @@ void TextureImporter::CreateKtxTextureFromRawImage()
                                           KTX_TEXTURE_CREATE_ALLOC_STORAGE,
                                           &acquiredKtxTexture);
 
-	SY_ASSERT(result == KTX_SUCCESS, "Failed to create ktx texture. Error : {}", magic_enum::enum_name(result));
+    SY_ASSERT(result == KTX_SUCCESS, "Failed to create ktx texture. Error : {}", magic_enum::enum_name(result));
     ktxTextureFromRawImage = KTXTexture2UniquePtr(acquiredKtxTexture, [](ktxTexture2* ptr) {
         ktxTexture_Destroy(ktxTexture(ptr));
     });
@@ -101,8 +101,8 @@ void TextureImporter::ReadbackGeneratedMipsToBuffer()
     generatedMipReadbackBuffers.reserve(generatedMips.size());
 
     auto& vulkanRHI = vulkanContext.GetRHI();
-    auto& cmdPoolManager = vulkanContext.GetCommandPoolManager();
-    auto& cmdPool = cmdPoolManager.RequestCommandPool(vk::EQueueType::Graphics);
+    auto& cmdPoolAllocator = vulkanContext.GetCommandPoolAllocator();
+    auto& cmdPool = cmdPoolAllocator.RequestCommandPool(vk::EQueueType::Graphics);
     for (const auto& generatedMip : generatedMips)
     {
         const auto extent = generatedMip->GetExtent();
@@ -188,5 +188,4 @@ void TextureImporter::ExportTextureAssetToFile()
         SaveJsonToFile(newTexture->GetPath(), newTexture->Serialize());
     }
 }
-
 } // namespace sy::asset

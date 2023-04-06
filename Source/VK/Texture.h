@@ -4,7 +4,7 @@
 
 namespace sy::vk
 {
-class CommandPoolManager;
+class CommandPoolAllocator;
 class FrameTracker;
 class TextureBuilder;
 class Texture : public VulkanWrapper<VkImage>

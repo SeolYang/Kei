@@ -38,11 +38,11 @@ Renderer::~Renderer()
 void Renderer::Render()
 {
     const auto& frameTracker = vulkanContext.GetFrameTracker();
-    const auto& vulkanRHI    = vulkanContext.GetRHI();
+    const auto& vulkanRHI = vulkanContext.GetRHI();
     BeginFrame();
     {
         elapsedTime += 0.00833333f; // hard-coded delta time
-        const auto&  renderSemaphore = frameTracker.GetCurrentInFlightRenderSemaphore();
+        const auto& renderSemaphore = frameTracker.GetCurrentInFlightRenderSemaphore();
         const size_t currentFrameIdx = frameTracker.GetCurrentFrameIndex();
 
         const auto& swapchain = vulkanContext.GetSwapchain();
@@ -74,8 +74,8 @@ void Renderer::Render()
 
         batchedCmdBuffers.emplace_back(renderPass->GetCommandBuffer());
 
-        const auto& renderFence      = frameTracker.GetCurrentInFlightRenderFence();
-        auto&       presentSemaphore = frameTracker.GetCurrentInFlightPresentSemaphore();
+        const auto& renderFence = frameTracker.GetCurrentInFlightRenderFence();
+        auto& presentSemaphore = frameTracker.GetCurrentInFlightPresentSemaphore();
 
         CRefVec<vk::Semaphore> waitSemaphores;
         waitSemaphores.emplace_back(presentSemaphore);
@@ -94,9 +94,9 @@ void Renderer::Render()
 
 void Renderer::BeginFrame()
 {
-    const auto& vulkanRHI    = vulkanContext.GetRHI();
+    const auto& vulkanRHI = vulkanContext.GetRHI();
     const auto& frameTracker = vulkanContext.GetFrameTracker();
-    auto&       swapchain    = vulkanContext.GetSwapchain();
+    auto& swapchain = vulkanContext.GetSwapchain();
     swapchain.AcquireNext(frameTracker.GetCurrentInFlightPresentSemaphore());
     frameTracker.WaitForInFlightRenderFence();
     frameTracker.ResetInFlightRenderFence();
@@ -110,12 +110,12 @@ void Renderer::EndFrame()
 void Renderer::Startup()
 {
     spdlog::info("Startup Renderer.");
-    const auto  windowExtent        = window.GetExtent();
-    const auto& frameTracker        = vulkanContext.GetFrameTracker();
-    const auto& vulkanRHI           = vulkanContext.GetRHI();
-    auto&       cmdPoolManager      = vulkanContext.GetCommandPoolManager();
-    auto&       descriptorManager   = vulkanContext.GetDescriptorManager();
-    auto&       pipelineLayoutCache = vulkanContext.GetPipelineLayoutCache();
+    const auto windowExtent = window.GetExtent();
+    const auto& frameTracker = vulkanContext.GetFrameTracker();
+    const auto& vulkanRHI = vulkanContext.GetRHI();
+    auto& cmdPoolAllocator = vulkanContext.GetCommandPoolAllocator();
+    auto& descriptorManager = vulkanContext.GetDescriptorManager();
+    auto& pipelineLayoutCache = vulkanContext.GetPipelineLayoutCache();
 
     depthStencil = vk::TextureBuilder::Texture2DDepthStencilTemplate(vulkanContext)
                        .SetName("Depth-Stencil Buffer")
@@ -150,7 +150,7 @@ void Renderer::Startup()
     pushConstantBuilder.Add<PushConstants>(VK_SHADER_STAGE_ALL_GRAPHICS);
 
     const vk::VertexInputBuilder vertexInputLayout = BuildVertexInputLayout<VertexPT0N>();
-    vk::GraphicsPipelineBuilder  basicPipelineBuilder;
+    vk::GraphicsPipelineBuilder basicPipelineBuilder;
     basicPipelineBuilder.SetDefault()
         .AddShaderStage(*triVert)
         .AddShaderStage(*triFrag)
@@ -163,12 +163,12 @@ void Renderer::Startup()
     basicPipeline = std::make_unique<vk::Pipeline>("Basic Graphics Pipeline", vulkanContext, basicPipelineBuilder);
 
     //auto model = handleManager.Add<asset::Model>("Assets/Models/rubber_duck/scene.gltf", handleManager, vulkanContext);
-	auto model = handleManager.Add<asset::Model>("Assets/Models/homura/homura.fbx", handleManager, vulkanContext);
+    auto model = handleManager.Add<asset::Model>("Assets/Models/homura/homura.fbx", handleManager, vulkanContext);
     SY_ASSERT(model->Initialize(), "Failed to init model.");
     staticMeshes = model->GetMeshes();
 
     const auto proj = glm::perspective(glm::radians(90.f), 16.f / 9.f, 0.1f, 1000.f);
-    viewProjMat     = proj * glm::lookAt(glm::vec3{0, 100.f, -80.f}, {0.f, 80.0f, 0.f}, {0.f, 1.f, 0.f});
+    viewProjMat = proj * glm::lookAt(glm::vec3{0, 100.f, -80.f}, {0.f, 80.0f, 0.f}, {0.f, 1.f, 0.f});
 
     renderPass = std::make_unique<SimpleRenderPass>("Simple Render Pass", vulkanContext, *basicPipeline);
 }

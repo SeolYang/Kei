@@ -6,7 +6,7 @@
 #include <VK/Buffer.h>
 #include <VK/CommandPool.h>
 #include <VK/CommandBuffer.h>
-#include <VK/CommandPoolManager.h>
+#include <VK/CommandPoolAllocator.h>
 #include <VK/FrameTracker.h>
 #include <VK/VulkanContext.h>
 
@@ -27,30 +27,30 @@ Texture::Texture(const TextureBuilder& builder) :
     mips(builder.mips)
 {
     const VkImageCreateInfo imageCreateInfo{
-        .sType     = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-        .pNext     = nullptr,
-        .flags     = 0,
+        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
         .imageType = type,
-        .format    = format,
-        .extent    = VkExtent3D{
+        .format = format,
+        .extent = VkExtent3D{
             extent.width,
             type != VK_IMAGE_TYPE_1D ? extent.height : 1,
             type == VK_IMAGE_TYPE_3D ? extent.depth : 1},
-        .mipLevels     = mips,
-        .arrayLayers   = layers,
-        .samples       = samples,
-        .tiling        = tiling,
-        .usage         = usage,
-        .sharingMode   = VK_SHARING_MODE_EXCLUSIVE,
+        .mipLevels = mips,
+        .arrayLayers = layers,
+        .samples = samples,
+        .tiling = tiling,
+        .usage = usage,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
         .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED};
 
     const VmaAllocationCreateInfo allocationCreateInfo{
-        .usage         = memoryUsage,
+        .usage = memoryUsage,
         .requiredFlags = memoryProperty};
 
-    const auto&  vulkanContext = builder.vulkanContext;
-    const auto&  vulkanRHI     = vulkanContext.GetRHI();
-    NativeHandle handle        = VK_NULL_HANDLE;
+    const auto& vulkanContext = builder.vulkanContext;
+    const auto& vulkanRHI = vulkanContext.GetRHI();
+    NativeHandle handle = VK_NULL_HANDLE;
     VK_ASSERT(vmaCreateImage(vulkanRHI.GetAllocator(),
                              &imageCreateInfo, &allocationCreateInfo,
                              &handle, &allocation,
@@ -67,9 +67,9 @@ Texture::Texture(const TextureBuilder& builder) :
     const bool bRequiredStateTransfer = builder.targetInitialState != ETextureState::None;
     if (bRequiredDataTransfer || bRequiredStateTransfer)
     {
-        auto&      cmdPoolManager = vulkanContext.GetCommandPoolManager();
-        auto&      cmdPool        = cmdPoolManager.RequestCommandPool(EQueueType::Graphics);
-        const auto cmdBuffer      = cmdPool.RequestCommandBuffer("Buffer Transfer Command Buffer");
+        auto& cmdPoolAllocator = vulkanContext.GetCommandPoolAllocator();
+        auto& cmdPool = cmdPoolAllocator.RequestCommandPool(EQueueType::Graphics);
+        const auto cmdBuffer = cmdPool.RequestCommandBuffer("Buffer Transfer Command Buffer");
 
         std::unique_ptr<Buffer> stagingBuffer = nullptr;
         cmdBuffer->Begin();
@@ -77,7 +77,7 @@ Texture::Texture(const TextureBuilder& builder) :
             auto currentState = ETextureState::None;
             if (bRequiredDataTransfer)
             {
-                stagingBuffer     = BufferBuilder::StagingBufferTemplate(builder.vulkanContext)
+                stagingBuffer = BufferBuilder::StagingBufferTemplate(builder.vulkanContext)
                                     .SetName("Staging Buffer-To Texture")
                                     .SetSize(builder.dataToTransfer->size_bytes())
                                     .Build();
@@ -90,14 +90,14 @@ Texture::Texture(const TextureBuilder& builder) :
                 cmdBuffer->ChangeTextureState(ETextureState::None, ETextureState::TransferWrite, *this);
                 currentState = ETextureState::TransferWrite;
 
-				if (builder.copyInfos.empty())
-				{
+                if (builder.copyInfos.empty())
+                {
                     cmdBuffer->CopyBufferToImageSimple(*stagingBuffer, *this);
-				}
-				else
-				{
+                }
+                else
+                {
                     cmdBuffer->CopyBufferToImage(*stagingBuffer, *this, builder.copyInfos);
-				}
+                }
             }
 
             cmdBuffer->ChangeTextureState(currentState, initialState, *this);

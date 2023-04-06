@@ -1,27 +1,25 @@
 #include <PCH.h>
-#include <VK/CommandPoolManager.h>
+#include <VK/CommandPoolAllocator.h>
 #include <VK/FrameTracker.h>
 #include <VK/VulkanRHI.h>
 #include <VK/CommandPool.h>
 
-namespace sy
+namespace sy::vk
 {
-namespace vk
-{
-CommandPoolManager::CommandPoolManager(VulkanContext& vulkanContext, const FrameTracker& frameTracker) :
+CommandPoolAllocator::CommandPoolAllocator(VulkanContext& vulkanContext, const FrameTracker& frameTracker) :
     vulkanContext(vulkanContext), frameTracker(frameTracker)
 {
 }
 
-CommandPoolManager::~CommandPoolManager()
+CommandPoolAllocator::~CommandPoolAllocator()
 {
 }
 
-void CommandPoolManager::Startup()
+void CommandPoolAllocator::Startup()
 {
 }
 
-void CommandPoolManager::Shutdown()
+void CommandPoolAllocator::Shutdown()
 {
     for (auto& cmdPoolVec : cmdPools)
     {
@@ -29,7 +27,7 @@ void CommandPoolManager::Shutdown()
     }
 }
 
-CommandPool& CommandPoolManager::RequestCommandPool(const EQueueType queueType)
+CommandPool& CommandPoolAllocator::RequestCommandPool(const EQueueType queueType)
 {
     thread_local robin_hood::unordered_map<EQueueType, std::array<CommandPool*, NumMaxInFlightFrames>>
         localCmdPools;
@@ -38,7 +36,7 @@ CommandPool& CommandPoolManager::RequestCommandPool(const EQueueType queueType)
         RWLock lock(cmdPoolMutex);
         for (size_t inFlightFrameIdx = 0; inFlightFrameIdx < NumMaxInFlightFrames; ++inFlightFrameIdx)
         {
-            auto* newCmdPool                           = new CommandPool(vulkanContext, queueType);
+            auto* newCmdPool = new CommandPool(vulkanContext, queueType);
             localCmdPools[queueType][inFlightFrameIdx] = newCmdPool;
             cmdPools[inFlightFrameIdx].emplace_back(newCmdPool);
         }
@@ -47,7 +45,7 @@ CommandPool& CommandPoolManager::RequestCommandPool(const EQueueType queueType)
     return *(localCmdPools[queueType][frameTracker.GetCurrentInFlightFrameIndex()]);
 }
 
-void CommandPoolManager::BeginFrame()
+void CommandPoolAllocator::BeginFrame()
 {
     const auto& frameDependCmdPools = cmdPools[frameTracker.GetCurrentInFlightFrameIndex()];
     for (const auto& cmdPool : frameDependCmdPools)
@@ -56,10 +54,7 @@ void CommandPoolManager::BeginFrame()
     }
 }
 
-void CommandPoolManager::EndFrame()
+void CommandPoolAllocator::EndFrame()
 {
-    /* Empty */
 }
-
-} // namespace vk
-} // namespace sy
+} // namespace sy::vk

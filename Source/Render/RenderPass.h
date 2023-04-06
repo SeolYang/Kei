@@ -5,7 +5,7 @@ namespace sy::vk
 {
 class VulkanRHI;
 class VulkanContext;
-class CommandPoolManager;
+class CommandPoolAllocator;
 class CommandBuffer;
 class DescriptorManager;
 class FrameTracker;
