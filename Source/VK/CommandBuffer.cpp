@@ -74,36 +74,6 @@ void CommandBuffer::ChangeBufferState(const EBufferState srcState, const EBuffer
         0, buffer.GetAlignedSize());
 }
 
-void CommandBuffer::ChangeTextureState(const ETextureState srcState, const ETextureState dstState, const VkImage image, const VkImageAspectFlags aspectMask, const uint32_t mipLevelCount, const uint32_t baseMipLevel, const uint32_t arrayLayerCount, const uint32_t baseArrayLayer) const
-{
-    const AccessPattern srcAccess = QueryAccessPattern(srcState);
-    const AccessPattern dstAccess = QueryAccessPattern(dstState);
-    ImageMemoryBarrier(
-        srcAccess.PipelineStage, dstAccess.PipelineStage,
-        srcAccess.Access, dstAccess.Access,
-        image,
-        srcAccess.ImageLayout, dstAccess.ImageLayout,
-        aspectMask, mipLevelCount, baseMipLevel, arrayLayerCount, baseArrayLayer);
-}
-
-void CommandBuffer::ChangeTextureState(const ETextureState srcState, const ETextureState dstState, const Texture& texture) const
-{
-    ChangeTextureState(
-        srcState, dstState,
-        texture.GetNative(), FormatToImageAspect(texture.GetFormat()),
-        texture.GetMipLevels(), 0,
-        texture.GetArrayLayers(), 0);
-}
-
-void CommandBuffer::ChangeTextureState(const ETextureState srcState, const ETextureState dstState, const Texture& texture, const uint32_t mipLevelCount, uint32_t baseMipLevel, const uint32_t arrayLayerCount, const uint32_t baseArrayLayer) const
-{
-    ChangeTextureState(
-        srcState, dstState,
-        texture.GetNative(), FormatToImageAspect(texture.GetFormat()),
-        mipLevelCount, baseMipLevel,
-        arrayLayerCount, baseArrayLayer);
-}
-
 void CommandBuffer::ApplyStateTransition(const TextureStateTransition transition) const
 {
     VkImageMemoryBarrier2 barriers[] = {transition.Build()};

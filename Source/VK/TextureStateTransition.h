@@ -13,7 +13,20 @@ public:
     explicit TextureStateTransition(const VulkanContext& vulkanContext);
     ~TextureStateTransition() = default;
 
-    void SetTargetTexture(const Handle<Texture> targetTextureHandle) { this->handle = targetTextureHandle; }
+    void SetTargetTexture(const Handle<Texture> targetTextureHandle)
+    {
+        this->handle = targetTextureHandle;
+        this->nativeHandle = std::nullopt;
+    }
+
+	void SetTargetNativeHandle(const VkImage image)
+	{
+        this->handle = {};
+        this->nativeHandle = image;
+	}
+
+	bool IsUsedNativeHandle() const { return nativeHandle != std::nullopt; }
+
     void SetSourceState(const ETextureState state) { this->srcState = state; }
     void SetDestinationState(const ETextureState state) { this->dstState = state; }
     void SetSourceQueueType(const EQueueType srcQueueType) { this->srcQueueType = srcQueueType; }
@@ -25,6 +38,7 @@ public:
 private:
     const VulkanContext& vulkanContext;
     Handle<Texture> handle = {};
+    std::optional<VkImage> nativeHandle = std::nullopt;
     std::optional<ETextureState> srcState = std::nullopt;
     std::optional<ETextureState> dstState = std::nullopt;
     std::optional<EQueueType> srcQueueType = std::nullopt;

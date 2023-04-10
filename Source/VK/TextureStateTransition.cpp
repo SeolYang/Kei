@@ -18,9 +18,21 @@ VkImageMemoryBarrier2 TextureStateTransition::Build() const
     const bool bStatesAreNotEqual = bValidStates && (*srcState != *dstState);
     SY_ASSERT(bStatesAreNotEqual, "State are equal. It may result in redudant transition.");
 
-    const bool bIsValidHandle = handle.IsValid();
-    SY_ASSERT(bIsValidHandle, "Invalid Texture Handle.");
-    const bool bIsValidNativeHandle = handle->GetNative() != VK_NULL_HANDLE;
+	bool bIsValidNativeHandle = false;
+	if (IsUsedNativeHandle())
+	{
+        bIsValidNativeHandle = nativeHandle != VK_NULL_HANDLE;
+        SY_ASSERT(bIsValidNativeHandle, "Invalid Vulkan Native Handle.");
+
+		const bool bHasSubresourceRange = subresourceRange != std::nullopt;
+        SY_ASSERT(bHasSubresourceRange, "Native Handle State Transtion must specify subresource range manually.");
+	}
+	else
+	{
+        const bool bIsValidHandle = handle.IsValid();
+        SY_ASSERT(bIsValidHandle, "Invalid Texture Handle.");
+        bIsValidNativeHandle = handle->GetNative() != VK_NULL_HANDLE;
+	}
     SY_ASSERT(bIsValidNativeHandle, "Invalid Vulkan Native Handle.");
 
     const AccessPattern srcAccessPattern = srcState ? QueryAccessPattern(*srcState) : QueryAccessPattern(ETextureState::None);
@@ -38,7 +50,7 @@ VkImageMemoryBarrier2 TextureStateTransition::Build() const
         .newLayout = dstAccessPattern.ImageLayout,
         .srcQueueFamilyIndex = srcQueueType ? vulkanRHI.GetQueueFamilyIndex(*srcQueueType) : VK_QUEUE_FAMILY_IGNORED,
         .dstQueueFamilyIndex = dstQueueType ? vulkanRHI.GetQueueFamilyIndex(*dstQueueType) : VK_QUEUE_FAMILY_IGNORED,
-        .image = handle->GetNative(),
+        .image = IsUsedNativeHandle() ? *nativeHandle : handle->GetNative(),
         .subresourceRange = subresourceRange ? *subresourceRange : handle->GetFullSubresourceRange()};
 
     return barrier;

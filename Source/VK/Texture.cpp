@@ -71,10 +71,14 @@ Texture::Texture(const TextureBuilder& builder) :
         auto& cmdPool = cmdPoolAllocator.RequestCommandPool(EQueueType::Graphics);
         const auto cmdBuffer = cmdPool.RequestCommandBuffer("Buffer Transfer Command Buffer");
 
+		TextureStateTransition stateTransition{vulkanContext};
+        stateTransition.SetTargetNativeHandle(GetNative());
+        stateTransition.SetSubresourceRange(GetFullSubresourceRange());
+        stateTransition.SetSourceState(ETextureState::None);
+
         std::unique_ptr<Buffer> stagingBuffer = nullptr;
         cmdBuffer->Begin();
         {
-            auto currentState = ETextureState::None;
             if (bRequiredDataTransfer)
             {
                 stagingBuffer = BufferBuilder::StagingBufferTemplate(builder.vulkanContext)
@@ -87,8 +91,8 @@ Texture::Texture(const TextureBuilder& builder) :
                             builder.dataToTransfer->size());
                 vulkanRHI.Unmap(*stagingBuffer);
 
-                cmdBuffer->ChangeTextureState(ETextureState::None, ETextureState::TransferWrite, *this);
-                currentState = ETextureState::TransferWrite;
+                stateTransition.SetDestinationState(ETextureState::TransferWrite);
+                cmdBuffer->ApplyStateTransition(stateTransition);
 
                 if (builder.copyInfos.empty())
                 {
@@ -98,9 +102,12 @@ Texture::Texture(const TextureBuilder& builder) :
                 {
                     cmdBuffer->CopyBufferToImage(*stagingBuffer, *this, builder.copyInfos);
                 }
+
+                stateTransition.SetSourceState(ETextureState::TransferWrite);
             }
 
-            cmdBuffer->ChangeTextureState(currentState, initialState, *this);
+			stateTransition.SetDestinationState(initialState);
+            cmdBuffer->ApplyStateTransition(stateTransition);
         }
         cmdBuffer->End();
 

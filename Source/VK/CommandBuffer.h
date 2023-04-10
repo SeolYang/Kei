@@ -32,13 +32,6 @@ public:
     void ChangeBufferState(EBufferState srcState, EBufferState dstState, VkBuffer buffer, size_t offset, size_t size) const;
     void ChangeBufferState(EBufferState srcState, EBufferState dstState, const Buffer& buffer) const;
 
-	// #deprecated
-    void ChangeTextureState(ETextureState srcState, ETextureState dstState, VkImage image, VkImageAspectFlags aspectMask, uint32_t mipLevelCount = 1, uint32_t baseMipLevel = 0, uint32_t arrayLayerCount = 1, uint32_t baseArrayLayer = 0) const;
-	// #deprecated
-    void ChangeTextureState(ETextureState srcState, ETextureState dstState, const Texture& texture) const;
-	// #deprecated
-    void ChangeTextureState(ETextureState srcState, ETextureState dstState, const Texture& texture, uint32_t mipLevelCount, uint32_t baseMipLevel, uint32_t arrayLayerCount, uint32_t baseArrayLayer) const;
-
     void ApplyStateTransition(TextureStateTransition transition) const;
     void ApplyStateTransitions(std::span<const TextureStateTransition> transitions) const;
 

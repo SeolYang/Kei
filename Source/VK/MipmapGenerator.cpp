@@ -96,14 +96,17 @@ void MipmapGenerator::SubmitBlitToCommandBuffer(const vk::CommandBuffer& cmdBuff
     imageBlit.dstOffsets[1].y = dstExtent.height;
     imageBlit.dstOffsets[1].z = dstExtent.depth;
 
-    cmdBuffer.ChangeTextureState(
-        vk::ETextureState::TransferRead,
-        vk::ETextureState::TransferWrite,
-        dstMip);
+	TextureStateTransition stateTransition{vulkanContext};
+    stateTransition.SetTargetNativeHandle(dstMip.GetNative());
+    stateTransition.SetSubresourceRange(dstMip.GetFullSubresourceRange());
+    stateTransition.SetSourceState(vk::ETextureState::TransferRead);
+	stateTransition.SetDestinationState(vk::ETextureState::TransferWrite);
+    cmdBuffer.ApplyStateTransition(stateTransition);
+
     cmdBuffer.BlitTexture(srcMip, dstMip, imageBlit);
-    cmdBuffer.ChangeTextureState(
-        vk::ETextureState::TransferWrite,
-        vk::ETextureState::TransferRead,
-        dstMip);
+
+    stateTransition.SetSourceState(vk::ETextureState::TransferWrite);
+    stateTransition.SetDestinationState(vk::ETextureState::TransferRead);
+    cmdBuffer.ApplyStateTransition(stateTransition);
 }
 } // namespace sy::vk

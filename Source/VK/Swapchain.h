@@ -45,6 +45,15 @@ public:
             .clearValue  = {clearColorValue}};
     }
 
+	[[nodiscard]] static auto GetSubresourceRange()
+	{
+        return VkImageSubresourceRange{
+			VK_IMAGE_ASPECT_COLOR_BIT,
+			0, 1,
+			0, 1
+        };
+	}
+
 private:
     const window::Window&    window;
     std::vector<VkImage>     images     = {};

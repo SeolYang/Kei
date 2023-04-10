@@ -56,8 +56,12 @@ SimpleRenderPass::SimpleRenderPass(const std::string_view name,
 void SimpleRenderPass::OnBegin()
 {
     const auto& graphicsCmdBuffer = GetCommandBuffer();
-    graphicsCmdBuffer.ChangeTextureState(vk::ETextureState::None, vk::ETextureState::ColorAttachmentWrite, swapchainImage,
-                                         VK_IMAGE_ASPECT_COLOR_BIT);
+    vk::TextureStateTransition noneToColorAttachmentWrite{GetVulkanContext()};
+	noneToColorAttachmentWrite.SetSubresourceRange(vk::Swapchain::GetSubresourceRange());
+    noneToColorAttachmentWrite.SetSourceState(vk::ETextureState::None);
+    noneToColorAttachmentWrite.SetDestinationState(vk::ETextureState::ColorAttachmentWrite);
+    noneToColorAttachmentWrite.SetTargetNativeHandle(swapchainImage);
+    graphicsCmdBuffer.ApplyStateTransition(noneToColorAttachmentWrite);
 
     std::array colorAttachmentInfos = {swapchainAttachmentInfo};
     std::array depthAttachmentInfos = {depthAttachmentInfo};
@@ -109,8 +113,13 @@ void SimpleRenderPass::OnEnd()
 {
     const auto& graphicsCmdBuffer = GetCommandBuffer();
     graphicsCmdBuffer.EndRendering();
-    graphicsCmdBuffer.ChangeTextureState(vk::ETextureState::ColorAttachmentWrite, vk::ETextureState::Present,
-                                         swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT);
+
+    vk::TextureStateTransition colorAttachmentToPresent{GetVulkanContext()};
+    colorAttachmentToPresent.SetSubresourceRange(vk::Swapchain::GetSubresourceRange());
+    colorAttachmentToPresent.SetSourceState(vk::ETextureState::ColorAttachmentWrite);
+    colorAttachmentToPresent.SetDestinationState(vk::ETextureState::Present);
+    colorAttachmentToPresent.SetTargetNativeHandle(swapchainImage);
+    graphicsCmdBuffer.ApplyStateTransition(colorAttachmentToPresent);
 }
 
 void SimpleRenderPass::UpdateBuffers()
