@@ -13,12 +13,12 @@ namespace sy
 {
 namespace vk
 {
-size_t CalculateAlignedBufferSize(VulkanContext&           vulkanContext,
-                                  const size_t             originSize,
+size_t CalculateAlignedBufferSize(VulkanContext& vulkanContext,
+                                  const size_t originSize,
                                   const VkBufferUsageFlags bufferUsage)
 {
-    const auto& vulkanRHI   = vulkanContext.GetRHI();
-    size_t      alignedSize = originSize;
+    const auto& vulkanRHI = vulkanContext.GetRHI();
+    size_t alignedSize = originSize;
     switch (bufferUsage)
     {
         case VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT:
@@ -36,18 +36,18 @@ Buffer::Buffer(const BufferBuilder& builder) :
     VulkanWrapper(builder.name, builder.vulkanContext, VK_OBJECT_TYPE_BUFFER), alignedSize(CalculateAlignedBufferSize(builder.vulkanContext, builder.size, *builder.usage)), usage(*builder.usage | (builder.dataToTransfer.has_value() ? VK_BUFFER_USAGE_TRANSFER_DST_BIT : 0)), memoryUsage(*builder.memoryUsage), initialState(builder.targetInitialState)
 {
     const VkBufferCreateInfo createInfo{
-        .sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-        .pNext       = nullptr,
-        .flags       = 0,
-        .size        = this->alignedSize,
-        .usage       = this->usage,
+        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .size = this->alignedSize,
+        .usage = this->usage,
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE};
 
     const VmaAllocationCreateInfo allocationCreateInfo{
         .usage = this->memoryUsage};
 
-    const auto& vulkanContext = builder.vulkanContext;
-    const auto& vulkanRHI     = vulkanContext.GetRHI();
+    auto& vulkanContext = builder.vulkanContext;
+    const auto& vulkanRHI = vulkanContext.GetRHI();
 
     NativeHandle handle = VK_NULL_HANDLE;
     VK_ASSERT(
@@ -61,11 +61,11 @@ Buffer::Buffer(const BufferBuilder& builder) :
         });
 
     const bool bRequiredDataTransfer = builder.dataToTransfer.has_value();
-    const bool bRequiredStateChange  = initialState != EBufferState::None;
+    const bool bRequiredStateChange = initialState != EBufferState::None;
     if (bRequiredDataTransfer || bRequiredStateChange)
     {
-        auto&      cmdPoolAllocator = vulkanContext.GetCommandPoolAllocator();
-        auto&      cmdPool        = cmdPoolAllocator.RequestCommandPool(EQueueType::Graphics);
+        auto& cmdPoolAllocator = vulkanContext.GetCommandPoolAllocator();
+        auto& cmdPool = cmdPoolAllocator.RequestCommandPool(EQueueType::Graphics);
         const auto cmdBuffer =
             cmdPool.RequestCommandBuffer("Buffer Transfer Command Buffer");
 

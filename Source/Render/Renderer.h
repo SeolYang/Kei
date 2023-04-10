@@ -35,8 +35,8 @@ public:
     Renderer(const window::Window& window, vk::VulkanContext& vulkanContext, HandleManager& handleManager);
     ~Renderer() override;
 
-    void Startup();
-    void Shutdown();
+    void Startup() override;
+    void Shutdown() override;
 
     void Render();
 

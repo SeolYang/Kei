@@ -75,7 +75,7 @@ void SimpleRenderPass::OnBegin()
         .pDepthAttachment = depthAttachmentInfos.data(),
         .pStencilAttachment = depthAttachmentInfos.data()};
 
-    const auto& vulkanContext = GetVulkanContext();
+    auto& vulkanContext = GetVulkanContext();
     const auto& descriptorAllocator = vulkanContext.GetDescriptorAllocator();
     const auto& pipeline = GetPipeline();
     graphicsCmdBuffer.BeginRendering(renderingInfo);

@@ -49,29 +49,49 @@ void VulkanContext::Shutdown()
     vulkanRHI->Shutdown();
 }
 
-CommandPoolAllocator& VulkanContext::GetCommandPoolAllocator() const
-{
-    return *cmdPoolAllocator;
-}
-
-DescriptorAllocator& VulkanContext::GetDescriptorAllocator() const
-{
-    return *descriptorAllocator;
-}
-
-VulkanRHI& VulkanContext::GetRHI() const
+const VulkanRHI& VulkanContext::GetRHI() const
 {
     return *vulkanRHI;
 }
 
-FrameTracker& VulkanContext::GetFrameTracker() const
+VulkanRHI& VulkanContext::GetRHI()
+{
+    return *vulkanRHI;
+}
+
+const FrameTracker& VulkanContext::GetFrameTracker() const
 {
     return *frameTracker;
 }
 
-PipelineLayoutCache& VulkanContext::GetPipelineLayoutCache() const
+FrameTracker& VulkanContext::GetFrameTracker()
+{
+    return *frameTracker;
+}
+
+CommandPoolAllocator& VulkanContext::GetCommandPoolAllocator()
+{
+    return *cmdPoolAllocator;
+}
+
+const DescriptorAllocator& VulkanContext::GetDescriptorAllocator() const
+{
+    return *descriptorAllocator;
+}
+
+DescriptorAllocator& VulkanContext::GetDescriptorAllocator()
+{
+    return *descriptorAllocator;
+}
+
+PipelineLayoutCache& VulkanContext::GetPipelineLayoutCache()
 {
     return *pipelineLayoutCache;
+}
+
+Swapchain& VulkanContext::GetSwapchain()
+{
+    return *swapchain;
 }
 
 void VulkanContext::BeginFrame()
@@ -112,9 +132,5 @@ void VulkanContext::FlushDeferredDeallocations()
     deferredObjectDeallocations.clear();
 }
 
-Swapchain& VulkanContext::GetSwapchain() const
-{
-    return *swapchain;
-}
 
 } // namespace sy::vk

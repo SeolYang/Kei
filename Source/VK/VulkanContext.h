@@ -23,12 +23,15 @@ public:
     void Startup() override;
     void Shutdown() override;
 
-    [[nodiscard]] VulkanRHI& GetRHI() const;
-    [[nodiscard]] FrameTracker& GetFrameTracker() const;
-    [[nodiscard]] CommandPoolAllocator& GetCommandPoolAllocator() const;
-    [[nodiscard]] DescriptorAllocator& GetDescriptorAllocator() const;
-    [[nodiscard]] PipelineLayoutCache& GetPipelineLayoutCache() const;
-    [[nodiscard]] Swapchain& GetSwapchain() const;
+    [[nodiscard]] const VulkanRHI& GetRHI() const;
+    [[nodiscard]] VulkanRHI& GetRHI();
+    [[nodiscard]] const FrameTracker& GetFrameTracker() const;
+	[[nodiscard]] FrameTracker& GetFrameTracker();
+    [[nodiscard]] CommandPoolAllocator& GetCommandPoolAllocator();
+    [[nodiscard]] const DescriptorAllocator& GetDescriptorAllocator() const;
+    [[nodiscard]] DescriptorAllocator& GetDescriptorAllocator();
+	[[nodiscard]] PipelineLayoutCache& GetPipelineLayoutCache();
+    [[nodiscard]] Swapchain& GetSwapchain();
 
     void BeginFrame();
     void EndFrame();

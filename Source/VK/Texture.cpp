@@ -48,7 +48,7 @@ Texture::Texture(const TextureBuilder& builder) :
         .usage = memoryUsage,
         .requiredFlags = memoryProperty};
 
-    const auto& vulkanContext = builder.vulkanContext;
+    auto& vulkanContext = builder.vulkanContext;
     const auto& vulkanRHI = vulkanContext.GetRHI();
     NativeHandle handle = VK_NULL_HANDLE;
     VK_ASSERT(vmaCreateImage(vulkanRHI.GetAllocator(),
