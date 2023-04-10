@@ -1,6 +1,7 @@
 #pragma once
 #include <PCH.h>
 #include <VK/VulkanWrapper.h>
+#include <VK/TextureStateTransition.h>
 
 namespace sy::vk
 {
@@ -37,6 +38,9 @@ public:
     void ChangeTextureState(ETextureState srcState, ETextureState dstState, const Texture& texture) const;
 	// #deprecated
     void ChangeTextureState(ETextureState srcState, ETextureState dstState, const Texture& texture, uint32_t mipLevelCount, uint32_t baseMipLevel, uint32_t arrayLayerCount, uint32_t baseArrayLayer) const;
+
+    void ApplyStateTransition(TextureStateTransition transition) const;
+    void ApplyStateTransitions(std::span<const TextureStateTransition> transitions) const;
 
     /** Binding resources */
     void BindPipeline(const Pipeline& pipeline) const;

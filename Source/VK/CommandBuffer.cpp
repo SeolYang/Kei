@@ -12,10 +12,10 @@ CommandBuffer::CommandBuffer(const std::string_view name, VulkanContext& vulkanC
     VulkanWrapper<VkCommandBuffer>(name, vulkanContext, VK_OBJECT_TYPE_COMMAND_BUFFER), queueType(cmdPool.GetQueueType())
 {
     const VkCommandBufferAllocateInfo allocInfo{
-        .sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-        .pNext              = nullptr,
-        .commandPool        = cmdPool.GetNative(),
-        .level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .pNext = nullptr,
+        .commandPool = cmdPool.GetNative(),
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
         .commandBufferCount = 1};
 
     NativeHandle handle = VK_NULL_HANDLE;
@@ -32,9 +32,9 @@ void CommandBuffer::Reset() const
 void CommandBuffer::Begin() const
 {
     const VkCommandBufferBeginInfo beginInfo{
-        .sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-        .pNext            = nullptr,
-        .flags            = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        .pNext = nullptr,
+        .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
         .pInheritanceInfo = nullptr};
 
     VK_ASSERT(vkBeginCommandBuffer(GetNative(), &beginInfo), "Faeild to begin command buffer {}.",
@@ -104,6 +104,26 @@ void CommandBuffer::ChangeTextureState(const ETextureState srcState, const EText
         arrayLayerCount, baseArrayLayer);
 }
 
+void CommandBuffer::ApplyStateTransition(const TextureStateTransition transition) const
+{
+    VkImageMemoryBarrier2 barriers[] = {transition.Build()};
+    PipelineBarrier({}, {}, barriers);
+}
+
+void CommandBuffer::ApplyStateTransitions(const std::span<const TextureStateTransition> transitions) const
+{
+    std::vector<VkImageMemoryBarrier2> barriers;
+    barriers.reserve(transitions.size());
+    std::transform(
+		transitions.begin(), transitions.end(), 
+		barriers.begin(), 
+		[](const TextureStateTransition& transition) {
+            return transition.Build();
+    });
+
+    PipelineBarrier({}, {}, barriers);
+}
+
 void CommandBuffer::BindPipeline(const Pipeline& pipeline) const
 {
     vkCmdBindPipeline(GetNative(), pipeline.GetBindPoint(), pipeline.GetNative());
@@ -171,16 +191,16 @@ void CommandBuffer::CopyBufferToImage(const Buffer& srcBuffer, const Texture& ds
 
 void CommandBuffer::CopyBufferToImageSimple(const Buffer& srcBuffer, const Texture& dstTexture) const
 {
-    const auto              imageExtent = dstTexture.GetExtent();
+    const auto imageExtent = dstTexture.GetExtent();
     const VkBufferImageCopy imgCopy{
-        .bufferOffset      = 0,
-        .bufferRowLength   = 0,
+        .bufferOffset = 0,
+        .bufferRowLength = 0,
         .bufferImageHeight = 0,
-        .imageSubresource  = {
-             .aspectMask     = FormatToImageAspect(dstTexture.GetFormat()),
-             .mipLevel       = 0,
-             .baseArrayLayer = 0,
-             .layerCount     = 1},
+        .imageSubresource = {
+            .aspectMask = FormatToImageAspect(dstTexture.GetFormat()),
+            .mipLevel = 0,
+            .baseArrayLayer = 0,
+            .layerCount = 1},
         .imageExtent = {imageExtent.width, imageExtent.height, imageExtent.depth}};
 
     std::array region = {imgCopy};
@@ -192,7 +212,7 @@ void CommandBuffer::CopyBufferSimple(const Buffer& srcBuffer, const size_t srcOf
     const VkBufferCopy bufferCopy{
         .srcOffset = srcOffset,
         .dstOffset = dstOffset,
-        .size      = sizeofData};
+        .size = sizeofData};
 
     vkCmdCopyBuffer(GetNative(), srcBuffer.GetNative(), dstBuffer.GetNative(), 1,
                     &bufferCopy);
@@ -200,16 +220,16 @@ void CommandBuffer::CopyBufferSimple(const Buffer& srcBuffer, const size_t srcOf
 
 void CommandBuffer::CopyImageToBuffer(const Texture& srcTexture, const Buffer& dstBuffer) const
 {
-	const auto              imageExtent = srcTexture.GetExtent();
+    const auto imageExtent = srcTexture.GetExtent();
     const VkBufferImageCopy imgCopy{
-        .bufferOffset      = 0,
-        .bufferRowLength   = 0,
+        .bufferOffset = 0,
+        .bufferRowLength = 0,
         .bufferImageHeight = 0,
-        .imageSubresource  = {
-             .aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
-             .mipLevel       = 0,
-             .baseArrayLayer = 0,
-             .layerCount     = 1},
+        .imageSubresource = {
+            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .mipLevel = 0,
+            .baseArrayLayer = 0,
+            .layerCount = 1},
         .imageExtent = {imageExtent.width, imageExtent.height, imageExtent.depth}};
 
     vkCmdCopyImageToBuffer(GetNative(), srcTexture.GetNative(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstBuffer.GetNative(), 1, &imgCopy);
@@ -217,35 +237,35 @@ void CommandBuffer::CopyImageToBuffer(const Texture& srcTexture, const Buffer& d
 
 void CommandBuffer::ImageMemoryBarrier(const VkPipelineStageFlags2 srcStage,
                                        const VkPipelineStageFlags2 dstStage,
-                                       const VkAccessFlags2        srcAccess,
-                                       const VkAccessFlags2        dstAccess,
-                                       const VkImage               image,
-                                       const VkImageLayout         oldLayout,
-                                       const VkImageLayout         newLayout,
-                                       const VkImageAspectFlags    aspectMask,
-                                       const uint32_t              mipLevelCount,
-                                       const uint32_t              baseMipLevel,
-                                       const uint32_t              arrayLayerCount,
-                                       const uint32_t              baseArrayLayer) const
+                                       const VkAccessFlags2 srcAccess,
+                                       const VkAccessFlags2 dstAccess,
+                                       const VkImage image,
+                                       const VkImageLayout oldLayout,
+                                       const VkImageLayout newLayout,
+                                       const VkImageAspectFlags aspectMask,
+                                       const uint32_t mipLevelCount,
+                                       const uint32_t baseMipLevel,
+                                       const uint32_t arrayLayerCount,
+                                       const uint32_t baseArrayLayer) const
 {
     const VkImageMemoryBarrier2 barrier{
-        .sType               = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-        .pNext               = nullptr,
-        .srcStageMask        = srcStage,
-        .srcAccessMask       = srcAccess,
-        .dstStageMask        = dstStage,
-        .dstAccessMask       = dstAccess,
-        .oldLayout           = oldLayout,
-        .newLayout           = newLayout,
+        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+        .pNext = nullptr,
+        .srcStageMask = srcStage,
+        .srcAccessMask = srcAccess,
+        .dstStageMask = dstStage,
+        .dstAccessMask = dstAccess,
+        .oldLayout = oldLayout,
+        .newLayout = newLayout,
         .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
         .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-        .image               = image,
-        .subresourceRange    = {
-               .aspectMask     = aspectMask,
-               .baseMipLevel   = baseMipLevel,
-               .levelCount     = mipLevelCount,
-               .baseArrayLayer = baseArrayLayer,
-               .layerCount     = arrayLayerCount,
+        .image = image,
+        .subresourceRange = {
+            .aspectMask = aspectMask,
+            .baseMipLevel = baseMipLevel,
+            .levelCount = mipLevelCount,
+            .baseArrayLayer = baseArrayLayer,
+            .layerCount = arrayLayerCount,
         }};
 
     VkImageMemoryBarrier2 barriers[] = {barrier};
@@ -254,11 +274,11 @@ void CommandBuffer::ImageMemoryBarrier(const VkPipelineStageFlags2 srcStage,
 
 void CommandBuffer::BufferMemoryBarrier(const VkPipelineStageFlags2 srcStage,
                                         const VkPipelineStageFlags2 dstStage,
-                                        const VkAccessFlags2        srcAccess,
-                                        const VkAccessFlags2        dstAccess,
-                                        VkBuffer                    buffer,
-                                        const size_t                offset,
-                                        const size_t                size) const
+                                        const VkAccessFlags2 srcAccess,
+                                        const VkAccessFlags2 dstAccess,
+                                        VkBuffer buffer,
+                                        const size_t offset,
+                                        const size_t size) const
 {
     const VkBufferMemoryBarrier2 barrier{
         VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2,
@@ -277,19 +297,19 @@ void CommandBuffer::BufferMemoryBarrier(const VkPipelineStageFlags2 srcStage,
     PipelineBarrier({}, barriers, {});
 }
 
-void CommandBuffer::PipelineBarrier(std::span<VkMemoryBarrier2>       memoryBarriers,
+void CommandBuffer::PipelineBarrier(std::span<VkMemoryBarrier2> memoryBarriers,
                                     std::span<VkBufferMemoryBarrier2> bufferMemoryBarriers,
-                                    std::span<VkImageMemoryBarrier2>  imageMemoryBarriers) const
+                                    std::span<VkImageMemoryBarrier2> imageMemoryBarriers) const
 {
     const VkDependencyInfo dependencyInfo{
-        .sType                    = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-        .pNext                    = nullptr,
-        .memoryBarrierCount       = static_cast<uint32_t>(memoryBarriers.size()),
-        .pMemoryBarriers          = memoryBarriers.data(),
+        .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+        .pNext = nullptr,
+        .memoryBarrierCount = static_cast<uint32_t>(memoryBarriers.size()),
+        .pMemoryBarriers = memoryBarriers.data(),
         .bufferMemoryBarrierCount = static_cast<uint32_t>(bufferMemoryBarriers.size()),
-        .pBufferMemoryBarriers    = bufferMemoryBarriers.data(),
-        .imageMemoryBarrierCount  = static_cast<uint32_t>(imageMemoryBarriers.size()),
-        .pImageMemoryBarriers     = imageMemoryBarriers.data()};
+        .pBufferMemoryBarriers = bufferMemoryBarriers.data(),
+        .imageMemoryBarrierCount = static_cast<uint32_t>(imageMemoryBarriers.size()),
+        .pImageMemoryBarriers = imageMemoryBarriers.data()};
 
     vkCmdPipelineBarrier2(GetNative(), &dependencyInfo);
 }
@@ -303,4 +323,5 @@ void CommandBuffer::BlitTexture(const Texture& src, const Texture& dst, const Vk
         1, &blit,
         filter);
 }
+
 } // namespace sy::vk
