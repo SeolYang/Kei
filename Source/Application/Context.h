@@ -9,7 +9,6 @@ class CommandLineParser;
 namespace sy::vk
 {
 class VulkanContext;
-class ResourceStateTracker;
 } // namespace sy::vk
 
 namespace sy::render
@@ -40,11 +39,11 @@ public:
     void Startup() override;
     void Shutdown() override;
 
-    window::Window&    GetWindow() const;
-    Timer&             GetTimer() const;
-    HandleManager&     GetHandleManager() const;
+    window::Window& GetWindow() const;
+    Timer& GetTimer() const;
+    HandleManager& GetHandleManager() const;
     vk::VulkanContext& GetVulkanContext() const;
-    render::Renderer&  GetRenderer() const;
+    render::Renderer& GetRenderer() const;
 
 private:
     void InitializeLogger();
@@ -52,11 +51,11 @@ private:
     void ExecuteAssetImportProcess();
 
 private:
-    CommandLineParser&                 cmdLineParser;
-    std::unique_ptr<window::Window>    window;
-    std::unique_ptr<Timer>             timer;
-    std::unique_ptr<HandleManager>     handleManager;
+    CommandLineParser& cmdLineParser;
+    std::unique_ptr<window::Window> window;
+    std::unique_ptr<Timer> timer;
+    std::unique_ptr<HandleManager> handleManager;
     std::unique_ptr<vk::VulkanContext> vulkanContext;
-    std::unique_ptr<render::Renderer>  renderer;
+    std::unique_ptr<render::Renderer> renderer;
 };
 } // namespace sy::app

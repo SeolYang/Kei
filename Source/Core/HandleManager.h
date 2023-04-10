@@ -379,15 +379,7 @@ public:
     HandleManager() = default;
     ~HandleManager()
     {
-        /** Empty */
     }
-
-    /** Non-copyable */
-    HandleManager(const HandleManager&)            = delete;
-    HandleManager& operator=(const HandleManager&) = delete;
-    /** Non-movable */
-    HandleManager(HandleManager&&) noexcept            = delete;
-    HandleManager& operator=(HandleManager&&) noexcept = delete;
 
     void Startup() override
     {

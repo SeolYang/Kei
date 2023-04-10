@@ -14,7 +14,6 @@ class TextureView;
 class Sampler;
 class Fence;
 class PipelineLayoutCache;
-class ResourceStateTracker;
 class FrameTracker;
 class CommandPoolAllocator;
 class DescriptorAllocator;
@@ -49,8 +48,6 @@ private:
     const window::Window& window;
     vk::VulkanContext&    vulkanContext;
     HandleManager&        handleManager;
-
-    std::unique_ptr<vk::ResourceStateTracker> resStateTracker;
 
     std::unique_ptr<vk::ShaderModule> triVert;
     std::unique_ptr<vk::ShaderModule> triFrag;

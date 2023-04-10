@@ -20,13 +20,12 @@
 #include <VK/TextureBuilder.h>
 #include <Window/Window.h>
 #include <Math/MathUtils.h>
-#include <VK/ResourceStateTracker.h>
 #include <Asset/ModelAsset.h>
 
 namespace sy::render
 {
 Renderer::Renderer(const window::Window& window, vk::VulkanContext& vulkanContext, HandleManager& handleManager) :
-    window(window), vulkanContext(vulkanContext), resStateTracker(std::make_unique<vk::ResourceStateTracker>(handleManager)), handleManager(handleManager)
+    window(window), vulkanContext(vulkanContext), handleManager(handleManager)
 {
 }
 
@@ -182,7 +181,6 @@ void Renderer::Shutdown()
     basicPipeline.reset();
     triFrag.reset();
     triVert.reset();
-    resStateTracker.reset();
 }
 
 } // namespace sy::render

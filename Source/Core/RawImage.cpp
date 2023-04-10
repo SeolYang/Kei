@@ -39,7 +39,7 @@ void RawImage::AcquireImageMetadata(std::string_view pathStr)
     int numChannels = 0;
     stbi_info(pathStr.data(), &width, &height, &numChannels);
     this->extent = Extent3D<uint32_t>{static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1};
-    this->numChannels = static_cast<size_t>(numChannels);
+    this->numChannels = static_cast<uint8_t>(numChannels);
 }
 
 void RawImage::LoadImageDataFromFile(std::string_view pathStr)

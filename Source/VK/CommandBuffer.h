@@ -5,7 +5,6 @@
 namespace sy::vk
 {
 class CommandPool;
-class ResourceStateTracker;
 class Fence;
 class Pipeline;
 class Buffer;
@@ -32,11 +31,12 @@ public:
     void ChangeBufferState(EBufferState srcState, EBufferState dstState, VkBuffer buffer, size_t offset, size_t size) const;
     void ChangeBufferState(EBufferState srcState, EBufferState dstState, const Buffer& buffer) const;
 
+	// #deprecated
     void ChangeTextureState(ETextureState srcState, ETextureState dstState, VkImage image, VkImageAspectFlags aspectMask, uint32_t mipLevelCount = 1, uint32_t baseMipLevel = 0, uint32_t arrayLayerCount = 1, uint32_t baseArrayLayer = 0) const;
+	// #deprecated
     void ChangeTextureState(ETextureState srcState, ETextureState dstState, const Texture& texture) const;
+	// #deprecated
     void ChangeTextureState(ETextureState srcState, ETextureState dstState, const Texture& texture, uint32_t mipLevelCount, uint32_t baseMipLevel, uint32_t arrayLayerCount, uint32_t baseArrayLayer) const;
-
-    void FlushStateTransitions(ResourceStateTracker& resourceStateTracker) const;
 
     /** Binding resources */
     void BindPipeline(const Pipeline& pipeline) const;
@@ -68,9 +68,9 @@ public:
 private:
     void BufferMemoryBarrier(VkPipelineStageFlags2 srcStage, VkPipelineStageFlags2 dstStage, VkAccessFlags2 srcAccess, VkAccessFlags2 dstAccess, VkBuffer buffer, size_t offset, size_t size) const;
     void ImageMemoryBarrier(VkPipelineStageFlags2 srcStage, VkPipelineStageFlags2 dstStage, VkAccessFlags2 srcAccess, VkAccessFlags2 dstAccess, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask, uint32_t mipLevelCount = 1, uint32_t baseMipLevel = 0, uint32_t arrayLayerCount = 1, uint32_t baseArrayLayer = 0) const;
-    void PipelineBarrier(std::span<VkMemoryBarrier2>       memoryBarriers,
+    void PipelineBarrier(std::span<VkMemoryBarrier2> memoryBarriers,
                          std::span<VkBufferMemoryBarrier2> bufferMemoryBarriers,
-                         std::span<VkImageMemoryBarrier2>  imageMemoryBarriers) const;
+                         std::span<VkImageMemoryBarrier2> imageMemoryBarriers) const;
 
 private:
     const EQueueType queueType;

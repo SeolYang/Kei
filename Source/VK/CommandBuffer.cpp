@@ -5,7 +5,6 @@
 #include <VK/Pipeline.h>
 #include <VK/Buffer.h>
 #include <VK/Texture.h>
-#include <VK/ResourceStateTracker.h>
 
 namespace sy::vk
 {
@@ -103,45 +102,6 @@ void CommandBuffer::ChangeTextureState(const ETextureState srcState, const EText
         texture.GetNative(), FormatToImageAspect(texture.GetFormat()),
         mipLevelCount, baseMipLevel,
         arrayLayerCount, baseArrayLayer);
-}
-
-void CommandBuffer::FlushStateTransitions(ResourceStateTracker& resourceStateTracker) const
-{
-    using TextureStateTransition                                      = ResourceStateTracker::TextureStateTransition;
-    using BufferStateTransition                                       = ResourceStateTracker::BufferStateTransition;
-    const std::vector<TextureStateTransition> textureStateTransitions = resourceStateTracker.FlushTextureTransitions();
-    std::vector<VkImageMemoryBarrier2>        imageBarriers;
-    imageBarriers.reserve(textureStateTransitions.size());
-    for (const TextureStateTransition& transition : textureStateTransitions)
-    {
-        const Texture&      texture   = transition.Target;
-        const AccessPattern srcAccess = QueryAccessPattern(transition.Before);
-        const AccessPattern dstAccess = QueryAccessPattern(transition.After);
-        imageBarriers.emplace_back(VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2, nullptr,
-                                   srcAccess.PipelineStage, srcAccess.Access,
-                                   dstAccess.PipelineStage, dstAccess.Access,
-                                   srcAccess.ImageLayout, dstAccess.ImageLayout,
-                                   VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED,
-                                   texture.GetNative(), VkImageSubresourceRange{FormatToImageAspect(texture.GetFormat()), transition.SubResourceRange.MipLevel, transition.SubResourceRange.MipLevelCount, transition.SubResourceRange.ArrayLayer, transition.SubResourceRange.ArrayLayerCount});
-    }
-
-    const std::vector<BufferStateTransition> bufferStateTransitions = resourceStateTracker.FlushBufferTransitions();
-    std::vector<VkBufferMemoryBarrier2>      bufferBarriers;
-    bufferBarriers.reserve(bufferStateTransitions.size());
-    for (const BufferStateTransition& transition : bufferStateTransitions)
-    {
-        const Buffer&       buffer    = transition.Target;
-        const AccessPattern srcAccess = QueryAccessPattern(transition.Before);
-        const AccessPattern dstAccess = QueryAccessPattern(transition.After);
-        bufferBarriers.emplace_back(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2,
-                                    nullptr,
-                                    srcAccess.PipelineStage, srcAccess.Access,
-                                    dstAccess.PipelineStage, dstAccess.Access,
-                                    VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED,
-                                    buffer.GetNative(), 0, buffer.GetAlignedSize());
-    }
-
-    PipelineBarrier({}, bufferBarriers, imageBarriers);
 }
 
 void CommandBuffer::BindPipeline(const Pipeline& pipeline) const

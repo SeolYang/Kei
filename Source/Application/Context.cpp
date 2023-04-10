@@ -7,7 +7,6 @@
 #include <Render/Material.h>
 #include <Render/Renderer.h>
 #include <VK/DescriptorAllocator.h>
-#include <VK/ResourceStateTracker.h>
 #include <VK/Sampler.h>
 #include <VK/SamplerBuilder.h>
 #include <VK/Texture.h>
@@ -220,6 +219,4 @@ render::Renderer& Context::GetRenderer() const
 {
     return *renderer;
 }
-
-
 } // namespace sy::app

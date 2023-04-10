@@ -26,12 +26,12 @@ CommandPool::CommandPool(VulkanContext& vulkanContext, const EQueueType queueTyp
             break;
     }
 
-    const auto&                   vulkanRHI      = GetRHI();
-    const auto                    queueFamilyIdx = vulkanRHI.GetQueueFamilyIndex(queueType);
+    const auto& vulkanRHI = GetRHI();
+    const auto queueFamilyIdx = vulkanRHI.GetQueueFamilyIndex(queueType);
     const VkCommandPoolCreateInfo cmdPoolCreateInfo{
-        .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-        .pNext            = nullptr,
-        .flags            = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+        .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
         .queueFamilyIndex = queueFamilyIdx};
 
     NativeHandle handle = VK_NULL_HANDLE;
@@ -46,7 +46,7 @@ CommandPool::CommandPool(VulkanContext& vulkanContext, const EQueueType queueTyp
 
 ManagedCommandBuffer CommandPool::RequestCommandBuffer(std::string_view name)
 {
-    const auto         allocatedSlot = offsetPool.Allocate();
+    const auto allocatedSlot = offsetPool.Allocate();
     const Deallocation deallocation{.slot = allocatedSlot};
 
     if (allocatedSlot.Offset >= cmdBuffers.size())

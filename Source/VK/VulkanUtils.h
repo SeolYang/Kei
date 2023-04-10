@@ -4,6 +4,11 @@
 
 namespace sy::vk
 {
+inline auto CalculateTextureSubresourceIndex(const size_t mipLevel, const size_t arrayLayer, const size_t numMipLevels)
+{
+    return (arrayLayer * numMipLevels) + mipLevel;
+}
+
 constexpr static VkPipelineBindPoint ToNative(const EPipelineType type)
 {
     switch (type)

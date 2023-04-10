@@ -16,9 +16,6 @@
     <ClCompile Include="..\Source\VK\CommandPool.cpp">
       <Filter>Source\VK</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\VK\CommandPoolManager.cpp">
-      <Filter>Source\VK</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Core\CommandLineParser.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
@@ -27,9 +24,6 @@
     </ClCompile>
     <ClCompile Include="..\Source\Game\GameContext.cpp">
       <Filter>Source\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\VK\DescriptorManager.cpp">
-      <Filter>Source\VK</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\VK\Fence.cpp">
       <Filter>Source\VK</Filter>
@@ -44,9 +38,6 @@
       <Filter>Source\VK</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\VK\PipelineBuilder.cpp">
-      <Filter>Source\VK</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\VK\ResourceStateTracker.cpp">
       <Filter>Source\VK</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\VK\Sampler.cpp">
@@ -80,9 +71,6 @@
       <Filter>Source\VK</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\VK\VulkanRHI.cpp">
-      <Filter>Source\VK</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\VK\VulkanTypes.cpp">
       <Filter>Source\VK</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Render\Material.cpp">
@@ -145,6 +133,30 @@
     <ClCompile Include="..\Source\Asset\AssetImporter.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\VK\CommandPoolAllocator.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\DescriptorAllocator.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\MipmapGenerator.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\VulkanUtils.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Core\RawImage.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\TextureImportConfig.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\AssetImportConfig.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\TextureStateTransition.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Audio\AudioContext.h">
@@ -160,9 +172,6 @@
       <Filter>Source\VK</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\VK\CommandPool.h">
-      <Filter>Source\VK</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\VK\CommandPoolManager.h">
       <Filter>Source\VK</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Core\CommandLineParser.h">
@@ -192,9 +201,6 @@
     <ClInclude Include="..\Source\Game\GameContext.h">
       <Filter>Source\Game</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\VK\DescriptorManager.h">
-      <Filter>Source\VK</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\VK\Fence.h">
       <Filter>Source\VK</Filter>
     </ClInclude>
@@ -211,9 +217,6 @@
       <Filter>Source\VK</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\VK\PushConstantBuilder.h">
-      <Filter>Source\VK</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\VK\ResourceStateTracker.h">
       <Filter>Source\VK</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\VK\Sampler.h">
@@ -250,9 +253,6 @@
       <Filter>Source\VK</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\VK\VulkanRHI.h">
-      <Filter>Source\VK</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\VK\VulkanTypes.h">
       <Filter>Source\VK</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\VK\VulkanWrapper.h">
@@ -350,6 +350,36 @@
     </ClInclude>
     <ClInclude Include="..\Source\Core\Range.h">
       <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\CommandPoolAllocator.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\DescriptorAllocator.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\MipmapGenerator.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\VulkanConstants.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\VulkanEnums.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\VulkanStructures.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Core\RawImage.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\TextureImportConfig.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Asset\AssetImportConfig.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\TextureStateTransition.h">
+      <Filter>Source\VK</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

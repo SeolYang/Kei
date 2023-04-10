@@ -53,7 +53,6 @@
     <ClCompile Include="..\Source\VK\Fence.cpp" />
     <ClCompile Include="..\Source\VK\FrameTracker.cpp" />
     <ClCompile Include="..\Source\VK\LayoutCache.cpp" />
-    <ClCompile Include="..\Source\VK\ResourceStateTracker.cpp" />
     <ClCompile Include="..\Source\VK\Sampler.cpp" />
     <ClCompile Include="..\Source\VK\SamplerBuilder.cpp" />
     <ClCompile Include="..\Source\VK\Texture.cpp" />
@@ -63,6 +62,7 @@
     <ClCompile Include="..\Source\VK\ShaderModule.cpp" />
     <ClCompile Include="..\Source\VK\Swapchain.cpp" />
     <ClCompile Include="..\Source\VK\TextureBuilder.cpp" />
+    <ClCompile Include="..\Source\VK\TextureStateTransition.cpp" />
     <ClCompile Include="..\Source\VK\TextureView.cpp" />
     <ClCompile Include="..\Source\VK\VertexInputBuilder.cpp" />
     <ClCompile Include="..\Source\VK\VulkanRHI.cpp" />
@@ -129,7 +129,6 @@
     <ClInclude Include="..\Source\VK\FrameTracker.h" />
     <ClInclude Include="..\Source\VK\LayoutCache.h" />
     <ClInclude Include="..\Source\VK\PushConstantBuilder.h" />
-    <ClInclude Include="..\Source\VK\ResourceStateTracker.h" />
     <ClInclude Include="..\Source\VK\Sampler.h" />
     <ClInclude Include="..\Source\VK\SamplerBuilder.h" />
     <ClInclude Include="..\Source\VK\Synchronization.h" />
@@ -140,6 +139,7 @@
     <ClInclude Include="..\Source\VK\ShaderModule.h" />
     <ClInclude Include="..\Source\VK\Swapchain.h" />
     <ClInclude Include="..\Source\VK\TextureBuilder.h" />
+    <ClInclude Include="..\Source\VK\TextureStateTransition.h" />
     <ClInclude Include="..\Source\VK\TextureView.h" />
     <ClInclude Include="..\Source\VK\VertexInputBuilder.h" />
     <ClInclude Include="..\Source\VK\VulkanConstants.h" />
@@ -147,7 +147,6 @@
     <ClInclude Include="..\Source\VK\VulkanRHI.h" />
     <ClInclude Include="..\Source\VK\VulkanContext.h" />
     <ClInclude Include="..\Source\VK\VulkanStructures.h" />
-    <ClInclude Include="..\Source\VK\VulkanUtils.h" />
     <ClInclude Include="..\Source\VK\VulkanWrapper.h" />
     <ClInclude Include="..\Source\Window\Window.h" />
     <ClInclude Include="..\Source\Window\WindowBuilder.h" />

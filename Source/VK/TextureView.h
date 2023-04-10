@@ -9,13 +9,13 @@ class Texture;
 class TextureView : public VulkanWrapper<VkImageView>
 {
 public:
-    TextureView(std::string_view name, VulkanContext& vulkanContext, const Texture& texture, VkImageViewType viewType, TextureSubResourceRange subResourceRange);
+    TextureView(std::string_view name, VulkanContext& vulkanContext, const Texture& texture, VkImageViewType viewType, VkImageSubresourceRange subresourceRange);
     TextureView(std::string_view name, VulkanContext& vulkanContext, const Texture& texture, VkImageViewType viewType);
 
     ~TextureView() override = default;
 
 private:
-    const VkImageViewType         viewType;
-    const TextureSubResourceRange subResourceRange;
+    const VkImageViewType viewType;
+    const VkImageSubresourceRange subresourceRange;
 };
 } // namespace sy::vk
