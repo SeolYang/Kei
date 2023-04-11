@@ -43,6 +43,7 @@
     <ClCompile Include="..\Source\Render\RenderPass.cpp" />
     <ClCompile Include="..\Source\Render\RenderPasses\SimpleRenderPass.cpp" />
     <ClCompile Include="..\Source\Tests\CoreUnitTest.cpp" />
+    <ClCompile Include="..\Source\VK\BufferStateTransition.cpp" />
     <ClCompile Include="..\Source\VK\MipmapGenerator.cpp" />
     <ClCompile Include="..\Source\VK\Buffer.cpp" />
     <ClCompile Include="..\Source\VK\BufferBuilder.cpp" />
@@ -118,6 +119,7 @@
     <ClInclude Include="..\Source\Render\RenderPass.h" />
     <ClInclude Include="..\Source\Render\RenderPasses\SimpleRenderPass.h" />
     <ClInclude Include="..\Source\Render\Vertex.h" />
+    <ClInclude Include="..\Source\VK\BufferStateTransition.h" />
     <ClInclude Include="..\Source\VK\MipmapGenerator.h" />
     <ClInclude Include="..\Source\VK\Buffer.h" />
     <ClInclude Include="..\Source\VK\BufferBuilder.h" />

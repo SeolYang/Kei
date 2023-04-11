@@ -157,6 +157,9 @@
     <ClCompile Include="..\Source\VK\TextureStateTransition.cpp">
       <Filter>Source\VK</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\VK\BufferStateTransition.cpp">
+      <Filter>Source\VK</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Audio\AudioContext.h">
@@ -379,6 +382,9 @@
       <Filter>Source\Asset</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\VK\TextureStateTransition.h">
+      <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\BufferStateTransition.h">
       <Filter>Source\VK</Filter>
     </ClInclude>
   </ItemGroup>

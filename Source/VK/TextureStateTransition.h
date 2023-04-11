@@ -13,17 +13,19 @@ public:
     explicit TextureStateTransition(const VulkanContext& vulkanContext);
     ~TextureStateTransition() = default;
 
-    void SetTargetTexture(const Handle<Texture> targetTextureHandle)
+    void SetHandle(const Handle<Texture> targetTextureHandle)
     {
         this->handle = targetTextureHandle;
         this->nativeHandle = std::nullopt;
     }
 
-	void SetTargetNativeHandle(const VkImage image)
+	void SetNativeHandle(const VkImage image)
 	{
         this->handle = {};
         this->nativeHandle = image;
 	}
+
+	void SetTexture(const Texture& texture);
 
 	bool IsUsedNativeHandle() const { return nativeHandle != std::nullopt; }
 

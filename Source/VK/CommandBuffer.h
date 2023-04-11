@@ -2,6 +2,7 @@
 #include <PCH.h>
 #include <VK/VulkanWrapper.h>
 #include <VK/TextureStateTransition.h>
+#include <VK/BufferStateTransition.h>
 
 namespace sy::vk
 {
@@ -29,11 +30,10 @@ public:
     void EndRendering() const;
 
     /** Synchronizations */
-    void ChangeBufferState(EBufferState srcState, EBufferState dstState, VkBuffer buffer, size_t offset, size_t size) const;
-    void ChangeBufferState(EBufferState srcState, EBufferState dstState, const Buffer& buffer) const;
-
     void ApplyStateTransition(TextureStateTransition transition) const;
+    void ApplyStateTransition(BufferStateTransition transition) const;
     void ApplyStateTransitions(std::span<const TextureStateTransition> transitions) const;
+    void ApplyStateTransitions(std::span<const BufferStateTransition> transitions) const;
 
     /** Binding resources */
     void BindPipeline(const Pipeline& pipeline) const;
@@ -63,8 +63,6 @@ public:
     void BlitTexture(const Texture& src, const Texture& dst, VkImageBlit blit, VkFilter filter = VK_FILTER_LINEAR) const;
 
 private:
-    void BufferMemoryBarrier(VkPipelineStageFlags2 srcStage, VkPipelineStageFlags2 dstStage, VkAccessFlags2 srcAccess, VkAccessFlags2 dstAccess, VkBuffer buffer, size_t offset, size_t size) const;
-    void ImageMemoryBarrier(VkPipelineStageFlags2 srcStage, VkPipelineStageFlags2 dstStage, VkAccessFlags2 srcAccess, VkAccessFlags2 dstAccess, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask, uint32_t mipLevelCount = 1, uint32_t baseMipLevel = 0, uint32_t arrayLayerCount = 1, uint32_t baseArrayLayer = 0) const;
     void PipelineBarrier(std::span<VkMemoryBarrier2> memoryBarriers,
                          std::span<VkBufferMemoryBarrier2> bufferMemoryBarriers,
                          std::span<VkImageMemoryBarrier2> imageMemoryBarriers) const;

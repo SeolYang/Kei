@@ -56,28 +56,16 @@ void CommandBuffer::EndRendering() const
     vkCmdEndRendering(GetNative());
 }
 
-void CommandBuffer::ChangeBufferState(const EBufferState srcState, const EBufferState dstState, const VkBuffer buffer, const size_t offset, const size_t size) const
-{
-    const AccessPattern srcAccess = QueryAccessPattern(srcState);
-    const AccessPattern dstAccess = QueryAccessPattern(dstState);
-    BufferMemoryBarrier(
-        srcAccess.PipelineStage, dstAccess.PipelineStage,
-        srcAccess.Access, dstAccess.Access,
-        buffer, offset, size);
-}
-
-void CommandBuffer::ChangeBufferState(const EBufferState srcState, const EBufferState dstState, const Buffer& buffer) const
-{
-    ChangeBufferState(
-        srcState, dstState,
-        buffer.GetNative(),
-        0, buffer.GetAlignedSize());
-}
-
 void CommandBuffer::ApplyStateTransition(const TextureStateTransition transition) const
 {
     VkImageMemoryBarrier2 barriers[] = {transition.Build()};
     PipelineBarrier({}, {}, barriers);
+}
+
+void CommandBuffer::ApplyStateTransition(BufferStateTransition transition) const
+{
+    VkBufferMemoryBarrier2 barriers[] = {transition.Build()};
+    PipelineBarrier({}, barriers, {});
 }
 
 void CommandBuffer::ApplyStateTransitions(const std::span<const TextureStateTransition> transitions) const
@@ -92,6 +80,20 @@ void CommandBuffer::ApplyStateTransitions(const std::span<const TextureStateTran
     });
 
     PipelineBarrier({}, {}, barriers);
+}
+
+void CommandBuffer::ApplyStateTransitions(std::span<const BufferStateTransition> transitions) const
+{
+    std::vector<VkBufferMemoryBarrier2> barriers;
+    barriers.reserve(transitions.size());
+    std::transform(
+        transitions.begin(), transitions.end(),
+        barriers.begin(),
+        [](const BufferStateTransition& transition) {
+            return transition.Build();
+        });
+
+    PipelineBarrier({}, barriers, {});
 }
 
 void CommandBuffer::BindPipeline(const Pipeline& pipeline) const
@@ -203,68 +205,6 @@ void CommandBuffer::CopyImageToBuffer(const Texture& srcTexture, const Buffer& d
         .imageExtent = {imageExtent.width, imageExtent.height, imageExtent.depth}};
 
     vkCmdCopyImageToBuffer(GetNative(), srcTexture.GetNative(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstBuffer.GetNative(), 1, &imgCopy);
-}
-
-void CommandBuffer::ImageMemoryBarrier(const VkPipelineStageFlags2 srcStage,
-                                       const VkPipelineStageFlags2 dstStage,
-                                       const VkAccessFlags2 srcAccess,
-                                       const VkAccessFlags2 dstAccess,
-                                       const VkImage image,
-                                       const VkImageLayout oldLayout,
-                                       const VkImageLayout newLayout,
-                                       const VkImageAspectFlags aspectMask,
-                                       const uint32_t mipLevelCount,
-                                       const uint32_t baseMipLevel,
-                                       const uint32_t arrayLayerCount,
-                                       const uint32_t baseArrayLayer) const
-{
-    const VkImageMemoryBarrier2 barrier{
-        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-        .pNext = nullptr,
-        .srcStageMask = srcStage,
-        .srcAccessMask = srcAccess,
-        .dstStageMask = dstStage,
-        .dstAccessMask = dstAccess,
-        .oldLayout = oldLayout,
-        .newLayout = newLayout,
-        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-        .image = image,
-        .subresourceRange = {
-            .aspectMask = aspectMask,
-            .baseMipLevel = baseMipLevel,
-            .levelCount = mipLevelCount,
-            .baseArrayLayer = baseArrayLayer,
-            .layerCount = arrayLayerCount,
-        }};
-
-    VkImageMemoryBarrier2 barriers[] = {barrier};
-    PipelineBarrier({}, {}, barriers);
-}
-
-void CommandBuffer::BufferMemoryBarrier(const VkPipelineStageFlags2 srcStage,
-                                        const VkPipelineStageFlags2 dstStage,
-                                        const VkAccessFlags2 srcAccess,
-                                        const VkAccessFlags2 dstAccess,
-                                        VkBuffer buffer,
-                                        const size_t offset,
-                                        const size_t size) const
-{
-    const VkBufferMemoryBarrier2 barrier{
-        VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2,
-        nullptr,
-        srcStage,
-        srcAccess,
-        dstStage,
-        dstAccess,
-        VK_QUEUE_FAMILY_IGNORED,
-        VK_QUEUE_FAMILY_IGNORED,
-        buffer,
-        offset,
-        size};
-
-    VkBufferMemoryBarrier2 barriers[] = {barrier};
-    PipelineBarrier({}, barriers, {});
 }
 
 void CommandBuffer::PipelineBarrier(std::span<VkMemoryBarrier2> memoryBarriers,

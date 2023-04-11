@@ -40,8 +40,11 @@ SimpleRenderPass::SimpleRenderPass(const std::string_view name,
         auto& graphicsCmdPool = cmdPoolAllocator.RequestCommandPool(vk::EQueueType::Graphics);
         auto graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Simple Render Pass Initial Sync");
         graphicsCmdBuffer->Begin();
-        graphicsCmdBuffer->ChangeBufferState(vk::EBufferState::None, vk::EBufferState::VertexShaderReadUniformBuffer,
-                                             *transformBuffers[idx]);
+
+		vk::BufferStateTransition transition{GetVulkanContext()};
+        transition.SetBuffer(*transformBuffers[idx]);
+        transition.SetSourceState(vk::EBufferState::None);
+        transition.SetDestinationState(vk::EBufferState::VertexShaderReadUniformBuffer);
         graphicsCmdBuffer->End();
 
         const auto& uploadFence = frameTracker.GetCurrentInFlightUploadFence();
@@ -60,7 +63,7 @@ void SimpleRenderPass::OnBegin()
 	noneToColorAttachmentWrite.SetSubresourceRange(vk::Swapchain::GetSubresourceRange());
     noneToColorAttachmentWrite.SetSourceState(vk::ETextureState::None);
     noneToColorAttachmentWrite.SetDestinationState(vk::ETextureState::ColorAttachmentWrite);
-    noneToColorAttachmentWrite.SetTargetNativeHandle(swapchainImage);
+    noneToColorAttachmentWrite.SetNativeHandle(swapchainImage);
     graphicsCmdBuffer.ApplyStateTransition(noneToColorAttachmentWrite);
 
     std::array colorAttachmentInfos = {swapchainAttachmentInfo};
@@ -118,7 +121,7 @@ void SimpleRenderPass::OnEnd()
     colorAttachmentToPresent.SetSubresourceRange(vk::Swapchain::GetSubresourceRange());
     colorAttachmentToPresent.SetSourceState(vk::ETextureState::ColorAttachmentWrite);
     colorAttachmentToPresent.SetDestinationState(vk::ETextureState::Present);
-    colorAttachmentToPresent.SetTargetNativeHandle(swapchainImage);
+    colorAttachmentToPresent.SetNativeHandle(swapchainImage);
     graphicsCmdBuffer.ApplyStateTransition(colorAttachmentToPresent);
 }
 

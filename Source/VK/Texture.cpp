@@ -72,7 +72,7 @@ Texture::Texture(const TextureBuilder& builder) :
         const auto cmdBuffer = cmdPool.RequestCommandBuffer("Buffer Transfer Command Buffer");
 
 		TextureStateTransition stateTransition{vulkanContext};
-        stateTransition.SetTargetNativeHandle(GetNative());
+        stateTransition.SetNativeHandle(GetNative());
         stateTransition.SetSubresourceRange(GetFullSubresourceRange());
         stateTransition.SetSourceState(ETextureState::None);
 
@@ -81,6 +81,7 @@ Texture::Texture(const TextureBuilder& builder) :
         {
             if (bRequiredDataTransfer)
             {
+				// #todo Texture size alignment!!!
                 stagingBuffer = BufferBuilder::StagingBufferTemplate(builder.vulkanContext)
                                     .SetName("Staging Buffer-To Texture")
                                     .SetSize(builder.dataToTransfer->size_bytes())

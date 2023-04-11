@@ -90,7 +90,11 @@ Buffer::Buffer(const BufferBuilder& builder) :
 
             if (bRequiredStateChange)
             {
-                cmdBuffer->ChangeBufferState(EBufferState::None, initialState, *this);
+                BufferStateTransition transition{vulkanContext};
+                transition.SetBuffer(*this);
+                transition.SetSourceState(EBufferState::None);
+                transition.SetDestinationState(initialState);
+                cmdBuffer->ApplyStateTransition(transition);
             }
         }
         cmdBuffer->End();
