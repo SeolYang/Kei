@@ -29,13 +29,17 @@ public:
     void BeginRendering(const VkRenderingInfo& renderingInfo) const;
     void EndRendering() const;
 
-    /** Synchronizations */
     void ApplyStateTransition(TextureStateTransition transition) const;
     void ApplyStateTransition(BufferStateTransition transition) const;
     void ApplyStateTransitions(std::span<const TextureStateTransition> transitions) const;
     void ApplyStateTransitions(std::span<const BufferStateTransition> transitions) const;
 
-    /** Binding resources */
+	void BatchStateTransition(TextureStateTransition transition);
+    void BatchStateTransition(BufferStateTransition transition);
+    void BatchStateTransitions(std::span<const TextureStateTransition> transitions);
+    void BatchStateTransitions(std::span<const BufferStateTransition> transitions);
+    void FlushBatchedStateTransitions();
+
     void BindPipeline(const Pipeline& pipeline) const;
     void BindDescriptorSet(VkDescriptorSet descriptorSet, const Pipeline& pipeline) const;
     void BindVertexBuffers(uint32_t firstBinding, std::span<CRef<Buffer>> buffers, std::span<size_t> offsets) const;
@@ -51,11 +55,9 @@ public:
 
     void PushConstants(const Pipeline& pipeline, VkShaderStageFlags shaderStageFlags, uint32_t offset, uint32_t size, const void* values) const;
 
-    /** Draw calls */
     void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const;
     void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) const;
 
-    /** Memory Transfer */
     void CopyBufferToImage(const Buffer& srcBuffer, const Texture& dstTexture, std::span<const VkBufferImageCopy> copySubresourceRegions) const;
     void CopyBufferToImageSimple(const Buffer& srcBuffer, const Texture& dstTexture) const;
     void CopyBufferSimple(const Buffer& srcBuffer, size_t srcOffset, const Buffer& dstBuffer, size_t dstOffset, const size_t sizeofData) const;
@@ -69,5 +71,7 @@ private:
 
 private:
     const EQueueType queueType;
+    std::vector<TextureStateTransition> batchedTextureStateTransitions;
+    std::vector<BufferStateTransition> batchedBufferStateTransitions;
 };
 } // namespace sy::vk

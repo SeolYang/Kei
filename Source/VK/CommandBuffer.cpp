@@ -96,6 +96,34 @@ void CommandBuffer::ApplyStateTransitions(std::span<const BufferStateTransition>
     PipelineBarrier({}, barriers, {});
 }
 
+void CommandBuffer::BatchStateTransition(const TextureStateTransition transition)
+{
+    batchedTextureStateTransitions.emplace_back(transition);
+}
+
+void CommandBuffer::BatchStateTransition(const BufferStateTransition transition)
+{
+    batchedBufferStateTransitions.emplace_back(transition);
+}
+
+void CommandBuffer::BatchStateTransitions(const std::span<const TextureStateTransition> transitions)
+{
+    batchedTextureStateTransitions.append_range(transitions);
+}
+
+void CommandBuffer::BatchStateTransitions(const std::span<const BufferStateTransition> transitions)
+{
+    batchedBufferStateTransitions.append_range(transitions);
+}
+
+void CommandBuffer::FlushBatchedStateTransitions()
+{
+    ApplyStateTransitions(batchedTextureStateTransitions);
+    ApplyStateTransitions(batchedBufferStateTransitions);
+    batchedTextureStateTransitions.clear();
+    batchedBufferStateTransitions.clear();
+}
+
 void CommandBuffer::BindPipeline(const Pipeline& pipeline) const
 {
     vkCmdBindPipeline(GetNative(), pipeline.GetBindPoint(), pipeline.GetNative());
@@ -233,5 +261,4 @@ void CommandBuffer::BlitTexture(const Texture& src, const Texture& dst, const Vk
         1, &blit,
         filter);
 }
-
 } // namespace sy::vk
