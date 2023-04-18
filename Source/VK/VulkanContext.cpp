@@ -106,7 +106,6 @@ void VulkanContext::EndFrame()
 
 void VulkanContext::BeginRender()
 {
-    frameTracker->WaitForInFlightRenderFence();
     FlushDeferredDeallocations();
     cmdPoolAllocator->BeginFrame();
     descriptorAllocator->BeginFrame();

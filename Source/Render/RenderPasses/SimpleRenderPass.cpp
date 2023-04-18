@@ -46,12 +46,7 @@ SimpleRenderPass::SimpleRenderPass(const std::string_view name,
         transition.SetSourceState(vk::EBufferState::None);
         transition.SetDestinationState(vk::EBufferState::VertexShaderReadUniformBuffer);
         graphicsCmdBuffer->End();
-
-        const auto& uploadFence = frameTracker.GetCurrentInFlightUploadFence();
-        vulkanContext.GetRHI().SubmitTo(*graphicsCmdBuffer, uploadFence);
-        uploadFence.Wait();
-        uploadFence.Reset();
-
+        vulkanContext.GetRHI().SubmitImmediateTo(*graphicsCmdBuffer);
         transformBufferIndices[idx] = descriptorAllocator.RequestDescriptor(*transformBuffers[idx]);
     }
 }

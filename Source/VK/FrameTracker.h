@@ -11,9 +11,7 @@ class FrameTracker : public NonCopyable
 private:
     struct Frame
     {
-        size_t                     InFlightFrameIndex = std::numeric_limits<size_t>::max();
-        std::unique_ptr<Fence>     RenderFence;
-        std::unique_ptr<Fence>     UploadFence;
+        size_t InFlightFrameIndex = std::numeric_limits<size_t>::max();
         std::unique_ptr<Semaphore> RenderSemaphore;
         std::unique_ptr<Semaphore> PresentSemaphore;
         std::unique_ptr<Semaphore> UploadSemaphore;
@@ -29,16 +27,11 @@ public:
     void BeginFrame();
     void EndFrame();
 
-    void WaitForInFlightRenderFence() const;
-    void ResetInFlightRenderFence() const;
-
     const Frame& GetCurrentInFlightFrame() const
     {
         return frames[GetCurrentInFlightFrameIndex()];
     }
 
-    Fence&     GetCurrentInFlightRenderFence() const;
-    Fence&     GetCurrentInFlightUploadFence() const;
     Semaphore& GetCurrentInFlightRenderSemaphore() const;
     Semaphore& GetCurrentInFlightPresentSemaphore() const;
     Semaphore& GetCurrentInFlightUploadSemaphore() const;
@@ -54,8 +47,8 @@ public:
     }
 
 private:
-    VulkanContext&                          vulkanContext;
+    VulkanContext& vulkanContext;
     std::array<Frame, NumMaxInFlightFrames> frames;
-    size_t                                  currentFrameIdx = 0;
+    size_t currentFrameIdx = 0;
 };
 } // namespace sy::vk

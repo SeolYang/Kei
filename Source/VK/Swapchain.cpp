@@ -51,6 +51,7 @@ Swapchain::Swapchain(const window::Window& window, VulkanContext& vulkanContext)
 
 void Swapchain::AcquireNext(const Semaphore& presentSemaphore)
 {
+    SY_ASSERT(presentSemaphore.IsBinarySemaphore(), "Given semaphore is not type of binary!");
     const auto& vulkanRHI = GetRHI();
     VK_ASSERT(vkAcquireNextImageKHR(
                   vulkanRHI.GetDevice(),

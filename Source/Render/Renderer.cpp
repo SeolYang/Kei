@@ -41,7 +41,7 @@ void Renderer::Render()
     BeginFrame();
     {
         elapsedTime += 0.00833333f; // hard-coded delta time
-        const auto& renderSemaphore = frameTracker.GetCurrentInFlightRenderSemaphore();
+        auto& renderSemaphore = frameTracker.GetCurrentInFlightRenderSemaphore();
         const size_t currentFrameIdx = frameTracker.GetCurrentFrameIndex();
 
         const auto& swapchain = vulkanContext.GetSwapchain();
@@ -73,18 +73,15 @@ void Renderer::Render()
 
         batchedCmdBuffers.emplace_back(renderPass->GetCommandBuffer());
 
-        const auto& renderFence = frameTracker.GetCurrentInFlightRenderFence();
-        auto& presentSemaphore = frameTracker.GetCurrentInFlightPresentSemaphore();
+        const auto& presentSemaphore = frameTracker.GetCurrentInFlightPresentSemaphore();
 
-        CRefVec<vk::Semaphore> waitSemaphores;
-        waitSemaphores.emplace_back(presentSemaphore);
-        CRefVec<vk::Semaphore> signalSemaphores;
-        signalSemaphores.emplace_back(renderSemaphore);
+        CRefArray<vk::Semaphore, 1> waitSemaphores = {presentSemaphore};
+        RefArray<vk::Semaphore, 1> signalSemaphores = {renderSemaphore};
 
-        vulkanRHI.SubmitTo(
-            vk::EQueueType::Graphics,
-            frameTracker,
-            batchedCmdBuffers);
+        vulkanRHI.SubmitSync(vk::EQueueType::Graphics,
+                             batchedCmdBuffers,
+                             waitSemaphores, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                             signalSemaphores, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
 
         vulkanRHI.Present(swapchain, renderSemaphore);
     }
@@ -97,8 +94,9 @@ void Renderer::BeginFrame()
     const auto& frameTracker = vulkanContext.GetFrameTracker();
     auto& swapchain = vulkanContext.GetSwapchain();
     swapchain.AcquireNext(frameTracker.GetCurrentInFlightPresentSemaphore());
-    frameTracker.WaitForInFlightRenderFence();
-    frameTracker.ResetInFlightRenderFence();
+
+	const auto& renderSemaphore = frameTracker.GetCurrentInFlightRenderSemaphore();
+    renderSemaphore.Wait();
 }
 
 void Renderer::EndFrame()

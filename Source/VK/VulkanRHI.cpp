@@ -10,9 +10,7 @@
 #include <VK/Texture.h>
 #include <VK/FrameTracker.h>
 
-namespace sy
-{
-namespace vk
+namespace sy::vk
 {
 VulkanRHI::VulkanRHI(VulkanContext& vulkanContext, const window::Window& window) :
     vulkanContext(vulkanContext),
@@ -35,7 +33,7 @@ void VulkanRHI::Startup()
     volkInitialize();
 
     vkb::InstanceBuilder instanceBuilder;
-    auto                 instanceBuilderRes = instanceBuilder.set_app_name(window.GetTitle().data())
+    auto instanceBuilderRes = instanceBuilder.set_app_name(window.GetTitle().data())
 #ifdef _DEBUG
                                   .request_validation_layers()
                                   .use_default_debug_messenger()
@@ -44,15 +42,15 @@ void VulkanRHI::Startup()
                                   .build();
 
     const auto vkbInstance = instanceBuilderRes.value();
-    instance               = vkbInstance.instance;
-    debugMessenger         = vkbInstance.debug_messenger;
+    instance = vkbInstance.instance;
+    debugMessenger = vkbInstance.debug_messenger;
 
     volkLoadInstance(instance);
 
     SDL_Vulkan_CreateSurface(&window.GetSDLWindow(), instance, &surface);
 
     vkb::PhysicalDeviceSelector physicalDeviceSelector{vkbInstance};
-    auto                        vkbPhysicalDevice = physicalDeviceSelector.set_minimum_version(1, 3)
+    auto vkbPhysicalDevice = physicalDeviceSelector.set_minimum_version(1, 3)
                                  .set_surface(surface)
                                  .add_required_extension(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME)
                                  .add_required_extension(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
@@ -63,8 +61,8 @@ void VulkanRHI::Startup()
                                  .value();
 
     physicalDevice = vkbPhysicalDevice.physical_device;
-    gpuProperties  = vkbPhysicalDevice.properties;
-    gpuName        = gpuProperties.deviceName;
+    gpuProperties = vkbPhysicalDevice.properties;
+    gpuName = gpuProperties.deviceName;
     spdlog::trace("\n----------- GPU Properties -----------\n* Device Name: {}\n* GPU Vendor ID: {}\n* API Version: {}\n* Driver Version: {}\n* Device ID: {}\n* Max Bound Descriptor Sets: {}\n* Min Uniform Buffer Offset Alignment: {}\n* Min Storage Buffer Offset Alignment: {}\n* Max Frame Buffer Extent: {}x{}\n* Max Memory Allocation Count: {}\n* Max Sampler Allocation Count: {}\n",
                   gpuName,
                   gpuProperties.vendorID,
@@ -79,48 +77,54 @@ void VulkanRHI::Startup()
                   gpuProperties.limits.maxMemoryAllocationCount,
                   gpuProperties.limits.maxSamplerAllocationCount);
 
-    vkb::DeviceBuilder                          deviceBuilder{vkbPhysicalDevice};
+    vkb::DeviceBuilder deviceBuilder{vkbPhysicalDevice};
     VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures{
-        .sType            = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
-        .pNext            = nullptr,
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
+        .pNext = nullptr,
         .dynamicRendering = VK_TRUE};
 
     VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures{
-        .sType                                         = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES,
-        .pNext                                         = nullptr,
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES,
+        .pNext = nullptr,
         .descriptorBindingUniformBufferUpdateAfterBind = VK_TRUE,
-        .descriptorBindingSampledImageUpdateAfterBind  = VK_TRUE,
-        .descriptorBindingStorageImageUpdateAfterBind  = VK_TRUE,
+        .descriptorBindingSampledImageUpdateAfterBind = VK_TRUE,
+        .descriptorBindingStorageImageUpdateAfterBind = VK_TRUE,
         .descriptorBindingStorageBufferUpdateAfterBind = VK_TRUE,
-        .descriptorBindingPartiallyBound               = VK_TRUE,
-        .descriptorBindingVariableDescriptorCount      = VK_TRUE,
-        .runtimeDescriptorArray                        = VK_TRUE,
+        .descriptorBindingPartiallyBound = VK_TRUE,
+        .descriptorBindingVariableDescriptorCount = VK_TRUE,
+        .runtimeDescriptorArray = VK_TRUE,
     };
 
     VkPhysicalDeviceSynchronization2Features synchronization2Features{
-        .sType            = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES,
-        .pNext            = nullptr,
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES,
+        .pNext = nullptr,
         .synchronization2 = true};
+
+	VkPhysicalDeviceTimelineSemaphoreFeatures timelineSemaphoreFeatures{
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES,
+        .pNext = nullptr,
+        .timelineSemaphore = true};
 
     auto vkbDeviceRes =
         deviceBuilder.add_pNext(&dynamicRenderingFeatures)
             .add_pNext(&descriptorIndexingFeatures)
             .add_pNext(&synchronization2Features)
+            .add_pNext(&timelineSemaphoreFeatures)
             .build();
     SY_ASSERT(vkbDeviceRes.has_value(), "Failed to create device using GPU {}.", gpuName);
     auto& vkbDevice = vkbDeviceRes.value();
-    device          = vkbDevice.device;
+    device = vkbDevice.device;
     spdlog::trace("Succeed to create logical device using GPU {}.", gpuName);
 
     const VmaVulkanFunctions vkFunctions{
         .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
-        .vkGetDeviceProcAddr   = vkGetDeviceProcAddr};
+        .vkGetDeviceProcAddr = vkGetDeviceProcAddr};
 
     const VmaAllocatorCreateInfo allocatorInfo{
-        .physicalDevice   = physicalDevice,
-        .device           = device,
+        .physicalDevice = physicalDevice,
+        .device = device,
         .pVulkanFunctions = &vkFunctions,
-        .instance         = instance,
+        .instance = instance,
     };
     VK_ASSERT(vmaCreateAllocator(&allocatorInfo, &allocator),
               "Failed to create vulkan memory allocator instance.");
@@ -180,82 +184,75 @@ VkQueue VulkanRHI::GetQueue(const EQueueType queueType) const
     return graphicsQueue;
 }
 
+void VulkanRHI::SubmitSync(const EQueueType queueType, const CRefSpan<CommandBuffer> cmdBuffers, const CRefSpan<Semaphore> waitSemaphores, const VkPipelineStageFlags2 waitAt, const RefSpan<Semaphore> signalSemaphores, const VkPipelineStageFlags2 signalAt) const
+{
+    std::vector<VkSemaphoreSubmitInfo> waitSemaphoreSubmitInfos;
+    waitSemaphoreSubmitInfos.resize(waitSemaphores.size());
+    std::transform(waitSemaphores.begin(), waitSemaphores.end(),
+                   waitSemaphoreSubmitInfos.begin(),
+                   [waitAt](const CRef<Semaphore> semaphoreRef) {
+                       const Semaphore& semaphore = semaphoreRef.get();
+                       return VkSemaphoreSubmitInfo{
+                           .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+                           .pNext = nullptr,
+                           .semaphore = semaphore.GetNative(),
+                           .value = semaphore.GetCurrentValue(),
+                           .stageMask = waitAt,
+                           .deviceIndex = 0};
+                   });
+
+    std::vector<VkSemaphoreSubmitInfo> signalSemaphoreSubmitInfos;
+    signalSemaphoreSubmitInfos.resize(signalSemaphores.size());
+    std::transform(signalSemaphores.begin(), signalSemaphores.end(),
+                   signalSemaphoreSubmitInfos.begin(),
+                   [signalAt](const Ref<Semaphore> semaphoreRef) {
+                       Semaphore& semaphore = semaphoreRef.get();
+                       semaphore.IncrementValue();
+                       return VkSemaphoreSubmitInfo{
+                           .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+                           .pNext = nullptr,
+                           .semaphore = semaphore.GetNative(),
+                           .value = semaphore.GetCurrentValue(),
+                           .stageMask = signalAt,
+                           .deviceIndex = 0};
+                   });
+
+    std::vector<VkCommandBufferSubmitInfo> cmdBufferSubmitInfos;
+    cmdBufferSubmitInfos.resize(cmdBuffers.size());
+    std::transform(cmdBuffers.begin(), cmdBuffers.end(),
+                   cmdBufferSubmitInfos.begin(),
+                   [](const CRef<CommandBuffer> cmdBufferRef) {
+                       const CommandBuffer& cmdBuffer = cmdBufferRef.get();
+                       return VkCommandBufferSubmitInfo{
+                           .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO,
+                           .pNext = nullptr,
+                           .commandBuffer = cmdBuffer.GetNative(),
+                           .deviceMask = 0};
+                   });
+
+    const VkSubmitInfo2 submitInfo{
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
+        .pNext = nullptr,
+        .waitSemaphoreInfoCount = static_cast<uint32_t>(waitSemaphoreSubmitInfos.size()),
+        .pWaitSemaphoreInfos = waitSemaphoreSubmitInfos.data(),
+        .commandBufferInfoCount =  static_cast<uint32_t>(cmdBufferSubmitInfos.size()),
+        .pCommandBufferInfos = cmdBufferSubmitInfos.data(),
+        .signalSemaphoreInfoCount =  static_cast<uint32_t>(signalSemaphoreSubmitInfos.size()),
+        .pSignalSemaphoreInfos = signalSemaphoreSubmitInfos.data()};
+
+    vkQueueSubmit2(GetQueue(queueType), 1, &submitInfo, VK_NULL_HANDLE);
+}
+
 void VulkanRHI::SubmitImmediateTo(const CommandBuffer& cmdBuffer) const
 {
-    const std::unique_ptr<Fence> tempFence = std::make_unique<Fence>(std::format("ImmediateFence for {}", cmdBuffer.GetName()), vulkanContext, false);
-    SubmitTo(cmdBuffer, *tempFence);
-    tempFence->Wait();
-    tempFence->Reset();
-}
-
-void VulkanRHI::SubmitTo(const EQueueType queueType, const VkSubmitInfo& submitInfo, const Fence& fence) const
-{
-    const auto queue = GetQueue(queueType);
-    SY_ASSERT(queue != VK_NULL_HANDLE, "Invalid queue submission request.");
-
-    VK_ASSERT(vkQueueSubmit(queue, 1, &submitInfo, fence.GetNative()), "Failed to submit to queue.");
-}
-
-void VulkanRHI::SubmitTo(const CommandBuffer& cmdBuffer, const Fence& fence) const
-{
-    const auto         cmdBufferHandle = cmdBuffer.GetNative();
-    const VkSubmitInfo submitInfo{
-        .sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-        .pNext                = nullptr,
-        .waitSemaphoreCount   = 0,
-        .pWaitSemaphores      = nullptr,
-        .pWaitDstStageMask    = nullptr,
-        .commandBufferCount   = 1,
-        .pCommandBuffers      = &cmdBufferHandle,
-        .signalSemaphoreCount = 0,
-        .pSignalSemaphores    = nullptr};
-
-    SubmitTo(cmdBuffer.GetQueueType(), submitInfo, fence);
-}
-
-void VulkanRHI::SubmitTo(const EQueueType queueType, const FrameTracker& frameTracker, const std::span<CRef<CommandBuffer>> cmdBuffers) const
-{
-    const auto& renderFence      = frameTracker.GetCurrentInFlightRenderFence();
-    auto&       presentSemaphore = frameTracker.GetCurrentInFlightPresentSemaphore();
-    const auto& renderSemaphore  = frameTracker.GetCurrentInFlightRenderSemaphore();
-
-    CRefVec<vk::Semaphore> waitSemaphores;
-    waitSemaphores.emplace_back(presentSemaphore);
-    CRefVec<vk::Semaphore> signalSemaphores;
-    signalSemaphores.emplace_back(renderSemaphore);
-
-    SubmitTo(queueType,
-             waitSemaphores,
-             cmdBuffers,
-             signalSemaphores,
-             VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, renderFence);
-}
-
-void VulkanRHI::SubmitTo(EQueueType                                                   queueType,
-                         const std::span<std::reference_wrapper<const Semaphore>>     waitSemaphores,
-                         const std::span<std::reference_wrapper<const CommandBuffer>> cmdBuffers,
-                         std::span<std::reference_wrapper<const Semaphore>>           signalSemaphores,
-                         const VkPipelineStageFlags                                   waitStage,
-                         const Fence&                                                 fence) const
-{
-    const auto         waitSemaphoreNatives   = TransformVulkanWrappersToNatives(waitSemaphores);
-    const auto         cmdBufferNatives       = TransformVulkanWrappersToNativesWithValidation<CommandBuffer>(cmdBuffers, [queueType](const CRef<CommandBuffer> cmdBufferRef) {
-        const auto& cmdBuffer = cmdBufferRef.get();
-        return cmdBuffer.GetQueueType() == queueType;
-    });
-    const auto         signalSemaphoreNatives = TransformVulkanWrappersToNatives(signalSemaphores);
-    const VkSubmitInfo submitInfo{
-        .sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-        .pNext                = nullptr,
-        .waitSemaphoreCount   = static_cast<uint32_t>(waitSemaphoreNatives.size()),
-        .pWaitSemaphores      = waitSemaphoreNatives.data(),
-        .pWaitDstStageMask    = &waitStage,
-        .commandBufferCount   = static_cast<uint32_t>(cmdBufferNatives.size()),
-        .pCommandBuffers      = cmdBufferNatives.data(),
-        .signalSemaphoreCount = static_cast<uint32_t>(signalSemaphoreNatives.size()),
-        .pSignalSemaphores    = signalSemaphoreNatives.data()};
-
-    SubmitTo(queueType, submitInfo, fence);
+    const std::unique_ptr<Semaphore> temporary = std::make_unique<Semaphore>(std::format("ImmediateFence for {}", cmdBuffer.GetName()), vulkanContext);
+    CRefArray<CommandBuffer, 1> cmdBuffers = {cmdBuffer};
+    CRefArray<Semaphore, 1> waitSemaphores = {*temporary};
+    RefArray<Semaphore, 1> signalSemaphores = {*temporary};
+    SubmitSync(cmdBuffer.GetQueueType(), cmdBuffers,
+               waitSemaphores, VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT,
+               signalSemaphores, VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT);
+    temporary->Wait();
 }
 
 void VulkanRHI::Present(const VkPresentInfoKHR& presentInfo) const
@@ -266,17 +263,17 @@ void VulkanRHI::Present(const VkPresentInfoKHR& presentInfo) const
 
 void VulkanRHI::Present(const Swapchain& swapchain, const Semaphore& waitSemaphore) const
 {
-    const auto             swapchainImageIdx   = swapchain.GetCurrentImageIndex();
-    const auto             waitSemaphoreNative = waitSemaphore.GetNative();
-    const auto             swapchainNative     = swapchain.GetNative();
+    const auto swapchainImageIdx = swapchain.GetCurrentImageIndex();
+    const auto waitSemaphoreNative = waitSemaphore.GetNative();
+    const auto swapchainNative = swapchain.GetNative();
     const VkPresentInfoKHR presentInfo{
-        .sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-        .pNext              = nullptr,
+        .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+        .pNext = nullptr,
         .waitSemaphoreCount = 1,
-        .pWaitSemaphores    = &waitSemaphoreNative,
-        .swapchainCount     = 1,
-        .pSwapchains        = &swapchainNative,
-        .pImageIndices      = &swapchainImageIdx};
+        .pWaitSemaphores = &waitSemaphoreNative,
+        .swapchainCount = 1,
+        .pSwapchains = &swapchainNative,
+        .pImageIndices = &swapchainImageIdx};
 
     Present(presentInfo);
 }
@@ -334,18 +331,17 @@ void VulkanRHI::Unmap(const Texture& texture) const
     vmaUnmapMemory(allocator, texture.GetAllocation());
 }
 
-
 void VulkanRHI::SetObjectName(const uint64_t object, const VkObjectType objectType, const std::string_view name) const
 {
 #if defined(DEBUG) || defined(_DEBUG)
     if (!name.empty())
     {
         const VkDebugUtilsObjectNameInfoEXT nameInfo{
-            .sType        = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
-            .pNext        = nullptr,
-            .objectType   = objectType,
+            .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+            .pNext = nullptr,
+            .objectType = objectType,
             .objectHandle = object,
-            .pObjectName  = name.data()};
+            .pObjectName = name.data()};
 
         VK_ASSERT(vkSetDebugUtilsObjectNameEXT(device, &nameInfo), "Failed to set object name {}", name);
     }
@@ -357,25 +353,25 @@ void VulkanRHI::InitQueues(const vkb::Device& vkbDevice)
     spdlog::trace("Initializing queues..");
     const auto graphicsQueueRes = vkbDevice.get_queue(vkb::QueueType::graphics);
     SY_ASSERT(graphicsQueueRes.has_value(), "Failed to get graphics queue from logical device of vulkan.");
-    graphicsQueue          = graphicsQueueRes.value();
+    graphicsQueue = graphicsQueueRes.value();
     graphicsQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
     spdlog::trace("Graphics Queue successfully acquired. Family Index: {}.", graphicsQueueFamilyIdx);
 
     const auto computeQueueRes = vkbDevice.get_queue(vkb::QueueType::compute);
     SY_ASSERT(computeQueueRes.has_value(), "Failed to get compute queue from logical device of vulkan.");
-    computeQueue          = computeQueueRes.value();
+    computeQueue = computeQueueRes.value();
     computeQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::compute).value();
     spdlog::trace("Compute Queue successfully acquired. Family Index: {}.", computeQueueFamilyIdx);
 
     const auto transferQueueRes = vkbDevice.get_queue(vkb::QueueType::transfer);
     SY_ASSERT(transferQueueRes.has_value(), "Failed to get transfer queue from logical device of vulkan.");
-    transferQueue          = transferQueueRes.value();
+    transferQueue = transferQueueRes.value();
     transferQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::transfer).value();
     spdlog::trace("Transfer Queue successfully acquired. Family Index: {}.", transferQueueFamilyIdx);
 
     const auto presentQueueRes = vkbDevice.get_queue(vkb::QueueType::present);
     SY_ASSERT(presentQueueRes.has_value(), "Failed to get present queue from logical device of vulkan.");
-    presentQueue          = presentQueueRes.value();
+    presentQueue = presentQueueRes.value();
     presentQueueFamilyIdx = vkbDevice.get_queue_index(vkb::QueueType::present).value();
     spdlog::trace("Present Queue successfully acquired. Family Index: {}.", presentQueueFamilyIdx);
 }
@@ -390,6 +386,4 @@ bool VulkanRHI::IsFormatSupportFeatures(VkFormat format, VkFormatFeatureFlagBits
         bIsOptimalTiling ? props.formatProperties.optimalTilingFeatures : props.formatProperties.linearTilingFeatures,
         featureFlag);
 }
-
-} // namespace vk
-} // namespace sy
+} // namespace sy::vk

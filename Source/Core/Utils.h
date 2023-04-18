@@ -233,7 +233,7 @@ T ResolveEnumFromJson(const nlohmann::json& json, const std::string_view key, co
     }
 
     const std::string enumStr = *itr;
-    const auto        enumOpt = magic_enum::enum_cast<T>(enumStr);
+    const auto enumOpt = magic_enum::enum_cast<T>(enumStr);
     if (!enumOpt)
     {
         spdlog::error("Failed to cast {} to given enum type {}.", enumStr, magic_enum::enum_type_name<T>());
@@ -261,6 +261,12 @@ template <typename T>
 inline auto VecToConstSpan(const std::vector<T>& target)
 {
     return std::span<const T>{reinterpret_cast<const std::remove_const_t<T>*>(target.data()), target.size()};
+}
+
+template <typename T>
+inline auto ToConstSpan(const RefSpan<T> target)
+{
+    return CRefSpan<T>{reinterpret_cast<CRef<T>*>(target.data()), target.size()};
 }
 
 inline size_t ImageBlobBytesSize(const size_t width, const size_t height, const size_t channels, const size_t bytesPerChannel)
