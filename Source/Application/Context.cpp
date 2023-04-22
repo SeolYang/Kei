@@ -184,10 +184,11 @@ void Context::Run()
                 bExit = true;
             }
         }
-
+        renderer->BeginFrame();
         vulkanContext->BeginRender();
         renderer->Render();
         vulkanContext->EndRender();
+        renderer->EndFrame();
 
         vulkanContext->EndFrame();
         timer->End();

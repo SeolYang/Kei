@@ -38,13 +38,11 @@ Renderer::~Renderer()
 
 void Renderer::Render()
 {
-    const auto& frameTracker = vulkanContext.GetFrameTracker();
+    auto& frameTracker = vulkanContext.GetFrameTracker();
     const auto& vulkanRHI = vulkanContext.GetRHI();
-    BeginFrame();
     {
         elapsedTime += 0.00833333f; // hard-coded delta time
-        auto& renderSemaphore = frameTracker.GetCurrentInFlightRenderSemaphore();
-        const size_t currentFrameIdx = frameTracker.GetCurrentFrameIndex();
+        const size_t frameCounter = frameTracker.GetFrameCounter();
 
         const auto& swapchain = vulkanContext.GetSwapchain();
 
@@ -75,10 +73,8 @@ void Renderer::Render()
 
         batchedCmdBuffers.emplace_back(renderPass->GetCommandBuffer());
 
-        const auto& presentSemaphore = frameTracker.GetCurrentInFlightPresentSemaphore();
-
-        CRefArray<vk::Semaphore, 1> waitSemaphores = {presentSemaphore};
-        RefArray<vk::Semaphore, 1> signalSemaphores = {renderSemaphore};
+        CRefArray<vk::Semaphore, 1> waitSemaphores = {frameTracker.GetInflightSwapchainSemaphore()};
+        RefArray<vk::Semaphore, 2> signalSemaphores = {frameTracker.GetInflightCommandExecutionSemaphore(), frameTracker.GetInflightPresentSemaphore()};
 
         vulkanRHI.SubmitSync(vk::EQueueType::Graphics,
                              batchedCmdBuffers,
@@ -87,20 +83,19 @@ void Renderer::Render()
 
 		// todo: split out (renderSemaphore, and renderNodeSemaphore)
 		// submit renderSemaphore at end of render graph(render nodes)
-        vulkanRHI.Present(swapchain, renderSemaphore);
+        vulkanRHI.Present(swapchain, signalSemaphores[1]);
     }
-    EndFrame();
 }
 
 void Renderer::BeginFrame()
 {
     const auto& vulkanRHI = vulkanContext.GetRHI();
-    const auto& frameTracker = vulkanContext.GetFrameTracker();
+    auto& frameTracker = vulkanContext.GetFrameTracker();
     auto& swapchain = vulkanContext.GetSwapchain();
-    swapchain.AcquireNext(frameTracker.GetCurrentInFlightPresentSemaphore());
+    swapchain.AcquireNext(frameTracker.GetInflightSwapchainSemaphore());
 
-	const auto& renderSemaphore = frameTracker.GetCurrentInFlightRenderSemaphore();
-    renderSemaphore.Wait();
+	const auto& cmdExecutionSemaphore = frameTracker.GetInflightCommandExecutionSemaphore();
+    cmdExecutionSemaphore.Wait();
 }
 
 void Renderer::EndFrame()

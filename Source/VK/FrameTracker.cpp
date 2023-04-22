@@ -24,7 +24,8 @@ void FrameTracker::Startup()
     for (auto& frame : frames)
     {
         frame.InFlightFrameIndex = frameIdx,
-        frame.RenderSemaphore = std::make_unique<Semaphore>(std::format("Render Semaphore {}", frameIdx), vulkanContext);
+        frame.CommandExecutionSemaphore = std::make_unique<Semaphore>(std::format("Cmd Execution Semaphore {}", frameIdx), vulkanContext);
+        frame.SwapchainSemaphore = std::make_unique<Semaphore>(std::format("Swapchain Semaphore {}", frameIdx), vulkanContext, true);
         frame.PresentSemaphore = std::make_unique<Semaphore>(std::format("Present Semaphore {}", frameIdx), vulkanContext, true);
         frame.UploadSemaphore = std::make_unique<Semaphore>(std::format("Upload Semaphore {}", frameIdx), vulkanContext);
         ++frameIdx;
@@ -36,7 +37,10 @@ void FrameTracker::Shutdown()
     spdlog::info("Shutdown Frame Tracker.");
     for (auto& frame : frames)
     {
+        frame.CommandExecutionSemaphore.reset();
+        frame.SwapchainSemaphore.reset();
         frame.PresentSemaphore.reset();
+        frame.UploadSemaphore.reset();
     }
 }
 
@@ -47,22 +51,28 @@ void FrameTracker::BeginFrame()
 
 void FrameTracker::EndFrame()
 {
-    ++currentFrameIdx;
+    ++frameCounter;
 }
 
-Semaphore& FrameTracker::GetCurrentInFlightRenderSemaphore() const
+Semaphore& FrameTracker::GetInflightCommandExecutionSemaphore()
 {
-    return *frames[GetCurrentInFlightFrameIndex()].RenderSemaphore;
+    return *frames[GetFrameIndex()].CommandExecutionSemaphore;
 }
 
-Semaphore& FrameTracker::GetCurrentInFlightPresentSemaphore() const
+Semaphore& FrameTracker::GetInflightSwapchainSemaphore()
 {
-    return *frames[GetCurrentInFlightFrameIndex()].PresentSemaphore;
+    return *frames[GetFrameIndex()].SwapchainSemaphore;
 }
 
-Semaphore& FrameTracker::GetCurrentInFlightUploadSemaphore() const
+Semaphore& FrameTracker::GetInflightPresentSemaphore()
 {
-    return *frames[GetCurrentInFlightFrameIndex()].UploadSemaphore;
+    return *frames[GetFrameIndex()].PresentSemaphore;
 }
+
+Semaphore& FrameTracker::GetCurrentInFlightUploadSemaphore()
+{
+    return *frames[GetFrameIndex()].UploadSemaphore;
+}
+
 
 } // namespace sy::vk

@@ -94,7 +94,7 @@ void SimpleRenderPass::Render()
 
     const PushConstants pushConstants{
         .textureIndex = static_cast<int>((*descriptor)->Offset),
-        .transformDataIndex = static_cast<int>(transformBufferIndices[frameTracker.GetCurrentInFlightFrameIndex()]
+        .transformDataIndex = static_cast<int>(transformBufferIndices[frameTracker.GetFrameIndex()]
                                                    ->Offset)};
 
     std::array vertexBuffers = {CRef<vk::Buffer>(mesh->GetVertexBuffer())};
@@ -125,7 +125,7 @@ void SimpleRenderPass::UpdateBuffers()
     const auto& vulkanContext = GetVulkanContext();
     const auto& vulkanRHI = vulkanContext.GetRHI();
     const auto& frameTracker = vulkanContext.GetFrameTracker();
-    const auto& transformBuffer = *transformBuffers[frameTracker.GetCurrentInFlightFrameIndex()];
+    const auto& transformBuffer = *transformBuffers[frameTracker.GetFrameIndex()];
     void* transformBufferMappedPtr = vulkanRHI.Map(transformBuffer);
     memcpy(transformBufferMappedPtr, &transformData, sizeof(TransformUniformBuffer));
     vulkanRHI.Unmap(transformBuffer);

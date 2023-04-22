@@ -32,6 +32,7 @@ Semaphore::Semaphore(const std::string_view name, VulkanContext& vulkanContext, 
 
 void Semaphore::Wait(const uint64_t timeout) const
 {
+    SY_ASSERT(!bIsBinarySemaphore, "Semaphore type is not a timeline semaphore.");
     const auto nativeHandle = GetNative();
     const VulkanRHI& rhi = GetRHI();
     const VkSemaphoreWaitInfo waitInfo{

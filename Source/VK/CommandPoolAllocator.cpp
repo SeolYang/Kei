@@ -42,12 +42,12 @@ CommandPool& CommandPoolAllocator::RequestCommandPool(const EQueueType queueType
         }
     }
 
-    return *(localCmdPools[queueType][frameTracker.GetCurrentInFlightFrameIndex()]);
+    return *(localCmdPools[queueType][frameTracker.GetFrameIndex()]);
 }
 
 void CommandPoolAllocator::BeginFrame()
 {
-    const auto& frameDependCmdPools = cmdPools[frameTracker.GetCurrentInFlightFrameIndex()];
+    const auto& frameDependCmdPools = cmdPools[frameTracker.GetFrameIndex()];
     for (const auto& cmdPool : frameDependCmdPools)
     {
         cmdPool->BeginFrame();

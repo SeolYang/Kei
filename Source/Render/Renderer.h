@@ -40,7 +40,6 @@ public:
 
     void Render();
 
-private:
     void BeginFrame();
     void EndFrame();
 

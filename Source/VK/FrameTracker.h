@@ -6,14 +6,16 @@ namespace sy::vk
 class Fence;
 class Semaphore;
 class VulkanContext;
+// todo: Should i move frame tracker to render module?
 class FrameTracker : public NonCopyable
 {
 private:
     struct Frame
     {
         size_t InFlightFrameIndex = std::numeric_limits<size_t>::max();
-        std::unique_ptr<Semaphore> RenderSemaphore;
+        std::unique_ptr<Semaphore> CommandExecutionSemaphore;
         std::unique_ptr<Semaphore> PresentSemaphore;
+        std::unique_ptr<Semaphore> SwapchainSemaphore;
         std::unique_ptr<Semaphore> UploadSemaphore;
     };
 
@@ -27,28 +29,29 @@ public:
     void BeginFrame();
     void EndFrame();
 
-    const Frame& GetCurrentInFlightFrame() const
+    const Frame& GetInflightFrame() const
     {
-        return frames[GetCurrentInFlightFrameIndex()];
+        return frames[GetFrameIndex()];
     }
 
-    Semaphore& GetCurrentInFlightRenderSemaphore() const;
-    Semaphore& GetCurrentInFlightPresentSemaphore() const;
-    Semaphore& GetCurrentInFlightUploadSemaphore() const;
+    Semaphore& GetInflightCommandExecutionSemaphore();
+    Semaphore& GetInflightSwapchainSemaphore();
+    Semaphore& GetInflightPresentSemaphore();
+    Semaphore& GetCurrentInFlightUploadSemaphore();
 
-    [[nodiscard]] size_t GetCurrentFrameIndex() const
+    [[nodiscard]] size_t GetFrameCounter() const
     {
-        return currentFrameIdx;
+        return frameCounter;
     }
 
-    [[nodiscard]] size_t GetCurrentInFlightFrameIndex() const
+    [[nodiscard]] size_t GetFrameIndex() const
     {
-        return currentFrameIdx % NumMaxInFlightFrames;
+        return frameCounter % NumMaxInFlightFrames;
     }
 
 private:
     VulkanContext& vulkanContext;
     std::array<Frame, NumMaxInFlightFrames> frames;
-    size_t currentFrameIdx = 0;
+    size_t frameCounter = 0;
 };
 } // namespace sy::vk

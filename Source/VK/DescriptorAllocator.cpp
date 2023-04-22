@@ -124,7 +124,7 @@ void DescriptorAllocator::Shutdown()
 
 void DescriptorAllocator::BeginFrame()
 {
-    auto& pendingList = pendingDeallocations[frameTracker.GetCurrentInFlightFrameIndex()];
+    auto& pendingList = pendingDeallocations[frameTracker.GetFrameIndex()];
     for (const Allocation& allocation : pendingList)
     {
         allocation.Owner.Pool.Deallocate(allocation.AllocatedSlot);
@@ -211,8 +211,8 @@ Descriptor DescriptorAllocator::RequestDescriptor(const vk::Buffer& buffer, cons
     return {
         &allocatedSlots[slotOffset],
         [this, &offsetPoolPackage](const FixedOffsetPool::Slot_t* slotPtr) {
-            auto&           pendingList      = pendingDeallocations[frameTracker.GetCurrentInFlightFrameIndex()];
-            auto&           pendingListMutex = pendingMutexList[frameTracker.GetCurrentInFlightFrameIndex()];
+            auto&           pendingList      = pendingDeallocations[frameTracker.GetFrameIndex()];
+            auto&           pendingListMutex = pendingMutexList[frameTracker.GetFrameIndex()];
             std::lock_guard lock{pendingListMutex};
             pendingList.emplace_back(*slotPtr, offsetPoolPackage);
         }};
@@ -272,8 +272,8 @@ Descriptor DescriptorAllocator::RequestDescriptor(const vk::Texture& texture, co
     return {
         &allocatedSlots[slotOffset],
         [this, &offsetPoolPackage](const FixedOffsetPool::Slot_t* slotPtr) {
-            auto&           pendingList      = pendingDeallocations[frameTracker.GetCurrentInFlightFrameIndex()];
-            auto&           pendingListMutex = pendingMutexList[frameTracker.GetCurrentInFlightFrameIndex()];
+            auto&           pendingList      = pendingDeallocations[frameTracker.GetFrameIndex()];
+            auto&           pendingListMutex = pendingMutexList[frameTracker.GetFrameIndex()];
             std::lock_guard lock{pendingListMutex};
             pendingList.emplace_back(*slotPtr, offsetPoolPackage);
         }};
