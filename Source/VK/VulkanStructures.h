@@ -15,4 +15,10 @@ struct TextureSubResource
     uint32_t MipLevel = 0;
     uint32_t ArrayLayer = 0;
 };
+
+struct BufferSubResource
+{
+    VkDeviceSize Offset = 0;
+    VkDeviceSize Size = 0;
+};
 } // namespace sy::vk

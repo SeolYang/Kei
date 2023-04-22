@@ -160,6 +160,12 @@
     <ClCompile Include="..\Source\VK\BufferStateTransition.cpp">
       <Filter>Source\VK</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Render\RenderGraph.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Render\RenderNode.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Audio\AudioContext.h">
@@ -386,6 +392,15 @@
     </ClInclude>
     <ClInclude Include="..\Source\VK\BufferStateTransition.h">
       <Filter>Source\VK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\RenderGraph.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\RenderNode.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\RenderGraphResource.h">
+      <Filter>Source\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

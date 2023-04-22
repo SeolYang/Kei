@@ -29,13 +29,8 @@ static std::optional<EAssetType> FileExtensionToAssetType(std::string_view exten
         {constants::ext::FBX, EAssetType::Model},
     };
 
-    if (extension[0] == '.')
-    {
-        extension = extension.substr(1);
-    }
-
-    // #todo to_lowercase
-    const auto found = extAssetMap.find(std::string(extension));
+    auto normalizedExtension = NormalizeExtension(std::string(extension));
+    const auto found = extAssetMap.find(std::string(normalizedExtension));
     return found != extAssetMap.end() ? std::optional<EAssetType>{found->second} : std::nullopt;
 }
 
@@ -46,7 +41,7 @@ private:
     struct ImportTarget
     {
         std::string Path;
-        EAssetType  AssetType;
+        EAssetType AssetType;
     };
 
 public:
@@ -60,28 +55,28 @@ private:
 
     void ForceResetOnExecute();
 
-    void                       ImportAssetsFromRootAssetDirectory();
-    void                       ExtractRegularFilesFromRootAssetDirectory();
-    void                       ExtractImportTargetsFromRegularFiles();
-    void                       UpdateUnseenImportTargetsToConfigMap();
-    static json                GetSerializedDefaultConfig(EAssetType assetType);
-    void                       FilteringReadyToImportTargets();
-    void                       ImportTargetAssets();
-    void                       ImportAsset(const ImportTarget& importTarget, json& config);
-    void                       ImportTextureAsset(const fs::path& path, const json& serializedConfig);
-    void                       ImportModelAsset(const fs::path& path, const json& serializedConfig);
+    void ImportAssetsFromRootAssetDirectory();
+    void ExtractRegularFilesFromRootAssetDirectory();
+    void ExtractImportTargetsFromRegularFiles();
+    void UpdateUnseenImportTargetsToConfigMap();
+    static json GetSerializedDefaultConfig(EAssetType assetType);
+    void FilteringReadyToImportTargets();
+    void ImportTargetAssets();
+    void ImportAsset(const ImportTarget& importTarget, json& config);
+    void ImportTextureAsset(const fs::path& path, const json& serializedConfig);
+    void ImportModelAsset(const fs::path& path, const json& serializedConfig);
     static TextureImportConfig DeserializeTextureImportConfig(const json& serializedConfig);
-    static ModelImportConfig   DeserializeModelImportConfig(const json& serializedConfig);
-    void                       FinalizeAssetImport(json& config);
+    static ModelImportConfig DeserializeModelImportConfig(const json& serializedConfig);
+    void FinalizeAssetImport(json& config);
 
     void ExportAssetImportConfigs();
 
 private:
-    vk::VulkanContext&        vulkanContext;
-    fs::path                  root;
-    const bool                bForceResetOnExecute = false;
-    std::vector<fs::path>     regularFiles;
+    vk::VulkanContext& vulkanContext;
+    fs::path root;
+    const bool bForceResetOnExecute = false;
+    std::vector<fs::path> regularFiles;
     std::vector<ImportTarget> importTargets;
-    json                      serializedImportConfigMap;
+    json serializedImportConfigMap;
 };
 } // namespace sy::asset
