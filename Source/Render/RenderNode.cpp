@@ -30,23 +30,25 @@ RenderGraphBuffer& RenderNode::CreateBuffer(const std::string_view bufferName)
 void RenderNode::AsGenaralSampledImage(const std::string_view resourceName, const std::span<const vk::TextureSubResource> subresources)
 {
     // TODO: extra care about subresources.
-    AsReadDependency(resourceName, vk::ETextureState::AnyShaderReadSampledImage);
+    AsReadDependency(resourceName, VK_IMAGE_USAGE_SAMPLED_BIT, vk::ETextureState::AnyShaderReadSampledImage);
 }
 
-void RenderNode::AsReadDependency(const std::string_view resourceName, const vk::ETextureState state)
+void RenderNode::AsReadDependency(const std::string_view resourceName, const VkImageUsageFlags usage, const vk::ETextureState state)
 {
     SY_ASSERT(!resourceName.empty(), "Resource Name is empty.");
     auto& texture = renderGraph.GetOrCreateTexture(resourceName);
     readDependencies.insert(resourceName.data());
     texture.ReadBy(this->name, state);
+    texture.GetBuilder().AddUsage(usage);
 }
 
-void RenderNode::AsReadDependency(const std::string_view resourceName, const vk::EBufferState state)
+void RenderNode::AsReadDependency(const std::string_view resourceName, const VkImageUsageFlags usage, const vk::EBufferState state)
 {
     SY_ASSERT(!resourceName.empty(), "Resource Name is empty.");
     auto& buffer = renderGraph.GetOrCreateBuffer(resourceName);
     readDependencies.insert(resourceName.data());
     buffer.ReadBy(this->name, state);
+    buffer.GetBuilder().AddUsage(usage);
 }
 
 void RenderNode::AsWriteDependency(const std::string_view resourceName)

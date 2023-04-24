@@ -324,4 +324,16 @@ static std::string NormalizeExtension(std::string extension)
 
     return extension;
 }
+
+template <typename T>
+std::vector<T> Permute(std::vector<T> origin, const std::span<size_t> permutation)
+{
+    std::vector<T> result;
+    result.reserve(origin.size());
+	for (const size_t idx : permutation)
+	{
+        result.emplace_back(std::move(origin[idx]));
+	}
+    return result;
+}
 } // namespace sy

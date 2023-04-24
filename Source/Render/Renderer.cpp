@@ -189,6 +189,7 @@ void Renderer::Startup()
 
 	auto node4 = std::make_unique<RenderNode>(*renderGraph, "n4");
     node4->CreateTexture("r3");
+    node4->ExecuteOnAsyncCompute();
 
 	renderGraph->AppendNode(std::move(node0));
 	renderGraph->AppendNode(std::move(node1));

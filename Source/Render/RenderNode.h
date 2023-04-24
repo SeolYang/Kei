@@ -26,14 +26,18 @@ public:
 	[[nodiscard]] const auto& GetWriteDependencies() const { return writeDependencies; }
     [[nodiscard]] const auto& GetReadDependencies() const { return readDependencies; }
 
+	[[nodiscard]] bool IsExecuteOnAsyncCompute() { return bIsExecuteOnAsyncCompute; }
+    void ExecuteOnAsyncCompute() { bIsExecuteOnAsyncCompute = true; }
+
 private:
     void AsWriteDependency(std::string_view resourceName);
-    void AsReadDependency(std::string_view resourceName, vk::ETextureState state);
-    void AsReadDependency(std::string_view resourceName, vk::EBufferState state);
+    void AsReadDependency(std::string_view resourceName, VkImageUsageFlags usage, vk::ETextureState state);
+    void AsReadDependency(std::string_view resourceName, VkImageUsageFlags usage, vk::EBufferState state);
 
 private:
     RenderGraph& renderGraph;
     const std::string name;
+    bool bIsExecuteOnAsyncCompute = false;
     robin_hood::unordered_set<std::string> writeDependencies;
     robin_hood::unordered_set<std::string> readDependencies;
 };
