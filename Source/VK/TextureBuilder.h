@@ -25,11 +25,25 @@ public:
         return *this;
     }
 
-    TextureBuilder& SetUsage(const VkImageUsageFlags usage)
+    TextureBuilder& SetUsage(const VkImageUsageFlags newUsage)
     {
-        this->usage = usage;
+        usage = newUsage;
         return *this;
     }
+
+	TextureBuilder& AddUsage(const VkImageUsageFlags additionalUsage)
+	{
+		if (usage == std::nullopt)
+		{
+            usage = additionalUsage;
+		}
+		else
+		{
+            *usage |= additionalUsage;
+		}
+
+        return *this;
+	}
 
     TextureBuilder& SetFormat(const VkFormat format)
     {

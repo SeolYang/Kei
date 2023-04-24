@@ -45,6 +45,20 @@ public:
         return *this;
     }
 
+    BufferBuilder& AddUsage(const VkBufferUsageFlags usage)
+    {
+		if (this->usage == std::nullopt)
+		{
+            this->usage = usage;
+		}
+		else
+		{
+            *this->usage |= usage;
+		}
+
+        return *this;
+    }
+
     BufferBuilder& SetMemoryUsage(const VmaMemoryUsage memoryUsage)
     {
         this->memoryUsage = memoryUsage;
