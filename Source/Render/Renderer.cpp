@@ -170,32 +170,39 @@ void Renderer::Startup()
 
 	/** todo: remove test codes **/
 	auto renderGraph = std::make_unique<RenderGraph>(vulkanContext);
-    auto node0 = std::make_unique<RenderNode>(*renderGraph, "n0");
-    node0->CreateTexture("r0");
+    auto node0 = std::make_unique<RenderNode>(*renderGraph, "n0_graphics:Expected Sync Index=1");
+    node0->CreateTexture("g0");
 
-    auto node1 = std::make_unique<RenderNode>(*renderGraph, "n1");
-    node1->AsGenaralSampledImage("r0");
-    node1->CreateTexture("r1");
+    auto node1 = std::make_unique<RenderNode>(*renderGraph, "n1_graphics:Expected Sync Index=2");
+    node1->AsGenaralSampledImage("g0");
+    node1->CreateTexture("g1");
 
-	auto node2 = std::make_unique<RenderNode>(*renderGraph, "n2");
-    node2->AsGenaralSampledImage("r0");
-    node2->CreateTexture("r2");
+	auto node2 = std::make_unique<RenderNode>(*renderGraph, "n2_graphics:Expected Sync Index=3");
+    node2->AsGenaralSampledImage("g1");
+    node2->CreateTexture("g2");
 
-	auto node3 = std::make_unique<RenderNode>(*renderGraph, "n3");
-    node3->AsGenaralSampledImage("r1");
-    node3->AsGenaralSampledImage("r2");
-    node3->AsGenaralSampledImage("r3");
-    node3->CreateTexture("finalOutput");
+	auto node3 = std::make_unique<RenderNode>(*renderGraph, "n3_asyncCompute:Expected Sync Index=4");
+    node3->CreateTexture("c0");
+    node3->ExecuteOnAsyncCompute();
 
-	auto node4 = std::make_unique<RenderNode>(*renderGraph, "n4");
-    node4->CreateTexture("r3");
+	auto node4 = std::make_unique<RenderNode>(*renderGraph, "n4_asyncCompute:Expected Sync Index=5");
+    node4->CreateTexture("c1");
+    node4->AsGenaralSampledImage("c0");
+    node4->AsGenaralSampledImage("g0");
     node4->ExecuteOnAsyncCompute();
+
+	auto node5 = std::make_unique<RenderNode>(*renderGraph, "n5_asyncCompute:Expected Sync Index=6");
+    node5->CreateTexture("c2");
+    node5->AsGenaralSampledImage("c1");
+    node5->AsGenaralSampledImage("g0");
+    node5->ExecuteOnAsyncCompute();
 
 	renderGraph->AppendNode(std::move(node0));
 	renderGraph->AppendNode(std::move(node1));
 	renderGraph->AppendNode(std::move(node2));
 	renderGraph->AppendNode(std::move(node3));
 	renderGraph->AppendNode(std::move(node4));
+	renderGraph->AppendNode(std::move(node5));
 	renderGraph->Compile();
 }
 
@@ -209,5 +216,4 @@ void Renderer::Shutdown()
     triFrag.reset();
     triVert.reset();
 }
-
 } // namespace sy::render

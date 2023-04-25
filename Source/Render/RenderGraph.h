@@ -10,9 +10,36 @@ class RenderNode;
 // resource::array<Resource, 2> instances;
 class RenderGraph : public NonCopyable
 {
-private:
+public:
     constexpr static size_t NumOfSupportedQueues = 2; // Graphics, Async Compute
     constexpr static vk::EQueueType MostCompetentQueue = vk::EQueueType::Graphics;
+
+private:
+    struct SSIS
+    {
+    public:
+        void CopyOtherNextToNow(const SSIS& other)
+        {
+            std::copy(other.Next.begin(), other.Next.end(), Now.begin());
+        }
+
+        void UpdateNext(const size_t nodeQueueIdx, const size_t syncIdx)
+        {
+            for (size_t queueIdx = 0; queueIdx < Next.size(); ++queueIdx)
+            {
+                Next[queueIdx] = queueIdx == nodeQueueIdx ? syncIdx : Now[queueIdx];
+            }
+        }
+		
+		void UpdateNow(const size_t targetNodeQueueIdx, const SSIS& other)
+		{
+            Now[targetNodeQueueIdx] = std::max(Now[targetNodeQueueIdx], other.Next[targetNodeQueueIdx]);
+		}
+
+    public:
+        std::array<size_t, NumOfSupportedQueues> Now;
+        std::array<size_t, NumOfSupportedQueues> Next;
+    };
 
 public:
     RenderGraph(vk::VulkanContext& vulkanContext);
@@ -40,14 +67,20 @@ public:
 
 private:
     static size_t QueryQueueIndex(vk::EQueueType queueType);
+    static size_t QueryQueueIndex(const RenderNode& node);
+
+    std::optional<std::string_view> QueryWriterFromResource(std::string_view resourceName) const;
+    SSIS& GetSSIS(const size_t synchronizationIdx);
+    std::optional<size_t> GetNodeIndex(std::string_view name) const;
+    RefOptional<RenderNode> GetNode(std::string_view name);
 
     void TopologicalSort();
     void DFS(size_t nodeIdx, const robin_hood::unordered_map<std::string, size_t> nodeIndexMap, std::vector<size_t>& sorted, std::vector<bool>& visited, std::vector<bool>& onStack);
 
     // SSIS: Sufficient Synchronization Index Set
     void InitSSIS();
-    void BuildNodeSyncrhonizationIndexMap(std::array<std::vector<std::string_view>, NumOfSupportedQueues> groupedNodesByQueue);
-    std::array<std::vector<std::string_view>, NumOfSupportedQueues> GroupNodesByQueue();
+    void BuildNodeSyncrhonizationIndexMap();
+    void GroupNodesByQueue();
     void ResetSSIS();
     void BuildSSIS();
 
@@ -56,6 +89,7 @@ private:
     std::vector<std::unique_ptr<RenderNode>> nodes;
     robin_hood::unordered_map<std::string, std::unique_ptr<RenderGraphTexture>> textureMap = {};
     robin_hood::unordered_map<std::string, std::unique_ptr<RenderGraphBuffer>> bufferMap = {};
-    robin_hood::unordered_map<std::string, size_t> nodeSyncIndexMap;
+    std::array<std::vector<size_t>, RenderGraph::NumOfSupportedQueues> groupedNodesByQueue;
+    std::vector<SSIS> ssises;
 };
 } // namespace sy::render

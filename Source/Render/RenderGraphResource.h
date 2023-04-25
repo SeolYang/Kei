@@ -48,6 +48,7 @@ public:
         readerStateMap[readerName.data()] = state;
     }
 
+	[[nodiscard]] std::string_view GetWriter() const { return writer; }
     [[nodiscard]] bool HasWriter() const { return !writer.empty(); }
     [[nodiscard]] bool IsWriteBy(const std::string_view writerName) const { return writerName == writer; }
     [[nodiscard]] bool IsReadBy(const std::string_view readerName) const { return readers.contains(readerName.data()); }

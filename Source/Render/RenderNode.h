@@ -26,8 +26,11 @@ public:
 	[[nodiscard]] const auto& GetWriteDependencies() const { return writeDependencies; }
     [[nodiscard]] const auto& GetReadDependencies() const { return readDependencies; }
 
-	[[nodiscard]] bool IsExecuteOnAsyncCompute() { return bIsExecuteOnAsyncCompute; }
+	[[nodiscard]] bool IsExecuteOnAsyncCompute() const { return bIsExecuteOnAsyncCompute; }
     void ExecuteOnAsyncCompute() { bIsExecuteOnAsyncCompute = true; }
+
+	[[nodiscard]] auto GetSynchronizationIndex() const { return synchronizationIdx; }
+    void SetSynchronizationIndex(const size_t idx) { synchronizationIdx = idx; }
 
 private:
     void AsWriteDependency(std::string_view resourceName);
@@ -40,5 +43,6 @@ private:
     bool bIsExecuteOnAsyncCompute = false;
     robin_hood::unordered_set<std::string> writeDependencies;
     robin_hood::unordered_set<std::string> readDependencies;
+    size_t synchronizationIdx = 0;
 };
 } // namespace sy::render

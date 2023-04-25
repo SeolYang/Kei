@@ -6,6 +6,7 @@
 
 namespace sy::render
 {
+// #todo clean up and simplify all things!!
 RenderGraph::RenderGraph(vk::VulkanContext& vulkanContext) :
     vulkanContext(vulkanContext)
 {
@@ -52,6 +53,11 @@ size_t RenderGraph::QueryQueueIndex(const vk::EQueueType queueType)
     return 0;
 }
 
+size_t RenderGraph::QueryQueueIndex(const RenderNode& node)
+{
+    return QueryQueueIndex(node.IsExecuteOnAsyncCompute() ? vk::EQueueType::Compute : MostCompetentQueue);
+}
+
 void RenderGraph::TopologicalSort()
 {
     robin_hood::unordered_map<std::string, size_t> nodeIndexMap;
@@ -85,19 +91,20 @@ void RenderGraph::DFS(const size_t nodeIdx, const robin_hood::unordered_map<std:
         robin_hood::unordered_set<size_t> readByDependencies;
         for (const auto& writeResourceName : nodes[nodeIdx]->GetWriteDependencies())
         {
+            robin_hood::unordered_set<std::string> readersOfResource;
             if (textureMap.contains(writeResourceName))
             {
-                for (const auto& dependentNodeName : textureMap[writeResourceName]->GetReaders())
-                {
-                    readByDependencies.insert(nodeIndexMap.at(dependentNodeName));
-                }
+                readersOfResource = textureMap[writeResourceName]->GetReaders();
             }
             else if (bufferMap.contains(writeResourceName))
             {
-                for (const auto& dependentNodeName : bufferMap[writeResourceName]->GetReaders())
-                {
-                    readByDependencies.insert(nodeIndexMap.at(dependentNodeName));
-                }
+                readersOfResource = bufferMap[writeResourceName]->GetReaders();
+            }
+            for (const auto& dependentNodeName : textureMap[writeResourceName]->GetReaders())
+            {
+                const auto idx = GetNodeIndex(dependentNodeName);
+                SY_ASSERT(idx.has_value(), "Dependent Node name is not valid.");
+                readByDependencies.insert(*idx);
             }
         }
 
@@ -116,57 +123,125 @@ void RenderGraph::Compile()
 {
     TopologicalSort();
     InitSSIS();
-
-	spdlog::info("Topologically sorted Nodes: ");
-	for (const auto& node : nodes)
-	{
-        spdlog::info("Name: {}, Synchronization Index: {}", node->GetName(), nodeSyncIndexMap[node->GetName().data()]);
-	}
+    // #todo Schedule synchronization / resource state transitions
+    // if 2 or more read dependencies exist at same dependency level.
+    // Should i force promote state to AnyXXX state?
 }
 
 void RenderGraph::InitSSIS()
 {
-    BuildNodeSyncrhonizationIndexMap(GroupNodesByQueue());
+    GroupNodesByQueue();
+    BuildNodeSyncrhonizationIndexMap();
     ResetSSIS();
     BuildSSIS();
 }
 
-void RenderGraph::BuildNodeSyncrhonizationIndexMap(const std::array<std::vector<std::string_view>, NumOfSupportedQueues> groupedNodesByQueue)
+void RenderGraph::BuildNodeSyncrhonizationIndexMap()
 {
     size_t idxOffset = 0;
-	for (const auto& groupedNodes : groupedNodesByQueue)
-	{
-		for (size_t idx = 0; idx < groupedNodes.size(); ++idx)
-		{
-            nodeSyncIndexMap[groupedNodes[idx].data()] = idxOffset + idx + 1;
-		}
+    for (const auto& groupedNodes : groupedNodesByQueue)
+    {
+        for (size_t idx = 0; idx < groupedNodes.size(); ++idx)
+        {
+            nodes[groupedNodes[idx]]->SetSynchronizationIndex(idxOffset + idx + 1);
+        }
         idxOffset += groupedNodes.size();
-	}
+    }
 }
 
-std::array<std::vector<std::string_view>, RenderGraph::NumOfSupportedQueues> RenderGraph::GroupNodesByQueue()
+void RenderGraph::GroupNodesByQueue()
 {
-    std::array<std::vector<std::string_view>, RenderGraph::NumOfSupportedQueues> groupedNodes;
-    for (const auto& node : nodes)
+    for (size_t idx = 0; idx < nodes.size(); ++idx)
     {
-        if (node->IsExecuteOnAsyncCompute())
-        {
-            groupedNodes[QueryQueueIndex(vk::EQueueType::Compute)].push_back(node->GetName());
-        }
-        else
-        {
-            groupedNodes[QueryQueueIndex(MostCompetentQueue)].push_back(node->GetName());
-        }
+        const auto& node = nodes[idx];
+        groupedNodesByQueue[QueryQueueIndex(*node)].push_back(idx);
     }
-
-    return groupedNodes;
 }
 
 void RenderGraph::ResetSSIS()
 {
+    ssises.resize(nodes.size());
+    std::fill(ssises.begin(), ssises.end(), SSIS{});
 }
 
 void RenderGraph::BuildSSIS()
 {
+    for (const auto& groupedNodes : groupedNodesByQueue)
+    {
+        for (const size_t nodeIdx : groupedNodes)
+        {
+            const auto& node = *nodes[nodeIdx];
+            const size_t syncIdx = node.GetSynchronizationIndex();
+            auto& ssis = GetSSIS(syncIdx);
+            if (node.HasAnyReadDependency())
+            {
+                SY_ASSERT(syncIdx != 0, "Synchronization Index == 0 only for read-independent node.");
+                ssis.CopyOtherNextToNow(GetSSIS(syncIdx - 1));
+
+                const auto& resourceReadDependencies = node.GetReadDependencies();
+                for (const std::string_view resourceName : resourceReadDependencies)
+                {
+                    const auto writerNodeNameOpt = QueryWriterFromResource(resourceName);
+                    SY_ASSERT(writerNodeNameOpt.has_value(), "Resource Name does not has any valid writer.");
+                    auto writerNodeIdxOpt = GetNodeIndex(*writerNodeNameOpt);
+                    SY_ASSERT(writerNodeIdxOpt.has_value(), "Invalid writer node name.");
+                    auto& writerNode = *nodes[*writerNodeIdxOpt];
+
+                    const size_t writerNodeQueueIdx = QueryQueueIndex(writerNode);
+                    if (writerNode.IsExecuteOnAsyncCompute() != node.IsExecuteOnAsyncCompute())
+                    {
+                        auto& writerNodeSSIS = GetSSIS(*writerNodeIdxOpt);
+                        ssis.UpdateNow(writerNodeQueueIdx, GetSSIS(writerNode.GetSynchronizationIndex()));
+                    }
+                }
+            }
+
+            ssis.UpdateNext(QueryQueueIndex(node), syncIdx);
+        }
+    }
+}
+
+RefOptional<RenderNode> RenderGraph::GetNode(const std::string_view name)
+{
+    auto idxOpt = GetNodeIndex(name);
+    if (idxOpt)
+    {
+        return *nodes[*idxOpt];
+    }
+
+    return std::nullopt;
+}
+
+std::optional<std::string_view> RenderGraph::QueryWriterFromResource(const std::string_view resourceName) const
+{
+    if (textureMap.contains(resourceName.data()))
+    {
+        return textureMap.at(resourceName.data())->GetWriter();
+    }
+    else if (bufferMap.contains(resourceName.data()))
+    {
+        return bufferMap.at(resourceName.data())->GetWriter();
+    }
+
+    return std::nullopt;
+}
+
+RenderGraph::SSIS& RenderGraph::GetSSIS(const size_t synchronizationIdx)
+{
+    return ssises[synchronizationIdx - 1];
+}
+
+std::optional<size_t> RenderGraph::GetNodeIndex(const std::string_view name) const
+{
+    for (size_t idx = 0; idx < nodes.size(); ++idx)
+    {
+        const auto& node = *nodes[idx];
+        if (node.GetName() == name)
+        {
+            return idx;
+        }
+    }
+
+    return std::nullopt;
 }
 } // namespace sy::render
