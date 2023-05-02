@@ -32,6 +32,9 @@ public:
 	[[nodiscard]] auto GetSynchronizationIndex() const { return synchronizationIdx; }
     void SetSynchronizationIndex(const size_t idx) { synchronizationIdx = idx; }
 
+	[[nodiscard]] auto GetDependencyLevel() const { return dependencyLevel; }
+    void SetDependencyLevel(const size_t level) { dependencyLevel = level; }
+
 private:
     void AsWriteDependency(std::string_view resourceName);
     void AsReadDependency(std::string_view resourceName, VkImageUsageFlags usage, vk::ETextureState state);
@@ -44,5 +47,6 @@ private:
     robin_hood::unordered_set<std::string> writeDependencies;
     robin_hood::unordered_set<std::string> readDependencies;
     size_t synchronizationIdx = 0;
+    size_t dependencyLevel = 0;
 };
 } // namespace sy::render

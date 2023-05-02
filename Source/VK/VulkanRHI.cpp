@@ -186,6 +186,7 @@ VkQueue VulkanRHI::GetQueue(const EQueueType queueType) const
 
 void VulkanRHI::SubmitSync(const EQueueType queueType, const CRefSpan<CommandBuffer> cmdBuffers, const CRefSpan<Semaphore> waitSemaphores, const VkPipelineStageFlags2 waitAt, const RefSpan<Semaphore> signalSemaphores, const VkPipelineStageFlags2 signalAt) const
 {
+	// #todo CmdBuffer-Signal 구조 생각해보기
     std::vector<VkSemaphoreSubmitInfo> waitSemaphoreSubmitInfos;
     waitSemaphoreSubmitInfos.resize(waitSemaphores.size());
     std::transform(waitSemaphores.begin(), waitSemaphores.end(),

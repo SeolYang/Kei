@@ -75,7 +75,7 @@ private:
     RefOptional<RenderNode> GetNode(std::string_view name);
 
     void TopologicalSort();
-    void DFS(size_t nodeIdx, const robin_hood::unordered_map<std::string, size_t> nodeIndexMap, std::vector<size_t>& sorted, std::vector<bool>& visited, std::vector<bool>& onStack);
+    void DFS(size_t depth, size_t nodeIdx, const robin_hood::unordered_map<std::string, size_t> nodeIndexMap, std::vector<size_t>& sorted, std::vector<bool>& visited, std::vector<bool>& onStack);
 
     // SSIS: Sufficient Synchronization Index Set
     void InitSSIS();
@@ -84,6 +84,8 @@ private:
     void ResetSSIS();
     void BuildSSIS();
 
+	void BuildMinDependencyLevelSyncPoints();
+
 private:
     vk::VulkanContext& vulkanContext;
     std::vector<std::unique_ptr<RenderNode>> nodes;
@@ -91,5 +93,6 @@ private:
     robin_hood::unordered_map<std::string, std::unique_ptr<RenderGraphBuffer>> bufferMap = {};
     std::array<std::vector<size_t>, RenderGraph::NumOfSupportedQueues> groupedNodesByQueue;
     std::vector<SSIS> ssises;
+    std::vector<robin_hood::unordered_set<size_t>> minDependencyLevelSyncPoints;
 };
 } // namespace sy::render

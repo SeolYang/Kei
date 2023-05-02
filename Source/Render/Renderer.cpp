@@ -81,8 +81,8 @@ void Renderer::Render()
                              waitSemaphores, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                              signalSemaphores, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
 
-		// todo: split out (renderSemaphore, and renderNodeSemaphore)
-		// submit renderSemaphore at end of render graph(render nodes)
+        // todo: split out (renderSemaphore, and renderNodeSemaphore)
+        // submit renderSemaphore at end of render graph(render nodes)
         vulkanRHI.Present(swapchain, signalSemaphores[1]);
     }
 }
@@ -94,7 +94,7 @@ void Renderer::BeginFrame()
     auto& swapchain = vulkanContext.GetSwapchain();
     swapchain.AcquireNext(frameTracker.GetInflightSwapchainSemaphore());
 
-	const auto& cmdExecutionSemaphore = frameTracker.GetInflightCommandExecutionSemaphore();
+    const auto& cmdExecutionSemaphore = frameTracker.GetInflightCommandExecutionSemaphore();
     cmdExecutionSemaphore.Wait();
 }
 
@@ -168,42 +168,49 @@ void Renderer::Startup()
 
     renderPass = std::make_unique<SimpleRenderPass>("Simple Render Pass", vulkanContext, *basicPipeline);
 
-	/** todo: remove test codes **/
-	auto renderGraph = std::make_unique<RenderGraph>(vulkanContext);
-    auto node0 = std::make_unique<RenderNode>(*renderGraph, "n0_graphics:Expected Sync Index=1");
+    /** todo: remove test codes **/
+    auto renderGraph = std::make_unique<RenderGraph>(vulkanContext);
+    auto node0 = std::make_unique<RenderNode>(*renderGraph, "n0_graphics");
     node0->CreateTexture("g0");
 
-    auto node1 = std::make_unique<RenderNode>(*renderGraph, "n1_graphics:Expected Sync Index=2");
+    auto node1 = std::make_unique<RenderNode>(*renderGraph, "n1_graphics");
     node1->AsGenaralSampledImage("g0");
     node1->CreateTexture("g1");
 
-	auto node2 = std::make_unique<RenderNode>(*renderGraph, "n2_graphics:Expected Sync Index=3");
+    auto node2 = std::make_unique<RenderNode>(*renderGraph, "n2_graphics");
     node2->AsGenaralSampledImage("g1");
+    node2->AsGenaralSampledImage("g0");
     node2->CreateTexture("g2");
 
-	auto node3 = std::make_unique<RenderNode>(*renderGraph, "n3_asyncCompute:Expected Sync Index=4");
+    auto node3 = std::make_unique<RenderNode>(*renderGraph, "n3_asyncCompute");
     node3->CreateTexture("c0");
     node3->ExecuteOnAsyncCompute();
 
-	auto node4 = std::make_unique<RenderNode>(*renderGraph, "n4_asyncCompute:Expected Sync Index=5");
+    auto node4 = std::make_unique<RenderNode>(*renderGraph, "n4_asyncCompute");
     node4->CreateTexture("c1");
     node4->AsGenaralSampledImage("c0");
     node4->AsGenaralSampledImage("g0");
     node4->ExecuteOnAsyncCompute();
 
-	auto node5 = std::make_unique<RenderNode>(*renderGraph, "n5_asyncCompute:Expected Sync Index=6");
+    auto node5 = std::make_unique<RenderNode>(*renderGraph, "n5_asyncCompute");
     node5->CreateTexture("c2");
     node5->AsGenaralSampledImage("c1");
     node5->AsGenaralSampledImage("g0");
     node5->ExecuteOnAsyncCompute();
 
-	renderGraph->AppendNode(std::move(node0));
-	renderGraph->AppendNode(std::move(node1));
-	renderGraph->AppendNode(std::move(node2));
-	renderGraph->AppendNode(std::move(node3));
-	renderGraph->AppendNode(std::move(node4));
-	renderGraph->AppendNode(std::move(node5));
-	renderGraph->Compile();
+	auto node6 = std::make_unique<RenderNode>(*renderGraph, "n6_graphics");
+    node6->CreateTexture("g3");
+    node6->AsGenaralSampledImage("c2");
+    node6->AsGenaralSampledImage("g2");
+
+    renderGraph->AppendNode(std::move(node0));
+    renderGraph->AppendNode(std::move(node1));
+    renderGraph->AppendNode(std::move(node2));
+    renderGraph->AppendNode(std::move(node3));
+    renderGraph->AppendNode(std::move(node4));
+    renderGraph->AppendNode(std::move(node5));
+    renderGraph->AppendNode(std::move(node6));
+    renderGraph->Compile();
 }
 
 void Renderer::Shutdown()

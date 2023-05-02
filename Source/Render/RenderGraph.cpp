@@ -75,7 +75,7 @@ void RenderGraph::TopologicalSort()
     {
         if (!nodes[idx]->HasAnyReadDependency() && nodes[idx]->HasAnyWriteDependency())
         {
-            DFS(idx, nodeIndexMap, sorted, visited, onStack);
+            DFS(0, idx, nodeIndexMap, sorted, visited, onStack);
         }
     }
 
@@ -83,7 +83,7 @@ void RenderGraph::TopologicalSort()
     nodes = Permute(std::move(nodes), sorted);
 }
 
-void RenderGraph::DFS(const size_t nodeIdx, const robin_hood::unordered_map<std::string, size_t> nodeIndexMap, std::vector<size_t>& sorted, std::vector<bool>& visited, std::vector<bool>& onStack)
+void RenderGraph::DFS(const size_t depth, const size_t nodeIdx, const robin_hood::unordered_map<std::string, size_t> nodeIndexMap, std::vector<size_t>& sorted, std::vector<bool>& visited, std::vector<bool>& onStack)
 {
     SY_ASSERT(!onStack[nodeIdx], "Found circular dependency in graph.");
     if (!visited[nodeIdx])
@@ -112,9 +112,10 @@ void RenderGraph::DFS(const size_t nodeIdx, const robin_hood::unordered_map<std:
         onStack[nodeIdx] = true;
         for (const size_t readNode : readByDependencies)
         {
-            DFS(readNode, nodeIndexMap, sorted, visited, onStack);
+            DFS(depth + 1, readNode, nodeIndexMap, sorted, visited, onStack);
         }
         onStack[nodeIdx] = false;
+        nodes[nodeIdx]->SetDependencyLevel(depth);
         sorted.emplace_back(nodeIdx);
     }
 }
@@ -123,9 +124,21 @@ void RenderGraph::Compile()
 {
     TopologicalSort();
     InitSSIS();
+    BuildMinDependencyLevelSyncPoints();
     // #todo Schedule synchronization / resource state transitions
     // if 2 or more read dependencies exist at same dependency level.
     // Should i force promote state to AnyXXX state?
+	for (size_t dl = 0; dl <= nodes.back()->GetDependencyLevel(); ++dl)
+	{
+		if (!minDependencyLevelSyncPoints[dl].empty())
+		{
+            spdlog::info("Dependency Level {}, required to sync with below queues.", dl);
+            for (const size_t queueIdx : minDependencyLevelSyncPoints[dl])
+            {
+                spdlog::info("Q{}", queueIdx);
+            }
+		}
+	}
 }
 
 void RenderGraph::InitSSIS()
@@ -166,38 +179,35 @@ void RenderGraph::ResetSSIS()
 
 void RenderGraph::BuildSSIS()
 {
-    for (const auto& groupedNodes : groupedNodesByQueue)
+    for (const auto& nodePtr : nodes)
     {
-        for (const size_t nodeIdx : groupedNodes)
+        const auto& node = *nodePtr;
+        const size_t syncIdx = node.GetSynchronizationIndex();
+        auto& ssis = GetSSIS(syncIdx);
+        if (node.HasAnyReadDependency())
         {
-            const auto& node = *nodes[nodeIdx];
-            const size_t syncIdx = node.GetSynchronizationIndex();
-            auto& ssis = GetSSIS(syncIdx);
-            if (node.HasAnyReadDependency())
+            SY_ASSERT(syncIdx != 0, "Synchronization Index == 0 only for read-independent node.");
+            ssis.CopyOtherNextToNow(GetSSIS(syncIdx - 1));
+
+            const auto& resourceReadDependencies = node.GetReadDependencies();
+            for (const std::string_view resourceName : resourceReadDependencies)
             {
-                SY_ASSERT(syncIdx != 0, "Synchronization Index == 0 only for read-independent node.");
-                ssis.CopyOtherNextToNow(GetSSIS(syncIdx - 1));
+                const auto writerNodeNameOpt = QueryWriterFromResource(resourceName);
+                SY_ASSERT(writerNodeNameOpt.has_value(), "Resource Name does not has any valid writer.");
+                auto writerNodeIdxOpt = GetNodeIndex(*writerNodeNameOpt);
+                SY_ASSERT(writerNodeIdxOpt.has_value(), "Invalid writer node name.");
+                auto& writerNode = *nodes[*writerNodeIdxOpt];
 
-                const auto& resourceReadDependencies = node.GetReadDependencies();
-                for (const std::string_view resourceName : resourceReadDependencies)
+                const size_t writerNodeQueueIdx = QueryQueueIndex(writerNode);
+                if (writerNode.IsExecuteOnAsyncCompute() != node.IsExecuteOnAsyncCompute())
                 {
-                    const auto writerNodeNameOpt = QueryWriterFromResource(resourceName);
-                    SY_ASSERT(writerNodeNameOpt.has_value(), "Resource Name does not has any valid writer.");
-                    auto writerNodeIdxOpt = GetNodeIndex(*writerNodeNameOpt);
-                    SY_ASSERT(writerNodeIdxOpt.has_value(), "Invalid writer node name.");
-                    auto& writerNode = *nodes[*writerNodeIdxOpt];
-
-                    const size_t writerNodeQueueIdx = QueryQueueIndex(writerNode);
-                    if (writerNode.IsExecuteOnAsyncCompute() != node.IsExecuteOnAsyncCompute())
-                    {
-                        auto& writerNodeSSIS = GetSSIS(*writerNodeIdxOpt);
-                        ssis.UpdateNow(writerNodeQueueIdx, GetSSIS(writerNode.GetSynchronizationIndex()));
-                    }
+                    auto& writerNodeSSIS = GetSSIS(*writerNodeIdxOpt);
+                    ssis.UpdateNow(writerNodeQueueIdx, GetSSIS(writerNode.GetSynchronizationIndex()));
                 }
             }
-
-            ssis.UpdateNext(QueryQueueIndex(node), syncIdx);
         }
+
+        ssis.UpdateNext(QueryQueueIndex(node), syncIdx);
     }
 }
 
@@ -243,5 +253,45 @@ std::optional<size_t> RenderGraph::GetNodeIndex(const std::string_view name) con
     }
 
     return std::nullopt;
+}
+
+void RenderGraph::BuildMinDependencyLevelSyncPoints()
+{
+    const size_t maxDependencyLevel = nodes.back()->GetDependencyLevel();
+    minDependencyLevelSyncPoints.resize(maxDependencyLevel + 1);
+	for (size_t dl = 0; dl <= maxDependencyLevel; ++dl)
+	{
+		for (size_t queueIdx = 0; queueIdx < NumOfSupportedQueues; ++queueIdx)
+		{
+            const auto& groupedNodesIdx = groupedNodesByQueue[queueIdx];
+            bool bFoundSynchronizationPoint = false;
+			for (const size_t nodeIdx : groupedNodesIdx)
+			{
+				if (bFoundSynchronizationPoint)
+				{
+                    break;
+				}
+                else if (nodes[nodeIdx]->HasAnyReadDependency() && (nodes[nodeIdx]->GetDependencyLevel() == dl))
+				{
+                    for (size_t otherQueueIdx = 0; otherQueueIdx < NumOfSupportedQueues; ++otherQueueIdx)
+                    {
+                        if (queueIdx != otherQueueIdx && !minDependencyLevelSyncPoints[dl].contains(otherQueueIdx))
+                        {
+                            const size_t syncIdx = nodes[nodeIdx]->GetSynchronizationIndex();
+                            const auto& ssis = GetSSIS(syncIdx);
+                            const auto& prevSSIS = GetSSIS(syncIdx - 1);
+
+							if (ssis.Now[otherQueueIdx] != prevSSIS.Next[otherQueueIdx])
+							{
+                                minDependencyLevelSyncPoints[dl].insert(otherQueueIdx);
+								bFoundSynchronizationPoint = true;
+                                break;
+							}
+                        }
+                    }
+				}
+			}
+		}
+	}
 }
 } // namespace sy::render
