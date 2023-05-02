@@ -29,11 +29,14 @@ public:
 
 	bool IsUsedNativeHandle() const { return nativeHandle != std::nullopt; }
 
-    void SetSourceState(const ETextureState state) { this->srcState = state; }
-    void SetDestinationState(const ETextureState state) { this->dstState = state; }
+    void SetSourceState(const ETextureState state) { this->srcAccessPattern = QueryAccessPattern(state); }
+    void SetDestinationState(const ETextureState state) { this->dstAccessPattern= QueryAccessPattern(state); }
     void SetSourceQueueType(const EQueueType srcQueueType) { this->srcQueueType = srcQueueType; }
     void SetDestinationQueueType(const EQueueType dstQueueType) { this->dstQueueType = dstQueueType; }
     void SetSubresourceRange(const VkImageSubresourceRange range) { this->subresourceRange = range; }
+
+	void OverlapSourceState(const ETextureState state) { srcAccessPattern->Overlap(QueryAccessPattern(state)); }
+    void OverlapDestinationState(const ETextureState state) { dstAccessPattern->Overlap(QueryAccessPattern(state)); }
 
     VkImageMemoryBarrier2 Build() const;
 
@@ -41,8 +44,8 @@ private:
     const VulkanContext& vulkanContext;
     Handle<Texture> handle = {};
     std::optional<VkImage> nativeHandle = std::nullopt;
-    std::optional<ETextureState> srcState = std::nullopt;
-    std::optional<ETextureState> dstState = std::nullopt;
+    std::optional<AccessPattern> srcAccessPattern = std::nullopt;
+    std::optional<AccessPattern> dstAccessPattern = std::nullopt;
     std::optional<EQueueType> srcQueueType = std::nullopt;
     std::optional<EQueueType> dstQueueType = std::nullopt;
     std::optional<VkImageSubresourceRange> subresourceRange = std::nullopt;

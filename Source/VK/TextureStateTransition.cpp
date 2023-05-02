@@ -19,30 +19,33 @@ void TextureStateTransition::SetTexture(const Texture& texture)
 
 VkImageMemoryBarrier2 TextureStateTransition::Build() const
 {
-    const bool bValidStates = srcState && dstState;
+    const bool bValidStates = this->srcAccessPattern && this->dstAccessPattern;
     SY_ASSERT(bValidStates, "Both states are does not setup. It result in redundant transition.");
-    const bool bStatesAreNotEqual = bValidStates && (*srcState != *dstState);
+    const bool bStatesAreNotEqual =
+        (srcAccessPattern->Access != dstAccessPattern->Access) &&
+        (srcAccessPattern->ImageLayout != dstAccessPattern->ImageLayout) &&
+        (srcAccessPattern->PipelineStage != dstAccessPattern->PipelineStage);
     SY_ASSERT(bStatesAreNotEqual, "State are equal. It may result in redudant transition.");
 
-	bool bIsValidNativeHandle = false;
-	if (IsUsedNativeHandle())
-	{
+    bool bIsValidNativeHandle = false;
+    if (IsUsedNativeHandle())
+    {
         bIsValidNativeHandle = nativeHandle != VK_NULL_HANDLE;
         SY_ASSERT(bIsValidNativeHandle, "Invalid Vulkan Native Handle.");
 
-		const bool bHasSubresourceRange = subresourceRange != std::nullopt;
+        const bool bHasSubresourceRange = subresourceRange != std::nullopt;
         SY_ASSERT(bHasSubresourceRange, "Native Handle State Transtion must specify subresource range manually.");
-	}
-	else
-	{
+    }
+    else
+    {
         const bool bIsValidHandle = handle.IsValid();
         SY_ASSERT(bIsValidHandle, "Invalid Texture Handle.");
         bIsValidNativeHandle = handle->GetNative() != VK_NULL_HANDLE;
-	}
+    }
     SY_ASSERT(bIsValidNativeHandle, "Invalid Vulkan Native Handle.");
 
-    const AccessPattern srcAccessPattern = srcState ? QueryAccessPattern(*srcState) : QueryAccessPattern(ETextureState::None);
-    const AccessPattern dstAccessPattern = dstState ? QueryAccessPattern(*dstState) : QueryAccessPattern(ETextureState::None);
+    const AccessPattern srcAccessPattern = this->srcAccessPattern ? *this->srcAccessPattern : QueryAccessPattern(ETextureState::None);
+    const AccessPattern dstAccessPattern = this->dstAccessPattern ? *this->dstAccessPattern : QueryAccessPattern(ETextureState::None);
 
     const VulkanRHI& vulkanRHI = vulkanContext.GetRHI();
     const VkImageMemoryBarrier2 barrier{
