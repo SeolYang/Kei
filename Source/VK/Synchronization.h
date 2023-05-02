@@ -170,9 +170,18 @@ enum class ETextureState
 
 struct AccessPattern
 {
+public:
+    void Overlap(const AccessPattern& rhs)
+    {
+        PipelineStage |= rhs.PipelineStage;
+        Access |= rhs.Access;
+        ImageLayout = ImageLayout != rhs.ImageLayout ? VK_IMAGE_LAYOUT_GENERAL : ImageLayout;
+    }
+
+public:
     VkPipelineStageFlags2 PipelineStage;
-    VkAccessFlags2        Access;
-    VkImageLayout         ImageLayout;
+    VkAccessFlags2 Access;
+    VkImageLayout ImageLayout;
 };
 
 static AccessPattern QueryAccessPattern(const ETextureState pattern)
