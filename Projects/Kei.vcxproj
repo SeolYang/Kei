@@ -45,6 +45,7 @@
     <ClCompile Include="..\Source\Render\RenderPass.cpp" />
     <ClCompile Include="..\Source\Render\RenderPasses\SimpleRenderPass.cpp" />
     <ClCompile Include="..\Source\Tests\CoreUnitTest.cpp" />
+    <ClCompile Include="..\Source\Tests\VKUnitTest.cpp" />
     <ClCompile Include="..\Source\VK\MipmapGenerator.cpp" />
     <ClCompile Include="..\Source\VK\Buffer.cpp" />
     <ClCompile Include="..\Source\VK\BufferBuilder.cpp" />

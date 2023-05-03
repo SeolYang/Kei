@@ -275,7 +275,7 @@ static AccessPattern QueryAccessPattern(const ETextureState pattern)
         case ETextureState::FragmentShaderReadSampledImage:
             return {
                 VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
-                VK_ACCESS_2_SHADER_READ_BIT_KHR,
+                VK_ACCESS_2_SHADER_SAMPLED_READ_BIT,
                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
 
         case ETextureState::FragmentShaderReadColorInputAttachment:

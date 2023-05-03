@@ -163,6 +163,9 @@
     <ClCompile Include="..\Source\VK\ResourceStateTransition.cpp">
       <Filter>Source\VK</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Tests\VKUnitTest.cpp">
+      <Filter>Source\Test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Audio\AudioContext.h">
