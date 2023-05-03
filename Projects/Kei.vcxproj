@@ -45,7 +45,6 @@
     <ClCompile Include="..\Source\Render\RenderPass.cpp" />
     <ClCompile Include="..\Source\Render\RenderPasses\SimpleRenderPass.cpp" />
     <ClCompile Include="..\Source\Tests\CoreUnitTest.cpp" />
-    <ClCompile Include="..\Source\VK\BufferStateTransition.cpp" />
     <ClCompile Include="..\Source\VK\MipmapGenerator.cpp" />
     <ClCompile Include="..\Source\VK\Buffer.cpp" />
     <ClCompile Include="..\Source\VK\BufferBuilder.cpp" />
@@ -56,6 +55,7 @@
     <ClCompile Include="..\Source\VK\Fence.cpp" />
     <ClCompile Include="..\Source\VK\FrameTracker.cpp" />
     <ClCompile Include="..\Source\VK\LayoutCache.cpp" />
+    <ClCompile Include="..\Source\VK\ResourceStateTransition.cpp" />
     <ClCompile Include="..\Source\VK\Sampler.cpp" />
     <ClCompile Include="..\Source\VK\SamplerBuilder.cpp" />
     <ClCompile Include="..\Source\VK\Texture.cpp" />
@@ -65,7 +65,6 @@
     <ClCompile Include="..\Source\VK\ShaderModule.cpp" />
     <ClCompile Include="..\Source\VK\Swapchain.cpp" />
     <ClCompile Include="..\Source\VK\TextureBuilder.cpp" />
-    <ClCompile Include="..\Source\VK\TextureStateTransition.cpp" />
     <ClCompile Include="..\Source\VK\TextureView.cpp" />
     <ClCompile Include="..\Source\VK\VertexInputBuilder.cpp" />
     <ClCompile Include="..\Source\VK\VulkanRHI.cpp" />
@@ -124,7 +123,6 @@
     <ClInclude Include="..\Source\Render\RenderPass.h" />
     <ClInclude Include="..\Source\Render\RenderPasses\SimpleRenderPass.h" />
     <ClInclude Include="..\Source\Render\Vertex.h" />
-    <ClInclude Include="..\Source\VK\BufferStateTransition.h" />
     <ClInclude Include="..\Source\VK\MipmapGenerator.h" />
     <ClInclude Include="..\Source\VK\Buffer.h" />
     <ClInclude Include="..\Source\VK\BufferBuilder.h" />
@@ -136,6 +134,7 @@
     <ClInclude Include="..\Source\VK\FrameTracker.h" />
     <ClInclude Include="..\Source\VK\LayoutCache.h" />
     <ClInclude Include="..\Source\VK\PushConstantBuilder.h" />
+    <ClInclude Include="..\Source\VK\ResourceStateTransition.h" />
     <ClInclude Include="..\Source\VK\Sampler.h" />
     <ClInclude Include="..\Source\VK\SamplerBuilder.h" />
     <ClInclude Include="..\Source\VK\Synchronization.h" />
@@ -146,7 +145,6 @@
     <ClInclude Include="..\Source\VK\ShaderModule.h" />
     <ClInclude Include="..\Source\VK\Swapchain.h" />
     <ClInclude Include="..\Source\VK\TextureBuilder.h" />
-    <ClInclude Include="..\Source\VK\TextureStateTransition.h" />
     <ClInclude Include="..\Source\VK\TextureView.h" />
     <ClInclude Include="..\Source\VK\VertexInputBuilder.h" />
     <ClInclude Include="..\Source\VK\VulkanConstants.h" />

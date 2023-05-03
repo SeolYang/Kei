@@ -42,7 +42,7 @@ SimpleRenderPass::SimpleRenderPass(const std::string_view name,
         graphicsCmdBuffer->Begin();
 
 		vk::BufferStateTransition transition{GetVulkanContext()};
-        transition.SetBuffer(*transformBuffers[idx]);
+        transition.SetResource(*transformBuffers[idx]);
         transition.SetSourceState(vk::EBufferState::None);
         transition.SetDestinationState(vk::EBufferState::VertexShaderReadUniformBuffer);
         graphicsCmdBuffer->End();

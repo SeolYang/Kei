@@ -1,8 +1,8 @@
 #pragma once
 #include <PCH.h>
 #include <VK/VulkanWrapper.h>
-#include <VK/TextureStateTransition.h>
-#include <VK/BufferStateTransition.h>
+#include <VK/Texture.h>
+#include <VK/Buffer.h>
 
 namespace sy::vk
 {

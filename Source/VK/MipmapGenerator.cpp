@@ -97,7 +97,7 @@ void MipmapGenerator::SubmitBlitToCommandBuffer(const vk::CommandBuffer& cmdBuff
     imageBlit.dstOffsets[1].z = dstExtent.depth;
 
 	TextureStateTransition stateTransition{vulkanContext};
-    stateTransition.SetTexture(dstMip);
+    stateTransition.SetResource(dstMip);
     stateTransition.SetSourceState(vk::ETextureState::TransferRead);
 	stateTransition.SetDestinationState(vk::ETextureState::TransferWrite);
     cmdBuffer.ApplyStateTransition(stateTransition);

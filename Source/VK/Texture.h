@@ -1,6 +1,7 @@
 #pragma once
 #include <PCH.h>
 #include <VK/VulkanWrapper.h>
+#include <VK/ResourceStateTransition.h>
 
 namespace sy::vk
 {
@@ -9,6 +10,11 @@ class FrameTracker;
 class TextureBuilder;
 class Texture : public VulkanWrapper<VkImage>
 {
+public:
+    using SubresourceRange = VkImageSubresourceRange;
+	using Barrier = VkImageMemoryBarrier2;
+	using State = ETextureState;
+
 public:
     explicit Texture(const TextureBuilder& builder);
     ~Texture() override = default;
@@ -27,7 +33,7 @@ public:
     [[nodiscard]] auto GetNumSubresources() const { return IsTextureArray() ? GetExtent().depth * GetMipLevels() : GetMipLevels(); }
     [[nodiscard]] auto GetImageAspect() const { return FormatToImageAspect(format); }
     [[nodiscard]] auto GetInitialState() const { return initialState; }
-    [[nodiscard]] VkImageSubresourceRange GetFullSubresourceRange() const { return {GetImageAspect(), 0, GetMipLevels(), 0, GetArrayLayers()}; }
+    [[nodiscard]] auto GetFullSubresourceRange() const { return SubresourceRange{GetImageAspect(), 0, GetMipLevels(), 0, GetArrayLayers()}; }
     [[nodiscard]] VmaAllocation GetAllocation() const { return allocation; }
 
 private:
@@ -41,7 +47,9 @@ private:
     const uint32_t layers;
     const VkSampleCountFlagBits samples;
     const VkImageTiling tiling;
-    const ETextureState initialState;
+    const State initialState;
     const uint32_t mips;
 };
+
+using TextureStateTransition = ResourceStateTransition<Texture>;
 } // namespace sy::vk

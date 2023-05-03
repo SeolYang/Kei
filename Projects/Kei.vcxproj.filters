@@ -154,17 +154,14 @@
     <ClCompile Include="..\Source\Asset\AssetImportConfig.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\VK\TextureStateTransition.cpp">
-      <Filter>Source\VK</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\VK\BufferStateTransition.cpp">
-      <Filter>Source\VK</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Render\RenderGraph.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Render\RenderNode.cpp">
       <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\VK\ResourceStateTransition.cpp">
+      <Filter>Source\VK</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -387,12 +384,6 @@
     <ClInclude Include="..\Source\Asset\AssetImportConfig.h">
       <Filter>Source\Asset</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\VK\TextureStateTransition.h">
-      <Filter>Source\VK</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\VK\BufferStateTransition.h">
-      <Filter>Source\VK</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Render\RenderGraph.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
@@ -401,6 +392,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\Render\RenderGraphResource.h">
       <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\VK\ResourceStateTransition.h">
+      <Filter>Source\VK</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
