@@ -330,7 +330,7 @@ void RenderGraph::ScheduleStateTransitions()
                 {
 					const auto& resource = GetOrCreateBuffer(resourceTransitions.first);
                     auto& transition = std::get<vk::BufferStateTransition>(transitionVariant);
-                    transition.OverlapDestinationState(resource.QueryStateFor(readerNode.GetName()));
+                    transition.OverlapDestinationState(resource.QueryStateFor(readerNode.GetName()))
                 }
             }
         }
