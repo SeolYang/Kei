@@ -55,6 +55,7 @@ public:
     [[nodiscard]] std::string_view GetName() const { return name; }
     [[nodiscard]] BuilderType& GetBuilder() { return builder; }
     [[nodiscard]] const auto& GetReaders() const { return readers; }
+    [[nodiscard]] auto QueryStateFor(const std::string_view reader) const { return readerStateMap.at(reader.data()); }
 
 private:
     const std::string name;

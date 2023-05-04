@@ -1,6 +1,8 @@
 #pragma once
 #include <PCH.h>
 #include <Render/RenderGraphResource.h>
+#include <VK/Buffer.h>
+#include <VK/Texture.h>
 
 namespace sy::render
 {
@@ -13,6 +15,7 @@ class RenderGraph : public NonCopyable
 public:
     constexpr static size_t NumOfSupportedQueues = 2; // Graphics, Async Compute
     constexpr static vk::EQueueType MostCompetentQueue = vk::EQueueType::Graphics;
+	using StateTransitionVariant = std::variant<std::monostate, vk::TextureStateTransition, vk::BufferStateTransition>;
 
 private:
     struct SSIS
@@ -30,11 +33,11 @@ private:
                 Next[queueIdx] = queueIdx == nodeQueueIdx ? syncIdx : Now[queueIdx];
             }
         }
-		
-		void UpdateNow(const size_t targetNodeQueueIdx, const SSIS& other)
-		{
+
+        void UpdateNow(const size_t targetNodeQueueIdx, const SSIS& other)
+        {
             Now[targetNodeQueueIdx] = std::max(Now[targetNodeQueueIdx], other.Next[targetNodeQueueIdx]);
-		}
+        }
 
     public:
         std::array<size_t, NumOfSupportedQueues> Now;
@@ -71,8 +74,9 @@ private:
 
     std::optional<std::string_view> QueryWriterFromResource(std::string_view resourceName) const;
     SSIS& GetSSIS(const size_t synchronizationIdx);
-    std::optional<size_t> GetNodeIndex(std::string_view name) const;
-    RefOptional<RenderNode> GetNode(std::string_view name);
+    size_t GetNodeIndex(std::string_view name) const;
+    RenderNode& GetNode(std::string_view name);
+    [[nodiscard]] size_t GetMaximumDependencyLevel() const;
 
     void TopologicalSort();
     void DFS(size_t depth, size_t nodeIdx, const robin_hood::unordered_map<std::string, size_t> nodeIndexMap, std::vector<size_t>& sorted, std::vector<bool>& visited, std::vector<bool>& onStack);
@@ -84,7 +88,10 @@ private:
     void ResetSSIS();
     void BuildSSIS();
 
-	void BuildMinDependencyLevelSyncPoints();
+    void BuildMinDependencyLevelSyncPoints();
+
+    void ScheduleStateTransitions();
+    std::vector<robin_hood::unordered_map<std::string, std::vector<size_t>>> GatherTransitionTargets() const;
 
 private:
     vk::VulkanContext& vulkanContext;
@@ -94,5 +101,6 @@ private:
     std::array<std::vector<size_t>, RenderGraph::NumOfSupportedQueues> groupedNodesByQueue;
     std::vector<SSIS> ssises;
     std::vector<robin_hood::unordered_set<size_t>> minDependencyLevelSyncPoints;
+    std::vector<robin_hood::unordered_map<std::string, StateTransitionVariant>> scheduledTransitions;
 };
 } // namespace sy::render

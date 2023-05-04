@@ -103,8 +103,7 @@ void RenderGraph::DFS(const size_t depth, const size_t nodeIdx, const robin_hood
             for (const auto& dependentNodeName : textureMap[writeResourceName]->GetReaders())
             {
                 const auto idx = GetNodeIndex(dependentNodeName);
-                SY_ASSERT(idx.has_value(), "Dependent Node name is not valid.");
-                readByDependencies.insert(*idx);
+                readByDependencies.insert(idx);
             }
         }
 
@@ -128,17 +127,22 @@ void RenderGraph::Compile()
     // #todo Schedule synchronization / resource state transitions
     // if 2 or more read dependencies exist at same dependency level.
     // Should i force promote state to AnyXXX state?
-	for (size_t dl = 0; dl <= nodes.back()->GetDependencyLevel(); ++dl)
-	{
-		if (!minDependencyLevelSyncPoints[dl].empty())
-		{
+    for (size_t dl = 0; dl <= nodes.back()->GetDependencyLevel(); ++dl)
+    {
+        if (!minDependencyLevelSyncPoints[dl].empty())
+        {
             spdlog::info("Dependency Level {}, required to sync with below queues.", dl);
             for (const size_t queueIdx : minDependencyLevelSyncPoints[dl])
             {
                 spdlog::info("Q{}", queueIdx);
             }
-		}
-	}
+        }
+    }
+
+    ScheduleStateTransitions();
+    // 각 dl 에서 맨 처음 state는 setState, 그다음 부터는 overlap으로 누적
+    // DL[0]["resource"].HasDstState() -> DL[0]["resource"].Overlap(newState);
+    // else DL[0]["resource"].SetSrcState(newState)...
 }
 
 void RenderGraph::InitSSIS()
@@ -194,14 +198,12 @@ void RenderGraph::BuildSSIS()
             {
                 const auto writerNodeNameOpt = QueryWriterFromResource(resourceName);
                 SY_ASSERT(writerNodeNameOpt.has_value(), "Resource Name does not has any valid writer.");
-                auto writerNodeIdxOpt = GetNodeIndex(*writerNodeNameOpt);
-                SY_ASSERT(writerNodeIdxOpt.has_value(), "Invalid writer node name.");
-                auto& writerNode = *nodes[*writerNodeIdxOpt];
-
+                auto writerNodeIdx = GetNodeIndex(*writerNodeNameOpt);
+                auto& writerNode = GetNode(*writerNodeNameOpt);
                 const size_t writerNodeQueueIdx = QueryQueueIndex(writerNode);
                 if (writerNode.IsExecuteOnAsyncCompute() != node.IsExecuteOnAsyncCompute())
                 {
-                    auto& writerNodeSSIS = GetSSIS(*writerNodeIdxOpt);
+                    auto& writerNodeSSIS = GetSSIS(writerNodeIdx);
                     ssis.UpdateNow(writerNodeQueueIdx, GetSSIS(writerNode.GetSynchronizationIndex()));
                 }
             }
@@ -211,15 +213,9 @@ void RenderGraph::BuildSSIS()
     }
 }
 
-RefOptional<RenderNode> RenderGraph::GetNode(const std::string_view name)
+RenderNode& RenderGraph::GetNode(const std::string_view name)
 {
-    auto idxOpt = GetNodeIndex(name);
-    if (idxOpt)
-    {
-        return *nodes[*idxOpt];
-    }
-
-    return std::nullopt;
+    return *nodes[GetNodeIndex(name)];
 }
 
 std::optional<std::string_view> RenderGraph::QueryWriterFromResource(const std::string_view resourceName) const
@@ -241,8 +237,9 @@ RenderGraph::SSIS& RenderGraph::GetSSIS(const size_t synchronizationIdx)
     return ssises[synchronizationIdx - 1];
 }
 
-std::optional<size_t> RenderGraph::GetNodeIndex(const std::string_view name) const
+size_t RenderGraph::GetNodeIndex(const std::string_view name) const
 {
+    SY_ASSERT(nodes.size() > 0, "Node list empty.");
     for (size_t idx = 0; idx < nodes.size(); ++idx)
     {
         const auto& node = *nodes[idx];
@@ -252,27 +249,34 @@ std::optional<size_t> RenderGraph::GetNodeIndex(const std::string_view name) con
         }
     }
 
-    return std::nullopt;
+    SY_ASSERT(false, "Does not found node {}.", name);
+    return nodes.size();
+}
+
+size_t RenderGraph::GetMaximumDependencyLevel() const
+{
+    SY_ASSERT(!nodes.empty(), "Node does not exist.");
+    return !nodes.empty() ? nodes.back()->GetDependencyLevel() : 0;
 }
 
 void RenderGraph::BuildMinDependencyLevelSyncPoints()
 {
     const size_t maxDependencyLevel = nodes.back()->GetDependencyLevel();
     minDependencyLevelSyncPoints.resize(maxDependencyLevel + 1);
-	for (size_t dl = 0; dl <= maxDependencyLevel; ++dl)
-	{
-		for (size_t queueIdx = 0; queueIdx < NumOfSupportedQueues; ++queueIdx)
-		{
+    for (size_t dl = 0; dl <= maxDependencyLevel; ++dl)
+    {
+        for (size_t queueIdx = 0; queueIdx < NumOfSupportedQueues; ++queueIdx)
+        {
             const auto& groupedNodesIdx = groupedNodesByQueue[queueIdx];
             bool bFoundSynchronizationPoint = false;
-			for (const size_t nodeIdx : groupedNodesIdx)
-			{
-				if (bFoundSynchronizationPoint)
-				{
+            for (const size_t nodeIdx : groupedNodesIdx)
+            {
+                if (bFoundSynchronizationPoint)
+                {
                     break;
-				}
+                }
                 else if (nodes[nodeIdx]->HasAnyReadDependency() && (nodes[nodeIdx]->GetDependencyLevel() == dl))
-				{
+                {
                     for (size_t otherQueueIdx = 0; otherQueueIdx < NumOfSupportedQueues; ++otherQueueIdx)
                     {
                         if (queueIdx != otherQueueIdx && !minDependencyLevelSyncPoints[dl].contains(otherQueueIdx))
@@ -281,17 +285,89 @@ void RenderGraph::BuildMinDependencyLevelSyncPoints()
                             const auto& ssis = GetSSIS(syncIdx);
                             const auto& prevSSIS = GetSSIS(syncIdx - 1);
 
-							if (ssis.Now[otherQueueIdx] != prevSSIS.Next[otherQueueIdx])
-							{
+                            if (ssis.Now[otherQueueIdx] != prevSSIS.Next[otherQueueIdx])
+                            {
                                 minDependencyLevelSyncPoints[dl].insert(otherQueueIdx);
-								bFoundSynchronizationPoint = true;
+                                bFoundSynchronizationPoint = true;
                                 break;
-							}
+                            }
                         }
                     }
-				}
-			}
-		}
-	}
+                }
+            }
+        }
+    }
 }
+
+
+void RenderGraph::ScheduleStateTransitions()
+{
+    const auto gatheredTransitionTargets = GatherTransitionTargets();
+    SY_ASSERT(gatheredTransitionTargets.size() > 0, "Dependency Level > 0");
+    scheduledTransitions.resize(gatheredTransitionTargets.size());
+    for (size_t dependencyLevel = 0; dependencyLevel < gatheredTransitionTargets.size(); ++dependencyLevel)
+    {
+        for (const auto& resourceTransitions : gatheredTransitionTargets[dependencyLevel])
+        {
+            const bool bIsTexture = textureMap.contains(resourceTransitions.first);
+            scheduledTransitions[dependencyLevel].insert(
+                {resourceTransitions.first,
+                 bIsTexture ?
+                     StateTransitionVariant{vk::TextureStateTransition{vulkanContext}} :
+                     StateTransitionVariant{vk::BufferStateTransition{vulkanContext}}});
+
+			auto& transitionVariant = scheduledTransitions[dependencyLevel].at(resourceTransitions.first);
+            for (const auto readerNodeIdx : resourceTransitions.second)
+            {
+                const auto& readerNode = *nodes[readerNodeIdx];
+                if (bIsTexture)
+                {
+                    const auto& resource = GetOrCreateTexture(resourceTransitions.first);
+                    auto& transition = std::get<vk::TextureStateTransition>(transitionVariant);
+                    transition.OverlapDestinationState(resource.QueryStateFor(readerNode.GetName()));
+                }
+                else
+                {
+					const auto& resource = GetOrCreateBuffer(resourceTransitions.first);
+                    auto& transition = std::get<vk::BufferStateTransition>(transitionVariant);
+                    transition.OverlapDestinationState(resource.QueryStateFor(readerNode.GetName()));
+                }
+            }
+        }
+    }
+}
+
+
+std::vector<robin_hood::unordered_map<std::string, std::vector<size_t>>> RenderGraph::GatherTransitionTargets() const
+{
+    std::vector<robin_hood::unordered_map<std::string, std::vector<size_t>>> gatheredStateTransitionTarget(GetMaximumDependencyLevel() + 1);
+    for (size_t nodeIdx = 0; nodeIdx < nodes.size(); ++nodeIdx)
+    {
+        const auto& node = *nodes[nodeIdx];
+        if (node.HasAnyReadDependency())
+        {
+            const size_t nodeDependencyLevel = node.GetDependencyLevel();
+            for (const auto& readDependency : node.GetReadDependencies())
+            {
+                gatheredStateTransitionTarget[nodeDependencyLevel][readDependency].emplace_back(nodeIdx);
+            }
+        }
+    }
+
+    for (size_t dl = 0; dl < gatheredStateTransitionTarget.size(); ++dl)
+    {
+        spdlog::info("Dependency Level : {}", dl);
+        for (const auto& resourceStateTransitionRequest : gatheredStateTransitionTarget[dl])
+        {
+            spdlog::info("Resource {} state transition required by..", resourceStateTransitionRequest.first);
+            for (const auto& resourceStateTransitionRequester : resourceStateTransitionRequest.second)
+            {
+                spdlog::info("Node : {}", nodes[resourceStateTransitionRequester]->GetName());
+            }
+        }
+    }
+
+    return gatheredStateTransitionTarget;
+}
+
 } // namespace sy::render

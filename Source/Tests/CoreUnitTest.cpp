@@ -45,7 +45,7 @@ TEST_CASE("HandleMap", "[handle_map]")
     SECTION("Allocation of Handle")
     {
         sy::HandleMap<size_t> map;
-        auto                  handleOfHundred = map.Add(std::make_unique<size_t>(100));
+        auto handleOfHundred = map.Add(std::make_unique<size_t>(100));
         REQUIRE(handleOfHundred.IsValid());
         REQUIRE(!handleOfHundred.HasAlias());
         REQUIRE(handleOfHundred.TryGetObject() != std::nullopt);
@@ -76,7 +76,7 @@ TEST_CASE("HandleMap", "[handle_map]")
 
     SECTION("Handle Alias")
     {
-        sy::HandleMap<size_t>      map;
+        sy::HandleMap<size_t> map;
         constexpr std::string_view HundredAlias = "Hundred";
 
         auto handleOfHundred = map.Add(std::make_unique<size_t>(100));
@@ -112,9 +112,9 @@ TEST_CASE("HandleManager", "[handle_mng]")
     SECTION("Allocation of HandleMap")
     {
         constexpr float PI = 3.141592f;
-        HandleManager   handleMng;
-        auto&           floatHandleMap = handleMng.GetHandleMap<float>();
-        auto            piHandle       = handleMng.Add<float>(PI);
+        HandleManager handleMng;
+        auto& floatHandleMap = handleMng.GetHandleMap<float>();
+        auto piHandle = handleMng.Add<float>(PI);
         REQUIRE(piHandle.IsValid());
         const auto ownerOfPiHandle = piHandle.GetOwner();
         REQUIRE(&floatHandleMap == &ownerOfPiHandle.value().get());
@@ -142,7 +142,7 @@ TEST_CASE("Utilities", "[utils]")
         REQUIRE(sy::ContainsBitFlag<VkCommandBufferUsageFlags>(tempFlagBits, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT));
 
         std::string ExtensionWithOutNormalize = ".GLtf";
-        std::string normalizeExtension        = sy::NormalizeExtension(ExtensionWithOutNormalize);
+        std::string normalizeExtension = sy::NormalizeExtension(ExtensionWithOutNormalize);
         REQUIRE(normalizeExtension == "gltf");
     }
 }
