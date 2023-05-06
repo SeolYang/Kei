@@ -18,66 +18,6 @@ public:
 
     ~ResourceStateTransition() = default;
 
-    /**
-	* @warn	This method always reset before setup new texture handle.
-	*/
-    void UseResource(const Texture& texture);
-
-	/**
-	* @warn	This method always reset before setup new texture handle.
-	*/
-    void UseResource(Handle<Texture> handle);
-
-	/**
-	* @warn	This method always reset before setup new texture handle.
-	*/
-    void UseResource(const VkImage nativeHandle)
-    {
-        Reset();
-        handleVariant = nativeHandle;
-    }
-
-	/**
-	* @warn	This method always reset before setup new buffer handle.
-	*/
-    void UseResource(const Buffer& buffer);
-
-	/**
-	* @warn	This method always reset before setup new buffer handle.
-	*/
-    void UseResource(Handle<Buffer> handle);
-
-	/**
-	* @warn	This method always reset before setup new buffer handle.
-	*/
-    void UseResource(const VkBuffer nativeHandle)
-    {
-        Reset();
-        handleVariant = nativeHandle;
-    }
-
-    void SetSourceState(const ETextureState state);
-    void SetDestinationState(const ETextureState state);
-    void SetSourceState(const EBufferState state);
-    void SetDestinationState(const EBufferState state);
-
-    void OverlapSourceState(const ETextureState state);
-    void OverlapDestinationState(const ETextureState state);
-    void OverlapSourceState(const EBufferState state);
-    void OverlapDestinationState(const EBufferState state);
-
-    void SetSourceQueueType(const EQueueType srcQueueType) { this->srcQueueType = srcQueueType; }
-    void SetDestinationQueueType(const EQueueType dstQueueType) { this->dstQueueType = dstQueueType; }
-
-    void SetSubresourceRange(VkImageSubresourceRange range, bool bUseAsFullRange = true);
-    void SetSubresourceRange(Range<uint32_t> range, bool bUseAsFullRange = true);
-
-    VkImageMemoryBarrier2 AsTextureMemoryBarrier() const;
-    VkBufferMemoryBarrier2 AsBufferMemoryBarrier() const;
-
-    bool IsTextureStateTransition() const { return std::holds_alternative<VkImage>(handleVariant); }
-    bool IsBufferStateTransition() const { return std::holds_alternative<VkBuffer>(handleVariant); }
-
     void Reset()
     {
         handleVariant = {};
@@ -88,6 +28,72 @@ public:
         srcQueueType = std::nullopt;
         dstQueueType = std::nullopt;
     }
+
+    /**
+	* @warn	This method always reset before setup new texture handle.
+	*/
+    void UseResource(const Texture& texture);
+
+    /**
+	* @warn	This method always reset before setup new texture handle.
+	*/
+    void UseResource(Handle<Texture> handle);
+
+    /**
+	* @warn	This method always reset before setup new texture handle.
+	*/
+    void UseResource(const VkImage nativeHandle)
+    {
+        Reset();
+        handleVariant = nativeHandle;
+    }
+
+    /**
+	* @warn	This method always reset before setup new buffer handle.
+	*/
+    void UseResource(const Buffer& buffer);
+
+    /**
+	* @warn	This method always reset before setup new buffer handle.
+	*/
+    void UseResource(Handle<Buffer> handle);
+
+    /**
+	* @warn	This method always reset before setup new buffer handle.
+	*/
+    void UseResource(const VkBuffer nativeHandle)
+    {
+        Reset();
+        handleVariant = nativeHandle;
+    }
+
+    void SetSourceState(ETextureState state);
+    void SetSourceState(EBufferState state);
+    void SetDestinationState(ETextureState state);
+    void SetDestinationState(EBufferState state);
+
+    void OverlapSourceState(ETextureState state);
+    void OverlapSourceState(EBufferState state);
+    void OverlapDestinationState(ETextureState state);
+    void OverlapDestinationState(EBufferState state);
+
+    void SetSourceAccessPattern(const AccessPattern accessPattern) { srcAccessPattern = accessPattern;}
+    void SetDestinationAccessPattern(const AccessPattern accessPattern) { dstAccessPattern = accessPattern; }
+
+    void OverlapSourceAccessPattern(AccessPattern accessPattern);
+    void OverlapDestinationAccessPattern(AccessPattern accessPattern);
+
+    void SetSourceQueueType(const EQueueType srcQueueType) { this->srcQueueType = srcQueueType; }
+    void SetDestinationQueueType(const EQueueType dstQueueType) { this->dstQueueType = dstQueueType; }
+
+    void SetSubresourceRange(VkImageSubresourceRange range, bool bUseAsFullRange = true);
+    void SetSubresourceRange(Range<uint32_t> range, bool bUseAsFullRange = true);
+
+    [[nodiscard]] VkImageMemoryBarrier2 AsTextureMemoryBarrier() const;
+    [[nodiscard]] VkBufferMemoryBarrier2 AsBufferMemoryBarrier() const;
+
+    [[nodiscard]] bool IsTextureStateTransition() const { return std::holds_alternative<VkImage>(handleVariant); }
+    [[nodiscard]] bool IsBufferStateTransition() const { return std::holds_alternative<VkBuffer>(handleVariant); }
 
 private:
     void CheckValidation() const

@@ -19,10 +19,9 @@ void ResourceStateTransition::UseResource(const Handle<Texture> handle)
     UseResource(*handle);
 }
 
-
 void ResourceStateTransition::UseResource(const Buffer& buffer)
 {
-	Reset();
+    Reset();
     handleVariant = buffer.GetNative();
     SetSubresourceRange(buffer.GetFullSubresourceRange());
 }
@@ -35,95 +34,91 @@ void ResourceStateTransition::UseResource(const Handle<Buffer> handle)
 void ResourceStateTransition::SetSourceState(const ETextureState state)
 {
     CheckIsTextureTransition();
-    srcAccessPattern = QueryAccessPattern(state);
+    SetSourceAccessPattern(QueryAccessPattern(state));
 }
 
 void ResourceStateTransition::SetSourceState(const EBufferState state)
 {
     CheckIsBufferTransition();
-	srcAccessPattern = QueryAccessPattern(state);
+    SetSourceAccessPattern(QueryAccessPattern(state));
 }
 
 void ResourceStateTransition::SetDestinationState(const ETextureState state)
 {
-	CheckIsTextureTransition();
-    dstAccessPattern = QueryAccessPattern(state);
+    CheckIsTextureTransition();
+    SetDestinationAccessPattern(QueryAccessPattern(state));
 }
 
 void ResourceStateTransition::SetDestinationState(const EBufferState state)
 {
     CheckIsBufferTransition();
-	dstAccessPattern = QueryAccessPattern(state);
+    SetDestinationAccessPattern(QueryAccessPattern(state));
 }
 
 void ResourceStateTransition::OverlapSourceState(const ETextureState state)
 {
-	if (srcAccessPattern)
-	{
-        CheckIsTextureTransition();
-        srcAccessPattern->Overlap(QueryAccessPattern(state));
-	}
-	else
-	{
-        SetSourceState(state);
-	}
+    CheckIsTextureTransition();
+    OverlapSourceAccessPattern(QueryAccessPattern(state));
 }
 
 void ResourceStateTransition::OverlapSourceState(const EBufferState state)
 {
-    if (srcAccessPattern)
-    {
-        CheckIsBufferTransition();
-        srcAccessPattern->Overlap(QueryAccessPattern(state));
-    }
-    else
-    {
-        SetSourceState(state);
-    }
+    CheckIsBufferTransition();
+    OverlapSourceAccessPattern(QueryAccessPattern(state));
 }
 
 void ResourceStateTransition::OverlapDestinationState(const ETextureState state)
 {
-    if (dstAccessPattern)
-    {
-        CheckIsTextureTransition();
-        dstAccessPattern->Overlap(QueryAccessPattern(state));
-    }
-    else
-    {
-        SetDestinationState(state);
-    }
+    CheckIsTextureTransition();
+    OverlapDestinationAccessPattern(QueryAccessPattern(state));
 }
 
 void ResourceStateTransition::OverlapDestinationState(const EBufferState state)
 {
+    CheckIsBufferTransition();
+    OverlapDestinationAccessPattern(QueryAccessPattern(state));
+}
+
+void ResourceStateTransition::OverlapSourceAccessPattern(const AccessPattern accessPattern)
+{
     if (srcAccessPattern)
     {
-        CheckIsBufferTransition();
-        dstAccessPattern->Overlap(QueryAccessPattern(state));
+        srcAccessPattern->Overlap(accessPattern);
     }
     else
     {
-        SetDestinationState(state);
+        SetSourceAccessPattern(accessPattern);
+    }
+}
+
+void ResourceStateTransition::OverlapDestinationAccessPattern(const AccessPattern accessPattern)
+{
+    if (dstAccessPattern)
+    {
+        dstAccessPattern->Overlap(accessPattern);
+    }
+    else
+    {
+        SetDestinationAccessPattern(accessPattern);
     }
 }
 
 void ResourceStateTransition::SetSubresourceRange(const VkImageSubresourceRange range, const bool bUseAsFullRange)
 {
     subresourceRangeVariant = range;
-	if (bUseAsFullRange)
-	{
+    if (bUseAsFullRange)
+    {
         fullSubresourceRangeVariant = range;
-	}
+    }
 }
 
 void ResourceStateTransition::SetSubresourceRange(const Range<uint32_t> range, const bool bUseAsFullRange)
 {
     subresourceRangeVariant = range;
-	if (bUseAsFullRange)
-	{
+    if (bUseAsFullRange)
+    {
         fullSubresourceRangeVariant = range;
-	}
+    }
 }
 
 VkImageMemoryBarrier2 ResourceStateTransition::AsTextureMemoryBarrier() const
@@ -171,4 +166,4 @@ VkBufferMemoryBarrier2 ResourceStateTransition::AsBufferMemoryBarrier() const
         .offset = subresourceRange.Offset,
         .size = subresourceRange.Size};
 }
-}
+} // namespace sy::vk
