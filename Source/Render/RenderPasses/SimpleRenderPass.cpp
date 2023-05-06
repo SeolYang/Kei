@@ -14,6 +14,7 @@
 #include <VK/Semaphore.h>
 #include <VK/Sampler.h>
 #include <VK/Fence.h>
+#include <VK/ResourceStateTransition.h>
 #include <Render/Mesh.h>
 
 namespace sy::render
@@ -41,8 +42,8 @@ SimpleRenderPass::SimpleRenderPass(const std::string_view name,
         auto graphicsCmdBuffer = graphicsCmdPool.RequestCommandBuffer("Simple Render Pass Initial Sync");
         graphicsCmdBuffer->Begin();
 
-		vk::BufferStateTransition transition{GetVulkanContext()};
-        transition.SetResource(*transformBuffers[idx]);
+		vk::ResourceStateTransition transition{GetVulkanContext()};
+        transition.UseBuffer(*transformBuffers[idx]);
         transition.SetSourceState(vk::EBufferState::None);
         transition.SetDestinationState(vk::EBufferState::VertexShaderReadUniformBuffer);
         graphicsCmdBuffer->End();
@@ -54,11 +55,11 @@ SimpleRenderPass::SimpleRenderPass(const std::string_view name,
 void SimpleRenderPass::OnBegin()
 {
     const auto& graphicsCmdBuffer = GetCommandBuffer();
-    vk::TextureStateTransition noneToColorAttachmentWrite{GetVulkanContext()};
+    vk::ResourceStateTransition noneToColorAttachmentWrite{GetVulkanContext()};
+    noneToColorAttachmentWrite.UseTexture(swapchainImage);
 	noneToColorAttachmentWrite.SetSubresourceRange(vk::Swapchain::GetSubresourceRange());
     noneToColorAttachmentWrite.SetSourceState(vk::ETextureState::None);
     noneToColorAttachmentWrite.SetDestinationState(vk::ETextureState::ColorAttachmentWrite);
-    noneToColorAttachmentWrite.SetNativeHandle(swapchainImage);
     graphicsCmdBuffer.ApplyStateTransition(noneToColorAttachmentWrite);
 
     std::array colorAttachmentInfos = {swapchainAttachmentInfo};
@@ -112,11 +113,11 @@ void SimpleRenderPass::OnEnd()
     const auto& graphicsCmdBuffer = GetCommandBuffer();
     graphicsCmdBuffer.EndRendering();
 
-    vk::TextureStateTransition colorAttachmentToPresent{GetVulkanContext()};
+    vk::ResourceStateTransition colorAttachmentToPresent{GetVulkanContext()};
+    colorAttachmentToPresent.UseTexture(swapchainImage);
     colorAttachmentToPresent.SetSubresourceRange(vk::Swapchain::GetSubresourceRange());
     colorAttachmentToPresent.SetSourceState(vk::ETextureState::ColorAttachmentWrite);
     colorAttachmentToPresent.SetDestinationState(vk::ETextureState::Present);
-    colorAttachmentToPresent.SetNativeHandle(swapchainImage);
     graphicsCmdBuffer.ApplyStateTransition(colorAttachmentToPresent);
 }
 

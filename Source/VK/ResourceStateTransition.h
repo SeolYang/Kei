@@ -6,15 +6,10 @@ namespace sy::vk
 {
 class VulkanContext;
 class VulkanRHI;
-template <typename Resource>
+class Texture;
+class Buffer;
 class ResourceStateTransition
 {
-public:
-    using NativeHandle = Resource::NativeHandle;
-    using SubresourceRange = Resource::SubresourceRange;
-    using Barrier = Resource::Barrier;
-    using State = Resource::State;
-
 public:
     explicit ResourceStateTransition(const VulkanContext& vulkanContext) :
         vulkanContext(vulkanContext)
@@ -23,62 +18,76 @@ public:
 
     ~ResourceStateTransition() = default;
 
-    void SetHandle(const Handle<Resource> newHandle)
+    /**
+	* @warn	This method always reset before setup new texture handle.
+	*/
+    void UseTexture(const Texture& texture);
+
+	/**
+	* @warn	This method always reset before setup new texture handle.
+	*/
+    void UseTexture(Handle<Texture> handle);
+
+	/**
+	* @warn	This method always reset before setup new texture handle.
+	*/
+    void UseTexture(const VkImage nativeHandle)
     {
-        handle = newHandle;
-        nativeHandle = std::nullopt;
+        Reset();
+        handleVariant = nativeHandle;
     }
 
-    void SetNativeHandle(const NativeHandle newNativeHandle)
+	/**
+	* @warn	This method always reset before setup new buffer handle.
+	*/
+    void UseBuffer(const Buffer& buffer);
+
+	/**
+	* @warn	This method always reset before setup new buffer handle.
+	*/
+    void UseBuffer(Handle<Buffer> handle);
+
+	/**
+	* @warn	This method always reset before setup new buffer handle.
+	*/
+    void UseTexture(const VkBuffer nativeHandle)
     {
-        handle = {};
-        nativeHandle = newNativeHandle;
+        Reset();
+        handleVariant = nativeHandle;
     }
 
-    void SetSubresourceRange(const SubresourceRange newSubresourceRange)
-    {
-        subresourceRange = newSubresourceRange;
-    }
+    void SetSourceState(const ETextureState state);
+    void SetDestinationState(const ETextureState state);
+    void SetSourceState(const EBufferState state);
+    void SetDestinationState(const EBufferState state);
 
-    void SetResource(const Resource& resource)
-    {
-        SetNativeHandle(resource.GetNative());
-        SetSubresourceRange(resource.GetFullSubresourceRange());
-    }
-
-    void SetSourceState(const State state) { srcAccessPattern = QueryAccessPattern(state); }
-    void SetDestinationState(const State state) { dstAccessPattern = QueryAccessPattern(state); }
-
-    void OverlapSourceState(const State state)
-    {
-        if (srcAccessPattern)
-        {
-            srcAccessPattern->Overlap(QueryAccessPattern(state));
-        }
-        else
-        {
-            SetSourceState(state);
-        }
-    }
-
-    void OverlapDestinationState(const State state)
-    {
-        if (dstAccessPattern)
-        {
-            dstAccessPattern->Overlap(QueryAccessPattern(state));
-        }
-        else
-        {
-            SetDestinationState(state);
-        }
-    }
+    void OverlapSourceState(const ETextureState state);
+    void OverlapDestinationState(const ETextureState state);
+    void OverlapSourceState(const EBufferState state);
+    void OverlapDestinationState(const EBufferState state);
 
     void SetSourceQueueType(const EQueueType srcQueueType) { this->srcQueueType = srcQueueType; }
     void SetDestinationQueueType(const EQueueType dstQueueType) { this->dstQueueType = dstQueueType; }
 
-    bool IsUsedNativeHandle() const { return nativeHandle != std::nullopt; }
+    void SetSubresourceRange(VkImageSubresourceRange range, bool bUseAsFullRange = true);
+    void SetSubresourceRange(Range<uint32_t> range, bool bUseAsFullRange = true);
 
-    Barrier Build() const;
+    VkImageMemoryBarrier2 AsTextureMemoryBarrier() const;
+    VkBufferMemoryBarrier2 AsBufferMemoryBarrier() const;
+
+    bool IsTextureStateTransition() const { return std::holds_alternative<VkImage>(handleVariant); }
+    bool IsBufferStateTransition() const { return std::holds_alternative<VkBuffer>(handleVariant); }
+
+    void Reset()
+    {
+        handleVariant = {};
+        subresourceRangeVariant = {};
+        fullSubresourceRangeVariant = {};
+        srcAccessPattern = std::nullopt;
+        dstAccessPattern = std::nullopt;
+        srcQueueType = std::nullopt;
+        dstQueueType = std::nullopt;
+    }
 
 private:
     void CheckValidation() const
@@ -91,32 +100,59 @@ private:
             (srcAccessPattern->PipelineStage != dstAccessPattern->PipelineStage);
         SY_ASSERT(bStatesAreNotEqual, "State are equal. It may result in redudant transition.");
 
-        bool bIsValidNativeHandle = false;
-        if (IsUsedNativeHandle())
+        const bool bHasHandle = handleVariant.index() != 0;
+        SY_ASSERT(bHasHandle, "Native Handle does not exist.");
+        if (bHasHandle)
         {
-            bIsValidNativeHandle = nativeHandle != VK_NULL_HANDLE;
+            const bool bIsValidNativeHandle = std::holds_alternative<VkImage>(handleVariant) ?
+                std::get<VkImage>(handleVariant) != VK_NULL_HANDLE :
+                std::get<VkBuffer>(handleVariant) != VK_NULL_HANDLE;
             SY_ASSERT(bIsValidNativeHandle, "Invalid Vulkan Native Handle.");
+        }
 
-            const bool bHasSubresourceRange = subresourceRange != std::nullopt;
-            SY_ASSERT(bHasSubresourceRange, "Native Handle State Transtion must specify subresource range manually.");
-        }
-        else
-        {
-            const bool bIsValidHandle = handle.IsValid();
-            SY_ASSERT(bIsValidHandle, "Invalid Texture Handle.");
-            bIsValidNativeHandle = handle->GetNative() != VK_NULL_HANDLE;
-        }
-        SY_ASSERT(bIsValidNativeHandle, "Invalid Vulkan Native Handle.");
+        SY_ASSERT(subresourceRangeVariant.index() != 0, "Subresource Range does not specified.");
+    }
+
+    void CheckIsTextureTransition() const
+    {
+        SY_ASSERT(std::holds_alternative<VkImage>(handleVariant), "Handle is not texture handle.");
+    }
+
+    void CheckTextureSubresourceRangeValidation() const
+    {
+        SY_ASSERT(std::holds_alternative<VkImageSubresourceRange>(fullSubresourceRangeVariant), "Texture full subresource range does not setup.");
+        const VkImageSubresourceRange fullSubresourceRange = std::get<VkImageSubresourceRange>(fullSubresourceRangeVariant);
+
+        SY_ASSERT(std::holds_alternative<VkImageSubresourceRange>(subresourceRangeVariant), "Texture subresource range does not setup.");
+        const VkImageSubresourceRange subresourceRange = std::get<VkImageSubresourceRange>(subresourceRangeVariant);
+        SY_ASSERT(fullSubresourceRange.aspectMask == subresourceRange.aspectMask, "Aspect mask does not match.");
+        SY_ASSERT(subresourceRange.baseMipLevel < fullSubresourceRange.levelCount, "Out of level count.");
+        SY_ASSERT(subresourceRange.baseArrayLayer < fullSubresourceRange.layerCount, "Out of layer count.");
+    }
+
+    void CheckIsBufferTransition() const
+    {
+        SY_ASSERT(std::holds_alternative<VkBuffer>(handleVariant), "Handle is not buffer handle.");
+    }
+
+    void CheckBufferSubresourceRangeValidation() const
+    {
+        SY_ASSERT(std::holds_alternative<Range<uint32_t>>(fullSubresourceRangeVariant), "Buffer full subresource range does not setup.");
+        const Range<uint32_t> fullSubresourceRange = std::get<Range<uint32_t>>(fullSubresourceRangeVariant);
+
+        SY_ASSERT(std::holds_alternative<Range<uint32_t>>(subresourceRangeVariant), "Buffer subresource range does not setup.");
+        const Range<uint32_t> subresourceRange = std::get<Range<uint32_t>>(subresourceRangeVariant);
+        SY_ASSERT(fullSubresourceRange.Include(subresourceRange), "Out of subresource range.");
     }
 
 private:
     const VulkanContext& vulkanContext;
-    Handle<Resource> handle = {};
-    std::optional<NativeHandle> nativeHandle = std::nullopt;
+    std::variant<std::monostate, VkImage, VkBuffer> handleVariant;
+    std::variant<std::monostate, VkImageSubresourceRange, Range<uint32_t>> subresourceRangeVariant = {};
+    std::variant<std::monostate, VkImageSubresourceRange, Range<uint32_t>> fullSubresourceRangeVariant = {};
     std::optional<AccessPattern> srcAccessPattern = std::nullopt;
     std::optional<AccessPattern> dstAccessPattern = std::nullopt;
     std::optional<EQueueType> srcQueueType = std::nullopt;
     std::optional<EQueueType> dstQueueType = std::nullopt;
-    std::optional<SubresourceRange> subresourceRange = std::nullopt;
 };
 } // namespace sy::vk

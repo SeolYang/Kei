@@ -5,6 +5,7 @@
 #include <VK/Pipeline.h>
 #include <VK/Buffer.h>
 #include <VK/Texture.h>
+#include <VK/ResourceStateTransition.h>
 
 namespace sy::vk
 {
@@ -56,72 +57,54 @@ void CommandBuffer::EndRendering() const
     vkCmdEndRendering(GetNative());
 }
 
-void CommandBuffer::ApplyStateTransition(const TextureStateTransition transition) const
+void CommandBuffer::ApplyStateTransition(const ResourceStateTransition& transition) const
 {
-    VkImageMemoryBarrier2 barriers[] = {transition.Build()};
-    PipelineBarrier({}, {}, barriers);
+    if (transition.IsTextureStateTransition())
+    {
+        VkImageMemoryBarrier2 textureMemoryBarriers[] = {transition.AsTextureMemoryBarrier()};
+        PipelineBarrier({}, {}, textureMemoryBarriers);
+    }
+    else if (transition.IsBufferStateTransition())
+    {
+        VkBufferMemoryBarrier2 bufferMemoryBarriers[] = {transition.AsBufferMemoryBarrier()};
+        PipelineBarrier({}, bufferMemoryBarriers, {});
+    }
 }
 
-void CommandBuffer::ApplyStateTransition(BufferStateTransition transition) const
+void CommandBuffer::ApplyStateTransitions(const std::span<const ResourceStateTransition> transitions) const
 {
-    VkBufferMemoryBarrier2 barriers[] = {transition.Build()};
-    PipelineBarrier({}, barriers, {});
+    using namespace std::ranges;
+    std::vector<VkImageMemoryBarrier2> textureMemoryBarriers;
+    textureMemoryBarriers.reserve(transitions.size());
+    textureMemoryBarriers.append_range(
+        transitions |
+        views::filter([](const ResourceStateTransition& transition) { return transition.IsTextureStateTransition(); }) |
+        views::transform([](const ResourceStateTransition& transition) { return transition.AsTextureMemoryBarrier(); }));
+
+    std::vector<VkBufferMemoryBarrier2> bufferMemoryBarriers;
+    bufferMemoryBarriers.reserve(transitions.size() - textureMemoryBarriers.size());
+    bufferMemoryBarriers.append_range(
+        transitions |
+        views::filter([](const ResourceStateTransition& transition) { return transition.IsBufferStateTransition(); }) |
+        views::transform([](const ResourceStateTransition& transition) { return transition.AsBufferMemoryBarrier(); }));
+
+    PipelineBarrier({}, bufferMemoryBarriers, textureMemoryBarriers);
 }
 
-void CommandBuffer::ApplyStateTransitions(const std::span<const TextureStateTransition> transitions) const
+void CommandBuffer::BatchStateTransition(const ResourceStateTransition& transition)
 {
-    std::vector<VkImageMemoryBarrier2> barriers;
-    barriers.reserve(transitions.size());
-    std::transform(
-		transitions.begin(), transitions.end(), 
-		barriers.begin(), 
-		[](const TextureStateTransition& transition) {
-            return transition.Build();
-    });
-
-    PipelineBarrier({}, {}, barriers);
+    batchedResourceStateTransitions.emplace_back(transition);
 }
 
-void CommandBuffer::ApplyStateTransitions(std::span<const BufferStateTransition> transitions) const
+void CommandBuffer::BatchStateTransitions(const std::span<const ResourceStateTransition> transitions)
 {
-    std::vector<VkBufferMemoryBarrier2> barriers;
-    barriers.reserve(transitions.size());
-    std::transform(
-        transitions.begin(), transitions.end(),
-        barriers.begin(),
-        [](const BufferStateTransition& transition) {
-            return transition.Build();
-        });
-
-    PipelineBarrier({}, barriers, {});
-}
-
-void CommandBuffer::BatchStateTransition(const TextureStateTransition transition)
-{
-    batchedTextureStateTransitions.emplace_back(transition);
-}
-
-void CommandBuffer::BatchStateTransition(const BufferStateTransition transition)
-{
-    batchedBufferStateTransitions.emplace_back(transition);
-}
-
-void CommandBuffer::BatchStateTransitions(const std::span<const TextureStateTransition> transitions)
-{
-    batchedTextureStateTransitions.append_range(transitions);
-}
-
-void CommandBuffer::BatchStateTransitions(const std::span<const BufferStateTransition> transitions)
-{
-    batchedBufferStateTransitions.append_range(transitions);
+    batchedResourceStateTransitions.append_range(transitions);
 }
 
 void CommandBuffer::FlushBatchedStateTransitions()
 {
-    ApplyStateTransitions(batchedTextureStateTransitions);
-    ApplyStateTransitions(batchedBufferStateTransitions);
-    batchedTextureStateTransitions.clear();
-    batchedBufferStateTransitions.clear();
+    ApplyStateTransitions(batchedResourceStateTransitions);
+    batchedResourceStateTransitions.clear();
 }
 
 void CommandBuffer::BindPipeline(const Pipeline& pipeline) const

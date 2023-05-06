@@ -3,8 +3,6 @@
 #include <Render/Material.h>
 #include <Render/Vertex.h>
 #include <Render/RenderPasses/SimpleRenderPass.h>
-#include <Render/RenderGraph.h>
-#include <Render/RenderNode.h>
 #include <VK/VulkanContext.h>
 #include <VK/VulkanRHI.h>
 #include <VK/Semaphore.h>
@@ -167,50 +165,6 @@ void Renderer::Startup()
     viewProjMat = proj * glm::lookAt(glm::vec3{0, 100.f, -80.f}, {0.f, 80.0f, 0.f}, {0.f, 1.f, 0.f});
 
     renderPass = std::make_unique<SimpleRenderPass>("Simple Render Pass", vulkanContext, *basicPipeline);
-
-    /** todo: remove test codes **/
-    auto renderGraph = std::make_unique<RenderGraph>(vulkanContext);
-    auto node0 = std::make_unique<RenderNode>(*renderGraph, "n0_graphics");
-    node0->CreateTexture("g0");
-
-    auto node1 = std::make_unique<RenderNode>(*renderGraph, "n1_graphics");
-    node1->AsGenaralSampledImage("g0");
-    node1->CreateTexture("g1");
-
-    auto node2 = std::make_unique<RenderNode>(*renderGraph, "n2_graphics");
-    node2->AsGenaralSampledImage("g1");
-    node2->AsGenaralSampledImage("g0");
-    node2->CreateTexture("g2");
-
-    auto node3 = std::make_unique<RenderNode>(*renderGraph, "n3_asyncCompute");
-    node3->CreateTexture("c0");
-    node3->ExecuteOnAsyncCompute();
-
-    auto node4 = std::make_unique<RenderNode>(*renderGraph, "n4_asyncCompute");
-    node4->CreateTexture("c1");
-    node4->AsGenaralSampledImage("c0");
-    node4->AsGenaralSampledImage("g0");
-    node4->ExecuteOnAsyncCompute();
-
-    auto node5 = std::make_unique<RenderNode>(*renderGraph, "n5_asyncCompute");
-    node5->CreateTexture("c2");
-    node5->AsGenaralSampledImage("c1");
-    node5->AsGenaralSampledImage("g0");
-    node5->ExecuteOnAsyncCompute();
-
-	auto node6 = std::make_unique<RenderNode>(*renderGraph, "n6_graphics");
-    node6->CreateTexture("g3");
-    node6->AsGenaralSampledImage("c2");
-    node6->AsGenaralSampledImage("g2");
-
-    renderGraph->AppendNode(std::move(node0));
-    renderGraph->AppendNode(std::move(node1));
-    renderGraph->AppendNode(std::move(node2));
-    renderGraph->AppendNode(std::move(node3));
-    renderGraph->AppendNode(std::move(node4));
-    renderGraph->AppendNode(std::move(node5));
-    renderGraph->AppendNode(std::move(node6));
-    renderGraph->Compile();
 }
 
 void Renderer::Shutdown()

@@ -7,6 +7,7 @@
 #include <VK/CommandBuffer.h>
 #include <VK/TextureBuilder.h>
 #include <VK/Texture.h>
+#include <VK/ResourceStateTransition.h>
 #include <Core/RawImage.h>
 
 namespace sy::vk
@@ -96,8 +97,8 @@ void MipmapGenerator::SubmitBlitToCommandBuffer(const vk::CommandBuffer& cmdBuff
     imageBlit.dstOffsets[1].y = dstExtent.height;
     imageBlit.dstOffsets[1].z = dstExtent.depth;
 
-	TextureStateTransition stateTransition{vulkanContext};
-    stateTransition.SetResource(dstMip);
+	ResourceStateTransition stateTransition{vulkanContext};
+    stateTransition.UseTexture(dstMip);
     stateTransition.SetSourceState(vk::ETextureState::TransferRead);
 	stateTransition.SetDestinationState(vk::ETextureState::TransferWrite);
     cmdBuffer.ApplyStateTransition(stateTransition);

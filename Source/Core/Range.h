@@ -18,6 +18,18 @@ public:
         return *(reinterpret_cast<C*>(base + Offset));
     }
 
+	bool Include(const Range& other) const
+	{
+		if (other.Offset < Offset)
+		{
+            return false;
+		}
+
+		const auto offsetDiff = other.Offset - Offset;
+        const auto maxValidSize = Size - offsetDiff;
+        return maxValidSize >= other.Size;
+	}
+
 public:
     T Offset = {};
     T Size   = {};

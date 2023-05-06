@@ -1,7 +1,6 @@
 #pragma once
 #include <PCH.h>
 #include <VK/VulkanWrapper.h>
-#include <VK/ResourceStateTransition.h>
 
 namespace sy::vk
 {
@@ -34,6 +33,4 @@ private:
     const VmaMemoryUsage memoryUsage;
     const State initialState;
 };
-
-using BufferStateTransition = ResourceStateTransition<Buffer>;
 } // namespace sy::vk

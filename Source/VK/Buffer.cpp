@@ -8,10 +8,9 @@
 #include <VK/FrameTracker.h>
 #include <VK/VulkanContext.h>
 #include <VK/VulkanRHI.h>
+#include <VK/ResourceStateTransition.h>
 
-namespace sy
-{
-namespace vk
+namespace sy::vk
 {
 size_t CalculateAlignedBufferSize(VulkanContext& vulkanContext,
                                   const size_t originSize,
@@ -90,8 +89,8 @@ Buffer::Buffer(const BufferBuilder& builder) :
 
             if (bRequiredStateChange)
             {
-                BufferStateTransition transition{vulkanContext};
-                transition.SetResource(*this);
+                ResourceStateTransition transition{vulkanContext};
+                transition.UseBuffer(*this);
                 transition.SetSourceState(EBufferState::None);
                 transition.SetDestinationState(initialState);
                 cmdBuffer->ApplyStateTransition(transition);
@@ -102,5 +101,4 @@ Buffer::Buffer(const BufferBuilder& builder) :
         vulkanRHI.SubmitImmediateTo(*cmdBuffer);
     }
 }
-} // namespace vk
-} // namespace sy
+} // namespace sy::vk

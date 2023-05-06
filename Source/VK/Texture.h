@@ -1,7 +1,6 @@
 #pragma once
 #include <PCH.h>
 #include <VK/VulkanWrapper.h>
-#include <VK/ResourceStateTransition.h>
 
 namespace sy::vk
 {
@@ -50,6 +49,4 @@ private:
     const State initialState;
     const uint32_t mips;
 };
-
-using TextureStateTransition = ResourceStateTransition<Texture>;
 } // namespace sy::vk

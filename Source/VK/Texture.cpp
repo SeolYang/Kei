@@ -9,6 +9,7 @@
 #include <VK/CommandPoolAllocator.h>
 #include <VK/FrameTracker.h>
 #include <VK/VulkanContext.h>
+#include <VK/ResourceStateTransition.h>
 
 namespace sy::vk
 {
@@ -71,9 +72,8 @@ Texture::Texture(const TextureBuilder& builder) :
         auto& cmdPool = cmdPoolAllocator.RequestCommandPool(EQueueType::Graphics);
         const auto cmdBuffer = cmdPool.RequestCommandBuffer("Buffer Transfer Command Buffer");
 
-		TextureStateTransition stateTransition{vulkanContext};
-        stateTransition.SetNativeHandle(GetNative());
-        stateTransition.SetSubresourceRange(GetFullSubresourceRange());
+		ResourceStateTransition stateTransition{vulkanContext};
+        stateTransition.UseTexture(*this);
         stateTransition.SetSourceState(ETextureState::None);
 
         std::unique_ptr<Buffer> stagingBuffer = nullptr;

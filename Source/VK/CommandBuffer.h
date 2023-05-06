@@ -1,8 +1,6 @@
 #pragma once
 #include <PCH.h>
 #include <VK/VulkanWrapper.h>
-#include <VK/Texture.h>
-#include <VK/Buffer.h>
 
 namespace sy::vk
 {
@@ -11,6 +9,7 @@ class Fence;
 class Pipeline;
 class Buffer;
 class Texture;
+class ResourceStateTransition;
 class CommandBuffer : public VulkanWrapper<VkCommandBuffer>
 {
 public:
@@ -29,15 +28,11 @@ public:
     void BeginRendering(const VkRenderingInfo& renderingInfo) const;
     void EndRendering() const;
 
-    void ApplyStateTransition(TextureStateTransition transition) const;
-    void ApplyStateTransition(BufferStateTransition transition) const;
-    void ApplyStateTransitions(std::span<const TextureStateTransition> transitions) const;
-    void ApplyStateTransitions(std::span<const BufferStateTransition> transitions) const;
+    void ApplyStateTransition(const ResourceStateTransition& transition) const;
+    void ApplyStateTransitions(std::span<const ResourceStateTransition> transitions) const;
 
-	void BatchStateTransition(TextureStateTransition transition);
-    void BatchStateTransition(BufferStateTransition transition);
-    void BatchStateTransitions(std::span<const TextureStateTransition> transitions);
-    void BatchStateTransitions(std::span<const BufferStateTransition> transitions);
+	void BatchStateTransition(const ResourceStateTransition& transition);
+    void BatchStateTransitions(std::span<const ResourceStateTransition> transitions);
     void FlushBatchedStateTransitions();
 
     void BindPipeline(const Pipeline& pipeline) const;
@@ -71,7 +66,6 @@ private:
 
 private:
     const EQueueType queueType;
-    std::vector<TextureStateTransition> batchedTextureStateTransitions;
-    std::vector<BufferStateTransition> batchedBufferStateTransitions;
+    std::vector<ResourceStateTransition> batchedResourceStateTransitions;
 };
 } // namespace sy::vk

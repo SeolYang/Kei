@@ -40,8 +40,6 @@
     <ClCompile Include="..\Source\Render\Mesh.cpp" />
     <ClCompile Include="..\Source\Render\Model.cpp" />
     <ClCompile Include="..\Source\Render\Renderer.cpp" />
-    <ClCompile Include="..\Source\Render\RenderGraph.cpp" />
-    <ClCompile Include="..\Source\Render\RenderNode.cpp" />
     <ClCompile Include="..\Source\Render\RenderPass.cpp" />
     <ClCompile Include="..\Source\Render\RenderPasses\SimpleRenderPass.cpp" />
     <ClCompile Include="..\Source\Tests\CoreUnitTest.cpp" />
@@ -118,9 +116,6 @@
     <ClInclude Include="..\Source\Render\Mesh.h" />
     <ClInclude Include="..\Source\Render\Model.h" />
     <ClInclude Include="..\Source\Render\Renderer.h" />
-    <ClInclude Include="..\Source\Render\RenderGraph.h" />
-    <ClInclude Include="..\Source\Render\RenderGraphResource.h" />
-    <ClInclude Include="..\Source\Render\RenderNode.h" />
     <ClInclude Include="..\Source\Render\RenderPass.h" />
     <ClInclude Include="..\Source\Render\RenderPasses\SimpleRenderPass.h" />
     <ClInclude Include="..\Source\Render\Vertex.h" />
