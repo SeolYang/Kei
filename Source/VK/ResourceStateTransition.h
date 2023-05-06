@@ -21,17 +21,17 @@ public:
     /**
 	* @warn	This method always reset before setup new texture handle.
 	*/
-    void UseTexture(const Texture& texture);
+    void UseResource(const Texture& texture);
 
 	/**
 	* @warn	This method always reset before setup new texture handle.
 	*/
-    void UseTexture(Handle<Texture> handle);
+    void UseResource(Handle<Texture> handle);
 
 	/**
 	* @warn	This method always reset before setup new texture handle.
 	*/
-    void UseTexture(const VkImage nativeHandle)
+    void UseResource(const VkImage nativeHandle)
     {
         Reset();
         handleVariant = nativeHandle;
@@ -40,17 +40,17 @@ public:
 	/**
 	* @warn	This method always reset before setup new buffer handle.
 	*/
-    void UseBuffer(const Buffer& buffer);
+    void UseResource(const Buffer& buffer);
 
 	/**
 	* @warn	This method always reset before setup new buffer handle.
 	*/
-    void UseBuffer(Handle<Buffer> handle);
+    void UseResource(Handle<Buffer> handle);
 
 	/**
 	* @warn	This method always reset before setup new buffer handle.
 	*/
-    void UseTexture(const VkBuffer nativeHandle)
+    void UseResource(const VkBuffer nativeHandle)
     {
         Reset();
         handleVariant = nativeHandle;

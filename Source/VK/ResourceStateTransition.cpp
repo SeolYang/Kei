@@ -7,29 +7,29 @@
 
 namespace sy::vk
 {
-void ResourceStateTransition::UseTexture(const Texture& texture)
+void ResourceStateTransition::UseResource(const Texture& texture)
 {
     Reset();
     handleVariant = texture.GetNative();
     SetSubresourceRange(texture.GetFullSubresourceRange());
 }
 
-void ResourceStateTransition::UseTexture(const Handle<Texture> handle)
+void ResourceStateTransition::UseResource(const Handle<Texture> handle)
 {
-    UseTexture(*handle);
+    UseResource(*handle);
 }
 
 
-void ResourceStateTransition::UseBuffer(const Buffer& buffer)
+void ResourceStateTransition::UseResource(const Buffer& buffer)
 {
 	Reset();
     handleVariant = buffer.GetNative();
     SetSubresourceRange(buffer.GetFullSubresourceRange());
 }
 
-void ResourceStateTransition::UseBuffer(const Handle<Buffer> handle)
+void ResourceStateTransition::UseResource(const Handle<Buffer> handle)
 {
-    UseBuffer(*handle);
+    UseResource(*handle);
 }
 
 void ResourceStateTransition::SetSourceState(const ETextureState state)

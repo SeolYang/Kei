@@ -43,7 +43,7 @@ SimpleRenderPass::SimpleRenderPass(const std::string_view name,
         graphicsCmdBuffer->Begin();
 
 		vk::ResourceStateTransition transition{GetVulkanContext()};
-        transition.UseBuffer(*transformBuffers[idx]);
+        transition.UseResource(*transformBuffers[idx]);
         transition.SetSourceState(vk::EBufferState::None);
         transition.SetDestinationState(vk::EBufferState::VertexShaderReadUniformBuffer);
         graphicsCmdBuffer->End();
@@ -56,7 +56,7 @@ void SimpleRenderPass::OnBegin()
 {
     const auto& graphicsCmdBuffer = GetCommandBuffer();
     vk::ResourceStateTransition noneToColorAttachmentWrite{GetVulkanContext()};
-    noneToColorAttachmentWrite.UseTexture(swapchainImage);
+    noneToColorAttachmentWrite.UseResource(swapchainImage);
 	noneToColorAttachmentWrite.SetSubresourceRange(vk::Swapchain::GetSubresourceRange());
     noneToColorAttachmentWrite.SetSourceState(vk::ETextureState::None);
     noneToColorAttachmentWrite.SetDestinationState(vk::ETextureState::ColorAttachmentWrite);
@@ -114,7 +114,7 @@ void SimpleRenderPass::OnEnd()
     graphicsCmdBuffer.EndRendering();
 
     vk::ResourceStateTransition colorAttachmentToPresent{GetVulkanContext()};
-    colorAttachmentToPresent.UseTexture(swapchainImage);
+    colorAttachmentToPresent.UseResource(swapchainImage);
     colorAttachmentToPresent.SetSubresourceRange(vk::Swapchain::GetSubresourceRange());
     colorAttachmentToPresent.SetSourceState(vk::ETextureState::ColorAttachmentWrite);
     colorAttachmentToPresent.SetDestinationState(vk::ETextureState::Present);

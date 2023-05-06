@@ -85,12 +85,6 @@
     <ClCompile Include="..\Source\Render\Renderer.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Render\RenderPass.cpp">
-      <Filter>Source\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Render\RenderPasses\SimpleRenderPass.cpp">
-      <Filter>Source\Render</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Window\Window.cpp">
       <Filter>Source\Window</Filter>
     </ClCompile>
@@ -159,6 +153,21 @@
     </ClCompile>
     <ClCompile Include="..\Source\VK\ResourceStateTransition.cpp">
       <Filter>Source\VK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Render\RenderPass.cpp">
+      <Filter>Source\Render\OldRenderPass</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Render\RenderPasses\SimpleRenderPass.cpp">
+      <Filter>Source\Render\OldRenderPass</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Render\RenderGraph.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Render\RenderNode.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Render\RenderResource.cpp">
+      <Filter>Source\Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -273,12 +282,6 @@
     <ClInclude Include="..\Source\Render\Renderer.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Render\RenderPass.h">
-      <Filter>Source\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Render\RenderPasses\SimpleRenderPass.h">
-      <Filter>Source\Render</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Render\Vertex.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
@@ -384,6 +387,21 @@
     <ClInclude Include="..\Source\VK\ResourceStateTransition.h">
       <Filter>Source\VK</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Render\RenderGraph.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\RenderNode.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\RenderResource.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\RenderPass.h">
+      <Filter>Source\Render\OldRenderPass</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Render\RenderPasses\SimpleRenderPass.h">
+      <Filter>Source\Render\OldRenderPass</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Assets\Shaders\tri.vert">
@@ -438,6 +456,9 @@
     </Filter>
     <Filter Include="Source\Test">
       <UniqueIdentifier>{dfcde011-8b21-4eba-99d0-2365080f7baf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Render\OldRenderPass">
+      <UniqueIdentifier>{8723fb74-4453-43c8-b9d6-8236d4f5aec6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

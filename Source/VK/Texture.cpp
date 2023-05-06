@@ -73,7 +73,7 @@ Texture::Texture(const TextureBuilder& builder) :
         const auto cmdBuffer = cmdPool.RequestCommandBuffer("Buffer Transfer Command Buffer");
 
 		ResourceStateTransition stateTransition{vulkanContext};
-        stateTransition.UseTexture(*this);
+        stateTransition.UseResource(*this);
         stateTransition.SetSourceState(ETextureState::None);
 
         std::unique_ptr<Buffer> stagingBuffer = nullptr;
